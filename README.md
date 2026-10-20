@@ -38,9 +38,12 @@ can be traced back to the exact raw file:
   processing happens on copies, the measuring mode is kept in a sample log, every run is added to an
   append-only audit log, every library change is kept in an append-only change log, and the report
   ends with a review and sign-off block.
-- **A minimal, modern interface.** Neutral greys with one accent colour, an 8 px spacing grid, flat
-  cards, light and dark themes. Motion is short and smooth (60 frames per second, measured): pages fade
-  through, results rise in, numbers count up, sheets slide in. **View → Reduce motion** switches it off.
+- **A minimal, modern interface.** Warm greys, one soft accent (powder blue) and pastel tints for the
+  status colours, an 8 px spacing grid, flat cards, light and dark themes. It fits any window, from a
+  small laptop (960 × 560) to a large screen: checked automatically at 9 window sizes and 3 display
+  scales. Motion is short and smooth (a steady 60 frames per second, measured): pages fade through,
+  results rise in, numbers count up, sheets appear as a card in the middle of the window. **View →
+  Reduce motion** switches it off.
 
 ![Main window](docs/main_window.png)
 
@@ -135,6 +138,7 @@ SETTINGS = {
 | See how the shapes differ | **Closest matches**: the best four, side by side; *Spectrum* or *Fingerprint* |
 | Zoom, pan, reset | `Ctrl` + mouse wheel zooms around the mouse, double-click resets, or use the buttons above the figure |
 | Save a figure | The save button: PNG at 300 or 600 dpi, SVG or PDF (vector: any size). Saves the view on screen |
+| Copy the result | `Ctrl+C` in the list (or right-click → **Copy the result**): verdict, score, flags, next step and the checksums as text, for a lab notebook, an e-mail or a ticket |
 | Write the report | **Export report** or `Ctrl+E`: `report.html` + `report.csv`, and a row in the audit log |
 | Browse the library | **Library** in the middle of the toolbar, or `Ctrl+2` (`Ctrl+1` back to Analyze). Click a card for details |
 | More references | **Library → Open Specy…**: download or import; then switch **Fab essentials / Extended** |
@@ -175,7 +179,7 @@ example:
 ### Closest matches
 
 Under the figure, the best four library materials are drawn next to each other, each over the
-sample. The orange wash is the area between the two curves: where the shapes do not agree. The best
+sample. The peach wash is the area between the two curves: where the shapes do not agree. The best
 match should have almost none; the others show exactly where they fail. **Fingerprint** shows the two
 derivative fingerprints the score is calculated from (the CO₂ region, which the score leaves out, is
 greyed). Move the mouse over a chart to read both values; click one to draw it in the big figure.
@@ -198,9 +202,10 @@ Analyze page it is drawn on top, and **Compare with** shows the two side by side
 
 ![Details of one reference](docs/library_detail.png)
 
-**Similarity map** shows every reference against every other one. Light = different, dark =
-similar; a red frame would mark a pair at or above 0.95 (two references the program could not tell
-apart). The same data is listed as a table of the closest pairs.
+**Similarity map** shows every reference against every other one, each pair once (the lower half of
+the table). Almost white = clearly different, soft coral = similar; a red frame would mark a pair at or
+above 0.95 (two references the program could not tell apart), the dashed frame marks the closest pair.
+The cells follow the size of the window. The same data is listed as a table of the closest pairs.
 
 ![Similarity map](docs/similarity_map.png)
 
@@ -341,7 +346,8 @@ Every rule and threshold lives in [`ftir_analyzer/config.py`](ftir_analyzer/conf
 │   ├── interactive.py   interactive figures for the report and the script (Plotly)
 │   ├── report.py        HTML and CSV report
 │   ├── theme.py         design system: colours (light and dark), fonts, sizes, animation times
-│   ├── motion.py        animation, smooth scrolling, cards, segmented control, sheets, toasts
+│   ├── motion.py        animation, smooth scrolling, cards, segmented control, sheets, toasts, a
+│   │                    row that wraps
 │   ├── widgets.py       building blocks of the window: pills, score bars, list, plot, welcome screen
 │   ├── compare_view.py  the closest matches, side by side
 │   ├── library_view.py  the Library page: album, details, similarity map, adding a reference
@@ -351,7 +357,7 @@ Every rule and threshold lives in [`ftir_analyzer/config.py`](ftir_analyzer/conf
 │   └── assets/          logo, fonts (Inter, IBM Plex Mono), icons (Lucide)
 ├── examples/            demo spectra with known answers; library_demo/ for adding a reference
 ├── records/             sample log, audit log, in-house library (created when first needed)
-├── tests/               known-answer, library, Open Specy, window and script tests (python -m pytest)
+├── tests/               known-answer, library, Open Specy, window, layout and script tests (pytest)
 └── docs/                screenshots
 ```
 
@@ -362,47 +368,85 @@ pip install pytest
 python -m pytest
 ```
 
-66 tests. 31 cover the analysis: file reading (read-only data, headerless tab-separated files, unit
+78 tests. 31 cover the analysis: file reading (read-only data, headerless tab-separated files, unit
 recognition, clear errors), processing, the verdict rule, the impostor test, the known answer for
 every demo spectrum, the second-component, empty-spot and saturation detection, the CO₂ direction,
 the analytical view (each step reproduced, the score recalculated from step 4), the interactive
 figures and the append-only records. 7 cover the in-house library: provenance of every reference, the
 similarity map, adding ABS makes demo 10 *probable ABS*, SAN after ABS is caught before it is added,
-adding a result as a reference, removing keeps the history, names must be new. 7 cover the Open
+adding a result as a reference, removing keeps the history, names must be new. 10 cover the Open
 Specy references: material groups, only fab-relevant FTIR spectra kept, confusable spectra left out,
 a valid extended library, a second reference of the same material does not weaken a verdict, the
-derivative library refused, the download finding the right file. 19 start the window without a
-screen and use it, including the animations finishing in the right state, the closest matches, the
-Library page, adding / refusing / removing a reference and switching to the extended library. 2 run
+derivative library refused, the download (from where Open Specy keeps it, then the older copy), names
+with a `#`, and a deliberately untidy library file. 21 start the window without a screen and use it,
+including the animations finishing in the right state, the bars growing in the sheets, the closest
+matches, the Library page, adding / refusing / removing a reference, switching to the extended library
+and copying a result. 7 check the layout at 960 × 560, 1280 × 720 and 1920 × 1080: no page scrolls
+sideways, no text is cut off, nothing overlaps, the sheets sit in the middle and the welcome page fits a
+laptop window without scrolling. 2 run
 `FTIR_Analyzer.py` from start to end.
 
 ## Design
 
-Minimal and modern, following a design guide for clean interfaces: neutral greys and one accent
-colour (indigo) for everything you can click, an 8 px spacing grid, white cards with a 1 px border
-(a soft shadow only while a card is lifted under the mouse), no gradients, and text of 14 px and up.
+Minimal and modern, following a design guide for clean interfaces: warm greys, ONE accent colour (a
+soft powder blue), an 8 px spacing grid, white cards with a 1 px border (a soft shadow only while a
+card is lifted under the mouse), no gradients, and text of 14 px and up.
 
+- **Soft colours, still readable.** Buttons and badges are pastel tints with dark text (7.3 : 1 or
+  more), the status colours are pastel too (green = probable, amber = weak, grey = no reliable match,
+  red = do not trust as it is), and a colour never appears without its icon and its word. Lines, bars
+  and focus rings use a deeper step of the same blue, so they stand out from every background (3 : 1
+  or more). All text meets WCAG (≥ 4.5 : 1; body text ≥ 9 : 1), worked out for both themes.
+- **Charts checked, not guessed.** Sample = ink, library reference = soft blue, unexplained band = soft
+  coral, where two shapes differ = a peach wash. The blue and the coral pass the colour-blind check
+  (`validate_palette`) on the light and on the dark background. The similarity map is one warm hue,
+  with dark text on every step (6 : 1 or more). Peak labels have a halo, so a line never hides them.
 - **Typeface.** Inter, embedded in the app and in the report, so it looks the same on every computer;
   IBM Plex Mono for checksums and paths.
+- **Fits any window.** On a narrow window the toolbar shows icons only, the facts wrap into two rows,
+  the cards stack, the Library page's buttons move under its title and long names are shortened
+  with … (the full text is in the tooltip). On a low window the welcome page leaves out its
+  illustration. Nothing scrolls sideways.
+- **Sheets.** Details, the similarity map, adding a reference and Open Specy open as a card in the
+  middle of the dimmed window, sized to their content; `Esc` or a click outside closes them, and the
+  keyboard focus goes back to where it was.
 - **Smooth motion, by construction.** Moving real widgets is slow (Qt would draw every card, list and
   figure again on every frame), so every transition is a flip-book: take a picture of the old state, do
   all the slow work at once (fill the page, draw the figure), take a picture of the new state, then
-  animate only the two pictures on one opaque layer. Measured at 2× display scaling: a steady 60 frames
-  per second with 2–6 ms of work per frame. Scrolling copies pixels instead of redrawing; the figure is
-  never drawn during an animation.
-- **Motion with a purpose.** Short (150–340 ms), easing out (fast start, gentle stop), never bouncing;
+  animate only the two pictures on one opaque layer. While it plays, the widgets underneath do not paint
+  at all and Python's garbage collector waits (a collection can take two or three frames). A sheet is
+  photographed once with its shadow and only fades in and rises 16 px: a short distance looks smooth
+  even where the screen and Qt are not in step.
+- **Motion with a purpose.** Short (150–280 ms), easing out (fast start, gentle stop), never bouncing;
   the most frequent action (clicking through samples) gets the quickest one. The curves and timings
   follow Material Design, Fluent, Emil Kowalski's and Rauno Freiberg's guidelines. **View → Reduce
   motion** switches it off, and it starts off if Windows' "Show animations" is off.
-- **Colour with meaning.** Green = probable, amber = weak, grey = no reliable match, red = do not
-  trust as it is. A colour never appears without its icon and its word.
-- **Checked, not guessed.** The chart colours (sample = ink, library = indigo, unexplained band =
-  orange) pass a colour-blind safety check in light and dark mode; the similarity map uses one hue from
-  light (different) to dark (similar). Text contrast meets WCAG (≥ 4.5 : 1, body text ≥ 9 : 1).
 - **Keyboard and focus.** Every action has a shortcut, the controls can be reached with Tab and show
   a focus ring, `Esc` closes a sheet.
 - **The window never freezes.** Loading and validating the library, analysing, checking a new
-  reference, importing Open Specy and writing the report run in the background.
+  reference, importing Open Specy and writing the report run in the background. If something goes
+  wrong, the message has the details and they are kept in `records/error_log.txt`.
+
+![A small window (960 × 560): the page reflows, nothing is cut off](docs/small_window.png)
+
+### Measured
+
+**Layout.** Every page and sheet (welcome, result, closest matches, analytical view, library,
+similarity map, Open Specy, reference details, adding a reference) was opened at 960 × 560, 1093 × 614,
+1280 × 720, 1536 × 864 and 1920 × 1080 at 100 % display scaling, and at the sizes a 1366 × 768,
+1920 × 1080 and 2560 × 1600 screen give at 125 % and 150 %. Each visible element was checked for
+running off its container, cut text, too narrow buttons, overlapping neighbours, sideways scrolling
+and an off-centre sheet: **0 problems in 111 screens** (the previous version: 61 problems in 26
+screens at just two sizes, among them the similarity table running off the side).
+
+**Motion** (window 1280 × 720 at 150 %, the frame times while it moves; a screen refreshes every
+16.7 ms):
+
+| Transition | Waits before it moves | Typical frame | Slowest frame | Painting one frame |
+| --- | --- | --- | --- | --- |
+| Click another sample | 0.12–0.14 s (drawing the figure) | 16 ms | 24–28 ms (the first) | 3–4 ms |
+| Analyze ↔ Library | 0.04–0.09 s | 16 ms | 17 ms | 7–12 ms |
+| Open / close a sheet | 0.02–0.10 s | 16 ms | 20–26 ms | 3–10 ms |
 
 ## Limits
 

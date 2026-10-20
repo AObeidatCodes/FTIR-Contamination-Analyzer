@@ -40,6 +40,7 @@ Version: 1.0.0
 License: MIT (see LICENSE)
 """
 
+import gc
 import sys
 import traceback
 from datetime import datetime
@@ -72,7 +73,7 @@ from .records import SampleLog, resolve_modes, run_info
 from .report import write_report
 from .spectrum_io import SpectrumFileError, find_spectrum_files, read_spectra
 from .theme import FONT_FILES, FONTS, THEMES, VERDICT_LOOK, stylesheet
-from .widgets import (EmptyState, FlowLayout, ModeDialog, Pill, PlotPanel, ScoreBars, SpectrumDelegate,
+from .widgets import (ElidedLabel, EmptyState, FlowLayout, ModeDialog, Pill, PlotPanel, ScoreBars, SpectrumDelegate,
                       SpectrumListModel, Theme, chip, clear_layout, flag_pill, icon, icon_pixmap, logo_pixmap,
                       verdict_pill)
 
@@ -126,7 +127,7 @@ their baseline and ruler lines. Move the mouse over any panel to read every curv
 of the band at that wavenumber. <b>Ctrl + mouse wheel</b> zooms around the mouse; a double-click resets.
 <b>Compare with</b> draws any other library material instead of the best match.</p>
 <p><b>Closest matches</b> shows the best four materials next to each other, each over the sample, with
-the area where the shapes differ shaded orange. Switch to <b>Fingerprint</b> to see exactly the two curves
+the area where the shapes differ shaded peach. Switch to <b>Fingerprint</b> to see exactly the two curves
 each score is calculated from. Click one to show it in the big figure.</p>
 <p>A CO₂ band that points <i>down</i> is not an error: absorbance is relative to the background, so less
 CO₂ in the air during the sample scan than during the background scan gives a negative band.</p>
@@ -198,13 +199,17 @@ def panel(title, hint=""):
     """A card with a title (and an optional grey hint). Returns (card, layout for its content)."""
     frame = Card()
     outer = QVBoxLayout(frame)
-    outer.setContentsMargins(20, 16, 20, 20)
+    outer.setContentsMargins(20, 16, 20, 20)                           # + the card's own 4 px = 24 / 20 / 24
     outer.setSpacing(12)
     head = QHBoxLayout()
-    head.addWidget(label(title, "SectionTitle"))
-    head.addStretch()
-    if hint:
-        head.addWidget(label(hint, "SectionHint"))
+    head.setSpacing(16)
+    head.addWidget(label(title, "SectionTitle"), 0, Qt.AlignTop)
+    if hint:                                                           # the hint wraps when the card is narrow
+        note = label(hint, "SectionHint", wrap=True)
+        note.setAlignment(Qt.AlignRight | Qt.AlignTop)
+        head.addWidget(note, 1)
+    else:
+        head.addStretch()
     outer.addLayout(head)
     body = QVBoxLayout()
     body.setSpacing(8)
@@ -218,7 +223,7 @@ class Fact(QWidget):
     def __init__(self, caption):
         super().__init__()
         self.value = label("–", "FactValue")
-        self.caption = label(caption, "FactLabel")
+        self.caption = label(caption, "FactLabel", wrap=True)
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(2)
@@ -256,39 +261,40 @@ class ResultView(SmoothScrollArea):
         col.setContentsMargins(32, 24, 32, 32)
         col.setSpacing(16)
 
-        # 1. title row: name, verdict, match, flags; file and mode underneath
+        # 1. title row: name, verdict, match, flags (they wrap onto a second line if needed); file and mode below
         self.head = QWidget()
         head = QVBoxLayout(self.head)
         head.setContentsMargins(4, 0, 4, 0)
-        head.setSpacing(4)
-        self.name = label("", "SampleName")
-        self.badges = QHBoxLayout()
-        self.badges.setSpacing(8)
-        title_row = QHBoxLayout()
-        title_row.addWidget(self.name)
-        title_row.addSpacing(10)
-        title_row.addLayout(self.badges)
-        title_row.addStretch()
+        head.setSpacing(8)
+        self.name = ElidedLabel("", "SampleName")                        # a very long name is shortened with …
+        self.title_row = QWidget()
+        self.badges = FlowLayout(self.title_row, spacing=8, row_spacing=8)
+        self.badges.addWidget(self.name)
+        self.badge_widgets = []
         self.meta = label("", "Meta", wrap=True)
-        head.addLayout(title_row)
+        head.addWidget(self.title_row)
         head.addWidget(self.meta)
         col.addWidget(self.head)
 
-        # 2. four facts in one card
+        # 2. four facts in one card (two rows of two on a narrow window)
         self.facts = Card()
-        row = QHBoxLayout(self.facts)
-        row.setContentsMargins(24, 16, 24, 16)
+        self.fact_grid = QGridLayout(self.facts)
+        self.fact_grid.setContentsMargins(20, 12, 20, 12)
+        self.fact_grid.setHorizontalSpacing(16)
+        self.fact_grid.setVerticalSpacing(16)
         self.fact_r = Fact("score (Pearson r)")
         self.fact_gap = Fact("lead over the next material")
         self.fact_bands = Fact("key bands found")
         self.fact_a = Fact("highest absorbance")
-        for i, fact in enumerate([self.fact_r, self.fact_gap, self.fact_bands, self.fact_a]):
-            if i:
-                divider = QFrame()
-                divider.setObjectName("Divider")
-                divider.setFixedWidth(1)
-                row.addWidget(divider)
-            row.addWidget(fact, 1)
+        self.fact_list = [self.fact_r, self.fact_gap, self.fact_bands, self.fact_a]
+        self.dividers = []
+        for _ in range(3):
+            divider = QFrame()
+            divider.setObjectName("Divider")
+            divider.setFixedWidth(1)
+            self.dividers.append(divider)
+        self.columns = None
+        self._lay_out(4)
         col.addWidget(self.facts)
 
         # 3. the next step (with "add to library" when the material is not known well)
@@ -320,10 +326,11 @@ class ResultView(SmoothScrollArea):
         self.plot.compare_changed.connect(self.top.set_current)
         col.addWidget(self.top)
 
-        # 5. two rows of two cards
+        # 5. two rows of two cards (one column on a narrow window)
         grid = QGridLayout()
         grid.setHorizontalSpacing(16)
         grid.setVerticalSpacing(16)
+        self.panel_grid = grid
         self.verdict_panel, verdict_body = panel("Why this verdict", "best 5 of the library")
         self.reason = label("", "Body", wrap=True)
         self.bars = ScoreBars()
@@ -332,12 +339,8 @@ class ResultView(SmoothScrollArea):
         self.evidence_panel, self.evidence_body = panel("Band evidence")
         self.checks_panel, self.checks_body = panel("Checks on the raw spectrum")
         self.sources_panel, self.sources_body = panel("Where it can come from in a fab")
-        grid.addWidget(self.verdict_panel, 0, 0)
-        grid.addWidget(self.evidence_panel, 0, 1)
-        grid.addWidget(self.checks_panel, 1, 0)
-        grid.addWidget(self.sources_panel, 1, 1)
-        grid.setColumnStretch(0, 1)
-        grid.setColumnStretch(1, 1)
+        self.panels = [self.verdict_panel, self.evidence_panel, self.checks_panel, self.sources_panel]
+        self._lay_panels(2)
         col.addLayout(grid)
 
         # 6. traceability
@@ -348,6 +351,52 @@ class ResultView(SmoothScrollArea):
         trace_body.addLayout(self.trace)
         col.addWidget(self.trace_panel)
         col.addStretch()
+
+    # ------------------------------------------------------------------ fitting the width
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        width = self.viewport().width()
+        side = 32 if width >= 760 else 16                               # narrow: the page keeps its width for content
+        if self.page.layout().contentsMargins().left() != side:
+            self.page.layout().setContentsMargins(side, 24, side, 32)
+        self._lay_out(4 if width >= 760 else 2)
+        self._lay_panels(2 if width >= 720 else 1)
+
+    def _lay_out(self, columns):
+        """The four facts in one row (with dividers), or in two rows of two."""
+        if columns == self.columns:
+            return
+        self.columns = columns
+        for widget in self.fact_list + self.dividers:
+            self.fact_grid.removeWidget(widget)
+        for k in range(8):
+            self.fact_grid.setColumnStretch(k, 0)
+        if columns == 4:
+            for i, fact in enumerate(self.fact_list):
+                self.fact_grid.addWidget(fact, 0, 2 * i)
+                self.fact_grid.setColumnStretch(2 * i, 1)
+                if i < 3:
+                    self.fact_grid.addWidget(self.dividers[i], 0, 2 * i + 1)
+                    self.dividers[i].show()
+        else:
+            for i, fact in enumerate(self.fact_list):
+                self.fact_grid.addWidget(fact, i // 2, i % 2)
+            self.fact_grid.setColumnStretch(0, 1)
+            self.fact_grid.setColumnStretch(1, 1)
+            for divider in self.dividers:
+                divider.hide()
+
+    def _lay_panels(self, columns):
+        """The four cards in two columns, or one under the other."""
+        if getattr(self, "panel_columns", None) == columns:
+            return
+        self.panel_columns = columns
+        for widget in self.panels:
+            self.panel_grid.removeWidget(widget)
+        for i, widget in enumerate(self.panels):
+            self.panel_grid.addWidget(widget, i // columns, i % columns)
+        self.panel_grid.setColumnStretch(0, 1)
+        self.panel_grid.setColumnStretch(1, 1 if columns == 2 else 0)
 
     def sections(self):
         """The parts of the page, top to bottom (they rise in one after the other)."""
@@ -379,12 +428,16 @@ class ResultView(SmoothScrollArea):
 
         # title row
         self.name.setText(r.name)
-        clear_layout(self.badges)
-        self.badges.addWidget(verdict_pill(r.verdict, size_key="body"))
+        for widget in self.badge_widgets:                                   # the badges of the last result go
+            self.badges.removeWidget(widget)
+            widget.hide()                                                   # at once, not when Qt deletes them
+            widget.deleteLater()
+        self.badge_widgets = [verdict_pill(r.verdict, size_key="body")]
         if r.has_match:
-            self.badges.addWidget(label(r.match, "SectionTitle"))
-        for text, severity in r.flags:
-            self.badges.addWidget(flag_pill(text, severity))
+            self.badge_widgets.append(label(r.match, "SectionTitle"))
+        self.badge_widgets += [flag_pill(text, severity) for text, severity in r.flags]
+        for widget in self.badge_widgets:
+            self.badges.addWidget(widget)
         how = "measuring mode unknown" if r.mode == "unknown" else f"measured by {r.mode}"
         self.meta.setText(f"{s.path.name}   {how} ({r.mode_source})")
 
@@ -508,8 +561,11 @@ class ResultView(SmoothScrollArea):
                  ("Sample log", str(sample_log_path), "Mono")]
         for i, (key, value, style) in enumerate(facts):
             self.trace.addWidget(label(key, "FactLabel"), i, 0, Qt.AlignTop)
-            text = label(value, style, wrap=True)
-            text.setTextInteractionFlags(Qt.TextSelectableByMouse)          # can be selected and copied
+            if style == "Mono":                                             # checksums and paths: one line,
+                text = ElidedLabel(value, "Mono", Qt.ElideMiddle, copyable=True)   # shortened in the middle
+            else:
+                text = label(value, style, wrap=True)
+                text.setTextInteractionFlags(Qt.TextSelectableByMouse)      # can be selected and copied
             self.trace.addWidget(text, i, 1)
         self.trace.setColumnStretch(1, 1)
 
@@ -544,7 +600,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle(__title__)
         self.setWindowIcon(app_icon())
         self.setAcceptDrops(True)
-        self.setMinimumSize(1060, 660)
+        self.setMinimumSize(960, 560)                                     # fits a 1366 x 768 laptop at 125 %
         self._fit_to_screen()
 
         self._build_actions()
@@ -640,7 +696,7 @@ class MainWindow(QMainWindow):
         titles.setSpacing(0)
         title = QLabel(__title__)
         title.setObjectName("AppTitle")
-        subtitle = QLabel(f"Version {__version__} · by {__author__}")
+        self.subtitle = subtitle = QLabel(f"Version {__version__} · by {__author__}")
         subtitle.setObjectName("AppSubtitle")
         titles.addWidget(title)
         titles.addWidget(subtitle)
@@ -731,6 +787,11 @@ class MainWindow(QMainWindow):
         self.list.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.list.setContextMenuPolicy(Qt.CustomContextMenu)
         self.list.customContextMenuRequested.connect(self._list_menu)
+        copy = QAction("Copy the result", self.list)                       # Ctrl+C in the list
+        copy.setShortcut(QKeySequence.Copy)
+        copy.setShortcutContext(Qt.WidgetShortcut)
+        copy.triggered.connect(self.copy_result)
+        self.list.addAction(copy)
         self.list.selectionModel().currentChanged.connect(lambda *_: self.show_current())
         side.addWidget(self.list, 1)
         self.summary = QHBoxLayout()
@@ -758,7 +819,7 @@ class MainWindow(QMainWindow):
         splitter.setStretchFactor(1, 1)
         splitter.setHandleWidth(1)
         splitter.setChildrenCollapsible(False)
-        sidebar.setMinimumWidth(296)
+        sidebar.setMinimumWidth(248)
         self.analyze_page = splitter
 
         # ---- the Library page
@@ -813,16 +874,16 @@ class MainWindow(QMainWindow):
         self.act_theme.setChecked(t["name"] == "dark")
         self.logo.setPixmap(logo_pixmap(34, self.devicePixelRatioF()))
         for button, icon_name, primary in self.header_buttons.values():
-            button.setIcon(icon(icon_name, t["on_accent"] if primary else t["header_ink"]))
+            button.setIcon(icon(icon_name, t["on_primary"] if primary else t["header_ink"]))
         self.theme_button.setIcon(icon("sun" if t["name"] == "dark" else "moon", t["header_ink"]))
         self.help_button.setIcon(icon("circle-help", t["header_ink"]))
         if not self.search.actions():                                      # the magnifier inside the filter box
             self.search.addAction(icon("search", t["muted"], 16), QLineEdit.LeadingPosition)
         self.search.actions()[0].setIcon(icon("search", t["muted"], 16))
-        accent = QColor(t["accent"])                                       # the drop overlay: accent, nearly opaque
+        tint = QColor(t["primary"])                                        # the drop overlay: the pastel, nearly opaque
         self.drop_overlay.setStyleSheet(
-            f"background: rgba({accent.red()}, {accent.green()}, {accent.blue()}, 230); color: {t['on_accent']};"
-            f"font-size: 22px; font-weight: 600; border: 2px dashed {t['on_accent']}; border-radius: 20px;")
+            f"background: rgba({tint.red()}, {tint.green()}, {tint.blue()}, 235); color: {t['on_primary']};"
+            f"font-size: 22px; font-weight: 600; border: 2px dashed {t['accent']}; border-radius: 20px;")
         self.empty.retheme()
         self.library_page.retheme()
         self.result_view.plot.retheme()
@@ -879,6 +940,9 @@ class MainWindow(QMainWindow):
 
     def _set_library(self, library, validation):
         """Use a (new) library: the badge, the Library page and its validation."""
+        if self.library is None:                       # the first time: everything made at start-up stays,
+            gc.collect()                               # so the garbage collector can skip it from now on
+            gc.freeze()                                # (its rounds get shorter: no pause while things move)
         self.library, self.validation = library, validation
         v = validation
         self.badge.kind = "good" if v.passed else "bad"
@@ -1065,6 +1129,14 @@ class MainWindow(QMainWindow):
         if rise_in(viewport, before, after, view.bands(), dy=8, on_done=view.play) is None:
             view.play()
 
+    def copy_result(self):
+        """The selected result as a few lines of text on the clipboard (for a lab notebook, an e-mail, a ticket)."""
+        r = self.current_result()
+        if r is None or self.library is None:
+            return
+        QGuiApplication.clipboard().setText(result_summary(r, self.library))
+        self.notify(f"{r.name}: result copied.", "copy")
+
     def _update_summary(self):
         results = self.model.results
         self.count.setText(f"{len(results)} analysed" if results else "none yet")
@@ -1088,6 +1160,7 @@ class MainWindow(QMainWindow):
         menu = QMenu(self)
         menu.addAction(icon("external-link", Theme.t["ink_2"]), "Show the file in its folder",
                        lambda: QDesktopServices.openUrl(QUrl.fromLocalFile(str(r.spectrum.path.parent))))
+        menu.addAction(icon("copy", Theme.t["ink_2"]), "Copy the result  (Ctrl+C)", self.copy_result)
         menu.addAction(icon("image-down", Theme.t["ink_2"]), "Save the figure…", self.save_current_figure)
         menu.addAction(icon("circle-plus", Theme.t["ink_2"]), "Add to the library as a reference…",
                        lambda: self.open_add_reference())
@@ -1113,11 +1186,11 @@ class MainWindow(QMainWindow):
             self.set_status("List cleared.")
 
     # ------------------------------------------------------------------ the library: sheets
-    def _open_sheet(self, title, content, width, eyebrow="", footer=None, on_close=None):
-        """Show content in a sheet that slides in from the right (one at a time)."""
+    def _open_sheet(self, title, content, width, eyebrow="", footer=None, on_close=None, tall=False):
+        """Show content in a sheet: a card in the middle of the dimmed window (one at a time)."""
         if self.sheet is not None:
             self.sheet.close_sheet()
-        sheet = Sheet(self.centralWidget(), title, content, width, eyebrow, footer)
+        sheet = Sheet(self.centralWidget(), title, content, width, eyebrow, footer, tall)
         sheet.set_close_icon(icon("x", Theme.t["ink_2"]))
         if hasattr(content, "play"):                                       # its own animation starts on arrival
             if sheet.has_arrived:
@@ -1151,7 +1224,7 @@ class MainWindow(QMainWindow):
         if self.library is None:
             return None
         content = SimilarityPanel(self.library, self.validation, similarity_for(self.library))
-        self._open_sheet("Which references could be confused?", content, 860, "SIMILARITY MAP")
+        self._open_sheet("Which references could be confused?", content, 1040, "SIMILARITY MAP")
         return content
 
     def open_add_reference(self, use_current=True):
@@ -1160,8 +1233,8 @@ class MainWindow(QMainWindow):
             return None
         current = self.current_result() if use_current else None
         content = AddReferencePanel(self.library, self.validation, self.model.results, current, self.last_dir)
-        sheet = self._open_sheet("Add a reference to the library", content, 680, "IN-HOUSE LIBRARY",
-                                 content.footer, content.closing)
+        sheet = self._open_sheet("Add a reference to the library", content, 720, "IN-HOUSE LIBRARY",
+                                 content.footer, content.closing, tall=True)
         content.cancelled.connect(sheet.close_sheet)
         content.submitted.connect(self.add_reference)
         return content
@@ -1417,13 +1490,17 @@ class MainWindow(QMainWindow):
             self.analyse_paths(paths)
 
     def resizeEvent(self, event):
-        """On a narrow window the toolbar buttons show only their icons (the tooltips still name them)."""
+        """On a narrow window the toolbar makes room in two steps (the tooltips still name everything):
+        below 1440 px the buttons show only their icons; below 1180 px the library badge shows only its
+        shield and the version line under the name is left out."""
         super().resizeEvent(event)
-        compact = self.width() < 1440
+        compact = 2 if self.width() < 1180 else 1 if self.width() < 1440 else 0
         if compact != self.compact:
             self.compact = compact
             for key, (button, _, primary) in self.header_buttons.items():
                 button.setText(f" {self.header_texts[key]}" if primary or not compact else "")
+            self.badge.set_compact(compact == 2)
+            self.subtitle.setVisible(compact < 2)
 
     def closeEvent(self, event):
         if not self.isMaximized():
@@ -1471,6 +1548,23 @@ def run_app(files=(), ask_for_files=True):
     else:
         window.show()
     return app.exec()
+
+
+def result_summary(r, library):
+    """One result as plain text: verdict, numbers, flags, next step and what proves where it came from."""
+    ev = r.evidence
+    verdict = r.verdict.capitalize() + (f": {r.match}" if r.has_match else "")
+    lines = [f"{r.name} - {verdict}",
+             f"Score r = {r.r:.2f}, lead {r.gap:.2f} over {r.runner_up}"
+             + (f", {len(ev.found)} of {ev.n_key} key {r.best} bands found" if ev else ""),
+             f"Measuring mode: {r.mode} ({r.mode_source})"]
+    if r.flags:
+        lines.append("Flags: " + "; ".join(text[:1].upper() + text[1:] for text, _ in r.flags))
+    lines += [f"Next step: {r.next_step}",
+              f"File: {r.spectrum.path.name} (SHA-256 {r.spectrum.sha256})",
+              f"Library: {library.name} (SHA-256 {library.sha256})",
+              f"{__title__} {__version__}"]
+    return "\n".join(lines)
 
 
 def write_error_log(details):

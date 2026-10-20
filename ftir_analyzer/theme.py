@@ -6,20 +6,23 @@ here, once, as named "tokens". The window, the figures and the report all read f
 file, so the whole program looks like one product and a value is changed in one place.
 
 The look is minimal and modern:
-    Colour    neutral greys and ONE accent (indigo) for everything you can click or that is
-              selected. Status colours (probable / weak / no match / do not trust) are only
+    Colour    warm neutral greys and ONE soft accent (powder blue): pastel fills with dark text
+              for buttons and badges, a deeper step of the same blue for lines and focus.
+              Status colours (probable / weak / no match / do not trust) are pastel tints, only
               used for status, always with an icon and a word, never by colour alone.
     Surfaces  white cards with a 1 px border on a near-white page; no gradients, no heavy
               shadows (a soft shadow only appears while a card is lifted under the mouse).
     Spacing   an 8 px grid: every margin and gap is 8, 16, 24, 32 or 48 px.
     Type      Inter for everything (14 px and up for text; 12 px only for chart axis labels),
               IBM Plex Mono for checksums and file paths.
-    Charts    sample = ink, library reference = indigo, unexplained band = orange. The pair
-              passes the colour-blind check (validate_palette) in both themes.
-    Motion    short (150-340 ms), eases out (fast start, gentle stop), never bounces;
+    Charts    sample = ink, library reference = soft blue, unexplained band = soft coral, where
+              two shapes differ = a peach wash. The pair passes the colour-blind check
+              (validate_palette) in both themes. The similarity map is one warm hue.
+    Motion    short (150-280 ms), eases out (fast start, gentle stop), never bounces;
               View > Reduce motion switches it off.
 
-Text contrast (WCAG): body text >= 9:1, small grey text >= 4.8:1, white on the accent 6.3:1.
+Text contrast (WCAG), both themes: body text >= 9:1, small grey text >= 5.2:1, text on the pastel
+buttons >= 7.3:1, every status word on its tint >= 4.5:1, text on every step of the map >= 6:1.
 
 Short names used in this file:
     t = a theme (a dict of colour tokens)    qss = Qt style sheet (CSS for Qt widgets)    ms = milliseconds
@@ -51,103 +54,116 @@ SPACE = {"xs": 8, "s": 16, "m": 24, "l": 32, "xl": 48}
 # Corner radius
 RADIUS = {"control": 8, "card": 12}
 
-# Motion (milliseconds). Quick for small things, a little longer for things that travel further.
-MOTION = {"hover": 150, "tab": 240, "content": 300, "page": 320, "sheet": 340, "sheet_out": 220,
+# Motion (milliseconds). Quick for small things, a little longer for things that travel further;
+# nothing you do often waits more than 0.3 s.
+MOTION = {"hover": 150, "tab": 220, "content": 260, "page": 280, "sheet": 280, "sheet_out": 180,
           "count": 600, "bars": 700, "stagger": 28, "toast": 2600}
 
 LIGHT = {
     "name": "light",
-    # surfaces, back to front
-    "paper": "#FAFAFA",        # the page
+    # surfaces, back to front (warm greys: softer than pure grey next to pastels)
+    "paper": "#FAFAF9",        # the page
     "surface": "#FFFFFF",      # cards, sidebar, toolbar, the figure
-    "surface_2": "#F5F5F5",    # hover, quiet fills, fields
+    "surface_2": "#F4F4F2",    # hover, quiet fills, fields
     "sidebar": "#FFFFFF",
-    "line": "#E5E5E5",         # borders and dividers
-    "line_strong": "#D4D4D4",  # a border under the mouse
-    "shadow": "#000000",       # the soft shadow of a lifted card ...
-    "shadow_alpha": 0.08,      # ... this strong
-    "backdrop_alpha": 0.32,    # how much the window is dimmed behind a sheet
+    "line": "#E7E5E4",         # borders and dividers
+    "line_strong": "#D6D3D1",  # a border under the mouse
+    "shadow": "#1C1917",       # the soft shadow of a lifted card ...
+    "shadow_alpha": 0.07,      # ... this strong
+    "backdrop_alpha": 0.28,    # how much the window is dimmed behind a sheet
     # text
-    "ink": "#171717",          # primary text
-    "ink_2": "#404040",        # secondary text
-    "muted": "#6B6B6B",        # captions, axis labels
-    "faint": "#A3A3A3",        # placeholders, disabled (never for information)
-    # the one accent (indigo)
-    "accent": "#4F46E5",       # buttons and the active state (white text on it: 6.3:1)
-    "accent_hover": "#4338CA",
-    "accent_ink": "#4338CA",   # accent-coloured text and icons
-    "accent_soft": "#EEF2FF",  # the selected row, the focus glow
+    "ink": "#1C1917",          # primary text (16.7:1 on the page)
+    "ink_2": "#44403C",        # secondary text (9.8:1)
+    "muted": "#6B6560",        # captions, axis labels (5.5:1)
+    "faint": "#A8A29E",        # placeholders, disabled (never for information)
+    # the one accent: a soft powder blue
+    "primary": "#D6E4F8",      # filled buttons and badges: a pastel tint ...
+    "primary_hover": "#C7DAF5",
+    "on_primary": "#1E3A66",   # ... with dark text on it (8.8:1)
+    "accent": "#5B8DD9",       # lines, bars, focus rings, the active tab (3:1 or more on every surface)
+    "accent_hover": "#4A7CC9",
+    "accent_ink": "#2F5D9C",   # accent-coloured text and icons (6.3:1)
+    "accent_soft": "#EDF3FC",  # the selected row, the next-step box
     "on_accent": "#FFFFFF",
     # toolbar
     "header": "#FFFFFF",
-    "header_ink": "#171717",
-    "header_muted": "#6B6B6B",
-    "header_button": "#F5F5F5",
-    "header_button_hover": "#F0F0F0",
+    "header_ink": "#1C1917",
+    "header_muted": "#6B6560",
+    "header_button": "#F4F4F2",
+    "header_button_hover": "#EEEDEA",
     # tooltips: small and dark
-    "tooltip": "#171717",
-    "tooltip_ink": "#FAFAFA",
-    # status: (text and icon, background)
-    "good": "#15803D", "good_bg": "#F0FDF4",
-    "warn": "#A16207", "warn_bg": "#FEFCE8",
-    "none": "#525252", "none_bg": "#F5F5F5",
-    "bad": "#B91C1C", "bad_bg": "#FEF2F2",
-    # charts
+    "tooltip": "#1C1917",
+    "tooltip_ink": "#FAFAF9",
+    # status: (text and icon, pastel background)
+    "good": "#2F7A4E", "good_bg": "#E5F3EA",
+    "warn": "#85580F", "warn_bg": "#FAF0DC",
+    "none": "#57534E", "none_bg": "#F1F0EE",
+    "bad": "#A23A2C", "bad_bg": "#FAE5E1",
+    # charts (validate_palette: reference + unexplained pass every check on white)
     "chart_surface": "#FFFFFF",
-    "chart_sample": "#171717",
-    "chart_reference": "#4F46E5",
-    "chart_unexplained": "#E8650F",
-    "chart_found": "#4F46E5",  # the key bands belong to the reference: same colour
-    "chart_zone": "#171717",   # drawn at low opacity
-    "chart_grid": "#F0F0F0",
-    "chart_axis": "#D4D4D4",
-    # one hue (indigo) for the similarity map: near 0 = light, near 1 = dark
-    "sequence": ["#EEF2FF", "#E0E7FF", "#C7D2FE", "#A5B4FC", "#818CF8", "#6366F1", "#4F46E5", "#4338CA",
-                 "#3730A3", "#312E81", "#1E1B4B"],
+    "chart_sample": "#1C1917",
+    "chart_reference": "#5B8DD9",
+    "chart_unexplained": "#D96C4F",
+    "chart_diff": "#F6C9B1",   # where two shapes differ: a peach wash ...
+    "chart_diff_alpha": 0.85,  # ... this strong
+    "chart_found": "#5B8DD9",  # the key bands belong to the reference: same colour
+    "chart_zone": "#1C1917",   # drawn at low opacity
+    "chart_grid": "#F1F0EE",
+    "chart_axis": "#D6D3D1",
+    # the similarity map: one warm hue, near 0 = almost white, near 1 = soft coral; dark text on every step
+    "sequence": ["#F5F4F2", "#F8EDE5", "#F9E3D6", "#F9D9C7", "#F8CEB8", "#F6C3A9", "#F3B79A", "#EFAA8B",
+                 "#E99C7C", "#E28E6D", "#DA7F60"],
+    "sequence_ink": "#1C1917",
 }
 
 DARK = {
     "name": "dark",
-    "paper": "#0A0A0A",
-    "surface": "#141414",
-    "surface_2": "#1F1F1F",
-    "sidebar": "#111111",
-    "line": "#262626",
-    "line_strong": "#3A3A3A",
+    "paper": "#111110",
+    "surface": "#1A1918",
+    "surface_2": "#242321",
+    "sidebar": "#151413",
+    "line": "#2E2C2A",
+    "line_strong": "#403D3A",
     "shadow": "#000000",
-    "shadow_alpha": 0.5,
-    "backdrop_alpha": 0.55,
-    "ink": "#EDEDED",
-    "ink_2": "#C2C2C2",
-    "muted": "#8F8F8F",
-    "faint": "#5C5C5C",
-    "accent": "#4F46E5",
-    "accent_hover": "#5B52F0",
-    "accent_ink": "#A5B4FC",
-    "accent_soft": "#1E1B4B",
+    "shadow_alpha": 0.45,
+    "backdrop_alpha": 0.5,
+    "ink": "#F2F1EF",
+    "ink_2": "#CFCBC6",
+    "muted": "#9C968F",
+    "faint": "#615C57",
+    "primary": "#2B3E5C",
+    "primary_hover": "#34496B",
+    "on_primary": "#DCE8FB",
+    "accent": "#6492DD",
+    "accent_hover": "#7AA2E3",
+    "accent_ink": "#A3C2F2",
+    "accent_soft": "#1D2634",
     "on_accent": "#FFFFFF",
-    "header": "#111111",
-    "header_ink": "#EDEDED",
-    "header_muted": "#8F8F8F",
-    "header_button": "#1F1F1F",
-    "header_button_hover": "#262626",
-    "tooltip": "#2A2A2A",
-    "tooltip_ink": "#EDEDED",
-    "good": "#4ADE80", "good_bg": "#052E16",
-    "warn": "#FACC15", "warn_bg": "#2A2205",
-    "none": "#C2C2C2", "none_bg": "#1F1F1F",
-    "bad": "#F87171", "bad_bg": "#2C0B0B",
-    "chart_surface": "#141414",
-    "chart_sample": "#EDEDED",
-    "chart_reference": "#7C83F2",
-    "chart_unexplained": "#DD6A22",
-    "chart_found": "#7C83F2",
-    "chart_zone": "#EDEDED",
-    "chart_grid": "#1F1F1F",
-    "chart_axis": "#3A3A3A",
-    # in the dark theme the scale is turned round: near 0 sinks into the dark surface
-    "sequence": ["#1E1B4B", "#312E81", "#3730A3", "#4338CA", "#4F46E5", "#6366F1", "#818CF8", "#A5B4FC",
-                 "#C7D2FE", "#E0E7FF", "#EEF2FF"],
+    "header": "#151413",
+    "header_ink": "#F2F1EF",
+    "header_muted": "#9C968F",
+    "header_button": "#242321",
+    "header_button_hover": "#2E2C2A",
+    "tooltip": "#2E2C2A",
+    "tooltip_ink": "#F2F1EF",
+    "good": "#84D4A3", "good_bg": "#132A1D",
+    "warn": "#E8C373", "warn_bg": "#2B2314",
+    "none": "#CFCBC6", "none_bg": "#242321",
+    "bad": "#F0A090", "bad_bg": "#2F1B17",
+    "chart_surface": "#1A1918",
+    "chart_sample": "#F2F1EF",
+    "chart_reference": "#6492DD",
+    "chart_unexplained": "#D77352",
+    "chart_diff": "#E3A487",
+    "chart_diff_alpha": 0.3,
+    "chart_found": "#6492DD",
+    "chart_zone": "#F2F1EF",
+    "chart_grid": "#242321",
+    "chart_axis": "#403D3A",
+    # in the dark theme the scale is turned round: near 0 sinks into the dark surface; light text on every step
+    "sequence": ["#242321", "#2D2421", "#372722", "#412A23", "#4C2D24", "#573025", "#633326", "#6F3627",
+                 "#7B3A29", "#883D2B", "#95412D"],
+    "sequence_ink": "#F2F1EF",
 }
 
 THEMES = {"light": LIGHT, "dark": DARK}
@@ -194,8 +210,8 @@ QToolTip {{ background: {t['tooltip']}; color: {t['tooltip_ink']}; border: none;
 #Header QPushButton:hover {{ background: {t['surface_2']}; color: {t['ink']}; }}
 #Header QPushButton:pressed {{ background: {t['line']}; }}
 #Header QPushButton:disabled {{ color: {t['faint']}; }}
-#Header QPushButton#Primary {{ background: {t['accent']}; color: {t['on_accent']}; padding: 8px 16px; }}
-#Header QPushButton#Primary:hover {{ background: {t['accent_hover']}; }}
+#Header QPushButton#Primary {{ background: {t['primary']}; color: {t['on_primary']}; padding: 8px 16px; font-weight: 600; }}
+#Header QPushButton#Primary:hover {{ background: {t['primary_hover']}; }}
 #Header QPushButton#Primary:disabled {{ background: {t['surface_2']}; color: {t['faint']}; }}
 #Header QToolButton {{ background: transparent; border: none; border-radius: {r_c}px; padding: 8px; }}
 #Header QToolButton:hover {{ background: {t['surface_2']}; }}
@@ -206,7 +222,7 @@ QToolTip {{ background: {t['tooltip']}; color: {t['tooltip_ink']}; border: none;
 #Count {{ color: {t['muted']}; font-size: {SIZE['small']}px; }}
 QLineEdit, QComboBox, QPlainTextEdit {{
     background: {t['surface']}; border: 1px solid {t['line_strong']}; border-radius: {r_c}px; padding: 8px 12px;
-    selection-background-color: {t['accent']}; selection-color: {t['on_accent']};
+    selection-background-color: {t['primary']}; selection-color: {t['on_primary']};
 }}
 QLineEdit:hover, QComboBox:hover {{ border-color: {t['muted']}; }}
 QLineEdit:focus, QComboBox:focus, QPlainTextEdit:focus {{ border: 1px solid {t['accent']}; }}
@@ -219,8 +235,11 @@ QListView, QListWidget {{ background: transparent; border: none; outline: none; 
 /* ---------- content ---------- */
 #Content, #ResultPage, #EmptyPage, #LibraryPage, #LibraryGrid, #SheetContent {{ background: {t['paper']}; }}
 QScrollArea {{ border: none; background: {t['paper']}; }}
+QScrollArea#MapScroller, QScrollArea#MapScroller > QWidget, QScrollArea#MapScroller > QWidget > QWidget {{
+    background: transparent; }}
 #SampleName {{ font-size: {SIZE['display']}px; font-weight: 600; }}
 #HeroTitle {{ font-size: {SIZE['hero']}px; font-weight: 700; }}
+#HeroTitle[compact="true"] {{ font-size: {SIZE['display']}px; }}
 #PageTitle {{ font-size: {SIZE['display']}px; font-weight: 600; }}
 #Meta {{ color: {t['muted']}; font-size: {SIZE['small']}px; }}
 #SectionTitle {{ font-size: {SIZE['title']}px; font-weight: 600; }}
@@ -258,8 +277,9 @@ QPushButton:hover {{ background: {t['surface_2']}; border-color: {t['muted']}; }
 QPushButton:pressed {{ background: {t['line']}; }}
 QPushButton:focus {{ border: 1px solid {t['accent']}; }}
 QPushButton:disabled {{ color: {t['faint']}; background: {t['surface_2']}; border-color: {t['line']}; }}
-QPushButton#Primary {{ background: {t['accent']}; border: 1px solid {t['accent']}; color: {t['on_accent']}; }}
-QPushButton#Primary:hover {{ background: {t['accent_hover']}; border-color: {t['accent_hover']}; }}
+QPushButton#Primary {{ background: {t['primary']}; border: 1px solid {t['primary']}; color: {t['on_primary']}; font-weight: 600; }}
+QPushButton#Primary:hover {{ background: {t['primary_hover']}; border-color: {t['primary_hover']}; }}
+QPushButton#Primary:focus {{ border: 1px solid {t['accent']}; }}
 QPushButton#Primary:disabled {{ background: {t['surface_2']}; border-color: {t['line']}; color: {t['faint']}; }}
 QPushButton#Danger {{ color: {t['bad']}; }}
 QPushButton#Link {{ background: transparent; border: none; color: {t['accent_ink']}; padding: 4px 0; }}
@@ -276,9 +296,9 @@ QCheckBox {{ spacing: 8px; color: {t['ink_2']}; }}
 QScrollArea#FileList {{ background: {t['surface']}; border: 1px solid {t['line']}; border-radius: {r_k}px; }}
 #ListArea {{ background: {t['surface']}; border-radius: {r_k}px; }}
 #FileRow {{ border-bottom: 1px solid {t['line']}; background: transparent; }}
-#SheetPanel {{ background: {t['paper']}; border-left: 1px solid {t['line']}; }}
-#SheetHeader {{ background: {t['surface']}; border-bottom: 1px solid {t['line']}; }}
-#SheetFooter {{ background: {t['surface']}; border-top: 1px solid {t['line']}; }}
+#SheetPanel {{ background: transparent; }}
+#SheetHeader {{ background: transparent; border-bottom: 1px solid {t['line']}; }}
+#SheetFooter {{ background: transparent; border-top: 1px solid {t['line']}; }}
 
 /* scroll bars: thin and quiet */
 QScrollBar:vertical {{ background: transparent; width: 12px; margin: 4px 2px; }}

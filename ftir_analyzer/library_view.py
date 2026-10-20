@@ -28,8 +28,8 @@ from pathlib import Path
 
 import numpy as np
 from PySide6.QtCore import QEasingCurve, QPointF, QRectF, QSize, Qt, QThreadPool, QTimer, Signal
-from PySide6.QtGui import QColor, QFont, QFontMetrics, QLinearGradient, QPainter, QPainterPath, QPen, QPixmap
-from PySide6.QtWidgets import (QComboBox, QFileDialog, QFrame, QGridLayout, QHBoxLayout, QLabel, QLineEdit,
+from PySide6.QtGui import QColor, QFont, QFontMetrics, QPainter, QPainterPath, QPen, QPixmap
+from PySide6.QtWidgets import (QBoxLayout, QComboBox, QFileDialog, QFrame, QGridLayout, QHBoxLayout, QLabel, QLineEdit,
                                QListWidget, QListWidgetItem, QPushButton, QSizePolicy, QStyle, QStyledItemDelegate,
                                QToolTip, QVBoxLayout, QWidget)
 
@@ -40,8 +40,8 @@ from .inhouse import addition_preview, reference_notes
 from .openspecy import CITATION, LICENCE
 from .jobs import Job
 from .library import reference_on_grid, similarity_matrix
-from .motion import (EASE_OUT, MOTION, Card, Segmented, SmoothScrollArea, Spinner, alive, animate, fade_through,
-                     make_opaque, snapshot, stop)
+from .motion import (EASE_OUT, MOTION, Card, FlowLayout, Segmented, SmoothScrollArea, Spinner, alive, animate,
+                     fade_through, make_opaque, snapshot, stop)
 from .peaks import band_label, band_table
 from .processing import GRID, absorbance
 from .spectrum_io import SpectrumFileError, read_spectra
@@ -71,13 +71,17 @@ def section(title, hint=""):
     """A card with a title (and a grey hint). Returns (card, layout for its content)."""
     card = Card()
     outer = QVBoxLayout(card)
-    outer.setContentsMargins(18, 14, 18, 16)
+    outer.setContentsMargins(20, 12, 20, 16)                           # + the card's own 4 px = 24 / 16 / 20
     outer.setSpacing(8)
     head = QHBoxLayout()
-    head.addWidget(text_label(title, "SectionTitle"))
-    head.addStretch()
-    if hint:
-        head.addWidget(text_label(hint, "SectionHint"))
+    head.setSpacing(16)
+    head.addWidget(text_label(title, "SectionTitle"), 0, Qt.AlignTop)
+    if hint:                                                           # the hint wraps when the card is narrow
+        note = text_label(hint, "SectionHint", wrap=True)
+        note.setAlignment(Qt.AlignRight | Qt.AlignTop)
+        head.addWidget(note, 1)
+    else:
+        head.addStretch()
     outer.addLayout(head)
     body = QVBoxLayout()
     body.setSpacing(8)
@@ -191,8 +195,11 @@ class SpectrumChart(QWidget):
             p.drawPath(self._path(self.other, rect))
         p.setPen(QPen(QColor(t["chart_reference"]), 1.8, Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin))
         p.drawPath(main)
-        # key bands: a small mark on the axis, the five tallest also labelled
-        p.setFont(font("caption", QFont.Medium))
+        # key bands: a small mark on the axis, the five tallest also labelled - above both curves, never on
+        # top of another label, and with a halo in the background colour so a line under it cannot hide it
+        label_font = font("caption", QFont.Medium)
+        fm = QFontMetrics(label_font)
+        placed = []
         for i, (w, _) in enumerate(self.bands):
             x = self._x(w, rect)
             if x > rect.left() + rect.width() * self.progress:
@@ -201,10 +208,20 @@ class SpectrumChart(QWidget):
             p.setBrush(QColor(t["chart_found"]))
             p.drawPolygon([QPointF(x, rect.bottom() - 7), QPointF(x - 4, rect.bottom()), QPointF(x + 4, rect.bottom())])
             if i < 5:
-                v = np.interp(w, GRID, np.nan_to_num(self.main))
-                y = rect.bottom() - v * rect.height() * 0.92
-                p.setPen(QColor(t["ink_2"]))
-                p.drawText(QRectF(x - 24, y - 17, 48, 14), Qt.AlignCenter, f"{w:.0f}")
+                curves = [self.main] + ([self.other] if self.other is not None else [])
+                v = max(float(np.interp(w, GRID, np.nan_to_num(c))) for c in curves)
+                text = f"{w:.0f}"
+                box = QRectF(x - fm.horizontalAdvance(text) / 2 - 2, rect.bottom() - v * rect.height() * 0.92 - 18,
+                             fm.horizontalAdvance(text) + 4, 14)
+                while any(box.intersects(other) for other in placed) and box.top() > rect.top() - 16:
+                    box.translate(0, -14)
+                placed.append(box)
+                path = QPainterPath()
+                path.addText(box.left() + 2, box.bottom() - 3, label_font, text)
+                p.setBrush(Qt.NoBrush)
+                p.setPen(QPen(QColor(t["chart_surface"]), 3, Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin))
+                p.drawPath(path)
+                p.fillPath(path, QColor(t["ink_2"]))
         # legend (only with two curves)
         if self.other is not None:
             x = rect.left() + 4
@@ -499,7 +516,8 @@ class LibraryPage(QWidget):
         # left: the categories
         side = QWidget()
         side.setObjectName("Sidebar")
-        side.setFixedWidth(272)
+        side.setFixedWidth(272)                                         # 232 on a narrow window (resizeEvent)
+        self.side = side
         side_layout = QVBoxLayout(side)
         side_layout.setContentsMargins(8, 24, 8, 16)
         side_layout.setSpacing(8)
@@ -514,6 +532,7 @@ class LibraryPage(QWidget):
         self.categories.setItemDelegate(CategoryDelegate(self.categories))
         self.categories.setMouseTracking(True)
         self.categories.setVerticalScrollMode(QListWidget.ScrollPerPixel)
+        self.categories.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)   # long names are shortened instead
         self.categories.currentRowChanged.connect(lambda _: self._filter(animated=True))
         side_layout.addWidget(self.categories, 1)
         self.change_log_hint = text_label("Every addition and removal is kept in records/inhouse_library/"
@@ -527,9 +546,11 @@ class LibraryPage(QWidget):
         content.setObjectName("LibraryGrid")
         self.scroll.setWidget(content)
         column = QVBoxLayout(content)
-        column.setContentsMargins(30, 26, 30, 30)
-        column.setSpacing(14)
-        top = QHBoxLayout()
+        column.setContentsMargins(32, 24, 32, 32)
+        column.setSpacing(16)
+        top = QBoxLayout(QBoxLayout.LeftToRight)                        # title | actions; or one under the other
+        top.setSpacing(16)
+        self.top = top
         titles = QVBoxLayout()
         titles.setSpacing(2)
         titles.addWidget(text_label("REFERENCE LIBRARY", "Eyebrow"))
@@ -548,11 +569,13 @@ class LibraryPage(QWidget):
         self.add_button = QPushButton(" Add a reference…")
         self.add_button.setObjectName("Primary")
         self.add_button.setToolTip("Add a material the lab identified itself (validated before it is saved)")
-        top.addWidget(self.mode, 0, Qt.AlignBottom)
-        top.addSpacing(8)
+        self.actions = QWidget()
+        actions = FlowLayout(self.actions, spacing=8, row_spacing=8, align="right")
+        actions.addWidget(self.mode)
         for button in (self.openspecy_button, self.map_button, self.add_button):
             button.setCursor(Qt.PointingHandCursor)
-            top.addWidget(button, 0, Qt.AlignBottom)
+            actions.addWidget(button)
+        top.addWidget(self.actions, 0, Qt.AlignBottom)
         self.openspecy_button.clicked.connect(self.openspecy_requested.emit)
         self.map_button.clicked.connect(self.similarity_requested.emit)
         self.add_button.clicked.connect(self.add_requested.emit)
@@ -561,7 +584,7 @@ class LibraryPage(QWidget):
         self.banner = QFrame()
         self.banner.setObjectName("Callout")
         banner_row = QHBoxLayout(self.banner)
-        banner_row.setContentsMargins(14, 10, 14, 10)
+        banner_row.setContentsMargins(16, 12, 16, 12)
         self.banner_icon = QLabel()
         self.banner_text = text_label("", "Body", wrap=True)
         self.banner_text.setTextFormat(Qt.RichText)
@@ -591,11 +614,23 @@ class LibraryPage(QWidget):
         self.retheme()
 
     # ------------------------------------------------------------------
+    def resizeEvent(self, event):
+        """A narrow window: a narrower list of categories, and the actions move under the title."""
+        super().resizeEvent(event)
+        self.side.setFixedWidth(232 if self.width() < 1180 else 272)
+        room = self.width() - self.side.width() - 64
+        side_by_side = room >= 360 + self.actions.layout().sizeHint().width()
+        direction = QBoxLayout.LeftToRight if side_by_side else QBoxLayout.TopToBottom
+        if self.top.direction() != direction:
+            self.top.setDirection(direction)
+            self.actions.layout().side = "right" if side_by_side else "left"
+            self.actions.layout().invalidate()
+
     def retheme(self):
         t = Theme.t
         self.map_button.setIcon(icon("grid-3x3", t["ink_2"]))
         self.openspecy_button.setIcon(icon("layers", t["ink_2"]))
-        self.add_button.setIcon(icon("plus", t["on_accent"]))
+        self.add_button.setIcon(icon("plus", t["on_primary"]))
         if not self.search.actions():
             self.search.addAction(icon("search", t["muted"], 16), QLineEdit.LeadingPosition)
         self.search.actions()[0].setIcon(icon("search", t["muted"], 16))
@@ -757,7 +792,7 @@ class MaterialDetail(QWidget):
             self.chart.set_data(y, name, bands, animated=True)
         chart_body.addWidget(self.chart)
         chart_body.addWidget(text_label("Move the mouse over the spectrum to read the wavenumber, the value and "
-                                        "the band. Green marks = key bands (≥ "
+                                        "the band. Blue marks = key bands (≥ "
                                         f"{config.KEY_SHARE:.0%} of the tallest band).", "SectionHint", wrap=True))
         column.addWidget(chart_card)
 
@@ -800,9 +835,9 @@ class MaterialDetail(QWidget):
             + ("below 0.95, so the two can be told apart." if fine else
                "at or above 0.95, so the program cannot tell the two apart. Confirm such samples another way."),
             "Body2", wrap=True))
-        bars = ScoreBars()
-        bars.set_data(nearest, NO_MATCH)
-        near_body.addWidget(bars)
+        self.bars = ScoreBars()
+        self.bars.set_data(nearest, NO_MATCH)
+        near_body.addWidget(self.bars)
         column.addWidget(near_card)
 
         # where it came from
@@ -832,7 +867,7 @@ class MaterialDetail(QWidget):
         actions = QHBoxLayout()
         if current is not None:
             compare = QPushButton(f" Compare with {current.name}")
-            compare.setIcon(icon("git-compare-arrows", t["on_accent"]))
+            compare.setIcon(icon("git-compare-arrows", t["on_primary"]))
             compare.setObjectName("Primary")
             compare.clicked.connect(lambda: self.compare.emit(name))
             actions.addWidget(compare)
@@ -857,56 +892,96 @@ class MaterialDetail(QWidget):
     def play(self):
         """Called when the sheet has arrived: the spectrum draws itself in."""
         self.chart.play()
+        self.bars.grow()                                    # and the bars of the closest references
 
 
 # ---------------------------------------------------------------------------- the similarity map
 class SimilarityMap(QWidget):
-    """Every reference against every other (Pearson r of the fingerprints), as a grid of coloured cells.
+    """Every reference against every other (Pearson r of the fingerprints), as a staircase of cells.
 
-    Light = different, dark = similar. A red frame marks a pair at or above 'probable' (0.95):
-    two references the program could not tell apart. Hover a cell to read the pair.
+    A against B is the same as B against A, so each pair is drawn once: the lower half of the
+    table. Each row is a reference with its number; the columns carry the same numbers. Almost
+    white = clearly different, soft coral = similar. A red frame marks a pair at or above
+    'probable' (0.95), which the program could not tell apart; the dashed frame marks the closest
+    pair, the one the impostor test reports. The cells follow the space (18-40 px); the scores
+    are written in them when there is room. Hover a cell to read the pair.
     """
 
-    CELL = 34
+    MIN_CELL, MAX_CELL, HEAD = 18, 40, 28
 
     def __init__(self, names, matrix, worst=None, parent=None):
         super().__init__(parent)
-        self.names, self.matrix, self.worst = names, matrix, worst
-        self.hover, self.progress = None, 0.0
+        self.names, self.matrix, self.worst = names, matrix, set(worst or ())
+        self.hover, self.progress, self.cell = None, 1.0, self.MAX_CELL
         fm = QFontMetrics(font("small"))
-        self.label_w = max(fm.horizontalAdvance(n) for n in names) + 14
-        self.top = int(self.label_w * 0.72) + 10
-        size = len(names) * self.CELL
-        self.setFixedSize(self.label_w + size + int(self.label_w * 0.66), self.top + size + 8)
+        self.number_w = fm.horizontalAdvance(str(len(names))) + 16
+        self.name_w = min(260, max((fm.horizontalAdvance(n) for n in names), default=40) + 12)
+        self.label_w = self.number_w + self.name_w
         self.setMouseTracking(True)
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
+    # ---------------------------------------------------------- size
+    def columns(self):
+        return max(1, len(self.names) - 1)
+
+    def cell_for(self, width):
+        return int(max(self.MIN_CELL, min(self.MAX_CELL, (width - self.label_w - 8) // self.columns())))
+
+    def height_for(self, cell):
+        return self.HEAD + len(self.names) * cell + 8
+
+    def minimumSizeHint(self):
+        return QSize(self.label_w + self.columns() * self.MIN_CELL + 8, self.height_for(self.MIN_CELL))
+
+    def sizeHint(self):
+        return QSize(self.label_w + self.columns() * 32 + 8, self.height_for(32))
+
+    def resizeEvent(self, event):
+        self.cell = self.cell_for(self.width())
+        if self.height() != self.height_for(self.cell):
+            self.setFixedHeight(self.height_for(self.cell))
+        super().resizeEvent(event)
+
+    def _left(self):
+        """The grid is centred in the width it has."""
+        used = self.label_w + self.columns() * self.cell
+        return max(0, (self.width() - used) // 2)
+
+    def _cell(self, i, j):
+        return QRectF(self._left() + self.label_w + j * self.cell, self.HEAD + i * self.cell, self.cell, self.cell)
+
+    # ---------------------------------------------------------- motion and hover
     def play(self):
-        """Fill the cells in, from the top-left corner along the diagonal."""
-        animate(self, 0.0, 1.0, 700, self._grow, EASE_OUT)
+        """The rows fill in from the top, one a little after the other."""
+        self.progress = 0.0
+        animate(self, 0.0, 1.0, 600, self._grow, EASE_OUT)
 
     def _grow(self, value):
         self.progress = value
         self.update()
 
-    def _cell(self, i, j):
-        return QRectF(self.label_w + j * self.CELL, self.top + i * self.CELL, self.CELL, self.CELL)
-
     def colour(self, r):
         steps = Theme.t["sequence"]
         return QColor(steps[int(round(max(0.0, min(1.0, r)) * (len(steps) - 1)))])
 
+    def _cell_at(self, pos):
+        x = pos.x() - self._left() - self.label_w
+        y = pos.y() - self.HEAD
+        if x < 0 or y < 0:
+            return None
+        i, j = int(y // self.cell), int(x // self.cell)
+        return (i, j) if i < len(self.names) and j < i else None
+
     def mouseMoveEvent(self, event):
-        x, y = event.position().x() - self.label_w, event.position().y() - self.top
-        n = len(self.names)
-        cell = (int(y // self.CELL), int(x // self.CELL)) if 0 <= x < n * self.CELL and 0 <= y < n * self.CELL else None
+        cell = self._cell_at(event.position())
         if cell != self.hover:
             self.hover = cell
             self.update()
-        if cell and cell[0] != cell[1]:
+        if cell:
             a, b = self.names[cell[0]], self.names[cell[1]]
-            r = self.matrix[cell]
+            r = float(self.matrix[cell])
             verdict = ("below 0.95: can be told apart" if r < config.PROBABLE_R
-                       else "at or above 0.95: could be confused")
+                       else "0.95 or more: could be confused")
             QToolTip.showText(event.globalPosition().toPoint(), f"<b>{a}</b> vs <b>{b}</b><br>r = {r:.2f}, {verdict}",
                               self)
         else:
@@ -916,92 +991,132 @@ class SimilarityMap(QWidget):
         self.hover = None
         self.update()
 
+    # ---------------------------------------------------------- painting
     def paintEvent(self, _):
         t = Theme.t
         p = QPainter(self)
         p.setRenderHint(QPainter.Antialiasing)
-        n = len(self.names)
+        n, left, cell = len(self.names), self._left(), self.cell
         hi, hj = self.hover if self.hover else (-1, -1)
-        # labels: rows on the left, columns slanted on top
+        # column numbers on top, row numbers and names on the left
+        p.setFont(font("caption", QFont.Medium))
+        for j in range(self.columns()):
+            p.setPen(QColor(t["ink"] if j in (hi, hj) else t["muted"]))
+            p.drawText(QRectF(left + self.label_w + j * cell, 0, cell, self.HEAD - 6), Qt.AlignHCenter | Qt.AlignBottom,
+                       str(j + 1))
+        fm = QFontMetrics(font("small"))
         for k, name in enumerate(self.names):
             strong = k in (hi, hj)
+            row = QRectF(left, self.HEAD + k * cell, self.label_w, cell)
+            p.setFont(font("caption", QFont.Medium))
+            p.setPen(QColor(t["ink"] if strong else t["muted"]))
+            p.drawText(row.adjusted(0, 0, -(self.name_w + 4), 0), Qt.AlignVCenter | Qt.AlignRight, str(k + 1))
             p.setFont(font("small", QFont.DemiBold if strong else QFont.Normal))
             p.setPen(QColor(t["ink"] if strong else t["ink_2"]))
-            p.drawText(QRectF(0, self.top + k * self.CELL, self.label_w - 8, self.CELL),
-                       Qt.AlignVCenter | Qt.AlignRight, name)
-            p.save()
-            p.translate(self.label_w + k * self.CELL + self.CELL / 2 + 4, self.top - 6)
-            p.rotate(-50)
-            p.drawText(QRectF(0, -8, self.label_w, 16), Qt.AlignVCenter | Qt.AlignLeft, name)
-            p.restore()
-        # cells: they fill in from the top-left corner along the diagonal
+            p.drawText(row.adjusted(self.number_w, 0, -8, 0), Qt.AlignVCenter | Qt.AlignLeft,
+                       fm.elidedText(name, Qt.ElideRight, self.name_w - 12))
+        # the cells: each row fills in a little after the one above
+        numbers = cell >= 28
         p.setFont(font("caption", QFont.Medium))
-        for i in range(n):
-            for j in range(n):
-                share = min(1.0, max(0.0, self.progress * 2.2 - (i + j) / (2 * n)))
-                if share <= 0:
-                    continue
+        for i in range(1, n):
+            share = min(1.0, max(0.0, self.progress * 1.6 - (i - 1) / (n * 1.6)))
+            if share <= 0:
+                continue
+            for j in range(i):
                 rect = self._cell(i, j).adjusted(1, 1, -1, -1)
-                if i == j:
-                    p.setPen(Qt.NoPen)
-                    p.setBrush(QColor(t["surface_2"]))
-                    p.drawRoundedRect(rect, 4, 4)
-                    continue
                 r = float(self.matrix[i, j])
                 colour = self.colour(r)
                 colour.setAlphaF(share)
                 p.setPen(Qt.NoPen)
                 p.setBrush(colour)
                 p.drawRoundedRect(rect, 4, 4)
-                light = colour.lightnessF() > 0.62
-                p.setPen(QColor(0x1D, 0x1D, 0x1F) if light else QColor("#FFFFFF"))
-                text = f"{abs(r):.2f}"[1:]                                   # .90, and −.03 for a negative r
-                p.drawText(rect, Qt.AlignCenter, ("−" if r < 0 else "") + text)
+                if numbers:
+                    ink = QColor(t["sequence_ink"])
+                    ink.setAlphaF(share)
+                    p.setPen(ink)
+                    text = ("−" if r < 0 else "") + f"{abs(r):.2f}"[1:]       # .90, and −.03 for a negative r
+                    p.drawText(rect, Qt.AlignCenter, text)
                 if r >= config.PROBABLE_R:                                # could be confused: a red frame
                     p.setPen(QPen(QColor(t["bad"]), 2))
                     p.setBrush(Qt.NoBrush)
                     p.drawRoundedRect(rect.adjusted(1, 1, -1, -1), 4, 4)
-                elif self.worst and {self.names[i], self.names[j]} == set(self.worst):
-                    p.setPen(QPen(QColor(t["ink"]), 1.6, Qt.DashLine))     # the impostor test's record pair
+                elif {self.names[i], self.names[j]} == self.worst:
+                    p.setPen(QPen(QColor(t["ink"]), 1.4, Qt.DashLine))       # the impostor test's closest pair
                     p.setBrush(Qt.NoBrush)
                     p.drawRoundedRect(rect.adjusted(1, 1, -1, -1), 4, 4)
-        if self.hover:                                                    # the hovered row and column
-            p.setPen(QPen(QColor(t["ink"]), 1.5))
+        if self.hover:                                                    # the hovered cell, its row and column
             p.setBrush(Qt.NoBrush)
-            p.drawRect(QRectF(self.label_w, self.top + hi * self.CELL, n * self.CELL, self.CELL))
-            p.drawRect(QRectF(self.label_w + hj * self.CELL, self.top, self.CELL, n * self.CELL))
+            p.setPen(QPen(QColor(t["ink"]), 1.6))
+            p.drawRoundedRect(self._cell(hi, hj).adjusted(0.5, 0.5, -0.5, -0.5), 5, 5)
 
 
-class ColourScale(QWidget):
-    """The legend of the similarity map: the colour ramp from 0 to 1 with the two thresholds."""
+class MapScroller(SmoothScrollArea):
+    """Holds the similarity map; scrolls sideways only when even the smallest cells do not fit."""
 
-    def __init__(self, parent=None):
+    def __init__(self, similarity_map):
+        super().__init__()
+        self.map = similarity_map
+        self.setWidget(similarity_map)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.setMinimumWidth(240)
+        self.setObjectName("MapScroller")                          # transparent: the card shows through
+
+    def minimumSizeHint(self):
+        return QSize(240, self.map.height_for(self.map.MIN_CELL))
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        need = self.map.minimumSizeHint().width()
+        width = max(self.viewport().width(), need)
+        cell = self.map.cell_for(width)
+        bar = self.horizontalScrollBar().sizeHint().height() if need > self.viewport().width() else 0
+        self.setFixedHeight(self.map.height_for(cell) + bar)
+
+
+class LegendSwatch(QWidget):
+    """One entry of the map's legend: a small cell (with a frame if that is what it explains) and a word."""
+
+    def __init__(self, step, frame, text, parent=None):
         super().__init__(parent)
-        self.setFixedHeight(46)
-        self.setMinimumWidth(320)
+        self.step, self.frame, self.text = step, frame, text
+        self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+
+    def sizeHint(self):
+        return QSize(20 + 8 + QFontMetrics(font("small")).horizontalAdvance(self.text) + 4, 24)
 
     def paintEvent(self, _):
         t = Theme.t
         p = QPainter(self)
         p.setRenderHint(QPainter.Antialiasing)
-        bar = QRectF(8, 6, self.width() - 16, 12)
-        ramp = QLinearGradient(bar.topLeft(), bar.topRight())
-        steps = t["sequence"]
-        for k, colour in enumerate(steps):
-            ramp.setColorAt(k / (len(steps) - 1), QColor(colour))
+        cell = QRectF(1, 2, 20, 20)
         p.setPen(Qt.NoPen)
-        p.setBrush(ramp)
-        p.drawRoundedRect(bar, 6, 6)
-        p.setFont(font("caption"))
-        for value, text in ((0.0, "0 different"), (config.WEAK_R, f"{config.WEAK_R} weak"),
-                            (config.PROBABLE_R, f"{config.PROBABLE_R} probable"), (1.0, "1 identical")):
-            x = bar.left() + value * bar.width()
-            p.setPen(QPen(QColor(t["ink_2"]), 1))
-            p.drawLine(QPointF(x, bar.bottom() + 2), QPointF(x, bar.bottom() + 7))
-            align = Qt.AlignLeft if value == 0 else Qt.AlignRight if value >= 0.95 else Qt.AlignHCenter
-            box = QRectF(x - (0 if value == 0 else 120 if value >= 0.95 else 60), bar.bottom() + 8, 120, 16)
-            p.setPen(QColor(t["muted"]))
-            p.drawText(box, align | Qt.AlignVCenter, text)
+        p.setBrush(QColor(t["sequence"][self.step]))
+        p.drawRoundedRect(cell, 4, 4)
+        if self.frame == "bad":
+            p.setPen(QPen(QColor(t["bad"]), 2))
+            p.setBrush(Qt.NoBrush)
+            p.drawRoundedRect(cell.adjusted(1, 1, -1, -1), 4, 4)
+        elif self.frame == "dash":
+            p.setPen(QPen(QColor(t["ink"]), 1.4, Qt.DashLine))
+            p.setBrush(Qt.NoBrush)
+            p.drawRoundedRect(cell.adjusted(1, 1, -1, -1), 4, 4)
+        p.setFont(font("small"))
+        p.setPen(QColor(t["ink_2"]))
+        p.drawText(QRectF(28, 0, self.width() - 28, self.height()), Qt.AlignVCenter | Qt.AlignLeft, self.text)
+
+
+def similarity_legend():
+    """The legend of the map: what the colours and the frames mean (wraps onto a second line if needed)."""
+    holder = QWidget()
+    flow = FlowLayout(holder, spacing=24, row_spacing=8)
+    for step, frame, text in ((1, None, f"below {config.WEAK_R}: clearly different"),
+                              (7, None, f"{config.WEAK_R} to {config.PROBABLE_R}: similar, still told apart"),
+                              (10, "bad", f"{config.PROBABLE_R} or more: could be confused"),
+                              (4, "dash", "the closest pair (impostor test)")):
+        flow.addWidget(LegendSwatch(step, frame, text))
+    return holder
 
 
 class SimilarityPanel(QWidget):
@@ -1011,20 +1126,17 @@ class SimilarityPanel(QWidget):
         super().__init__()
         names, matrix = similarity
         column = QVBoxLayout(self)
-        column.setContentsMargins(22, 16, 22, 26)
-        column.setSpacing(14)
+        column.setContentsMargins(24, 16, 24, 24)
+        column.setSpacing(16)
         column.addWidget(text_label(
             "Each cell is the score (Pearson r) one reference gets against another. The verdict 'probable' needs "
             f"r ≥ {config.PROBABLE_R}, so every pair must stay below it: then no material can be mistaken for "
-            "another. A red frame would mark a pair that breaks this; the dashed frame marks the closest pair, the "
-            "one the impostor test reports.", "Body2", wrap=True))
-        card, body = section("Similarity map", f"{len(names)} references · hover a cell")
-        holder = QHBoxLayout()
+            "another.", "Body2", wrap=True))
+        card, body = section("Similarity map", f"{len(names)} references · each pair once · hover a cell")
         self.map = SimilarityMap(names, matrix, (validation.material, validation.impostor))
-        holder.addWidget(self.map)
-        holder.addStretch()
-        body.addLayout(holder)
-        body.addWidget(ColourScale())
+        body.addWidget(MapScroller(self.map))
+        body.addSpacing(8)
+        body.addWidget(similarity_legend())
         column.addWidget(card)
 
         # the same information as a table: the closest pairs
@@ -1032,12 +1144,12 @@ class SimilarityPanel(QWidget):
                         for j in range(i + 1, len(names))), key=lambda pair: -pair[2])[:8]
         table_card, table_body = section("The closest pairs", "the same data, as a table")
         grid = QGridLayout()
-        grid.setHorizontalSpacing(18)
-        grid.setVerticalSpacing(6)
-        for k, header in enumerate(("Pair", "r", "Can be told apart?")):
+        grid.setHorizontalSpacing(24)
+        grid.setVerticalSpacing(8)
+        for k, header in enumerate(("Pair", "r", "Told apart?")):
             grid.addWidget(text_label(header, "FactLabel"), 0, k)
         for row, (a, b, r) in enumerate(pairs, start=1):
-            grid.addWidget(text_label(f"{a}  ↔  {b}", "Body"), row, 0)
+            grid.addWidget(text_label(f"{a}  ↔  {b}", "Body", wrap=True), row, 0)
             grid.addWidget(text_label(f"{r:.2f}", "Body"), row, 1)
             grid.addWidget(Pill("good", "Yes", "circle-check") if r < config.PROBABLE_R
                            else Pill("bad", "No", "triangle-alert"), row, 2)
@@ -1171,7 +1283,7 @@ class AddReferencePanel(QWidget):
         self.cancel_button.clicked.connect(self.cancelled.emit)
         self.add_button = QPushButton(" Add to library")
         self.add_button.setObjectName("Primary")
-        self.add_button.setIcon(icon("plus", t["on_accent"]))
+        self.add_button.setIcon(icon("plus", t["on_primary"]))
         self.add_button.clicked.connect(self._submit)
         for button in (self.cancel_button, self.add_button):
             button.setCursor(Qt.PointingHandCursor)
@@ -1299,6 +1411,7 @@ class AddReferencePanel(QWidget):
         bars = ScoreBars()
         bars.winner_colour = "chart_unexplained" if score >= config.PROBABLE_R else "chart_reference"
         bars.set_data([(nearest, score)], "probable")
+        QTimer.singleShot(MOTION["content"] + 40, bars, bars.grow)          # grows once the rows have faded in
         similar_layout.addWidget(bars)
         rows.append(similar)
 
@@ -1462,7 +1575,7 @@ class OpenSpecyPanel(QWidget):
         buttons = QHBoxLayout()
         self.download_button = QPushButton(" Download from Open Specy")
         self.download_button.setObjectName("Primary")
-        self.download_button.setIcon(icon("file-down", t["on_accent"]))
+        self.download_button.setIcon(icon("file-down", t["on_primary"]))
         self.import_button = QPushButton(" Import a library file…")
         self.import_button.setIcon(icon("upload", t["ink_2"]))
         for button in (self.download_button, self.import_button):

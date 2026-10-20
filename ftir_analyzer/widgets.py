@@ -37,20 +37,20 @@ matplotlib.use("QtAgg")                                  # draw matplotlib figur
 import numpy as np  # noqa: E402
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg, NavigationToolbar2QT  # noqa: E402
 from matplotlib.figure import Figure  # noqa: E402
-from PySide6.QtCore import (QAbstractListModel, QByteArray, QEasingCurve, QModelIndex, QPoint, QPointF,  # noqa: E402
+from PySide6.QtCore import (QAbstractListModel, QByteArray, QEasingCurve, QEvent, QModelIndex, QPoint, QPointF,  # noqa: E402
                             QRect, QRectF, QSize, Qt, Signal)
 from PySide6.QtGui import (QAction, QActionGroup, QColor, QCursor, QFont, QFontMetrics, QIcon,  # noqa: E402
                            QPainter, QPainterPath, QPen, QPixmap, QPolygonF)
 from PySide6.QtSvg import QSvgRenderer  # noqa: E402
-from PySide6.QtWidgets import (QDialog, QFrame, QHBoxLayout, QLabel, QLayout, QMenu, QPushButton,  # noqa: E402
-                               QScrollArea, QSizePolicy, QStyle, QStyledItemDelegate, QToolButton, QToolTip,
-                               QVBoxLayout, QWidget, QWidgetItem)
+from PySide6.QtWidgets import (QApplication, QDialog, QFrame, QHBoxLayout, QLabel, QMenu, QPushButton, QScrollArea,  # noqa: E402
+                               QSizePolicy, QStyle, QStyledItemDelegate, QToolButton, QToolTip, QVBoxLayout,
+                               QWidget)
 
 from . import config  # noqa: E402
 from .analysis import NO_MATCH  # noqa: E402
 from .analytical import analytical_steps  # noqa: E402
-from .motion import (EASE_OUT, Card, Look, Motion, Segmented, animate, blank, rise_in, snapshot,  # noqa: E402
-                     stop)
+from .motion import (EASE_OUT, Card, FlowLayout, Look, Motion, Segmented, SmoothScrollArea, animate,  # noqa: E402
+                     blank, make_opaque, rise_in, snapshot, stop)
 from .peaks import band_table  # noqa: E402
 from .plots import draw_analytical, draw_result  # noqa: E402
 from .theme import FONT_SANS, ICONS, LOGO_SVG, SIZE, VERDICT_LOOK  # noqa: E402
@@ -141,12 +141,21 @@ class Pill(QWidget):
     def __init__(self, kind, text, icon_name, parent=None, size_key="small"):
         super().__init__(parent)
         self.kind, self.text, self.icon_name, self.size_key = kind, text, icon_name, size_key
+        self.compact = False                                           # True: only the icon (tight spaces)
         self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
 
     def sizeHint(self):
         fm = QFontMetrics(font(self.size_key, QFont.DemiBold))
         h = fm.height() + 8
+        if self.compact:
+            return QSize(h, h)
         return QSize(8 + 14 + 6 + fm.horizontalAdvance(self.text) + 11, h)
+
+    def set_compact(self, compact):
+        if compact != self.compact:
+            self.compact = compact
+            self.updateGeometry()
+            self.update()
 
     def paintEvent(self, _):
         t = Theme.t
@@ -157,6 +166,9 @@ class Pill(QWidget):
         p.setBrush(QColor(t[f"{self.kind}_bg"]))
         p.drawRoundedRect(rect, rect.height() / 2, rect.height() / 2)
         pix = icon_pixmap(self.icon_name, t[self.kind], 14, self.devicePixelRatioF())
+        if self.compact:
+            p.drawPixmap(QPoint(int((rect.width() - 14) / 2), int((rect.height() - 14) / 2)), pix)
+            return
         p.drawPixmap(QPoint(8, int((rect.height() - 14) / 2)), pix)
         p.setPen(QColor(t[self.kind]))
         p.setFont(font(self.size_key, QFont.DemiBold))
@@ -273,72 +285,60 @@ class ScoreBars(QWidget):
             p.drawText(QRect(int(end) + 6, y, 44, self.ROW), Qt.AlignVCenter | Qt.AlignLeft, f"{r:.2f}")
 
 
-# ---------------------------------------------------------------------------- FlowLayout
-class FlowLayout(QLayout):
-    """Places widgets left to right and wraps to a new row when the line is full."""
-
-    def __init__(self, parent=None, spacing=6):
-        super().__init__(parent)
-        self._items, self._spacing = [], spacing
-        self.setContentsMargins(0, 0, 0, 0)
-
-    def addItem(self, item):
-        self._items.append(item)
-
-    def addWidget(self, widget):
-        self.addChildWidget(widget)
-        self.addItem(QWidgetItem(widget))
-
-    def count(self):
-        return len(self._items)
-
-    def itemAt(self, index):
-        return self._items[index] if 0 <= index < len(self._items) else None
-
-    def takeAt(self, index):
-        return self._items.pop(index) if 0 <= index < len(self._items) else None
-
-    def expandingDirections(self):
-        return Qt.Orientation(0)
-
-    def hasHeightForWidth(self):
-        return True
-
-    def heightForWidth(self, width):
-        return self._arrange(QRect(0, 0, width, 0), move=False)
-
-    def setGeometry(self, rect):
-        super().setGeometry(rect)
-        self._arrange(rect, move=True)
-
-    def sizeHint(self):
-        return self.minimumSize()
-
-    def minimumSize(self):
-        size = QSize()
-        for item in self._items:
-            size = size.expandedTo(item.minimumSize())
-        return size
-
-    def _arrange(self, rect, move):
-        """Walk through the items, starting a new row when the next one would not fit."""
-        x, y, row_height = rect.x(), rect.y(), 0
-        for item in self._items:
-            hint = item.sizeHint()
-            if x + hint.width() > rect.right() and row_height > 0:
-                x, y, row_height = rect.x(), y + row_height + self._spacing, 0
-            if move:
-                item.setGeometry(QRect(QPoint(x, y), hint))
-            x += hint.width() + self._spacing
-            row_height = max(row_height, hint.height())
-        return y + row_height - rect.y()
-
-
 def chip(text, kind="Chip"):
     """A small label for one band: 'Chip' = found, 'ChipMissing' = missing, 'ChipExtra' = unexplained."""
     label = QLabel(text)
     label.setObjectName(kind)
+    label.setWordWrap(len(text) > 24)                                  # a long one may take two lines
     return label
+
+
+class ElidedLabel(QLabel):
+    """One line of text that is shortened with '…' when it does not fit; the full text is in the tooltip.
+
+    mode Qt.ElideMiddle keeps both ends (a checksum, a file path); copyable=True adds 'Copy' to the
+    right-click menu, which copies the full text.
+    """
+
+    def __init__(self, text="", name="Body", mode=Qt.ElideRight, copyable=False):
+        super().__init__()
+        self.setObjectName(name)
+        self.mode, self.full = mode, ""
+        if copyable:
+            copy = QAction("Copy", self)
+            copy.triggered.connect(lambda: QApplication.clipboard().setText(self.full))
+            self.addAction(copy)
+            self.setContextMenuPolicy(Qt.ActionsContextMenu)
+        self.setText(text)
+
+    def setText(self, text):
+        self.full = str(text)
+        self._elide()
+        self.updateGeometry()                                          # the layout should know the new length
+
+    def text(self):
+        return self.full
+
+    def _elide(self):
+        width = self.contentsRect().width()
+        shown = self.fontMetrics().elidedText(self.full, self.mode, width) if width > 0 else self.full
+        QLabel.setText(self, shown)
+        self.setToolTip(self.full if shown != self.full else "")
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        self._elide()
+
+    def changeEvent(self, event):
+        super().changeEvent(event)
+        if event.type() in (QEvent.FontChange, QEvent.StyleChange):
+            self._elide()
+
+    def sizeHint(self):
+        return QSize(self.fontMetrics().horizontalAdvance(self.full) + 4, super().sizeHint().height())
+
+    def minimumSizeHint(self):
+        return QSize(min(64, self.sizeHint().width()), super().minimumSizeHint().height())
 
 
 # ---------------------------------------------------------------------------- the list of spectra
@@ -543,7 +543,7 @@ class PlotPanel(Card):
         self.compare_button.setMenu(self.compare_menu)
         self.tools = {}
         bar = QHBoxLayout()
-        bar.setContentsMargins(16, 14, 12, 0)
+        bar.setContentsMargins(16, 16, 12, 0)
         bar.addWidget(self.switch)
         bar.addSpacing(10)
         bar.addWidget(self.compare_button)
@@ -598,6 +598,13 @@ class PlotPanel(Card):
         self.canvas.mpl_connect("button_press_event", self._on_click)
         self.retheme()
 
+
+    def resizeEvent(self, event):
+        """A narrow figure: 'Compare with' shows only its icon (the tooltip still says what it does)."""
+        super().resizeEvent(event)
+        narrow = self.width() < 640
+        if self.compare_button.toolButtonStyle() != (Qt.ToolButtonIconOnly if narrow else Qt.ToolButtonTextBesideIcon):
+            self.compare_button.setToolButtonStyle(Qt.ToolButtonIconOnly if narrow else Qt.ToolButtonTextBesideIcon)
     def retheme(self):
         """Recolour the tool icons and redraw the figure in the current theme."""
         for button, icon_name in self.tools.values():
@@ -832,7 +839,12 @@ class FeatureTile(Card):
 
 
 class EmptyState(QWidget):
-    """Shown before any spectrum is opened: what the program does, and the ways to start."""
+    """Shown before any spectrum is opened: what the program does, and the ways to start.
+
+    It fits any window: the page scrolls rather than squeezing anything; on a low window the
+    decorative spectrum is left out and the headline gets smaller; on a narrow one the three
+    tiles wrap onto more lines and the text narrows.
+    """
 
     choose_files = Signal()
     open_demo = Signal()
@@ -841,6 +853,8 @@ class EmptyState(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setObjectName("EmptyPage")
+        self.page = QWidget()
+        self.page.setObjectName("EmptyPage")
         self.logo = QLabel()
         self.eyebrow = QLabel("FTIR CONTAMINATION ANALYZER")
         self.eyebrow.setObjectName("Eyebrow")
@@ -854,7 +868,6 @@ class EmptyState(QWidget):
         self.text.setObjectName("Body2")
         self.text.setWordWrap(True)
         self.text.setAlignment(Qt.AlignCenter)
-        self.text.setFixedWidth(600)                                    # a fixed width; its height is set in retheme
         self.choose = QPushButton(" Choose spectrum files…")
         self.choose.setObjectName("Primary")
         self.demo = QPushButton(" Open the demo spectra")
@@ -865,6 +878,7 @@ class EmptyState(QWidget):
         self.formats = QLabel("CSV, TXT or DPT exports in %T or absorbance, with or without a header line")
         self.formats.setObjectName("SectionHint")
         self.formats.setAlignment(Qt.AlignCenter)
+        self.formats.setWordWrap(True)
         self.art = SpectrumArt()
         self.choose.clicked.connect(self.choose_files.emit)
         self.demo.clicked.connect(self.open_demo.emit)
@@ -878,68 +892,98 @@ class EmptyState(QWidget):
                         "Checksums, a sample log and an append-only audit trail."),
         ]
 
-        buttons = QHBoxLayout()
-        buttons.addStretch()
+        self.buttons = QWidget()
+        buttons = FlowLayout(self.buttons, spacing=16, align="center")
         buttons.addWidget(self.choose)
-        buttons.addSpacing(10)
         buttons.addWidget(self.demo)
-        buttons.addStretch()
-        tiles = QHBoxLayout()
-        tiles.addStretch()
+        self.tile_row = QWidget()
+        tiles = FlowLayout(self.tile_row, spacing=16, row_spacing=16, align="center", even=True)
         for tile in self.tiles:
             tiles.addWidget(tile)
-        tiles.addStretch()
-        tiles.setSpacing(16)
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(40, 30, 40, 30)
+        layout = QVBoxLayout(self.page)
+        layout.setContentsMargins(40, 32, 40, 32)
+        layout.setSpacing(0)
         layout.addStretch(2)
         layout.addWidget(self.logo, 0, Qt.AlignCenter)
         layout.addSpacing(16)
         layout.addWidget(self.eyebrow)
-        layout.addSpacing(6)
+        layout.addSpacing(8)
         layout.addWidget(self.title)
-        layout.addSpacing(12)
+        layout.addSpacing(16)
         layout.addWidget(self.text, 0, Qt.AlignCenter)
-        layout.addSpacing(22)
-        layout.addLayout(buttons)
-        layout.addSpacing(6)
+        layout.addSpacing(24)
+        layout.addWidget(self.buttons)
+        layout.addSpacing(8)
         layout.addWidget(self.library_link, 0, Qt.AlignCenter)
-        layout.addSpacing(2)
         layout.addWidget(self.formats)
-        layout.addSpacing(18)
+        self.art_gap = layout.count()
+        layout.addSpacing(16)
         layout.addWidget(self.art)
-        layout.addSpacing(18)
-        layout.addLayout(tiles)
+        layout.addSpacing(16)
+        layout.addWidget(self.tile_row)
         layout.addStretch(3)
+
+        self.scroll = SmoothScrollArea()
+        self.scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.scroll.setWidget(self.page)
+        outer = QVBoxLayout(self)
+        outer.setContentsMargins(0, 0, 0, 0)
+        outer.addWidget(self.scroll)
         self.retheme()
+
+    # ---------------------------------------------------------- fitting the window
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        self._fit()
+
+    def _fit(self):
+        """Narrow the text to the width; then, step by step, leave out what does not fit the height:
+        first the decorative spectrum, then the logo (and the title gets smaller)."""
+        self.text.setFixedWidth(max(280, min(600, self.width() - 96)))
+        self._set_heights()
+        width, height = max(1, self.width()), self.height()
+        for art, roomy in ((True, True), (False, True), (False, False)):
+            self.art.setVisible(art)
+            self.logo.setVisible(roomy)
+            if self.title.property("compact") != (not roomy):
+                self.title.setProperty("compact", not roomy)
+                self.title.style().unpolish(self.title)
+                self.title.style().polish(self.title)
+            layout = self.page.layout()
+            layout.invalidate()
+            if layout.totalHeightForWidth(width) <= height:
+                break
+
+    def _set_heights(self):
+        for label in [self.text] + [tile.blurb for tile in self.tiles]:  # wrapped text: the height its lines need
+            label.ensurePolished()
+            label.setMinimumHeight(label.heightForWidth(min(label.maximumWidth(), 600)) + 4)
 
     def play(self):
         """The entrance: the parts rise in one after the other, then the spectrum draws itself."""
         if Motion.reduced or not self.isVisible():
             return
         self.art.progress = 0.0
-        parts = [self.logo, self.eyebrow, self.title, self.text, self.choose, self.library_link, self.art] + self.tiles
+        parts = [self.logo, self.eyebrow, self.title, self.text, self.buttons, self.library_link, self.art,
+                 self.tile_row]
         bands = []
         for widget in parts:
-            rect = widget.geometry()
-            if widget is self.choose:                                  # the two buttons rise together
-                rect = rect.united(self.demo.geometry())
-            if widget is self.library_link:
-                rect = rect.united(self.formats.geometry())
-            if widget is self.tiles[0]:
-                rect = rect.united(self.tiles[-1].geometry())
-            if widget in self.tiles[1:]:
+            if not widget.isVisible():
                 continue
+            rect = QRect(widget.mapTo(self, QPoint(0, 0)), widget.size())
+            if widget is self.library_link:
+                formats = self.formats
+                rect = rect.united(QRect(formats.mapTo(self, QPoint(0, 0)), formats.size()))
             bands.append(rect)
         rise_in(self, blank(self, Theme.t["paper"]), snapshot(self), bands, dy=16, duration=720,
                 on_done=self.art.play)
 
     def retheme(self):
-        for label in [self.text] + [tile.blurb for tile in self.tiles]:  # wrapped text: the height its lines need
-            label.ensurePolished()
-            label.setMinimumHeight(label.heightForWidth(label.width() if label.width() > 50 else 224) + 4)
+        self._set_heights()
+        make_opaque(self.page, Theme.t["paper"])
+        make_opaque(self.scroll.viewport(), Theme.t["paper"])
         self.logo.setPixmap(logo_pixmap(64, self.devicePixelRatioF() or 2.0))
-        self.choose.setIcon(icon("files", Theme.t["on_accent"]))
+        self.choose.setIcon(icon("files", Theme.t["on_primary"]))
         self.demo.setIcon(icon("flask-conical", Theme.t["ink_2"]))
         for tile in self.tiles:
             tile.retheme()

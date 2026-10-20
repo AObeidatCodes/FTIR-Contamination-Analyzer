@@ -12,7 +12,7 @@ How it stays smooth
     rate. When it ends, the layer disappears and the real, live widgets are underneath.
 
 How it moves (the rules come from Material Design, Fluent, Emil Kowalski and Rauno Freiberg)
-    - short: 150-340 ms; things you do often (clicking through samples) get the shortest
+    - short: 150-280 ms; things you do often (clicking through samples) get the shortest
     - ease-out: fast start, gentle stop; no bounce
     - fade-through: the old content fades out quickly, then the new one fades in and rises
       a few pixels; only one picture is blended at a time
@@ -32,7 +32,8 @@ How it moves (the rules come from Material Design, Fluent, Emil Kowalski and Rau
     Segmented        a segmented control whose knob slides to the chosen segment
     Spinner          a thin arc that turns while something is working
     Toast            a small message that rises at the bottom of the window and fades away
-    Sheet            a panel that slides in from the right over the dimmed window
+    Sheet            a card in the middle of the dimmed window (fades in, rises 16 px)
+    FlowLayout       a row of widgets that wraps onto the next line when it runs out of room
 
 Short names used in this file:
     p = the painter, or the progress of an animation (0 -> 1)    e = progress after easing
@@ -43,6 +44,7 @@ Version: 1.0.0
 License: MIT (see LICENSE)
 """
 
+import gc
 import re
 import sys
 
@@ -50,8 +52,8 @@ import shiboken6
 from PySide6.QtCore import (QAbstractAnimation, QElapsedTimer, QEasingCurve, QEvent, QPoint, QPointF, QRect, QRectF,
                             QSize, Qt, QTimer, QVariantAnimation, Signal)
 from PySide6.QtGui import QColor, QFont, QFontMetrics, QPainter, QPainterPath, QPen, QPixmap
-from PySide6.QtWidgets import (QApplication, QFrame, QHBoxLayout, QLabel, QScrollArea, QSizePolicy, QStackedWidget,
-                               QToolButton, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QApplication, QFrame, QHBoxLayout, QLabel, QLayout, QScrollArea, QSizePolicy,
+                               QStackedWidget, QToolButton, QVBoxLayout, QWidget)
 
 from .theme import FONT_SANS, LIGHT, MOTION, RADIUS, SIZE
 
@@ -108,7 +110,6 @@ def bezier(x1, y1, x2, y2):
 
 EASE_OUT = bezier(0.23, 1, 0.32, 1)        # things that appear or leave: fast start, long gentle stop
 EASE_IN_OUT = bezier(0.77, 0, 0.175, 1)    # things that move from one place to another on screen
-DRAWER = bezier(0.32, 0.72, 0, 1)          # sheets that slide in from the side
 
 
 def ease(curve, progress):
@@ -177,6 +178,28 @@ def zero_like(text):
     return f"{0:.{len(decimals or '')}f}{rest}"
 
 
+# ---------------------------------------------------------------------------- no pauses while things move
+class Moving:
+    """While anything moves, Python's garbage collector waits: a collection can take tens of
+    milliseconds, which is two or three frames. It catches up as soon as the motion ends."""
+
+    count = 0
+
+    @classmethod
+    def start(cls):
+        cls.count += 1
+        if cls.count == 1 and gc.isenabled():
+            gc.disable()
+            cls.paused = True
+
+    @classmethod
+    def end(cls):
+        cls.count = max(0, cls.count - 1)
+        if cls.count == 0 and getattr(cls, "paused", False):
+            cls.paused = False
+            gc.enable()
+
+
 # ---------------------------------------------------------------------------- the transition layer
 def snapshot(widget):
     """A picture of a widget as it looks now, with every pending layout change applied first."""
@@ -197,7 +220,10 @@ class Overlay(QWidget):
     """An opaque layer over a widget that paints the frames of a transition from snapshots.
 
     Because it is opaque, Qt does not repaint anything underneath while it plays: each frame
-    is only a few picture copies. `paint_frame(p, e)` draws one frame (e = eased progress).
+    is only a few picture copies. The widgets underneath are also told not to paint at all
+    until it ends (they are hidden anyway), so a page that was just filled does not spend the
+    first frame painting itself where nobody can see it. `paint_frame(p, e)` draws one frame
+    (e = eased progress).
     """
 
     active = {}                      # {id(host): the overlay playing on it}
@@ -207,6 +233,10 @@ class Overlay(QWidget):
         Overlay.finish(host)                                       # one transition at a time per widget
         Overlay.active[id(host)] = self
         self.host, self.paint_frame, self.on_done, self.progress = host, paint_frame, on_done, 0.0
+        self.frozen = [child for child in host.findChildren(QWidget, options=Qt.FindDirectChildrenOnly)
+                       if child is not self and child.isVisible() and child.updatesEnabled()]
+        for child in self.frozen:                                  # hidden under the layer: no painting
+            child.setUpdatesEnabled(False)
         self.setAttribute(Qt.WA_OpaquePaintEvent)
         self.setAttribute(Qt.WA_NoSystemBackground)
         self.setAttribute(Qt.WA_TransparentForMouseEvents)
@@ -214,6 +244,8 @@ class Overlay(QWidget):
         self.show()
         self.raise_()
         self.repaint()                                             # the first frame, at once
+        Moving.start()
+        self.moving = True
         self.animation = animate(self, 0.0, 1.0, duration, self._frame, QEasingCurve.Linear, self._done)
 
     @classmethod
@@ -231,6 +263,13 @@ class Overlay(QWidget):
     def _done(self):
         if Overlay.active.get(id(self.host)) is self:
             del Overlay.active[id(self.host)]
+        for child in self.frozen:                                  # paint again (once) as the layer goes
+            if alive(child):
+                child.setUpdatesEnabled(True)
+        self.frozen = []
+        if getattr(self, "moving", False):
+            self.moving = False
+            Moving.end()
         self.hide()
         self.deleteLater()
         if self.on_done:
@@ -707,32 +746,147 @@ class Toast(QWidget):
         p.drawText(QRectF(x, 0, self.width() - x - 16, self.height()), Qt.AlignVCenter | Qt.AlignLeft, self.text)
 
 
-# ---------------------------------------------------------------------------- sheet
-class Sheet(QWidget):
-    """A panel that slides in from the right over the dimmed window.
+# ---------------------------------------------------------------------------- a row that wraps
+class FlowLayout(QLayout):
+    """Widgets side by side, wrapping onto the next line when the row runs out of room (like words).
 
-    Smooth because it is a flip-book: the window behind is photographed once, and while
-    the sheet moves only that photo, a dim layer and a photo of the panel are painted.
-    When it has arrived, the real (live) panel takes the photo's place. Closes with the
-    close button, the Esc key or a click on the dimmed part.
+    align: "left", "center" or "right" - where each row sits in the width it has.
+    even=True: every item in a row gets the row's height (cards side by side look tidy).
+    """
+
+    def __init__(self, parent=None, spacing=8, row_spacing=8, align="left", even=False):
+        super().__init__(parent)
+        self.items, self.gap, self.row_gap, self.side, self.even = [], spacing, row_spacing, align, even
+        self.setContentsMargins(0, 0, 0, 0)
+
+    def addItem(self, item):
+        self.items.append(item)
+
+    def count(self):
+        return len(self.items)
+
+    def itemAt(self, index):
+        return self.items[index] if 0 <= index < len(self.items) else None
+
+    def takeAt(self, index):
+        return self.items.pop(index) if 0 <= index < len(self.items) else None
+
+    def expandingDirections(self):
+        return Qt.Orientations(0)
+
+    def hasHeightForWidth(self):
+        return True
+
+    def heightForWidth(self, width):
+        return self._arrange(QRect(0, 0, width, 0), apply=False)
+
+    def setGeometry(self, rect):
+        super().setGeometry(rect)
+        self._arrange(rect, apply=True)
+
+    def sizeHint(self):
+        """One row with everything in it."""
+        visible = [item.sizeHint() for item in self.items if not item.isEmpty()]
+        m = self.contentsMargins()
+        width = sum(h.width() for h in visible) + self.gap * max(0, len(visible) - 1)
+        return QSize(width + m.left() + m.right(), max((h.height() for h in visible), default=0) + m.top() + m.bottom())
+
+    def minimumSize(self):
+        """As narrow as the widest item can become (text that wraps or shortens can become narrow)."""
+        size = QSize()
+        for item in self.items:
+            if not item.isEmpty():
+                size = size.expandedTo(item.minimumSize())
+        m = self.contentsMargins()
+        return size + QSize(m.left() + m.right(), m.top() + m.bottom())
+
+    @staticmethod
+    def _size(item, room):
+        """An item's size in a row of `room` pixels: never wider than the row; wrapped text gets taller."""
+        hint = item.sizeHint()
+        width = max(item.minimumSize().width(), min(hint.width(), room))
+        height = item.heightForWidth(width) if item.hasHeightForWidth() else hint.height()
+        return QSize(width, max(height, item.minimumSize().height()))
+
+    def _arrange(self, rect, apply):
+        m = self.contentsMargins()
+        area = rect.adjusted(m.left(), m.top(), -m.right(), -m.bottom())
+        rows, row, used = [], [], 0
+        for item in self.items:
+            if item.isEmpty():
+                continue
+            size = self._size(item, area.width())
+            if row and used + self.gap + size.width() > area.width():
+                rows.append(row)
+                row, used = [], 0
+            used += (self.gap if row else 0) + size.width()
+            row.append((item, size))
+        if row:
+            rows.append(row)
+        y = area.y()
+        for row in rows:
+            height = max(size.height() for _, size in row)
+            width = sum(size.width() for _, size in row) + self.gap * (len(row) - 1)
+            free = max(0, area.width() - width)
+            x = area.x() + {"left": 0, "center": free // 2, "right": free}[self.side]
+            for item, size in row:
+                if apply and self.even:
+                    item.setGeometry(QRect(x, y, size.width(), height))
+                elif apply:
+                    item.setGeometry(QRect(QPoint(x, y + (height - size.height()) // 2), size))
+                x += size.width() + self.gap
+            y += height + self.row_gap
+        total = y - self.row_gap - area.y() if rows else 0
+        return total + m.top() + m.bottom()
+
+
+# ---------------------------------------------------------------------------- sheet
+class SheetCard(QFrame):
+    """The card of a sheet: paper-coloured, rounded, with a hairline edge. It paints itself,
+    so its corners stay round (the header and footer on it are transparent)."""
+
+    RADIUS = 16
+
+    def paintEvent(self, _):
+        t = Look.t
+        p = QPainter(self)
+        p.setRenderHint(QPainter.Antialiasing)
+        p.setPen(QPen(QColor(t["line"]), 1))
+        p.setBrush(QColor(t["paper"]))
+        p.drawRoundedRect(QRectF(self.rect()).adjusted(0.5, 0.5, -0.5, -0.5), self.RADIUS, self.RADIUS)
+
+
+class Sheet(QWidget):
+    """A card in the middle of the dimmed window, for a task that needs its own space.
+
+    Smooth because it is a flip-book: the window behind is photographed once and the card,
+    with its soft shadow, is photographed once. While it appears only those two pictures and
+    a dim layer are painted: the card fades in and rises 16 px (a short distance, so it looks
+    smooth even where the screen and Qt are not in step). When it has arrived the real (live)
+    card takes the photo's place. Closes with the close button, Esc or a click outside it.
+
+    tall=True: the card always takes the full height (for content that grows while it is
+    open); otherwise it is as tall as its content, up to the window's height.
     """
 
     closed = Signal()
-    arrived = Signal()               # the sheet has slid in: its content may start its own animation
+    arrived = Signal()               # the sheet has appeared: its content may start its own animation
+    MARGIN, RISE, SHADOW = 32, 16, 28  # space around the card, how far it rises, room for its shadow
 
-    def __init__(self, host, title, content, width=600, eyebrow="", footer=None):
+    def __init__(self, host, title, content, width=600, eyebrow="", footer=None, tall=False):
         super().__init__(host)
-        self.host, self.panel_width, self.progress, self.closing = host, width, 0.0, False
+        self.host, self.panel_width, self.tall, self.progress, self.closing = host, width, tall, 0.0, False
         self.has_arrived = False
+        self.previous_focus = QApplication.focusWidget()           # gets the keyboard focus back afterwards
         self.setAttribute(Qt.WA_OpaquePaintEvent)
         self.setFocusPolicy(Qt.StrongFocus)
         self.background = host.grab()                             # the window behind, photographed once
-        self.panel = QFrame(self)
+        self.panel = SheetCard(self)
         self.panel.setObjectName("SheetPanel")
 
-        head = QFrame()
-        head.setObjectName("SheetHeader")
-        head_row = QHBoxLayout(head)
+        self.head = QFrame()
+        self.head.setObjectName("SheetHeader")
+        head_row = QHBoxLayout(self.head)
         head_row.setContentsMargins(24, 16, 16, 16)
         titles = QVBoxLayout()
         titles.setSpacing(4)
@@ -752,47 +906,108 @@ class Sheet(QWidget):
         self.close_button.clicked.connect(self.close_sheet)
         head_row.addWidget(self.close_button, 0, Qt.AlignTop)
 
+        self.content = content
         content.setObjectName(content.objectName() or "SheetContent")
         make_opaque(content, Look.t["paper"])
         self.scroll = SmoothScrollArea()
         self.scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)   # the content follows the width
         self.scroll.setWidget(content)
+        make_opaque(self.scroll.viewport(), Look.t["paper"])
         layout = QVBoxLayout(self.panel)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
-        layout.addWidget(head)
+        layout.addWidget(self.head)
         layout.addWidget(self.scroll, 1)
         if footer is not None:
             footer.setObjectName("SheetFooter")
             layout.addWidget(footer)
+        else:                                                      # keeps the scrolling part off the round corners
+            layout.addSpacing(SheetCard.RADIUS)
+        self.footer = footer
 
         host.installEventFilter(self)                              # follow the window when it is resized
+        content.installEventFilter(self)                           # and the content when it grows
         self.setGeometry(host.rect())
         self._place_panel()
         self.show()
         self.raise_()
         self.setFocus()
-        self.panel_photo = snapshot(self.panel)                    # the panel, photographed once it is laid out
+        self._photograph()
         self.panel.hide()
-        self._animation = animate(self, 0.0, 1.0, Motion.ms("sheet"), self._frame, DRAWER, self._arrived)
+        Moving.start()
+        self._animation = animate(self, 0.0, 1.0, Motion.ms("sheet"), self._frame, QEasingCurve.Linear,
+                                  self._arrived)
 
     def set_close_icon(self, qicon):
         self.close_button.setIcon(qicon)
 
+    # -------------------------------------------------------------- where the card goes
+    def _natural_height(self, width):
+        """How tall the card wants to be at this width: header + content + footer."""
+        QApplication.sendPostedEvents(None, QEvent.LayoutRequest)
+        content = self.content
+        inner = width - 16                                         # room for the scroll bar
+        body = content.heightForWidth(inner) if content.hasHeightForWidth() else content.sizeHint().height()
+        head = self.head.heightForWidth(width) if self.head.hasHeightForWidth() else self.head.sizeHint().height()
+        foot = self.footer.sizeHint().height() if self.footer is not None else SheetCard.RADIUS
+        return head + max(body, content.minimumSizeHint().height()) + foot + 2
+
     def _panel_rect(self):
-        width = min(self.panel_width, self.width() - 48)
-        return QRect(self.width() - width, 0, width, self.height())
+        margin = self.MARGIN if min(self.width(), self.height()) > 640 else 16
+        width = max(320, min(self.panel_width, self.width() - 2 * margin))
+        room = self.height() - 2 * margin
+        height = room if self.tall else min(room, self._natural_height(width))
+        return QRect((self.width() - width) // 2, (self.height() - height) // 2, width, height)
 
     def _place_panel(self):
         self.panel.setGeometry(self._panel_rect())
+        self.shadow = self._shadow(self.panel.size())
 
+    def _shadow(self, size):
+        """The card's soft shadow, painted once into a picture: a few wide, faint rounded layers."""
+        t, s = Look.t, self.SHADOW
+        dpr = self.devicePixelRatioF() or 1.0
+        pix = QPixmap(int((size.width() + 2 * s) * dpr), int((size.height() + 2 * s) * dpr))
+        pix.setDevicePixelRatio(dpr)
+        pix.fill(Qt.transparent)
+        p = QPainter(pix)
+        p.setRenderHint(QPainter.Antialiasing)
+        p.setPen(Qt.NoPen)
+        card = QRectF(s, s, size.width(), size.height())
+        for spread, strength in ((24, 0.10), (14, 0.18), (6, 0.32), (2, 0.40)):
+            shade = QColor(t["shadow"])
+            shade.setAlphaF(min(1.0, t["shadow_alpha"] * strength * 2.2))
+            p.setBrush(shade)
+            p.drawRoundedRect(card.adjusted(-spread, -spread + spread / 2, spread, spread + spread / 2),
+                              SheetCard.RADIUS + spread, SheetCard.RADIUS + spread)
+        p.end()
+        return pix
+
+    def _photograph(self):
+        """The card and its shadow as one picture, for the frames while it moves."""
+        photo = snapshot(self.panel)
+        s, size = self.SHADOW, self.panel.size()
+        dpr = self.devicePixelRatioF() or 1.0
+        layer = QPixmap(int((size.width() + 2 * s) * dpr), int((size.height() + 2 * s) * dpr))
+        layer.setDevicePixelRatio(dpr)
+        layer.fill(Qt.transparent)
+        p = QPainter(layer)
+        p.setRenderHint(QPainter.Antialiasing)
+        p.drawPixmap(0, 0, self.shadow)
+        p.setClipPath(rounded_path(QRectF(s, s, size.width(), size.height()), SheetCard.RADIUS))
+        p.drawPixmap(s, s, photo)
+        p.end()
+        self.layer = layer
+
+    # -------------------------------------------------------------- motion
     def _frame(self, value):
         self.progress = value
         self.update()
 
     def _arrived(self):
+        Moving.end()
         if not self.closing:
-            self.panel.show()                                      # the live panel takes over
+            self.panel.show()                                      # the live card takes over
             self.update()
             self.has_arrived = True
             self.arrived.emit()
@@ -801,28 +1016,47 @@ class Sheet(QWidget):
         if self.closing:
             return
         self.closing = True
+        if not self.has_arrived and alive(self._animation):
+            Moving.end()                                           # closed while it was still appearing
         stop(self._animation)
         self.host.removeEventFilter(self)
+        self.content.removeEventFilter(self)
         if self.panel.isVisible():
-            self.panel_photo = self.panel.grab()
+            self._photograph()
             self.panel.hide()
 
+        Moving.start()
+
         def finished():
+            Moving.end()
+            # hand the focus back first: otherwise Qt moves it on as if Tab had been pressed (a focus ring)
+            back = self.previous_focus if alive(self.previous_focus) and self.previous_focus.isVisible() else self.host
+            back.setFocus(Qt.OtherFocusReason)
             self.hide()
             self.closed.emit()
             self.deleteLater()
 
-        self._animation = animate(self, self.progress, 0.0, Motion.ms("sheet_out"), self._frame, EASE_OUT, finished)
+        self._animation = animate(self, self.progress, 0.0, Motion.ms("sheet_out"), self._frame, QEasingCurve.Linear,
+                                  finished)
 
     def eventFilter(self, obj, event):
-        if obj is self.host and event.type() == QEvent.Resize and not self.closing:
+        if self.closing:
+            return False
+        if obj is self.host and event.type() == QEvent.Resize:
             self.hide()                                            # photograph the resized window without the sheet
             self.setGeometry(self.host.rect())
             self.background = self.host.grab()
             self._place_panel()
             self.show()
             self.raise_()
+        elif obj is self.content and event.type() == QEvent.LayoutRequest and self.has_arrived and not self.tall:
+            QTimer.singleShot(0, self._refit)                      # the content changed size: follow it
         return False
+
+    def _refit(self):
+        if alive(self) and not self.closing and self._panel_rect() != self.panel.geometry():
+            self._place_panel()
+            self.update()
 
     def mousePressEvent(self, event):
         if not self._panel_rect().contains(event.position().toPoint()):
@@ -838,13 +1072,17 @@ class Sheet(QWidget):
         t = Look.t
         p = QPainter(self)
         p.drawPixmap(0, 0, self.background)
-        dim = QColor(0, 0, 0)
-        dim.setAlphaF(t["backdrop_alpha"] * self.progress)
+        e = ease(EASE_OUT, self.progress)
+        dim = QColor(t["shadow"])
+        dim.setAlphaF(t["backdrop_alpha"] * e)
         p.fillRect(self.rect(), dim)
-        if not self.panel.isVisible():                             # moving: paint the photo of the panel
-            rect = self._panel_rect()
-            x = self.width() - round(rect.width() * self.progress)
-            p.drawPixmap(x, 0, self.panel_photo)
+        rect, s = self.panel.geometry(), self.SHADOW
+        if self.panel.isVisible():                                 # live: only the shadow; the card paints itself
+            p.drawPixmap(rect.left() - s, rect.top() - s, self.shadow)
+        else:                                                      # moving: the photo fades in and rises
+            p.setOpacity(e)
+            rise = round((self.RISE if not self.closing else self.RISE / 2) * (1 - e))
+            p.drawPixmap(rect.left() - s, rect.top() - s + rise, self.layer)
 
 
 def rounded_path(rect, radius):

@@ -8,7 +8,7 @@ Result view
     top panel     the raw data exactly as measured (%T or absorbance), nothing changed
     bottom panel  the copy that was compared (ink) over the best library match (blue),
                   the zones the checks look at (C-H, O-H / N-H, CO2), the key bands
-                  that were found (green triangles) and any unexplained band (orange)
+                  that were found (blue triangles) and any unexplained band (coral)
 Analytical view
     one panel per processing step (see analytical.py): raw data, absorbance, mode
     correction on the grid, derivative fingerprints, checks with baseline and rulers
@@ -149,7 +149,7 @@ def draw_result(fig, result, library, t=LIGHT, compare=None):
         bottom.text((lo + hi) / 2, 0.985, label, ha="center", va="top", fontsize=7.5, color=t["muted"],
                     transform=bottom.get_xaxis_transform())      # x in data units, y as a share of the panel
 
-    # Band evidence: key bands found (green triangles on the axis) and unexplained bands (orange lines)
+    # Band evidence: key bands found (blue triangles on the axis) and unexplained bands (coral lines)
     if result.evidence and shown == result.best:
         for w in result.evidence.found:
             bottom.plot(w, 0.0, marker="^", color=t["chart_found"], ms=6, mec=t["chart_surface"], mew=1.2,

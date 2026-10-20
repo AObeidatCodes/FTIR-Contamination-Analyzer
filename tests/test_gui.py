@@ -279,3 +279,36 @@ def test_export_report(app, window, tmp_path):
     assert html.count('class="js-plotly-plot"') + html.count("Plotly.newPlot") >= 18   # 2 interactive figures each
     assert "Ali Obeidat" in html
     assert window.audit_log.exists()
+
+
+def test_copy_the_result(app, window):
+    """Ctrl+C in the list puts a short, traceable summary of the result on the clipboard."""
+    if not window.model.results:
+        window.analyse_paths([config.EXAMPLES_DIR], ask=answer_modes)
+        assert wait(app, lambda: not window.busy and len(window.model.results) == 12)
+    window.show_page("analyze")
+    select(app, window, "07_particle_on_filter")
+    window.copy_result()
+    text = QApplication.clipboard().text()
+    assert text.startswith("07_particle_on_filter - Probable: PE (high density)")
+    assert "Score r = 0.97" in text and "Second component" in text and "Next step:" in text
+    assert window.current_result().spectrum.sha256 in text and window.library.sha256 in text
+
+
+def test_bars_grow_when_a_sheet_arrives(app, window):
+    """With animations on, the bars in the sheets grow to their full length (they start at zero)."""
+    Motion.reduced = False
+    try:
+        detail = window.open_material("PET")
+        assert wait(app, lambda: detail.bars.growth >= 1.0, 5)
+        window.sheet.close_sheet()
+        assert wait(app, lambda: window.sheet is None, 5)
+        panel = window.open_add_reference(use_current=False)
+        panel.load_file(DEMO / "ABS_reference_known_part.csv")
+        assert wait(app, lambda: panel.preview is not None, 30)
+        bars = [b for b in panel.findChildren(type(detail.bars)) if b.ranking]
+        assert bars and wait(app, lambda: all(b.growth >= 1.0 for b in bars), 5)
+        window.sheet.close_sheet()
+        assert wait(app, lambda: window.sheet is None, 5)
+    finally:
+        Motion.reduced = True

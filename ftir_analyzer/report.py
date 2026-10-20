@@ -76,7 +76,8 @@ def _font_face(file_name, weight):
 def _tokens(t):
     """The theme colours as CSS variables."""
     keys = ["paper", "surface", "surface_2", "line", "line_strong", "ink", "ink_2", "muted", "accent",
-            "accent_soft", "header", "header_ink", "header_muted", "good", "good_bg", "warn", "warn_bg",
+            "accent_ink", "accent_soft", "primary", "on_primary", "header", "header_ink", "header_muted",
+            "good", "good_bg", "warn", "warn_bg",
             "none", "none_bg", "bad", "bad_bg"]
     return ";".join(f"--{k.replace('_', '-')}:{t[k]}" for k in keys)
 
@@ -103,7 +104,7 @@ table{width:100%;border-collapse:collapse;font-size:14px}
 th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
 th{color:var(--muted);font-weight:500}
 td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
-.scroll{overflow-x:auto}a{color:var(--accent)}
+.scroll{overflow-x:auto}a{color:var(--accent-ink)}
 .pill{display:inline-block;border-radius:999px;padding:2px 11px;font-size:13px;font-weight:600;
   margin:2px 6px 2px 0;white-space:nowrap}
 .good{background:var(--good-bg);color:var(--good)}.warn{background:var(--warn-bg);color:var(--warn)}
@@ -116,13 +117,13 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
 .facts div{padding:10px 16px;border-left:1px solid var(--line)}.facts div:first-child{border-left:none}
 .facts b{display:block;font-size:20px;font-weight:600}.facts span{color:var(--muted);font-size:13px}
 .next{background:var(--accent-soft);border-radius:10px;padding:12px 16px;margin:0 0 14px}
-.next b{color:var(--accent)}.next.alert{background:var(--bad-bg)}.next.alert b{color:var(--bad)}
+.next b{color:var(--accent-ink)}.next.alert{background:var(--bad-bg)}.next.alert b{color:var(--bad)}
 figure,.figure{margin:0 0 14px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff}
 figure svg{display:block;width:100%;height:auto}
 .hint{color:var(--muted);font-size:13px;margin:-6px 0 12px}
 details.analytical{margin-top:14px;border:1px solid var(--line);border-radius:10px;padding:12px 16px;background:var(--surface-2)}
 details.analytical[open]{background:var(--surface)}
-details.analytical summary{font-weight:600;color:var(--accent)}
+details.analytical summary{font-weight:600;color:var(--accent-ink)}
 ol.steps{margin:12px 0 14px;padding-left:22px}ol.steps li{margin:0 0 6px}
 .boxes{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;margin-top:4px}
 .boxes p,.boxes ul,.boxes ol{margin:0 0 6px}.boxes ul,.boxes ol{padding-left:20px}
@@ -131,7 +132,7 @@ ol.steps{margin:12px 0 14px;padding-left:22px}ol.steps li{margin:0 0 6px}
 .chip.missing{background:transparent;border-style:dashed;color:var(--muted)}
 .chip.extra{background:var(--warn-bg);border-color:transparent;color:var(--warn);font-weight:600}
 .small{color:var(--muted);font-size:13px}
-details{margin-top:12px}details summary{cursor:pointer;color:var(--accent);font-weight:500}details dl{margin-top:10px}
+details{margin-top:12px}details summary{cursor:pointer;color:var(--accent-ink);font-weight:500}details dl{margin-top:10px}
 .sign td{height:44px}
 footer{color:var(--muted);font-size:13px;text-align:center;margin-top:28px}
 @media (max-width:700px){.facts{grid-template-columns:repeat(2,1fr)}.facts div:nth-child(3){border-left:none}}

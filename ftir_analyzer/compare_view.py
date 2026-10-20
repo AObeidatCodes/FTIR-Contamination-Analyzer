@@ -5,8 +5,8 @@ A score says HOW similar two spectra are; this shows WHERE they differ. For the 
 four library materials, one small chart each:
 
     ink line      the sample, as it was compared
-    indigo line   the library material
-    orange wash   the area between the two lines: where the shapes do not agree
+    blue line     the library material
+    peach wash    the area between the two lines: where the shapes do not agree
 
 Two views (the switch at the top right):
     Spectrum      the absorbance, both scaled 0-1: what a person reads
@@ -63,7 +63,7 @@ class MatchTile(Card):
         self._picture = None                                # the chart, drawn once
         self._lift_animation = None
         self.setFixedHeight(self.HEIGHT)
-        self.setMinimumWidth(260)
+        self.setMinimumWidth(240)
         self.setMouseTracking(True)
         self.setCursor(Qt.PointingHandCursor)
         self.setFocusPolicy(Qt.StrongFocus)
@@ -149,10 +149,10 @@ class MatchTile(Card):
                 xs = GRID[self.mask]
                 p.fillRect(QRectF(self._x(xs.max(), rect), rect.top(), self._x(xs.min(), rect) - self._x(xs.max(), rect),
                                   rect.height()), QColor(t["surface_2"]))
-            # the orange wash: the area between the two curves, point by point
+            # the peach wash: the area between the two curves, point by point
             both = np.isfinite(self.sample) & np.isfinite(self.reference)
-            wash = QColor(t["chart_unexplained"])
-            wash.setAlphaF(0.22)
+            wash = QColor(t["chart_diff"])
+            wash.setAlphaF(t["chart_diff_alpha"])
             p.setPen(Qt.NoPen)
             p.setBrush(wash)
             for first, last in _runs(both):
@@ -194,10 +194,10 @@ class MatchTile(Card):
         left = body.left() + 16
         badge = QRectF(left, body.top() + 16, 24, 24)
         p.setPen(Qt.NoPen)
-        p.setBrush(QColor(t["accent"] if self.rank == 1 else t["surface_2"]))
+        p.setBrush(QColor(t["primary"] if self.rank == 1 else t["surface_2"]))
         p.drawRoundedRect(badge, 6, 6)
         p.setFont(font("small", QFont.DemiBold))
-        p.setPen(QColor(t["on_accent"] if self.rank == 1 else t["ink_2"]))
+        p.setPen(QColor(t["on_primary"] if self.rank == 1 else t["ink_2"]))
         p.drawText(badge, Qt.AlignCenter, str(self.rank))
         score = f"r {self.r:.2f}"
         p.setFont(font("body", QFont.DemiBold))
@@ -259,8 +259,9 @@ class TopMatches(Card):
         self.view, self.current = SPECTRUM, None
         title = QLabel("Closest matches")
         title.setObjectName("SectionTitle")
-        self.hint = QLabel("where the shapes differ is shaded orange · click one to show it above")
+        self.hint = QLabel("where the shapes differ is shaded peach · click one to show it above")
         self.hint.setObjectName("SectionHint")
+        self.hint.setWordWrap(True)                                        # two lines on a narrow window
         self.switch = Segmented(SPECTRUM, choices=(("Spectrum", SPECTRUM), ("Fingerprint", FINGERPRINT)))
         self.switch.setToolTip("Fingerprint: the two curves the score (Pearson r) is calculated from")
         self.switch.changed.connect(self.set_view)
