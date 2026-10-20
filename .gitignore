@@ -1,0 +1,14 @@
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+build/
+dist/
+
+# Records are lab data: kept on the lab computer or a shared drive, not in the code repository
+records/*
+!records/.gitkeep
+
+# Reports written into the project folder
+FTIR_report_*/

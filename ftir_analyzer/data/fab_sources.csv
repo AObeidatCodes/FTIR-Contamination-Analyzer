@@ -1,0 +1,32 @@
+# Where a material can come from in a semiconductor fab, and what to look at next.
+# Hints for the root-cause analysis (8D), not proof: confirm with the process history.
+material,possible sources,check next
+PE (high density),"bags and liners, packaging film, wafer-box parts",packaging and storage steps
+PP,"wafer cassettes, chemical bottles, wet-bench parts, face masks (meltblown PP)","carrier wear, masks at the station"
+PS,"packaging foam, trays, disposable labware",packaging near the tool
+PET,"polyester cleanroom wipes and garments, packaging film","wiping steps, garment condition"
+PBT,"connectors, housings, some wafer carriers",carrier and housing wear
+PMMA,"resist residue (methacrylate-based 193 nm and e-beam resists), acrylic windows and covers","litho rework and strip step, compare with the resist spectrum"
+PC,"FOUPs and wafer shipping boxes, equipment covers, safety glasses",FOUP and shipping-box condition and cleaning history
+"Nylon 6,6","microfiber wipes, fabrics, brushes, cable ties","wipes and garments, mechanical parts"
+PVOH,"PVA sponge brushes in post-CMP cleaning, water-soluble films","post-CMP brush clean, brush age"
+PAN,acrylic fibres from clothing worn under the cleanroom garment,gowning
+EVA (25% VA),"hot-melt adhesives, foams, shoe soles",adhesives and tapes near the tool
+PLA,"3D-printed fixtures, packaging",printed jigs and fixtures
+PVC,"vinyl gloves, tubing, wet-bench parts, dicing-tape base film","glove type, tubing, tapes"
+PU,"CMP polishing pads, foams, shoe covers, coatings","CMP pad wear, gowning"
+EVOH (44% ethylene),"multilayer barrier films and bags (packaging), food-grade films brought into the area",packaging and shipping materials
+PK (polyketone),"gears, bearings, clips and other wear parts in handling equipment",moving parts of handlers and load ports that rub or wear
+silicone,"silicone seals, O-rings, tubing and thermal pads; silicone oils and release agents; PDMS from vacuum greases","seals and O-rings near the affected tool, recent maintenance with greases or release agents"
+fluoropolymer,"PTFE / PFA / FEP wafer carriers, tubing, valve parts and seals; PVDF piping in wet benches","worn carriers or valve parts, wet-bench piping, recent part changes"
+nitrile rubber,"nitrile gloves; nitrile seals and O-rings","glove changes and handling steps; seals that rub or are swollen by solvents"
+natural rubber,"latex gloves (should not be in a cleanroom), rubber seals and pads","glove policy and visitors; rubber parts in handling equipment"
+epoxy,"epoxy adhesives and potting, die attach, coatings on fixtures","recent repairs or new fixtures with adhesive; cured epoxy flakes from coatings"
+polyimide,"Kapton tape, polyimide films and insulation","tape used on tools or wafers, heater and cable insulation"
+POM,"POM (Delrin) gears, rollers and guides in handling equipment","moving parts of handlers and load ports that wear"
+PEEK,"PEEK wafer-handling parts, end effectors, valve seats","end effectors, wafer-contact parts and their wear"
+PA,"nylon fibres from garments and brushes, cable ties, wear parts","garments, cleaning brushes, cable ties near the tool"
+SAN,"transparent covers and windows of equipment, housings","transparent covers near the tool, cracked or scratched windows"
+cellulose,"paper, cotton and cellulose wipes (non-cleanroom paper should not be in the area)","paper brought into the area, wipe types in use"
+protein,"skin flakes, hair and other human sources","gowning, people movement near the tool, gowning practice"
+silica,"CMP slurry (silica abrasive), glass and quartz parts, particles from quartzware","post-CMP clean efficiency, quartzware and glass parts"

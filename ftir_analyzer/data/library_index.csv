@@ -1,0 +1,20 @@
+# The reference library: one row per material. 'file' holds the spectrum (one column per material),
+# 'mode' is how the reference was measured; every reference is put into the library's mode (ATR)
+# when it is loaded.
+material,file,mode,category,source,licence,contributor,original_name
+PE (high density),library_openftir_atr.csv,ATR,Packaging,OpenFTIR,MIT,V. A. Mhetar,PE High Density GF
+PP,library_openftir_atr.csv,ATR,Carriers & handling,OpenFTIR,MIT,V. A. Mhetar,PP film GF
+PS,library_openftir_atr.csv,ATR,Packaging,OpenFTIR,MIT,V. A. Mhetar,PS Biaxial Film GF
+PET,library_openftir_atr.csv,ATR,Cleanroom consumables,OpenFTIR,MIT,V. A. Mhetar,PET Biaxial Film GF
+PBT,library_openftir_atr.csv,ATR,Carriers & handling,OpenFTIR,MIT,V. A. Mhetar,PBT (polybutylene) GF
+PMMA,library_openftir_atr.csv,ATR,Litho & process residues,OpenFTIR,MIT,V. A. Mhetar,PMMA Scientific
+PC,library_openftir_atr.csv,ATR,Carriers & handling,OpenFTIR,MIT,V. A. Mhetar,PC (polycarbonate) GF
+"Nylon 6,6",library_openftir_atr.csv,ATR,Cleanroom consumables,OpenFTIR,MIT,V. A. Mhetar,"Nylon (6,6) GF"
+PVOH,library_openftir_atr.csv,ATR,CMP & cleaning,OpenFTIR,MIT,V. A. Mhetar,PVOH MW 130K
+PAN,library_openftir_atr.csv,ATR,People & clothing,OpenFTIR,MIT,V. A. Mhetar,PAN 230kDa GF
+EVA (25% VA),library_openftir_atr.csv,ATR,"Adhesives, seals & lubricants",OpenFTIR,MIT,V. A. Mhetar,EVA (25% vinyl acetate) Sigma
+PLA,library_openftir_atr.csv,ATR,Equipment & fixtures,OpenFTIR,MIT,V. A. Mhetar,PLA (polylactic acid) GF
+PVC,library_openftir_atr.csv,ATR,Cleanroom consumables,OpenFTIR,MIT,V. A. Mhetar,PVC powder GF
+PU,library_openftir_atr.csv,ATR,CMP & cleaning,OpenFTIR,MIT,V. A. Mhetar,PU (polyurethane) GF
+EVOH (44% ethylene),library_openftir_atr.csv,ATR,Packaging,OpenFTIR,MIT,V. A. Mhetar,EVOH (44mol% ethylene) Soarnol
+PK (polyketone),library_openftir_atr.csv,ATR,Equipment & fixtures,OpenFTIR,MIT,V. A. Mhetar,PK (polyketone) GF

@@ -1,0 +1,50 @@
+# FTIR Contamination Analyzer - project definition
+# Author: Ali Obeidat
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ftir-contamination-analyzer"
+version = "1.0.0"
+description = "Identify contamination from FTIR spectra: validated library search, raw-spectrum checks, band evidence and traceable reports."
+readme = "README.md"
+authors = [{ name = "Ali Obeidat" }]
+maintainers = [{ name = "Ali Obeidat" }]
+license = { text = "MIT" }
+requires-python = ">=3.10"
+dependencies = [
+    "numpy>=1.24",
+    "pandas>=2.0",
+    "scipy>=1.10",
+    "matplotlib>=3.7",
+    "plotly>=5.20",
+    "nbformat>=4.2",
+    "PySide6-Essentials>=6.6",
+    "rdata>=0.11",
+]
+keywords = ["FTIR", "spectroscopy", "contamination", "failure analysis", "semiconductor", "quality"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Chemistry",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=7"]
+
+[project.gui-scripts]
+ftir-analyzer = "ftir_analyzer.__main__:main"
+
+[tool.setuptools]
+packages = ["ftir_analyzer"]
+
+[tool.setuptools.package-data]
+ftir_analyzer = ["data/*.csv", "data/*.md", "assets/*.*", "assets/fonts/*", "assets/icons/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

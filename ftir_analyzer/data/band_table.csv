@@ -1,0 +1,26 @@
+low,high,assignment
+3500,3950,sharp lines here = water vapour (artefact)
+3200,3680,O-H stretch (alcohol / water / cellulose / PVA)
+3250,3350,N-H stretch (amide / protein)
+3000,3110,aromatic or olefinic C-H stretch
+2840,2995,aliphatic C-H stretch
+2220,2260,C-N triple bond (nitrile)
+2280,2400,CO2 (atmosphere - artefact)
+1760,1795,imide or anhydride C=O
+1700,1765,C=O (ester / ketone / acid)
+1620,1680,amide I C=O / C=C / nitrate ester NO2 asym / water bend
+1590,1612,aromatic ring C=C
+1500,1560,amide II / aromatic ring
+1480,1520,aromatic ring C=C
+1430,1480,CH2 / CH3 bend
+1365,1390,CH3 symmetric bend
+1250,1270,Si-CH3 (silicone)
+1210,1300,C-O ester / aryl ether / nitrate ester NO2 sym
+1100,1300,C-F stretch (fluoropolymer / fluorinated gas)
+1000,1150,C-O stretch (alcohol / ether / cellulose) or Si-O-Si
+1100,1112,interstitial oxygen in silicon (substrate)
+900,960,S-F stretch (SF6) / C-H wag
+830,900,Si-N / nitrate ester / substituted aromatic C-H
+780,820,Si-C / Si-CH3 rock (silicone)
+690,760,CH2 rock (long chains ~720) / aromatic C-H out of plane
+660,672,CO2 bend (atmosphere - artefact)

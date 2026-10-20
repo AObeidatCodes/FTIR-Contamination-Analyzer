@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <!-- FTIR Contamination Analyzer logo. Author: Ali Obeidat -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#138a9c"/>
+      <stop offset="1" stop-color="#0a4c5c"/>
+    </linearGradient>
+    <linearGradient id="shine" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.16"/>
+      <stop offset="0.55" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <!-- tile -->
+  <rect x="8" y="8" width="240" height="240" rx="56" fill="url(#bg)"/>
+  <rect x="8" y="8" width="240" height="240" rx="56" fill="url(#shine)"/>
+  <!-- faint baseline -->
+  <line x1="44" y1="186" x2="212" y2="186" stroke="#ffffff" stroke-opacity="0.22" stroke-width="6" stroke-linecap="round"/>
+  <!-- an absorbance spectrum: a broad band, a sharp tall band, a doublet and a small band -->
+  <path d="M44 178
+           C 58 178, 62 150, 72 150  C 82 150, 86 178, 98 178
+           L 108 178  C 114 178, 116 62, 122 62  C 128 62, 130 178, 136 178
+           L 142 178  C 146 178, 148 122, 152 122  C 156 122, 157 150, 160 150  C 163 150, 164 112, 168 112  C 172 112, 174 178, 180 178
+           L 190 178  C 195 178, 197 158, 201 158  C 205 158, 206 178, 212 178"
+        fill="none" stroke="#ffffff" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- the identified band -->
+  <circle cx="122" cy="62" r="15" fill="#f6b73c" stroke="#0a4c5c" stroke-width="6"/>
+</svg>

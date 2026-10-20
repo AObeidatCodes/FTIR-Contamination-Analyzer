@@ -1,0 +1,10 @@
+# FTIR Contamination Analyzer - required packages
+# Install once with:  python -m pip install -r requirements.txt
+numpy>=1.24
+pandas>=2.0
+scipy>=1.10
+matplotlib>=3.7
+plotly>=5.20          # interactive figures (report and FTIR_Analyzer.py)
+nbformat>=4.2         # lets Plotly show figures inside Jupyter / VS Code
+PySide6-Essentials>=6.6   # the desktop app (not needed for FTIR_Analyzer.py)
+rdata>=0.11           # reads Open Specy library files (only for the optional Open Specy references)
