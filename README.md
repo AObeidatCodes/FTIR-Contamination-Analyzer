@@ -264,8 +264,11 @@ Open Specy…** adds references from the Open Specy library (Cowger et al. 2021,
 1. **Download from Open Specy** gets the *medoid nobaseline* library (baseline-corrected absorbance)
    on your computer, from where Open Specy's own R package gets it
    (`https://d2jrxerjcsjhs7.cloudfront.net/medoid_nobaseline.rds`), or from the older copy on osf.io.
-   Or **Import a library file…** if you downloaded it yourself (`.rds`). The *derivative* library is refused: processed derivative spectra
-   cannot be compared with absorbance.
+   Or **Import a library file…** if you downloaded it yourself (`.rds`). Open Specy's current file
+   holds one library per kind of spectrum (FTIR, Raman, NIR); the FTIR one is used. Its FTIR range
+   is cut to 800–2200 and 2420–3200 cm⁻¹ (no CO₂ region): the gap stays empty, nothing is drawn across
+   it. The *derivative* library is refused: processed derivative spectra cannot be compared with
+   absorbance.
 2. Only FTIR spectra of materials a fab is likely to see are kept (gloves, wipes, seals,
    fluoropolymers, silicones, resins and adhesives, fibres, silica and other minerals), at most three
    per material. Raman spectra and environmental samples are left out.
@@ -276,8 +279,9 @@ Open Specy…** adds references from the Open Specy library (Cowger et al. 2021,
 4. The result is kept in `records/openspecy/` with an import report. Switch between **Fab
    essentials** and **Extended** on the Library page; the open results are analysed again at once.
 
-The import was tested with a file in Open Specy's format (`tests/data/openspecy_sample.rds`) and
-with a deliberately untidy one (names with `#`, wavenumbers from high to low, empty and short spectra,
+The import was tested with a file in Open Specy's older format (`tests/data/openspecy_sample.rds`),
+with one laid out like the current file (FTIR / Raman / NIR parts, R classes, the cut-out CO₂ region)
+and with a deliberately untidy one (names with `#`, wavenumbers from high to low, empty and short spectra,
 missing metadata): an odd spectrum is counted in the report and left out, it never stops the import.
 The download needs internet access to Open Specy's storage on your computer. If an import fails, the
 full details are in `records/error_log.txt`.
@@ -368,17 +372,18 @@ pip install pytest
 python -m pytest
 ```
 
-78 tests. 31 cover the analysis: file reading (read-only data, headerless tab-separated files, unit
+81 tests. 31 cover the analysis: file reading (read-only data, headerless tab-separated files, unit
 recognition, clear errors), processing, the verdict rule, the impostor test, the known answer for
 every demo spectrum, the second-component, empty-spot and saturation detection, the CO₂ direction,
 the analytical view (each step reproduced, the score recalculated from step 4), the interactive
 figures and the append-only records. 7 cover the in-house library: provenance of every reference, the
 similarity map, adding ABS makes demo 10 *probable ABS*, SAN after ABS is caught before it is added,
-adding a result as a reference, removing keeps the history, names must be new. 10 cover the Open
+adding a result as a reference, removing keeps the history, names must be new. 13 cover the Open
 Specy references: material groups, only fab-relevant FTIR spectra kept, confusable spectra left out,
 a valid extended library, a second reference of the same material does not weaken a verdict, the
 derivative library refused, the download (from where Open Specy keeps it, then the older copy), names
-with a `#`, and a deliberately untidy library file. 21 start the window without a screen and use it,
+with a `#`, a deliberately untidy library file, the current FTIR / Raman / NIR file (its FTIR part
+used, a file without one refused) and no data made up across a cut-out region. 21 start the window without a screen and use it,
 including the animations finishing in the right state, the bars growing in the sheets, the closest
 matches, the Library page, adding / refusing / removing a reference, switching to the extended library
 and copying a result. 7 check the layout at 960 × 560, 1280 × 720 and 1920 × 1080: no page scrolls

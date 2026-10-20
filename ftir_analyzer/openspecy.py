@@ -9,6 +9,8 @@ extra references, so that more kinds of samples can be identified:
          download   from Open Specy's public storage (AWS, as its R package does; or OSF,
                     project x7dpz) on this computer, or
          import     a file downloaded by hand (an Open Specy .rds / .RData library file)
+       Open Specy's current files hold one library per kind of spectrum (FTIR, Raman, NIR);
+       the FTIR one is used. Older files hold a single library; both are read.
        The "nobaseline" library is used: baseline-corrected absorbance spectra, comparable
        with the program's own references. (The "derivative" library holds processed
        derivative spectra, which cannot be compared with absorbance, so it is refused.)
@@ -36,6 +38,7 @@ License: MIT (see LICENSE)
 import json
 import re
 import urllib.request
+import warnings
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
@@ -154,13 +157,14 @@ def read_library_file(path):
     except ImportError as error:
         raise ImportError("Reading Open Specy files needs the 'rdata' package: python -m pip install rdata") \
             from error
-    if path.suffix.lower() == ".rds":
-        obj = rdata.read_rds(path)
-    else:
-        found = rdata.read_rda(path)
-        obj = next(iter(found.values()))
-    if not isinstance(obj, dict) or not {"wavenumber", "spectra"} <= set(obj):
-        raise ValueError(f"{path.name} is not an Open Specy library (it has no 'wavenumber' and 'spectra').")
+    with warnings.catch_warnings():                                     # R classes Python has no name for
+        warnings.simplefilter("ignore")                                 # ('OpenSpecy', 'data.table') are read
+        if path.suffix.lower() == ".rds":                               # as plain lists and tables: no warning
+            obj = rdata.read_rds(path)
+        else:
+            found = rdata.read_rda(path)
+            obj = next(iter(found.values()))
+    obj = _ftir_library(obj, path.name)
     wn = np.asarray(obj["wavenumber"], float).ravel()
     spectra = obj["spectra"]
     if isinstance(spectra, pd.DataFrame):
@@ -180,6 +184,26 @@ def read_library_file(path):
     metadata = metadata.reset_index(drop=True) if isinstance(metadata, pd.DataFrame) else pd.DataFrame()
     metadata = metadata.reindex(range(X.shape[1]))                      # one row per spectrum, whatever the file has
     return wn, X, metadata
+
+
+def _is_library(obj):
+    return isinstance(obj, dict) and {"wavenumber", "spectra"} <= set(obj)
+
+
+def _ftir_library(obj, name):
+    """The FTIR library in what the file holds: the file itself, or its 'ftir' part.
+
+    Open Specy now keeps one library per kind of spectrum in a file: {ftir, raman, nir}.
+    """
+    if _is_library(obj):
+        return obj
+    kinds = {str(k).lower(): v for k, v in obj.items()} if isinstance(obj, dict) else {}
+    if _is_library(kinds.get("ftir")):
+        return kinds["ftir"]
+    if kinds.keys() & {"ftir", "raman", "nir"}:
+        raise ValueError(f"{name} holds no FTIR spectra that can be used (it has: {', '.join(sorted(kinds))}). "
+                         "Use the 'nobaseline' library.")
+    raise ValueError(f"{name} is not an Open Specy library (it has no 'wavenumber' and 'spectra').")
 
 
 def _column(metadata, *names):
@@ -208,9 +232,9 @@ def prepare(wn, X, metadata):
     """
     meta = {"kind": _column(metadata, "spectrum_type", "SpectrumType"),
             "identity": _column(metadata, "spectrum_identity", "SpectrumIdentity", "sample_name"),
-            "polymer": _column(metadata, "polymer"),
+            "polymer": _column(metadata, "polymer", "material"),
             "material_class": _column(metadata, "material_class", "polymer_class", "Polymer.Category"),
-            "organisation": _column(metadata, "organization", "Organization"),
+            "organisation": _column(metadata, "organization", "Organization", "library_name"),
             "sample_id": _column(metadata, "sample_name", "SpectrumID", "file_id")}
     skipped = {"Raman": 0, "not likely in a fab": 0, "too little data": 0, "more than 3 of one material": 0,
                "could not be read": 0}

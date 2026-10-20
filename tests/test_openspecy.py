@@ -10,7 +10,10 @@ different material is left out (and reported); the extended library passes the i
 test; a second reference of the SAME material does not weaken a verdict; the 'derivative'
 library is refused; the download finds the 'nobaseline' library (AWS first, then OSF); an
 untidy library file (names with '#', wavenumbers high -> low, empty or short spectra,
-missing metadata rows) is imported without stopping, and every odd spectrum is counted.
+missing metadata rows) is imported without stopping, and every odd spectrum is counted;
+a file laid out like Open Specy's current one (one library per kind of spectrum, FTIR /
+Raman / NIR, with R classes, and the FTIR range cut to 800-2200 + 2420-3200) is read, its
+FTIR part is used, and no data is made up across the cut-out region.
 
 Author : Ali Obeidat
 Version: 1.0.0
@@ -19,6 +22,7 @@ License: MIT (see LICENSE)
 
 import io
 import json
+import warnings
 from pathlib import Path
 
 import numpy as np
@@ -29,6 +33,7 @@ from ftir_analyzer import config
 from ftir_analyzer.analysis import PROBABLE, WEAK, analyse, decide
 from ftir_analyzer.evidence import fab_sources
 from ftir_analyzer.library import impostor_test, load_library, material_group
+from ftir_analyzer.processing import GRID, fingerprint, on_grid
 from ftir_analyzer.spectrum_io import read_spectra
 
 pytest.importorskip("rdata")
@@ -213,3 +218,91 @@ def test_the_download_tries_aws_first_then_osf(base, tmp_path):
 
     with pytest.raises(ConnectionError, match="Import a library file"):
         download_and_import(base, tmp_path / "other", opener=offline)
+
+
+class RClassed:
+    """A value R keeps with a class: an Open Specy object (a list) or a data.table."""
+
+    def __init__(self, value, *classes):
+        self.value, self.classes = value, classes
+
+
+def classed_to_r(data, converter):
+    """How rdata writes an RClassed: the list or table, with its R class."""
+    from rdata.conversion.to_r import build_r_object
+    from rdata.missing import R_INT_NA
+    from rdata.parser import RObjectType
+    value = data.value
+    table = isinstance(value, pd.DataFrame)
+    columns = [value[c].to_numpy() for c in value.columns] if table else list(value.values())
+    attributes = {"names": np.array([str(c) for c in (value.columns if table else value)]),
+                  "class": np.array(data.classes)}
+    if table:
+        attributes["row.names"] = np.ma.array([R_INT_NA, -len(value)], mask=[True, False])
+    return build_r_object(RObjectType.VEC, value=[converter.convert_to_r_object(c) for c in columns],
+                          is_object=True, attributes=converter.convert_to_r_attributes(attributes))
+
+
+def open_specy_object(wn, spectra, metadata):
+    data_table = ("data.table", "data.frame")
+    return RClassed({"wavenumber": wn, "spectra": RClassed(spectra, *data_table),
+                     "metadata": RClassed(metadata, *data_table)}, "OpenSpecy", "list")
+
+
+def typed_library(path, kinds=("ftir", "raman", "nir")):
+    """The test library laid out like Open Specy's current files: {ftir, raman, nir}."""
+    import rdata
+    from rdata.conversion.to_r import DEFAULT_CLASS_MAP
+    wn, X, metadata = read_library_file(FIXTURE)
+    ftir = np.concatenate([np.arange(800.0, 2201.0, 2.0), np.arange(2420.0, 3201.0, 2.0)])   # CO2 cut out
+    spectra = pd.DataFrame({f"os{i:03d}": np.interp(ftir, wn, X[:, i]) for i in range(X.shape[1])})
+    spectra.iloc[40:43, 2] = np.nan                                     # a few points missing, as in a medoid
+    rows = pd.DataFrame({"spectrum_id": metadata["sample_name"].astype(str),
+                         "spectrum_type": metadata["spectrum_type"].str.lower().astype(str),
+                         "spectrum_identity": metadata["spectrum_identity"].astype(str),
+                         "material": metadata["polymer"].fillna("").astype(str),
+                         "material_class": metadata["material_class"].astype(str),
+                         "library_name": metadata["organization"].fillna("").astype(str)})
+    raman = np.arange(200.0, 3201.0, 4.0)
+    bundle = {"ftir": open_specy_object(ftir, spectra, rows),
+              "raman": open_specy_object(raman, pd.DataFrame({"r1": np.sin(raman / 90.0)}),
+                                         pd.DataFrame({"spectrum_type": ["raman"]})),
+              "nir": open_specy_object(np.arange(4000.0, 12001.0, 8.0), pd.DataFrame({"n1": np.ones(1001)}),
+                                       pd.DataFrame({"spectrum_type": ["nir"]}))}
+    bundle = {k: v for k, v in bundle.items() if k in kinds}
+    rdata.write_rds(path, bundle, compression="gzip", constructor_dict={**DEFAULT_CLASS_MAP, RClassed: classed_to_r})
+    return path
+
+
+def test_the_current_open_specy_file_is_read_and_its_ftir_part_used(base, tmp_path):
+    path = typed_library(tmp_path / "medoid_nobaseline.rds")
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")                                  # reading it is quiet
+        wn, X, metadata = read_library_file(path)
+    assert X.shape == (len(wn), 10) and wn.min() == 800 and wn.max() == 3200
+    folder = tmp_path / "openspecy"
+    summary = import_library(path, base, folder)
+    assert summary.kept >= 5 and summary.skipped["not likely in a fab"] == 1   # the soil
+    extended = load_library(inhouse_dir=tmp_path / "inhouse", extended=True, openspecy_dir=folder)
+    assert len(extended.open_specy) == summary.kept and impostor_test(extended).passed
+    hole, outside = (GRID > 2200) & (GRID < 2420), (GRID < 800) | (GRID > 3200)
+    for name in extended.open_specy:
+        y = extended.spectra[name]
+        assert np.isnan(y[hole | outside]).all() and np.isfinite(y[~hole & ~outside]).sum() >= 400
+    result = analyse(read_spectra(config.EXAMPLES_DIR / "02_wafer_box_particle_ATR.csv")[0], extended, "ATR")
+    assert result.verdict == PROBABLE and extended.group_of(result.match) == "PE"
+
+
+def test_a_file_with_no_ftir_library_is_refused(tmp_path):
+    with pytest.raises(ValueError, match="no FTIR"):
+        read_library_file(typed_library(tmp_path / "medoid_nobaseline.rds", kinds=("raman", "nir")))
+
+
+def test_no_data_is_made_up_across_a_cut_out_region():
+    wn = np.concatenate([np.arange(800.0, 2201.0, 2.0), np.arange(2420.0, 3201.0, 2.0)])
+    y = on_grid(wn, np.cos(wn / 70.0))
+    assert np.isnan(y[(GRID > 2200) & (GRID < 2420)]).all() and np.isfinite(y[GRID == 2200]).all()
+    d = fingerprint(y)
+    left, right = (GRID >= 800) & (GRID <= 2200), (GRID >= 2420) & (GRID <= 3200)
+    alone = fingerprint(np.where(left, y, np.nan))                      # each stretch is differentiated on its own
+    assert np.corrcoef(d[left], alone[left])[0, 1] > 0.99999 and np.isfinite(d[right]).all()

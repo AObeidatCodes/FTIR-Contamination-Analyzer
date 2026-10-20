@@ -50,6 +50,11 @@ def on_grid(wn, a):
     """Read a spectrum off at the grid points; NaN where it was not measured (never invent data)."""
     y = np.interp(GRID, wn, a)                                        # value on a straight line between neighbours
     y[(GRID < wn.min()) | (GRID > wn.max())] = np.nan                 # outside the measured range: no data
+    steps = np.diff(wn)
+    if len(steps):                                                    # a region cut out of the file (Open Specy
+        hole = steps > max(config.HOLE, 4 * np.median(steps))         # leaves out 2200-2420) stays empty: no
+        for low, high in zip(wn[:-1][hole], wn[1:][hole]):            # straight line is drawn across it
+            y[(GRID > low) & (GRID < high)] = np.nan
     return y
 
 
@@ -82,10 +87,13 @@ def fingerprint(y):
     y = np.asarray(y, float)
     ok = np.isfinite(y)                                               # only the points with data
     d = np.full_like(y, np.nan)                                       # the result starts as all NaN
-    if ok.sum() < config.SAVGOL_WINDOW:                               # too little data for a derivative:
+    edges = np.flatnonzero(np.diff(np.concatenate(([0], ok.astype(int), [0]))))
+    for start, stop in zip(edges[::2], edges[1::2]):                  # each unbroken stretch of data on its own,
+        if stop - start >= config.SAVGOL_WINDOW:                      # so no slope is made up across a hole
+            d[start:stop] = np.abs(savgol_filter(y[start:stop], window_length=config.SAVGOL_WINDOW,
+                                                 polyorder=config.SAVGOL_ORDER, deriv=1))
+    if not np.isfinite(d).any():                                      # too little data for a derivative:
         return d                                                      # all NaN, which never matches anything
-    d[ok] = np.abs(savgol_filter(y[ok], window_length=config.SAVGOL_WINDOW,
-                                 polyorder=config.SAVGOL_ORDER, deriv=1))
     spread = np.nanmax(d) - np.nanmin(d)
     if spread == 0:                                                   # a flat line has no shape to compare
         return np.full_like(y, np.nan)

@@ -48,6 +48,7 @@ CATEGORIES = ("CMP & cleaning", "Cleanroom consumables", "People & clothing", "C
 # --------------------------------------------------------------------------------------
 GRID_START, GRID_STOP, GRID_STEP = 650.0, 4000.0, 5.0     # cm-1: a point every 5 cm-1, 671 points
 CO2_RANGE = (2280.0, 2400.0)                              # atmospheric CO2: never part of a comparison
+HOLE = 20.0              # cm-1: a wider step between two measured points is a cut-out region, never bridged
 
 # --------------------------------------------------------------------------------------
 # Derivative fingerprint (used for matching)
