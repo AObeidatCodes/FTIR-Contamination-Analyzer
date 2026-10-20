@@ -111,7 +111,7 @@ def result_figure(r, library, t=LIGHT):
                                         "Compared with the library: no reliable match"))
     unit = "transmittance (%)" if s.unit == "%T" else "absorbance"
     fig.add_trace(_trace(s.wn, s.raw, f"raw {unit}", t, SAMPLE, legend=False), 1, 1)    # every measured point
-    fig.add_trace(_trace(GRID, scaled(r.compared), f"sample, as compared ({r.mode})", t, SAMPLE,
+    fig.add_trace(_trace(GRID, scaled(r.compared), f"sample, as compared ({r.compared_as})", t, SAMPLE,
                          with_bands=True, fmt=".3f"), 2, 1)
     if r.has_match:
         fig.add_trace(_trace(GRID, scaled(library.spectra[r.best]), f"library: {r.best} (r = {r.r:.2f})", t,

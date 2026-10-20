@@ -128,7 +128,7 @@ def draw_result(fig, result, library, t=LIGHT, compare=None):
     bottom.plot(GRID, scaled(result.compared), color=t["chart_sample"], lw=1.3, solid_joinstyle="round",
                 zorder=3)
     drawing.trace(bottom, "sample (scaled)", GRID, scaled(result.compared), t["chart_sample"], ".3f")
-    handles = [Line2D([], [], color=t["chart_sample"], lw=2, label=f"sample, as compared ({result.mode})")]
+    handles = [Line2D([], [], color=t["chart_sample"], lw=2, label=f"sample, as compared ({result.compared_as})")]
     shown = compare if compare in library.spectra else (result.best if result.has_match else None)
     if shown:
         score = dict(result.ranking).get(shown, float("nan"))

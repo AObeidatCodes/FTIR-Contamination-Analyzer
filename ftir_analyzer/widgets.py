@@ -1007,6 +1007,7 @@ class ModeDialog(QDialog):
         title.setObjectName("DialogTitle")
         text = QLabel(f"These files do not say it themselves. The reference library was measured by "
                       f"{library_mode}, so a spectrum measured another way is corrected before it is compared. "
+                      "Don't know: both ways are tried and the better fit is used (and said). "
                       "Your answer is saved in the sample log with your name and today's date, so you are "
                       "asked only once per file. Nothing is written into the files.")
         text.setObjectName("Body2")

@@ -312,3 +312,31 @@ def test_bars_grow_when_a_sheet_arrives(app, window):
         assert wait(app, lambda: window.sheet is None, 5)
     finally:
         Motion.reduced = True
+
+
+def test_new_badges_are_in_the_transition_picture(app, window):
+    """Qt shows a widget put into a layout a moment later; the picture a transition plays must
+    already have it, or the badge pops in when the transition ends."""
+    from PySide6.QtWidgets import QLabel
+    from ftir_analyzer.motion import snapshot
+    window.show_page("analyze")
+    row = window.result_view.badges                                # the title row's layout
+    badge = QLabel("new badge")
+    row.addWidget(badge)
+    assert not badge.isVisible()                                   # Qt has not shown it yet ...
+    snapshot(window.result_view.viewport())
+    assert badge.isVisible()                                       # ... the picture is taken with it
+    row.removeWidget(badge)
+    badge.deleteLater()
+
+
+def test_the_close_button_is_on_the_sheet_from_the_first_frame(app, window):
+    Motion.reduced = False
+    try:
+        window.open_material("PET")
+        sheet = window.sheet
+        assert not sheet.close_button.icon().isNull() and not sheet.has_arrived   # on the photo, not added later
+        sheet.close_sheet()
+        assert wait(app, lambda: window.sheet is None, 5)
+    finally:
+        Motion.reduced = True

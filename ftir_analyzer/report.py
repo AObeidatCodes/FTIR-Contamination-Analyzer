@@ -200,7 +200,7 @@ def section(i, r, figure_svg, analytical="", library=None):
     return f"""
 <section class="panel" id="s{i}">
   <div class="sample-head"><h3>{h(r.name)}</h3>{pill(r.verdict)}{match}{flag_pills(r.flags)}</div>
-  <p class="meta">{h(s.path.name)}, measured by {h(r.mode)} ({h(r.mode_source)})</p>
+  <p class="meta">{h(s.path.name)}, measured by {h(r.mode_text)}</p>
   <div class="facts">
     <div><b>{r.r:.2f}</b><span>score (Pearson r)</span></div>
     <div><b>{r.gap:.2f}</b><span>lead over {h(r.runner_up)}</span></div>
@@ -220,7 +220,7 @@ def section(i, r, figure_svg, analytical="", library=None):
     <dt>File SHA-256</dt><dd class="mono">{s.sha256}</dd>
     <dt>Unit as measured</dt><dd>{h(s.unit)}, recognised from the {h(s.unit_source)}</dd>
     <dt>Data points</dt><dd>{len(s.wn)}, {s.wn.min():.0f}&ndash;{s.wn.max():.0f} cm<sup>&minus;1</sup></dd>
-    <dt>Measuring mode</dt><dd>{h(r.mode)} ({h(r.mode_source)})</dd>
+    <dt>Measuring mode</dt><dd>{h(r.mode_text)}</dd>
     <dt>Tallest bands</dt><dd>{h('; '.join(c.tallest_bands))}</dd></dl></details>
   {analytical}
 </section>"""
@@ -328,7 +328,7 @@ def results_table(results):
     """The results as a flat table: one row per spectrum, lists turned into text."""
     return pd.DataFrame([{
         "file": r.spectrum.path.name, "sample": r.name, "unit": r.spectrum.unit, "mode": r.mode,
-        "mode_source": r.mode_source, "verdict": r.verdict, "match": r.match, "best": r.best,
+        "mode_source": r.mode_source, "compared_as": r.compared_as, "verdict": r.verdict, "match": r.match, "best": r.best,
         "r": r.r, "gap": r.gap, "second": r.runner_up, "ch": r.checks.ch, "ch_share": r.checks.ch_share,
         "oh": r.checks.oh, "oh_share": r.checks.oh_share, "max_A": r.checks.max_a,
         "co2_share": r.checks.co2_share, "noise": r.checks.noise,

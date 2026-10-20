@@ -79,6 +79,7 @@ LIGHT = {
     # the one accent: a soft powder blue
     "primary": "#D6E4F8",      # filled buttons and badges: a pastel tint ...
     "primary_hover": "#C7DAF5",
+    "primary_pressed": "#B8CFF1",
     "on_primary": "#1E3A66",   # ... with dark text on it (8.8:1)
     "accent": "#5B8DD9",       # lines, bars, focus rings, the active tab (3:1 or more on every surface)
     "accent_hover": "#4A7CC9",
@@ -133,6 +134,7 @@ DARK = {
     "faint": "#615C57",
     "primary": "#2B3E5C",
     "primary_hover": "#34496B",
+    "primary_pressed": "#3D547A",
     "on_primary": "#DCE8FB",
     "accent": "#6492DD",
     "accent_hover": "#7AA2E3",
@@ -212,9 +214,11 @@ QToolTip {{ background: {t['tooltip']}; color: {t['tooltip_ink']}; border: none;
 #Header QPushButton:disabled {{ color: {t['faint']}; }}
 #Header QPushButton#Primary {{ background: {t['primary']}; color: {t['on_primary']}; padding: 8px 16px; font-weight: 600; }}
 #Header QPushButton#Primary:hover {{ background: {t['primary_hover']}; }}
+#Header QPushButton#Primary:pressed {{ background: {t['primary_pressed']}; }}
 #Header QPushButton#Primary:disabled {{ background: {t['surface_2']}; color: {t['faint']}; }}
 #Header QToolButton {{ background: transparent; border: none; border-radius: {r_c}px; padding: 8px; }}
 #Header QToolButton:hover {{ background: {t['surface_2']}; }}
+#Header QToolButton:pressed {{ background: {t['line']}; }}
 
 /* ---------- sidebar ---------- */
 #Sidebar {{ background: {t['sidebar']}; border-right: 1px solid {t['line']}; }}
@@ -279,6 +283,7 @@ QPushButton:focus {{ border: 1px solid {t['accent']}; }}
 QPushButton:disabled {{ color: {t['faint']}; background: {t['surface_2']}; border-color: {t['line']}; }}
 QPushButton#Primary {{ background: {t['primary']}; border: 1px solid {t['primary']}; color: {t['on_primary']}; font-weight: 600; }}
 QPushButton#Primary:hover {{ background: {t['primary_hover']}; border-color: {t['primary_hover']}; }}
+QPushButton#Primary:pressed {{ background: {t['primary_pressed']}; border-color: {t['primary_pressed']}; }}
 QPushButton#Primary:focus {{ border: 1px solid {t['accent']}; }}
 QPushButton#Primary:disabled {{ background: {t['surface_2']}; border-color: {t['line']}; color: {t['faint']}; }}
 QPushButton#Danger {{ color: {t['bad']}; }}
@@ -287,6 +292,7 @@ QPushButton#Link:hover {{ text-decoration: underline; }}
 QToolButton {{ background: transparent; border: 1px solid transparent; border-radius: {r_c}px; padding: 6px;
     color: {t['ink_2']}; }}
 QToolButton:hover {{ background: {t['surface_2']}; }}
+QToolButton:pressed {{ background: {t['line']}; }}
 QToolButton:checked {{ background: {t['accent_soft']}; border-color: {t['accent_soft']}; }}
 QToolButton::menu-indicator {{ image: none; width: 0; }}
 QToolButton[popupMode="2"] {{ padding: 6px 10px; font-weight: 500; }}

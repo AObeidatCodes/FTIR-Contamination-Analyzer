@@ -10,6 +10,11 @@ can be traced back to the exact raw file:
   library. The "probable" threshold is checked by an *impostor test* every time the library is loaded.
 - **Clear verdict with its reason.** *probable*, *weak* or *no reliable match*, with the numbers that
   decided it.
+- **ATR or transmission, either way round.** Samples and references are put into one common look
+  (the library's ATR look) whichever way each was measured: a transmission sample against ATR
+  references, an ATR sample against a transmission reference, Open Specy references of both kinds.
+  If the mode is not known, the spectrum is read both ways and the better fit is used (and said); if a
+  given mode fits clearly worse than the other, the result is flagged **mode doubt**.
 - **Checks on the raw spectrum.** Saturation, CO₂ artefact (is there a sample at all? which way does
   the CO₂ band point?), C–H (organic?) and O–H / N–H, each compared with 3× the measured noise.
 - **Band-by-band evidence.** Which key bands of the match are present or missing, and which bands it
@@ -150,6 +155,15 @@ SETTINGS = {
 When a file does not say how it was measured (ATR or transmission), the program asks once, then saves
 the answer in the sample log with your user name and the date. Nothing is written into the raw files.
 
+Everything is compared in the library's look (ATR): a transmission spectrum is multiplied by
+1000 / wavenumber, whether it is a sample, an in-house reference or an Open Specy reference, so ATR
+and transmission meet in the middle. **Don't know** is not a dead end: the spectrum is read both ways
+and the reading that fits better is used and named ("compared as ATR: the better fit", with both
+scores). Tested on the demo spectra whose mode is known, this picks the right mode every time the two
+readings differ, and changes no verdict. When a mode *is* given but the other one fits clearly better
+(by 0.05 or more), the result gets the flag **mode doubt**, e.g. the PE particle (07) entered as
+transmission: "it fits clearly better as ATR (r 0.97 against 0.81)".
+
 ![Measuring-mode dialog](docs/mode_dialog.png)
 
 ### Analytical view
@@ -213,6 +227,10 @@ The cells follow the size of the window. The same data is listed as a table of t
 
 The demo shows the whole idea in five minutes: a sample that the library does not know, the
 reference that teaches it, and the guard that stops a reference from breaking the library.
+[`examples/CHECK_IT_YOURSELF.md`](examples/CHECK_IT_YOURSELF.md) is the same as a checklist to run
+yourself, with every number you should see, plus a second example: the Nylon 6 fibre (05) goes from
+*weak Nylon 6,6* (r 0.88) to **probable Nylon 6** (r 0.96) once a Nylon 6 reference from a fibre
+reference collection is added, and only to *weak* if that reference is entered with the wrong mode.
 
 1. **Open the demo spectra.** `10_tool_cover_fragment_ATR` is a fragment of an equipment cover made
    of ABS. ABS is not in the shipped library, so the best the program can say is **weak PS**
@@ -316,7 +334,7 @@ python -m ftir_analyzer --version
 | --- | --- | --- |
 | 1. Read | The file is read exactly as measured; the arrays are made read-only and the SHA-256 is recorded | The raw data can never change by accident and the report can be traced to the exact file |
 | 2. Absorbance | %T → A = −log₁₀(T), on a copy | Band heights are proportional to the amount (Beer–Lambert) |
-| 3. Mode correction | Transmission spectra are given the "ATR look" (× 1000 / ν̃) | The library was measured by ATR, where the light reaches less deep at high wavenumber |
+| 3. Mode correction | Transmission spectra are given the "ATR look" (× 1000 / ν̃): samples and references alike. Mode unknown: both readings are compared and the better fit is used | The library was measured by ATR, where the light reaches less deep at high wavenumber |
 | 4. Common grid | 650–4000 cm⁻¹ in 5 cm⁻¹ steps; no data is invented outside the measured range | Sample and reference are compared point by point |
 | 5. Fingerprint | \|Savitzky–Golay first derivative\| (window 11, order 3), scaled 0–1 | Offsets, sloping baselines and sample thickness drop out |
 | 6. Search | Pearson r against every reference, CO₂ region 2280–2400 cm⁻¹ left out | Measures whether the shapes go up and down together |
@@ -359,7 +377,8 @@ Every rule and threshold lives in [`ftir_analyzer/config.py`](ftir_analyzer/conf
 │   ├── gui.py           the desktop app (Qt)
 │   ├── data/            reference library (index + spectra), band table, fab sources
 │   └── assets/          logo, fonts (Inter, IBM Plex Mono), icons (Lucide)
-├── examples/            demo spectra with known answers; library_demo/ for adding a reference
+├── examples/            demo spectra with known answers; library_demo/ for adding a reference;
+│                        CHECK_IT_YOURSELF.md, a walkthrough with the numbers to expect
 ├── records/             sample log, audit log, in-house library (created when first needed)
 ├── tests/               known-answer, library, Open Specy, window, layout and script tests (pytest)
 └── docs/                screenshots
@@ -372,21 +391,27 @@ pip install pytest
 python -m pytest
 ```
 
-81 tests. 31 cover the analysis: file reading (read-only data, headerless tab-separated files, unit
+97 tests. 43 cover the analysis: file reading (read-only data, headerless tab-separated files, unit
 recognition, clear errors), processing, the verdict rule, the impostor test, the known answer for
 every demo spectrum, the second-component, empty-spot and saturation detection, the CO₂ direction,
 the analytical view (each step reproduced, the score recalculated from step 4), the interactive
-figures and the append-only records. 7 cover the in-house library: provenance of every reference, the
-similarity map, adding ABS makes demo 10 *probable ABS*, SAN after ABS is caught before it is added,
-adding a result as a reference, removing keeps the history, names must be new. 13 cover the Open
+figures, the append-only records, and ATR / transmission: a transmission sample meets the ATR
+library with the same score, an ATR sample meets a transmission reference (r 1.00, and why the
+reference's mode matters), an unknown mode is worked out from the better fit for every demo whose mode
+is known, a wrong mode is flagged, and nothing is corrected when neither reading fits. 8 cover the
+in-house library: provenance of every reference, the similarity map, adding ABS makes demo 10
+*probable ABS*, SAN after ABS is caught before it is added, the Nylon 6 walkthrough with its numbers,
+adding a result as a reference, removing keeps the history, names must be new. 14 cover the Open
 Specy references: material groups, only fab-relevant FTIR spectra kept, confusable spectra left out,
 a valid extended library, a second reference of the same material does not weaken a verdict, the
 derivative library refused, the download (from where Open Specy keeps it, then the older copy), names
 with a `#`, a deliberately untidy library file, the current FTIR / Raman / NIR file (its FTIR part
-used, a file without one refused) and no data made up across a cut-out region. 21 start the window without a screen and use it,
+used, a file without one refused), no data made up across a cut-out region, and transmission
+references put into the ATR look. 23 start the window without a screen and use it,
 including the animations finishing in the right state, the bars growing in the sheets, the closest
 matches, the Library page, adding / refusing / removing a reference, switching to the extended library
-and copying a result. 7 check the layout at 960 × 560, 1280 × 720 and 1920 × 1080: no page scrolls
+copying a result, new badges already in the picture a transition plays, and the close button on a
+sheet from its first frame. 7 check the layout at 960 × 560, 1280 × 720 and 1920 × 1080: no page scrolls
 sideways, no text is cut off, nothing overlaps, the sheets sit in the middle and the welcome page fits a
 laptop window without scrolling. 2 run
 `FTIR_Analyzer.py` from start to end.
@@ -422,6 +447,13 @@ card is lifted under the mouse), no gradients, and text of 14 px and up.
   at all and Python's garbage collector waits (a collection can take two or three frames). A sheet is
   photographed once with its shadow and only fades in and rises 16 px: a short distance looks smooth
   even where the screen and Qt are not in step.
+- **Nothing pops in.** Qt shows a widget that was just put into a layout a moment later, and styles it
+  a moment after that. Before the picture of the new state is taken, all of it is done, so the badges,
+  flags and the close button are already in the picture and the real page that replaces it at the end
+  looks exactly the same (they used to appear only when the motion ended, and that work made the first
+  frame late).
+- **Every control answers.** Hover, pressed, focus and disabled states on every button, the filled
+  ones included (a slightly deeper tint while pressed).
 - **Motion with a purpose.** Short (150–280 ms), easing out (fast start, gentle stop), never bouncing;
   the most frequent action (clicking through samples) gets the quickest one. The curves and timings
   follow Material Design, Fluent, Emil Kowalski's and Rauno Freiberg's guidelines. **View → Reduce
@@ -449,9 +481,12 @@ screens at just two sizes, among them the similarity table running off the side)
 
 | Transition | Waits before it moves | Typical frame | Slowest frame | Painting one frame |
 | --- | --- | --- | --- | --- |
-| Click another sample | 0.12–0.14 s (drawing the figure) | 16 ms | 24–28 ms (the first) | 3–4 ms |
-| Analyze ↔ Library | 0.04–0.09 s | 16 ms | 17 ms | 7–12 ms |
-| Open / close a sheet | 0.02–0.10 s | 16 ms | 20–26 ms | 3–10 ms |
+| Click another sample | 0.13–0.21 s (drawing the figure) | 16 ms | 17 ms (was 24–28 ms) | 3–4 ms |
+| Analyze ↔ Library | 0.04–0.07 s | 16 ms | 17 ms | 7–8 ms |
+| Open / close a sheet | 0.02–0.10 s | 16 ms | 19–27 ms (one frame) | 3–9 ms |
+| Light ↔ dark | 0.41–0.44 s (restyling every widget) | 16 ms | 17 ms | 7 ms |
+
+At 100 % display scaling every transition stays at 16–18 ms per frame.
 
 ## Limits
 
@@ -460,9 +495,12 @@ screens at just two sizes, among them the similarity table running off the side)
   Library page is built for exactly that, and checks every addition.
 - Two materials that are chemically almost the same (like ABS and SAN) cannot both be references:
   the program cannot tell them apart from the spectrum alone, and says so.
-- Open Specy references are measured on many instruments, by ATR and transmission; they widen the
-  coverage, but a match to one should be confirmed with the band evidence and, where possible, an
-  in-house reference.
+- Open Specy references are measured on many instruments, by ATR and transmission (put into the ATR
+  look when Open Specy says which; used as measured when it does not); they widen the coverage, but a
+  match to one should be confirmed with the band evidence and, where possible, an in-house reference.
+- The ATR correction is the standard one (penetration depth ∝ 1 / wavenumber). The small shifts of
+  very strong bands in ATR (a few cm⁻¹, from the change of refractive index across the band) are not
+  modelled; the derivative fingerprint and the band tolerance (15 cm⁻¹) absorb them.
 - The verdict is a suggestion. A person reviews the raw spectrum and signs the report.
 - Mixtures are flagged (unexplained bands), not yet separated by spectral subtraction.
 

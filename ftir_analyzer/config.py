@@ -109,3 +109,4 @@ EVIDENCE_SHARE = 0.03 # bands are listed from 3 % of the tallest band (small ban
 # --------------------------------------------------------------------------------------
 MODES = ("ATR", "transmission", "unknown")
 REFERENCE_WN = 1000.0   # at this wavenumber the ATR correction changes nothing (factor 1)
+MODE_DOUBT = 0.05       # the OTHER mode fits this much better (best r): the stated mode is probably wrong

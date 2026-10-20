@@ -202,8 +202,20 @@ class Moving:
 
 # ---------------------------------------------------------------------------- the transition layer
 def snapshot(widget):
-    """A picture of a widget as it looks now, with every pending layout change applied first."""
-    QApplication.sendPostedEvents(None, QEvent.LayoutRequest)
+    """A picture of a widget as it looks now, with every pending layout change applied first.
+
+    Qt shows a widget that was just put into a layout a moment later (a queued call), gives
+    new widgets their style (font, colours) a moment after that, and a layout pass can ask for
+    another one (a label shortened to its new width, a row that wraps). All of it is done
+    now, until things settle: otherwise the picture would miss the new badges (they would
+    pop in when the transition ends) and the work would make its first frame late.
+    """
+    for _ in range(4):
+        for child in widget.findChildren(QWidget):
+            if child.isHidden() and not child.testAttribute(Qt.WA_WState_ExplicitShowHide):
+                QApplication.sendPostedEvents(child, QEvent.MetaCall)      # the queued 'show it'
+        QApplication.sendPostedEvents(None, QEvent.PolishRequest)
+        QApplication.sendPostedEvents(None, QEvent.LayoutRequest)
     return widget.grab()
 
 
@@ -867,13 +879,14 @@ class Sheet(QWidget):
 
     tall=True: the card always takes the full height (for content that grows while it is
     open); otherwise it is as tall as its content, up to the window's height.
+    close_icon: given here, so that it is already on the photo (it would pop in at the end).
     """
 
     closed = Signal()
     arrived = Signal()               # the sheet has appeared: its content may start its own animation
     MARGIN, RISE, SHADOW = 32, 16, 28  # space around the card, how far it rises, room for its shadow
 
-    def __init__(self, host, title, content, width=600, eyebrow="", footer=None, tall=False):
+    def __init__(self, host, title, content, width=600, eyebrow="", footer=None, tall=False, close_icon=None):
         super().__init__(host)
         self.host, self.panel_width, self.tall, self.progress, self.closing = host, width, tall, 0.0, False
         self.has_arrived = False
@@ -904,6 +917,8 @@ class Sheet(QWidget):
         self.close_button.setAccessibleName("Close")
         self.close_button.setCursor(Qt.PointingHandCursor)
         self.close_button.clicked.connect(self.close_sheet)
+        if close_icon is not None:
+            self.close_button.setIcon(close_icon)
         head_row.addWidget(self.close_button, 0, Qt.AlignTop)
 
         self.content = content
@@ -934,6 +949,7 @@ class Sheet(QWidget):
         self.setFocus()
         self._photograph()
         self.panel.hide()
+        self.repaint()                                             # the first frame, at once
         Moving.start()
         self._animation = animate(self, 0.0, 1.0, Motion.ms("sheet"), self._frame, QEasingCurve.Linear,
                                   self._arrived)

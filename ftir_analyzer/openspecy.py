@@ -20,6 +20,9 @@ extra references, so that more kinds of samples can be identified:
     3. validate: every reference is compared with every other one; a spectrum that could be
        confused with a DIFFERENT material (r >= 0.95) is left out, until none is left, so the
        extended library passes the impostor test. Each left-out spectrum is listed with why.
+       Before that, each spectrum is put into the library's mode (ATR): Open Specy notes how it
+       was measured (instrument_mode, instrument_accessories); a transmission spectrum is
+       multiplied by 1000 / wavenumber like any transmission sample. Not recorded: used as it is.
     4. save it in records/openspecy/ with a report; the window can then switch between the
        shipped library ("Fab essentials") and the extended one.
 
@@ -47,7 +50,7 @@ import numpy as np
 import pandas as pd
 
 from . import config
-from .processing import GRID, fingerprint, on_grid
+from .processing import GRID, fingerprint, on_grid, to_library_mode
 from .spectrum_io import checksum, read_table
 
 AWS_LIBRARY = "https://d2jrxerjcsjhs7.cloudfront.net/medoid_nobaseline.rds"   # where Open Specy's get_lib() looks
@@ -76,6 +79,16 @@ CATEGORY_RULES = [
     ("Minerals & inorganics", ["QUARTZ", "SILICATE", "CALCITE", "CARBONATE", "GYPSUM", "SULFATE", "TALC", "KAOLIN",
                                "MICA", "CLAY", "OXIDE", "MINERAL"]),
 ]
+
+
+def measuring_mode(text):
+    """'ATR', 'transmission' or 'unknown', from how Open Specy describes a measurement."""
+    text = str(text).upper()
+    if re.search(r"\bATR\b|ATTENUATED", text):
+        return "ATR"
+    if "TRANSMI" in text:
+        return "transmission"
+    return "unknown"                                    # reflectance, 'absorbance' or nothing at all
 
 
 def fab_category(text):
@@ -235,7 +248,9 @@ def prepare(wn, X, metadata):
             "polymer": _column(metadata, "polymer", "material"),
             "material_class": _column(metadata, "material_class", "polymer_class", "Polymer.Category"),
             "organisation": _column(metadata, "organization", "Organization", "library_name"),
-            "sample_id": _column(metadata, "sample_name", "SpectrumID", "file_id")}
+            "sample_id": _column(metadata, "sample_name", "SpectrumID", "file_id"),
+            "how": (_column(metadata, "instrument_mode") + " " + _column(metadata, "SpectralCollectionMode")
+                    + " " + _column(metadata, "instrument_accessories"))}            # how it was measured
     skipped = {"Raman": 0, "not likely in a fab": 0, "too little data": 0, "more than 3 of one material": 0,
                "could not be read": 0}
     entries, per_group, names = [], {}, set()
@@ -260,7 +275,8 @@ def _prepare_one(wn, column, meta, per_group, names, i):
     category = fab_category(described)
     if category is None:
         return None, "not likely in a fab"
-    y = on_grid(wn, column)
+    mode = measuring_mode(meta["how"])
+    y = on_grid(wn, to_library_mode(wn, column, mode, config.LIBRARY_MODE))   # in the library's mode
     if np.isfinite(y).sum() < 200 or np.nanmax(y) <= np.nanmin(y):
         return None, "too little data"
     group = material_group(described) or _display_name(meta["material_class"] or meta["identity"]).lower()
@@ -275,7 +291,7 @@ def _prepare_one(wn, column, meta, per_group, names, i):
     low, high = np.nanmin(y), np.nanmax(y)
     return {"name": name, "group": group, "category": category, "y": (y - low) / (high - low),
             "original_name": str(meta["identity"] or meta["polymer"] or meta["material_class"]),
-            "spectrum_id": str(meta["sample_id"]), "contributor": str(meta["organisation"])}, None
+            "spectrum_id": str(meta["sample_id"]), "contributor": str(meta["organisation"]), "mode": mode}, None
 
 
 def curate(base_library, entries):
@@ -328,11 +344,16 @@ class ImportSummary:
     by_category: dict = field(default_factory=dict)
     skipped: dict = field(default_factory=dict)
     dropped: list = field(default_factory=list)          # [(name, confused with, r)]
+    modes: dict = field(default_factory=dict)            # {measuring mode: how many kept}
 
     def text(self):
         lines = [f"Open Specy library imported from {self.source}",
                  f"{self.kept} reference spectra kept (FTIR, fab-relevant, validated)."]
         lines += [f"  {category}: {count}" for category, count in sorted(self.by_category.items())]
+        if self.modes:
+            said = {"ATR": "ATR", "transmission": f"transmission (put into the {config.LIBRARY_MODE} look)",
+                    "unknown": "mode not recorded (used as measured)"}
+            lines.append("Measured by: " + ", ".join(f"{n} {said[m]}" for m, n in sorted(self.modes.items())) + ".")
         left_out = {k: v for k, v in self.skipped.items() if v}
         if left_out:
             lines.append("Left out: " + ", ".join(f"{v} {k}" for k, v in left_out.items()) + ".")
@@ -371,7 +392,8 @@ class OpenSpecyLibrary:
             if row.name not in table.columns:
                 continue
             info = MaterialInfo(name=row.name, category=row.category, source="Open Specy", licence=LICENCE,
-                                contributor=row.contributor, mode="unknown", original_name=row.original_name,
+                                contributor=row.contributor, mode=getattr(row, "mode", "") or "unknown",
+                                original_name=row.original_name,
                                 origin="open specy", notes=f"Open Specy id {row.spectrum_id}",
                                 file=self.spectra_file.name, sha256=sha, group=row.group)
             y = on_grid(wn, table[row.name].to_numpy(float))
@@ -387,9 +409,8 @@ class OpenSpecyLibrary:
                 f"# Source: {summary.source}. Cite: {CITATION}\n")
         table = pd.DataFrame({"wavenumber": GRID, **{e["name"]: np.round(e["y"], 5) for e in entries}})
         self.spectra_file.write_text(head + table.to_csv(index=False), encoding="utf-8")
-        index = pd.DataFrame([{k: e[k] for k in ("name", "group", "category", "original_name", "spectrum_id",
-                                                 "contributor")} for e in entries],
-                             columns=["name", "group", "category", "original_name", "spectrum_id", "contributor"])
+        columns = ["name", "group", "category", "original_name", "spectrum_id", "contributor", "mode"]
+        index = pd.DataFrame([{k: e.get(k, "unknown") for k in columns} for e in entries], columns=columns)
         self.index_file.write_text(head + index.to_csv(index=False), encoding="utf-8")
         self.report_file.write_text(summary.text() + f"\n\nCite: {CITATION}\n", encoding="utf-8")
 
@@ -408,10 +429,11 @@ def import_library(path, base_library, folder=None, progress=None):
         e["category"] = known.get(e["group"], e["category"])
     say(0, 1, "Validating them against every other reference")
     kept, dropped = curate(base_library, entries)
-    by_category = {}
+    by_category, modes = {}, {}
     for e in kept:
         by_category[e["category"]] = by_category.get(e["category"], 0) + 1
-    summary = ImportSummary(Path(path).name, len(kept), by_category, skipped, dropped)
+        modes[e["mode"]] = modes.get(e["mode"], 0) + 1
+    summary = ImportSummary(Path(path).name, len(kept), by_category, skipped, dropped, modes)
     OpenSpecyLibrary(folder).save(kept, summary)
     return summary
 

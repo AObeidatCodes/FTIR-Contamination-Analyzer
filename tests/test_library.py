@@ -4,6 +4,7 @@ FTIR Contamination Analyzer - tests of the library: provenance, validation and t
 The central promise: a material that is NOT in the library is not identified; after a
 reference of it is added (and validated), a new measurement of it IS identified. And a
 reference that would make two materials impossible to tell apart is caught before it is added.
+The Nylon 6 walkthrough (examples/CHECK_IT_YOURSELF.md) is checked here with its numbers.
 
 Author : Ali Obeidat
 Version: 1.0.0
@@ -79,6 +80,28 @@ def test_adding_a_reference_catches_the_unknown(empty_inhouse):
     assert (result.verdict, result.match) == (PROBABLE, "ABS")          # after: caught
     from ftir_analyzer.evidence import fab_sources
     assert "equipment housings" in fab_sources("ABS", library)[0]       # its fab sources came along
+
+
+def test_the_nylon_6_walkthrough(empty_inhouse):
+    """examples/CHECK_IT_YOURSELF.md, part A: a separately measured Nylon 6 fibre raises the score."""
+    library = load_library(inhouse_dir=empty_inhouse)
+    before = analyse_file("05_fibre_on_wafer_ATR.csv", library)
+    assert (before.verdict, before.match, round(before.r, 2)) == (WEAK, "Nylon 6,6", 0.88)
+    path = DEMO / "Nylon6_reference_fibre_collection.csv"
+    assert read_spectra(path)[0].unit == "%T"                           # measured by ATR, saved as transmittance
+    impact = validation_impact(library, "Nylon 6", grid_of(path))
+    assert impact.passed and impact.distinct and impact.nearest[0] == "Nylon 6,6"
+    assert round(impact.nearest[1], 2) == 0.90
+    spectrum = read_spectra(path)[0]
+    InHouseLibrary(empty_inhouse / "wrong").add("Nylon 6", spectrum.wn, absorbance(spectrum), "transmission")
+    wrong = analyse_file("05_fibre_on_wafer_ATR.csv", load_library(inhouse_dir=empty_inhouse / "wrong"))
+    assert (wrong.verdict, wrong.match) == (WEAK, "Nylon 6 or Nylon 6,6")   # the reference's mode set wrong
+
+    add_from_file(InHouseLibrary(empty_inhouse), path, library)
+    library = load_library(inhouse_dir=empty_inhouse)
+    after = analyse_file("05_fibre_on_wafer_ATR.csv", library)
+    assert (after.verdict, after.match, round(after.r, 2)) == (PROBABLE, "Nylon 6", 0.96)
+    assert after.runner_up == "Nylon 6,6" and after.gap >= config.MIN_GAP and impostor_test(library).passed
 
 
 def test_a_too_similar_reference_is_caught_before_adding(empty_inhouse):

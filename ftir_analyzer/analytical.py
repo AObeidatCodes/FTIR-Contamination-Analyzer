@@ -56,14 +56,27 @@ class Step:
     rulers: list = field(default_factory=list)    # [(name, Ruler)] for the checks step
 
 
-def _mode_text(mode, library_mode):
+def _mode_text(result, library_mode):
+    mode = result.reading
+    if result.mode == "unknown" and mode != "unknown":
+        other, r_other = result.other
+        how = ("like the library, so no correction is needed" if mode == library_mode else
+               "so it is multiplied by " + ("1000 / wavenumber" if mode == "transmission" else "wavenumber / 1000")
+               + f" to look like {library_mode}")
+        return (f"Measuring mode unknown, so the sample was read both ways. It fits better as {mode} "
+                f"(r {result.r:.2f} against {r_other:.2f} as {other}), {how}.")
+    if result.mode == "unknown":
+        return ("Measuring mode unknown, and neither reading (ATR, transmission) matches anything, so no "
+                "correction was made (the result is flagged).")
+    return _mode_text_known(mode, library_mode)
+
+
+def _mode_text_known(mode, library_mode):
     if mode == "transmission" and library_mode == "ATR":
         return ("Measured in transmission, the library by ATR: multiplied by 1000 / wavenumber, because ATR "
                 "light reaches less deep at high wavenumber, so ATR bands there look weaker.")
     if mode == "ATR" and library_mode == "transmission":
         return "Measured by ATR, the library in transmission: multiplied by wavenumber / 1000 (ATR correction)."
-    if mode == "unknown":
-        return "Measuring mode unknown, so no correction was made (the result is flagged)."
     return f"Measured by {mode}, like the library: no correction needed."
 
 
@@ -92,7 +105,7 @@ def analytical_steps(result, library):
     curves = [Curve("absorbance on the grid", GRID, before, BEFORE),
               Curve("as compared with the library", GRID, after, SAMPLE)]
     steps.append(Step(3, "Measuring-mode correction, on the common grid", "absorbance",
-                      _mode_text(result.mode, library.mode) + " Then read off every 5 cm⁻¹ from 650 to 4000 cm⁻¹ "
+                      _mode_text(result, library.mode) + " Then read off every 5 cm⁻¹ from 650 to 4000 cm⁻¹ "
                       "(671 points); where the file has no data, nothing is invented.", curves))
 
     # 4. Fingerprints: exactly what the score compares

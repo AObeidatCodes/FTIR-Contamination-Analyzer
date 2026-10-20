@@ -4,7 +4,10 @@ FTIR Contamination Analyzer - analysis of one spectrum
 Puts every step together for one measured spectrum:
 
     1. absorbance        %T -> A if needed (a new array; the measured values stay as they are)
-    2. mode correction   make the sample look as if it was measured like the library (ATR)
+    2. mode correction   make the sample look as if it was measured like the library (ATR).
+                         Mode unknown: it is read both ways (as ATR, as transmission) and the
+                         reading that fits better is used and stated. Mode given: the other
+                         reading is checked too, and a clearly better fit is flagged.
     3. library search    every reference material ranked by Pearson r, best first
     4. verdict           probable / weak / no reliable match, with the reason in numbers
     5. checks            saturation, CO2, C-H, O-H on the raw absorbance
@@ -16,6 +19,7 @@ The program suggests; a person reviews the raw spectrum and decides.
 Short names used in this file:
     wn = wavenumbers    a = absorbance    a_grid = absorbance on the common grid
     ok = True where there is data    r1, r2 = best and second-best score    v = verdict word
+    reading = the measuring mode the comparison used ("ATR", "transmission", or "unknown" = as measured)
 
 Author : Ali Obeidat
 Version: 1.0.0
@@ -39,6 +43,9 @@ PROBABLE, WEAK, NO_MATCH = "probable", "weak", "no reliable match"
 # A spectrum must cover at least this many points of the 650-4000 cm-1 grid to be compared.
 MIN_GRID_POINTS = 50
 
+# The two ways a spectrum can have been measured; each can be put into the library's mode.
+MODES = ("ATR", "transmission")
+
 
 @dataclass(frozen=True)
 class Result:
@@ -58,6 +65,8 @@ class Result:
     flags: list = field(default_factory=list)   # [(label, kind)]; kind "bad" = not trustworthy, "warn" = look closer
     compared: np.ndarray = None                 # the copy that was compared with the library (on the grid)
     rival: int = 1                              # position in the ranking of the best DIFFERENT material
+    reading: str = "unknown"                    # the mode the comparison used ("unknown": as measured)
+    other: tuple = ()                           # (the other mode, its best r), for the mode check
 
     # Short-cuts used by the window and the report
     @property
@@ -87,6 +96,19 @@ class Result:
     @property
     def has_match(self):
         return self.verdict != NO_MATCH
+
+    @property
+    def compared_as(self):
+        """How the sample was compared, in a few words: 'ATR', 'transmission' or 'as measured'."""
+        return self.reading if self.reading in MODES else "as measured"
+
+    @property
+    def mode_text(self):
+        """The measuring mode and where it came from, plus how it was compared if that was worked out."""
+        text = f"{self.mode} ({self.mode_source})"
+        if self.mode not in MODES and self.reading in MODES:
+            text += f", compared as {self.reading}: the better fit"
+        return text
 
 
 def decide(ranking, rival=1):
@@ -137,16 +159,33 @@ def advise(verdict, match, checks):
     return text
 
 
+def choose_reading(mode, best):
+    """The mode the comparison uses. best = {mode: best r when read that way}.
+
+    A known mode is used as it is. An unknown one: the reading that fits better, if it fits
+    at all (r >= WEAK_R); if neither does, none (the spectrum is compared as measured).
+    """
+    if mode in best:
+        return mode
+    fit = max(best, key=best.get)
+    return fit if best[fit] >= config.WEAK_R else "unknown"
+
+
 def analyse(spectrum, library, mode="unknown", mode_source="not given", conflict=""):
     """Run the whole analysis on one spectrum and return a Result. The spectrum is never changed."""
     wn = spectrum.wn
     a = absorbance(spectrum)                                                    # 1. a new array, in absorbance
-    compared = on_grid(wn, to_library_mode(wn, a, mode, library.mode))         # 2. the copy that is compared
-    if np.isfinite(compared).sum() < MIN_GRID_POINTS:
+    readings = {m: on_grid(wn, to_library_mode(wn, a, m, library.mode)) for m in MODES}   # 2. read as ATR and
+    if np.isfinite(readings[library.mode]).sum() < MIN_GRID_POINTS:                       #    as transmission
         raise SpectrumFileError(f"{spectrum.name}: the spectrum hardly covers the mid-IR range "
                                 f"{config.GRID_START:.0f}-{config.GRID_STOP:.0f} cm-1, so it cannot be compared.")
 
-    ranking = search(compared, library)                                         # 3. every material, best first
+    rankings = {m: search(y, library) for m, y in readings.items()}           # 3. every material, best first
+    best = {m: ranking[0][1] for m, ranking in rankings.items()}
+    reading = choose_reading(mode, best)
+    used = reading if reading in MODES else library.mode                        #    'as measured' = no correction
+    compared, ranking = readings[used], rankings[used]
+    other = next(m for m in MODES if m != used)
     rival = library.rival(ranking)                                              #    the best DIFFERENT material
     verdict, match = decide(ranking, rival)                                     # 4. the rule
 
@@ -167,12 +206,21 @@ def analyse(spectrum, library, mode="unknown", mode_source="not given", conflict
         flags.append(("second component?", "warn"))
         step += (" Unexplained band(s) at " + ", ".join(f"{w:.0f}" for w in evidence.unexplained)
                  + " cm-1: possible second component. Read them with the method card.")
-    if mode == "unknown":
+    if mode not in MODES:
         flags.append(("mode unknown", "warn"))
-        step += f" Measuring mode unknown, so not corrected to the library's {library.mode}."
+        if reading in MODES:
+            step += (f" Measuring mode unknown: read both ways, it fits better as {reading} "
+                     f"(r {best[reading]:.2f} against {best[other]:.2f}), so it is compared that way. "
+                     "Record the mode to be sure.")
+        else:
+            step += " Measuring mode unknown, and neither reading matches anything, so it is compared as measured."
+    elif best[other] - best[mode] >= config.MODE_DOUBT and best[other] >= config.WEAK_R:
+        flags.append(("mode doubt", "warn"))
+        step += (f" Mode check: it fits clearly better as {other} (r {best[other]:.2f} against "
+                 f"{best[mode]:.2f}). Check how it was measured.")
     if conflict:
         flags.append(("mode conflict", "bad"))
         step += f" Mode conflict: {conflict}."
 
     return Result(spectrum, mode, mode_source, conflict, verdict, match, ranking, explain(ranking, verdict, rival),
-                  checks, evidence, step, flags, compared, rival)
+                  checks, evidence, step, flags, compared, rival, reading, (other, best[other]))

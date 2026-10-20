@@ -2,7 +2,9 @@
 FTIR Contamination Analyzer - tests
 
 Known-answer tests: every demo spectrum must give the verdict it was validated with,
-the raw data must never change, and the records must only ever grow.
+the raw data must never change, and the records must only ever grow. ATR and transmission
+meet in the library's look whichever side was measured which way; an unknown mode is worked
+out from the better fit, and a stated mode that fits clearly worse is flagged.
 
     python -m pytest            (from the project folder)
 
@@ -10,6 +12,8 @@ Author : Ali Obeidat
 Version: 1.0.0
 License: MIT (see LICENSE)
 """
+
+from dataclasses import replace
 
 import numpy as np
 import pandas as pd
@@ -147,6 +151,59 @@ def test_analysis_never_changes_the_raw_data(library):
     before = spectrum.raw.copy()
     analyse(spectrum, library, "transmission")
     assert np.array_equal(spectrum.raw, before)
+
+
+# ---------------------------------------------------------------- ATR and transmission
+KNOWN_MODES = {f.name: ("ATR" if "ATR" in f.name else "transmission") for f in sorted(EXAMPLES.glob("*.csv"))
+               if "ATR" in f.name or "transmission" in f.name}
+
+
+def as_transmission(spectrum):
+    """The same measurement as it would look in transmission: ATR bands at high wavenumber are weaker."""
+    a = spectrum.raw * spectrum.wn / config.REFERENCE_WN
+    return replace(spectrum, raw=a, unit="A")
+
+
+def test_a_transmission_sample_meets_the_atr_library(library):
+    spectrum = read_spectra(EXAMPLES / "01_wipe_area_particle_ATR.csv")[0]
+    by_atr = analyse(spectrum, library, "ATR")
+    by_transmission = analyse(as_transmission(spectrum), library, "transmission")
+    assert by_transmission.r == pytest.approx(by_atr.r, abs=1e-9) and by_transmission.match == by_atr.match == "PET"
+
+
+def test_an_atr_sample_meets_a_transmission_reference(tmp_path):
+    from ftir_analyzer.inhouse import InHouseLibrary
+    spectrum = read_spectra(EXAMPLES / "12_shipping_box_film_ATR.csv")[0]
+    film = as_transmission(spectrum)
+    InHouseLibrary(tmp_path).add("EVOH film, transmission", film.wn, film.raw, "transmission")
+    result = analyse(spectrum, load_library(inhouse_dir=tmp_path), "ATR")
+    assert result.best == "EVOH film, transmission" and result.r == pytest.approx(1.0)
+    InHouseLibrary(tmp_path / "wrong").add("EVOH film, transmission", film.wn, film.raw, "ATR")   # mode set wrong
+    wrong = analyse(spectrum, load_library(inhouse_dir=tmp_path / "wrong"), "ATR")
+    assert dict(wrong.ranking)["EVOH film, transmission"] < 0.9               # why the reference's mode matters
+
+
+@pytest.mark.parametrize("name", sorted(KNOWN_MODES))
+def test_an_unknown_mode_is_worked_out_from_the_better_fit(library, name):
+    known, unknown = example(name, library, KNOWN_MODES[name]), example(name, library, "unknown")
+    assert (unknown.verdict, unknown.match) == (known.verdict, known.match)
+    other_r = unknown.other[1]
+    if abs(unknown.r - other_r) > 0.01:                                        # not a tie (demo 10: 0.876 / 0.879)
+        assert unknown.reading == KNOWN_MODES[name]
+    assert ("mode unknown", "warn") in unknown.flags and "fits better as" in unknown.next_step
+    assert ("mode doubt", "warn") not in known.flags                           # the right mode is never doubted
+
+
+def test_a_wrong_mode_is_noticed(library):
+    result = example("02_wafer_box_particle_ATR.csv", library, "transmission")
+    assert ("mode doubt", "warn") in result.flags and "fits clearly better as ATR" in result.next_step
+    result = example("06_PS_calibration_film_transmission.csv", library, "ATR")
+    assert ("mode doubt", "warn") in result.flags
+
+
+def test_no_reading_fits_so_nothing_is_corrected(library):
+    result = example("08_fibre_on_filter.csv", library)
+    assert result.reading == "unknown" and result.compared_as == "as measured" and result.verdict == NO_MATCH
 
 
 # ---------------------------------------------------------------- records

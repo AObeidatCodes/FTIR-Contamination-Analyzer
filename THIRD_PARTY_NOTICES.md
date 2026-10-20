@@ -60,6 +60,44 @@ Every report that uses them names Open Specy and cites:
 > Rochman, C., Herodotou, O. (2021). Microplastic Spectral Classification Needs an Open Source
 > Community: Open Specy to the Rescue! *Analytical Chemistry* 93(21), 7543–7548.
 
+## FasTEX-KCL textile fibre spectra (MIT License)
+
+Used in `examples/library_demo/Nylon6_reference_fibre_collection.csv`: the row of sample
+MTF_NYL_083 (Microtrace forensic fibre reference collection, PA 6) of
+`ml_datasets/feature_matrix_raw_transmittance.csv` from https://github.com/reeha-parkar/FasTEX-KCL,
+written as two columns (wavenumber, transmittance). Measured with a PerkinElmer Frontier FT-IR and a
+single-reflection diamond ATR.
+
+```
+MIT License
+
+Copyright (c) 2025 Reeha Parkar
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
+The dataset is cited as asked by its authors:
+
+> Parkar, R., Jain, A., Prendergast-Miller, M., Stanton, T., Sheridan, K., Gallidabino, M. (2025).
+> A dataset of infrared (ATR-FTIR) spectra for textile fibres of natural and man-made origin.
+> Mendeley Data. https://doi.org/10.17632/rx3fjgz96x
+
 ## Polystyrene film (public domain)
 
 Used in `examples/06_PS_calibration_film_transmission.csv`. It is a transmission spectrum of

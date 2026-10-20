@@ -13,7 +13,8 @@ untidy library file (names with '#', wavenumbers high -> low, empty or short spe
 missing metadata rows) is imported without stopping, and every odd spectrum is counted;
 a file laid out like Open Specy's current one (one library per kind of spectrum, FTIR /
 Raman / NIR, with R classes, and the FTIR range cut to 800-2200 + 2420-3200) is read, its
-FTIR part is used, and no data is made up across the cut-out region.
+FTIR part is used, and no data is made up across the cut-out region; references measured
+in transmission are put into the library's ATR look, as samples are.
 
 Author : Ali Obeidat
 Version: 1.0.0
@@ -249,7 +250,7 @@ def open_specy_object(wn, spectra, metadata):
                      "metadata": RClassed(metadata, *data_table)}, "OpenSpecy", "list")
 
 
-def typed_library(path, kinds=("ftir", "raman", "nir")):
+def typed_library(path, kinds=("ftir", "raman", "nir"), transmission=()):
     """The test library laid out like Open Specy's current files: {ftir, raman, nir}."""
     import rdata
     from rdata.conversion.to_r import DEFAULT_CLASS_MAP
@@ -257,12 +258,17 @@ def typed_library(path, kinds=("ftir", "raman", "nir")):
     ftir = np.concatenate([np.arange(800.0, 2201.0, 2.0), np.arange(2420.0, 3201.0, 2.0)])   # CO2 cut out
     spectra = pd.DataFrame({f"os{i:03d}": np.interp(ftir, wn, X[:, i]) for i in range(X.shape[1])})
     spectra.iloc[40:43, 2] = np.nan                                     # a few points missing, as in a medoid
+    how = ["ATR"] * len(metadata)
+    for i in transmission:                                              # these as measured in transmission
+        spectra.iloc[:, i] *= ftir / config.REFERENCE_WN
+        how[i] = "Transmission"
     rows = pd.DataFrame({"spectrum_id": metadata["sample_name"].astype(str),
                          "spectrum_type": metadata["spectrum_type"].str.lower().astype(str),
                          "spectrum_identity": metadata["spectrum_identity"].astype(str),
                          "material": metadata["polymer"].fillna("").astype(str),
                          "material_class": metadata["material_class"].astype(str),
-                         "library_name": metadata["organization"].fillna("").astype(str)})
+                         "library_name": metadata["organization"].fillna("").astype(str),
+                         "instrument_mode": how})
     raman = np.arange(200.0, 3201.0, 4.0)
     bundle = {"ftir": open_specy_object(ftir, spectra, rows),
               "raman": open_specy_object(raman, pd.DataFrame({"r1": np.sin(raman / 90.0)}),
@@ -306,3 +312,22 @@ def test_no_data_is_made_up_across_a_cut_out_region():
     left, right = (GRID >= 800) & (GRID <= 2200), (GRID >= 2420) & (GRID <= 3200)
     alone = fingerprint(np.where(left, y, np.nan))                      # each stretch is differentiated on its own
     assert np.corrcoef(d[left], alone[left])[0, 1] > 0.99999 and np.isfinite(d[right]).all()
+
+
+def test_transmission_references_are_put_into_the_atr_look(base, tmp_path):
+    from ftir_analyzer.openspecy import measuring_mode
+    assert [measuring_mode(t) for t in ("ATR", "Diamond ATR", "Transmission", "Reflectance", "")] == \
+        ["ATR", "ATR", "transmission", "unknown", "unknown"]
+    folders = {}
+    for label, transmission in (("atr", ()), ("mixed", (0, 2, 6))):     # PE, Nylon 6 and PS by transmission
+        (tmp_path / label).mkdir()
+        path = typed_library(tmp_path / label / "medoid_nobaseline.rds", transmission=transmission)
+        folders[label] = tmp_path / label / "openspecy"
+        summary = import_library(path, base, folders[label])
+    assert "transmission (put into the ATR look)" in summary.text()
+    libraries = {k: load_library(inhouse_dir=tmp_path / "inhouse", extended=True, openspecy_dir=f)
+                 for k, f in folders.items()}
+    for name in ("Poly(ethylene) (Open Specy)", "Nylon 6 (Open Specy)", "Polystyrene (Open Specy)"):
+        a, b = libraries["atr"].spectra[name], libraries["mixed"].spectra[name]
+        assert np.allclose(a, b, equal_nan=True, atol=1e-4)            # converted back: the same reference
+        assert libraries["mixed"].info_of(name).mode == "transmission"

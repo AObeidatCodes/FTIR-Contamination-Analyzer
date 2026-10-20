@@ -165,7 +165,8 @@ def append_audit_log(results, info, path=config.AUDIT_LOG_FILE):
         "run_at": info["run_at"], "run_by": info["run_by"], "program": info["program"],
         "code_sha256": info["code_sha256"][:16], "library_sha256": info["library_sha256"][:16],
         "file": r.spectrum.path.name, "file_sha256": r.spectrum.sha256, "sample": r.name,
-        "mode": r.mode, "verdict": r.verdict, "match": r.match, "r": round(r.r, 3),
+        "mode": r.mode if r.mode == r.compared_as else f"{r.mode} (compared as {r.compared_as})",
+        "verdict": r.verdict, "match": r.match, "r": round(r.r, 3),
         "flags": "; ".join(label for label, _ in r.flags),
     } for r in results])
     rows.to_csv(path, mode="a", index=False, header=not path.exists())        # append; header only for a new log

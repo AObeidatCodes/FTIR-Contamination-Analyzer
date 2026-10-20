@@ -89,7 +89,9 @@ HOW_IT_WORKS = f"""
 checksum is recorded, so the report can be traced to this exact file.</li>
 <li><b>Absorbance</b>: %T is converted with A = −log₁₀ T, on a copy.</li>
 <li><b>Measuring mode</b>: the library was measured by ATR, so a transmission spectrum is given the
-ATR look (× 1000 / wavenumber) before it is compared.</li>
+ATR look (× 1000 / wavenumber) before it is compared; a reference measured in transmission too.
+Mode not known: the spectrum is read both ways and the better fit is used (and named). A given mode
+that fits clearly worse than the other one is flagged <i>mode doubt</i>.</li>
 <li><b>Common grid</b>: 650–4000 cm⁻¹ every 5 cm⁻¹. Nothing is invented outside the measured range.</li>
 <li><b>Fingerprint</b>: |first derivative| (Savitzky–Golay, 11 points, cubic), scaled 0–1, so offsets,
 sloping baselines and sample thickness drop out.</li>
@@ -439,7 +441,8 @@ class ResultView(SmoothScrollArea):
         for widget in self.badge_widgets:
             self.badges.addWidget(widget)
         how = "measuring mode unknown" if r.mode == "unknown" else f"measured by {r.mode}"
-        self.meta.setText(f"{s.path.name}   {how} ({r.mode_source})")
+        fit = f", compared as {r.reading}: the better fit" if r.mode == "unknown" and r.reading != "unknown" else ""
+        self.meta.setText(f"{s.path.name}   {how} ({r.mode_source}){fit}")
 
         # facts (the numbers count up)
         self.fact_r.set(f"{r.r:.2f}", "score (Pearson r)", animated)
@@ -554,7 +557,7 @@ class ResultView(SmoothScrollArea):
         facts = [("File", str(s.path), "Mono"), ("File SHA-256", s.sha256, "Mono"),
                  ("Unit as measured", f"{s.unit}, recognised from the {s.unit_source}", "Body2"),
                  ("Data points", f"{len(s.wn)}, {s.wn.min():.0f}–{s.wn.max():.0f} cm⁻¹", "Body2"),
-                 ("Measuring mode", f"{r.mode} ({r.mode_source})", "Body2"),
+                 ("Measuring mode", r.mode_text, "Body2"),
                  ("Library", f"{library.name}, compared in {library.mode} mode", "Body2"),
                  ("Library SHA-256", library.sha256, "Mono"),
                  ("Best reference", reference, "Body2"),
@@ -1190,8 +1193,8 @@ class MainWindow(QMainWindow):
         """Show content in a sheet: a card in the middle of the dimmed window (one at a time)."""
         if self.sheet is not None:
             self.sheet.close_sheet()
-        sheet = Sheet(self.centralWidget(), title, content, width, eyebrow, footer, tall)
-        sheet.set_close_icon(icon("x", Theme.t["ink_2"]))
+        sheet = Sheet(self.centralWidget(), title, content, width, eyebrow, footer, tall,
+                      close_icon=icon("x", Theme.t["ink_2"]))
         if hasattr(content, "play"):                                       # its own animation starts on arrival
             if sheet.has_arrived:
                 content.play()
@@ -1557,7 +1560,7 @@ def result_summary(r, library):
     lines = [f"{r.name} - {verdict}",
              f"Score r = {r.r:.2f}, lead {r.gap:.2f} over {r.runner_up}"
              + (f", {len(ev.found)} of {ev.n_key} key {r.best} bands found" if ev else ""),
-             f"Measuring mode: {r.mode} ({r.mode_source})"]
+             f"Measuring mode: {r.mode_text}"]
     if r.flags:
         lines.append("Flags: " + "; ".join(text[:1].upper() + text[1:] for text, _ in r.flags))
     lines += [f"Next step: {r.next_step}",
