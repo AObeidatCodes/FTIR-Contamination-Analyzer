@@ -707,24 +707,31 @@ class Toast(QWidget):
     def __init__(self, host):
         super().__init__(host)
         self.host, self.text, self.icon, self.opacity, self.rise = host, "", None, 0.0, 0.0
+        self.action_word, self.on_action = "", None
         self.hide_timer = QTimer(self)
         self.hide_timer.setSingleShot(True)
         self.hide_timer.timeout.connect(self.dismiss)
         self._animation = None
         self.hide()
 
-    def show_message(self, text, icon_pixmap=None):
-        """Show a message (with an optional icon) for a few seconds."""
+    def show_message(self, text, icon_pixmap=None, action=None):
+        """Show a message (with an optional icon) for a few seconds.
+
+        action: (word, function) - the word is shown at the right; a click on the message runs it.
+        """
         self.text, self.icon = text, icon_pixmap
+        self.action_word, self.on_action = action if action else ("", None)
+        self.setCursor(Qt.PointingHandCursor if self.on_action else Qt.ArrowCursor)
         fm = QFontMetrics(_font("body", QFont.Medium))
-        width = min(self.host.width() - 48, fm.horizontalAdvance(text) + (64 if icon_pixmap else 40))
+        extra = fm.horizontalAdvance(self.action_word) + 24 if self.action_word else 0
+        width = min(self.host.width() - 48, fm.horizontalAdvance(text) + extra + (64 if icon_pixmap else 40))
         self.resize(width, 44)
         self._place()
         self.show()
         self.raise_()
         stop(self._animation)
         self._animation = animate(self, self.opacity, 1.0, 220, self._frame, EASE_OUT)
-        self.hide_timer.start(MOTION["toast"])
+        self.hide_timer.start(MOTION["toast"] * (2 if self.on_action else 1))   # time to reach the action
 
     def _place(self):
         self.move((self.host.width() - self.width()) // 2, self.host.height() - self.height() - 24 + round(self.rise))
@@ -739,7 +746,10 @@ class Toast(QWidget):
         self._animation = animate(self, self.opacity, 0.0, 180, self._frame, EASE_OUT, self.hide)
 
     def mousePressEvent(self, _):
+        action, self.on_action = self.on_action, None
         self.dismiss()
+        if action:
+            action()
 
     def paintEvent(self, _):
         t = Look.t
@@ -753,9 +763,16 @@ class Toast(QWidget):
         if self.icon is not None:
             p.drawPixmap(int(x), int((self.height() - 18) / 2), self.icon)
             x += 28
+        right = self.width() - 16
+        p.setFont(_font("body", QFont.DemiBold))
+        if self.action_word:
+            p.setPen(QColor(t["tooltip_action"]))
+            p.drawText(QRectF(x, 0, right - x, self.height()), Qt.AlignVCenter | Qt.AlignRight, self.action_word)
+            right -= QFontMetrics(p.font()).horizontalAdvance(self.action_word) + 24
         p.setPen(QColor(t["tooltip_ink"]))
         p.setFont(_font("body", QFont.Medium))
-        p.drawText(QRectF(x, 0, self.width() - x - 16, self.height()), Qt.AlignVCenter | Qt.AlignLeft, self.text)
+        text = QFontMetrics(p.font()).elidedText(self.text, Qt.ElideRight, int(right - x))
+        p.drawText(QRectF(x, 0, right - x, self.height()), Qt.AlignVCenter | Qt.AlignLeft, text)
 
 
 # ---------------------------------------------------------------------------- a row that wraps

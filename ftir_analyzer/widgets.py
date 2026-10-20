@@ -352,7 +352,8 @@ class SpectrumListModel(QAbstractListModel):
     def __init__(self):
         super().__init__()
         self.results = []
-        self.updated = {}             # {sample name: "Weak PS -> Probable ABS"} after a library change
+        self.updated = {}             # {sample name: Change ("Weak: PS -> Probable: ABS")} after a library change
+        self.reason = ""              # ... and which change it was ("ABS added to the library")
         self.glow = 0.0               # 1 -> 0: the changed rows glow for a moment
 
     def rowCount(self, parent=QModelIndex()):
@@ -382,10 +383,10 @@ class SpectrumListModel(QAbstractListModel):
             self.results.extend(results)
             self.endInsertRows()
 
-    def replace(self, results, updated):
-        """New results for the same spectra (after a library change); `updated` = what changed."""
+    def replace(self, results, updated, reason=""):
+        """New results for the same spectra (after a library change); `updated` = what changed, and why."""
         self.results = list(results)
-        self.updated = dict(updated)
+        self.updated, self.reason = dict(updated), reason
         self.dataChanged.emit(self.index(0), self.index(max(0, len(self.results) - 1)))
 
     def remove_rows(self, rows):
@@ -433,11 +434,12 @@ class SpectrumDelegate(QStyledItemDelegate):
             p.setPen(Qt.NoPen)
             p.setBrush(QColor(t["surface_2"]))
             p.drawRoundedRect(QRectF(rect), 8, 8)
-        if updated and model.glow > 0.01:                       # changed with the library: a fading ring
-            ring = QColor(t["accent"])
+        if updated and model.glow > 0.01:                       # changed with the library: a tint and a ring
+            wash, ring = QColor(t["accent"]), QColor(t["accent"])  # that fade together
+            wash.setAlphaF(0.22 * model.glow)
             ring.setAlphaF(model.glow)
             p.setPen(QPen(ring, 2))
-            p.setBrush(Qt.NoBrush)
+            p.setBrush(wash)
             p.drawRoundedRect(QRectF(rect).adjusted(1, 1, -1, -1), 8, 8)
 
         # status icon in a soft circle

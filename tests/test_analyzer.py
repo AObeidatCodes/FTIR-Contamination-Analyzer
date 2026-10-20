@@ -241,6 +241,55 @@ def test_report_and_append_only_audit_log(tmp_path, library):
     assert "Ali Obeidat" in html_path.read_text(encoding="utf-8")
 
 
+def test_a_signed_report_and_its_record(tmp_path, library):
+    from ftir_analyzer.records import make_signoff, readable_time
+    from ftir_analyzer.spectrum_io import checksum
+    results = [example("05_fibre_on_wafer_ATR.csv", library, "ATR")]
+    info = run_info(library, impostor_test(library), "Ali Obeidat")
+    with pytest.raises(ValueError):
+        make_signoff("", "accept")                                    # a signature needs a name
+    signoff = make_signoff("Ali Obeidat", "accept with changes", "05 is Nylon 6, see the band at 1640")
+    signatures = tmp_path / "signatures.csv"
+    html_path = write_report(results, library, info, tmp_path / "signed", audit_log=tmp_path / "audit.csv",
+                             signoff=signoff, signature_log=signatures)
+    page = html_path.read_text(encoding="utf-8")
+    assert "Signed: Accepted with changes" in page and "Ali Obeidat" in page and "1 spectrum " in page
+    assert readable_time(info["run_at"], with_zone=True) in page and info["run_at"] not in page.split("<main>")[0]
+    row = pd.read_csv(signatures, comment="#").iloc[0]
+    assert row.signed_by == "Ali Obeidat" and row.decision == "accept with changes"
+    assert row.report_sha256 == checksum(html_path)                   # the signature points at this exact file
+    unsigned = write_report(results, library, info, tmp_path / "unsigned", audit_log=tmp_path / "audit.csv",
+                            signature_log=signatures)
+    assert "Not signed yet" in unsigned.read_text(encoding="utf-8") and len(pd.read_csv(signatures, comment="#")) == 1
+
+
+def test_readable_times():
+    from ftir_analyzer.records import readable_time
+    assert readable_time("2026-10-20T16:50:00+02:00") == "20 Oct 2026, 16:50"
+    assert readable_time("2026-10-20T16:50:00+02:00", with_zone=True) == "20 Oct 2026, 16:50 (UTC+02:00)"
+    assert readable_time("2026-10-20") == "20 Oct 2026" and readable_time("not a time") == "not a time"
+
+
+def test_records_open_as_formatted_excel_sheets(tmp_path, library):
+    pytest.importorskip("openpyxl")
+    from openpyxl import load_workbook
+    from ftir_analyzer.log_views import FIRST_ROW, view_of
+    results = [example(name, library, "ATR") for name in ("01_wipe_area_particle_ATR.csv", "08_fibre_on_filter.csv")]
+    audit = tmp_path / "audit_log.csv"
+    write_report(results, library, run_info(library, impostor_test(library)), tmp_path / "run", audit_log=audit)
+    before = audit.read_bytes()
+    view = view_of(audit, "Audit log", tmp_path / "views")
+    assert audit.read_bytes() == before                               # the record itself is never touched
+    ws = load_workbook(view)["Audit log"]
+    assert ws["A1"].value == "Audit log" and "Rows are only ever added" in ws["A2"].value
+    assert ws.cell(FIRST_ROW, 1).value == "Run at" and ws.freeze_panes == f"A{FIRST_ROW + 1}"
+    assert ws.cell(FIRST_ROW + 1, 1).is_date                          # a real date, not text
+    verdicts = [ws.cell(FIRST_ROW + 1 + i, [c.value for c in ws[FIRST_ROW]].index("Verdict") + 1) for i in range(2)]
+    assert [v.value for v in verdicts] == ["probable", "no reliable match"]
+    assert verdicts[0].fill.fgColor.rgb.endswith("E5F3EA")            # the verdict in its colour
+    assert load_workbook(tmp_path / "run" / "report.xlsx").sheetnames == ["Results", "About"]   # the report's table
+
+
 # ---------------------------------------------------------------- analytical view and CO2 direction
 def test_analytical_view_reproduces_every_step(library):
     from ftir_analyzer.analytical import analytical_steps

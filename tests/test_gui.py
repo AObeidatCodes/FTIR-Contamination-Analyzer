@@ -22,7 +22,7 @@ import pytest
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")       # no screen needed
 pytest.importorskip("PySide6")
 
-from PySide6.QtCore import QEventLoop, QSettings  # noqa: E402
+from PySide6.QtCore import QEventLoop, QSettings, Qt  # noqa: E402
 from PySide6.QtWidgets import QApplication  # noqa: E402
 
 from ftir_analyzer import config  # noqa: E402
@@ -340,3 +340,44 @@ def test_the_close_button_is_on_the_sheet_from_the_first_frame(app, window):
         assert wait(app, lambda: window.sheet is None, 5)
     finally:
         Motion.reduced = True
+
+
+def test_a_change_is_shown_where_it_is_seen(app, window):
+    """Added on the Analyze page: the changed row glows there and its page says what changed. Removed on the
+    Library page: the rows glow when the Analyze page is shown (the message offers to show them)."""
+    window.show_page("analyze")
+    select(app, window, "05_fibre_on_wafer_ATR")
+    panel = adding_panel(app, window, DEMO / "Nylon6_reference_fibre_collection.csv")
+    panel._submit()
+    assert wait(app, lambda: not window.busy and "Nylon 6" in window.library.spectra, 60)
+    assert window.pages.currentWidget() is window.analyze_page                     # stays where it was seen
+    view = window.result_view
+    assert view.change_box.isVisible() and "Probable: Nylon 6" in view.change_text.text()
+    assert window.toast.action_word == "See it in the library"
+    window.show_page("library")
+    window.remove_reference("Nylon 6", reason="end of the check")
+    assert wait(app, lambda: not window.busy and "Nylon 6" not in window.library.spectra, 60)
+    assert window.pages.currentWidget() is window.library_page and window.pending_glow
+    assert window.toast.action_word == "Show"
+    window.toast.on_action()                                                        # "Show"
+    assert window.pages.currentWidget() is window.analyze_page and not window.pending_glow
+    assert window.current_result().name == "05_fibre_on_wafer_ATR" and "Weak" in view.change_text.text()
+
+
+def test_exporting_a_signed_report(app, window, tmp_path):
+    panel = window.export_report()
+    panel.set_folder(tmp_path)
+    panel.name.setText("Ali Obeidat")
+    panel.decision._choose(panel.decision.values().index("re-measure"))
+    assert "a comment" in panel.problems() and "the statement ticked" in panel.problems()
+    assert not panel.export_button.isEnabled()                                   # not signed without them
+    panel.comment.setText("06 is saturated: measure a thinner film")
+    panel.statement_text.mousePressEvent(type("Click", (), {"button": lambda self: Qt.LeftButton})())
+    assert panel.statement.isChecked() and panel.problems() == [] and "Sign" in panel.export_button.text()
+    panel._submit()
+    assert wait(app, lambda: not window.busy and str(tmp_path) in str(window.last_report), 60)
+    page = window.last_report.read_text(encoding="utf-8")
+    assert "Signed: Re-measure" in page and "06 is saturated" in page
+    assert window.settings.value("user_name") == "Ali Obeidat"                  # remembered for next time
+    assert "Ali Obeidat" in window.signature_log.read_text(encoding="utf-8")
+    window.report_box.close()

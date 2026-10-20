@@ -19,7 +19,7 @@ REM 2. Python 3.10 or newer is needed
 %PY% -c "import sys; sys.exit(sys.version_info < (3, 10))" || goto oldpython
 
 REM 3. First start only: install the packages listed in requirements.txt
-set CHECK=import numpy, pandas, scipy, matplotlib, plotly; from PySide6 import QtWidgets
+set CHECK=import numpy, pandas, scipy, matplotlib, plotly, openpyxl; from PySide6 import QtWidgets
 %PY% -c "%CHECK%" >nul 2>nul
 if errorlevel 1 (
     echo.

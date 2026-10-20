@@ -34,6 +34,7 @@ RECORDS_DIR = Path(os.environ.get("FTIR_ANALYZER_RECORDS", _DEFAULT_RECORDS))
 SAMPLE_LOG_FILE = RECORDS_DIR / "sample_log.csv"          # how each raw file was measured
 INHOUSE_DIR = RECORDS_DIR / "inhouse_library"             # references the lab adds itself (append-only log)
 AUDIT_LOG_FILE = RECORDS_DIR / "audit_log.csv"            # one row per spectrum per run, append-only
+SIGNATURE_LOG_FILE = RECORDS_DIR / "signatures.csv"       # one row per signed report, append-only
 
 # File types the app reads: instrument exports with a wavenumber column and one or more
 # intensity columns (comma, semicolon, tab or space separated, with or without a header).

@@ -44,6 +44,7 @@ from .motion import (EASE_OUT, MOTION, Card, FlowLayout, Segmented, SmoothScroll
                      fade_through, make_opaque, snapshot, stop)
 from .peaks import band_label, band_table
 from .processing import GRID, absorbance
+from .records import readable_time
 from .spectrum_io import SpectrumFileError, read_spectra
 from .theme import CATEGORY_ICONS
 from .widgets import Pill, ScoreBars, Theme, chip, clear_layout, font, icon, icon_pixmap, line_pen, polylines
@@ -848,7 +849,7 @@ class MaterialDetail(QWidget):
         facts = [("Source", info.source), ("Licence", info.licence), ("Measured by", info.mode),
                  ("Contributor", info.contributor), ("Name in the source", info.original_name)]
         if info.origin == "in-house":
-            facts = [("Added by", info.added_by), ("Added on", info.added_at.replace("T", " ")),
+            facts = [("Added by", info.added_by), ("Added on", readable_time(info.added_at)),
                      ("Identity confirmed by", info.confirmation), ("Made from", info.original_name),
                      ("Measured by", info.mode), ("Notes", info.notes)]
         facts += [("File", info.file), ("File SHA-256", info.sha256)]
@@ -863,30 +864,32 @@ class MaterialDetail(QWidget):
         prov_body.addLayout(grid)
         column.addWidget(prov_card)
 
-        # actions
-        actions = QHBoxLayout()
+        # actions (they wrap onto a second line when the sheet is narrow, never wider than the card)
+        holder = QWidget()
+        actions = FlowLayout(holder, spacing=8, row_spacing=8)
+        buttons = []
         if current is not None:
-            compare = QPushButton(f" Compare with {current.name}")
+            compare = QPushButton(" Compare with the selected spectrum")
+            compare.setToolTip(f"Draw {name} over {current.name} on the Analyze page")
             compare.setIcon(icon("git-compare-arrows", t["on_primary"]))
             compare.setObjectName("Primary")
             compare.clicked.connect(lambda: self.compare.emit(name))
-            actions.addWidget(compare)
+            buttons.append(compare)
         show = QPushButton(" Show the file")
         show.setIcon(icon("external-link", t["ink_2"]))
         show.clicked.connect(lambda: self.show_file.emit(name))
-        actions.addWidget(show)
-        actions.addStretch()
+        buttons.append(show)
         if info.origin == "in-house":
             remove = QPushButton(" Remove from the library…")
             remove.setObjectName("Danger")
             remove.setIcon(icon("trash-2", t["bad"]))
             remove.setToolTip("Takes it out of the library. The file and its history are kept.")
             remove.clicked.connect(lambda: self.remove.emit(name))
-            actions.addWidget(remove)
-        for button in (actions.itemAt(k).widget() for k in range(actions.count())):
-            if button:
-                button.setCursor(Qt.PointingHandCursor)
-        column.addLayout(actions)
+            buttons.append(remove)
+        for button in buttons:
+            button.setCursor(Qt.PointingHandCursor)
+            actions.addWidget(button)
+        column.addWidget(holder)
         column.addStretch()
 
     def play(self):

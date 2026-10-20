@@ -7,8 +7,9 @@ Writes the results of one run as:
                   name, zoom, pan, save a 4x PNG. Each spectrum also has an "Analytical view"
                   (closed until clicked) with every step from the raw file to the fingerprint.
                   Without Plotly installed, the figures are embedded as vector graphics (SVG).
-                  Contents: run information, validation, summary, one section per spectrum,
-                  review and sign-off
+                  Contents: who and when, an overview, the summary, one section per spectrum,
+                  the review and sign-off (filled in when it was signed in the app, or to be
+                  filled in by hand), and the traceability (program, library, validation)
     report.csv    the same results as a table, for Excel or a LIMS
 and adds one row per spectrum to the audit log.
 
@@ -35,7 +36,7 @@ from .checks import BELOW_ZERO_TEXT, describe_co2
 from .evidence import fab_sources
 from .peaks import band_label
 from .plots import result_svg
-from .records import append_audit_log
+from .records import DECISIONS, append_audit_log, append_signature, readable_time, who_text
 from .theme import DARK, FONT_SANS, FONTS, LIGHT, LOGO_SVG, WEB_FONTS
 
 try:                                         # interactive figures if Plotly is installed, vector images if not
@@ -133,12 +134,36 @@ ol.steps{margin:12px 0 14px;padding-left:22px}ol.steps li{margin:0 0 6px}
 .chip.extra{background:var(--warn-bg);border-color:transparent;color:var(--warn);font-weight:600}
 .small{color:var(--muted);font-size:13px}
 details{margin-top:12px}details summary{cursor:pointer;color:var(--accent-ink);font-weight:500}details dl{margin-top:10px}
-.sign td{height:44px}
+.top-in .who{margin-left:auto;display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}
+.top-in .who .pill{margin:0}
+a.pill{text-decoration:none}
+th{white-space:nowrap}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:0 0 16px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 18px}
+.tile b{display:block;font-size:28px;font-weight:600;line-height:1.2;font-variant-numeric:tabular-nums}
+.tile span{color:var(--muted);font-size:13.5px}
+.tile i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:7px;vertical-align:1px}
+.tile.good i{background:var(--good)}.tile.warn i{background:var(--warn)}.tile.none i{background:var(--muted)}
+.tile.bad i{background:var(--bad)}
+.tile.good,.tile.warn,.tile.none,.tile.bad{background:var(--surface);color:var(--ink)}
+.signed{display:flex;gap:14px;align-items:flex-start;background:var(--good-bg);border-radius:10px;padding:14px 18px;
+  margin:4px 0 14px}
+.signed .mark{flex:none;width:26px;height:26px;border-radius:50%;background:var(--good);color:var(--surface);
+  display:flex;align-items:center;justify-content:center;font-weight:700}
+.signed p{margin:0 0 4px}.signed .small{margin:0}
+.sign td{height:44px}.sign td[contenteditable]{border-bottom:1px dashed var(--line-strong);outline:none}
+.sign td[contenteditable]:focus{background:var(--accent-soft)}
+.sign td[contenteditable]:empty:before{content:attr(data-hint);color:var(--muted)}
+.ink{display:flex;gap:32px;flex-wrap:wrap;margin-top:28px}
+.ink div{flex:1;min-width:220px;border-top:1px solid var(--ink-2);padding-top:6px;color:var(--muted);font-size:13px}
+h2.part{font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);
+  margin:28px 0 10px}
 footer{color:var(--muted);font-size:13px;text-align:center;margin-top:28px}
-@media (max-width:700px){.facts{grid-template-columns:repeat(2,1fr)}.facts div:nth-child(3){border-left:none}}
+@media (max-width:700px){.facts,.tiles{grid-template-columns:repeat(2,1fr)}
+  .facts div:nth-child(3){border-left:none}.top-in{flex-wrap:wrap}.top-in .who{margin-left:0;justify-content:flex-start}}
 @media print{body{background:#fff}.top{background:#fff;color:var(--ink);border-bottom:2px solid var(--ink)}
   .top p{color:var(--muted)}.panel{break-inside:avoid;border-color:#ccc}details{display:block}
-  details summary{display:none}}
+  details summary{display:none}.sign td[contenteditable]:empty:before{content:""}}
 """
 
 
@@ -252,7 +277,7 @@ def library_html(library):
     if not in_house:
         return f'<section class="panel"><h2>Reference library</h2>{text}</section>'
     rows = "".join(
-        f"<tr><td>{h(i.name)}</td><td>{h(i.category)}</td><td>{h(i.added_by)}</td><td>{h(i.added_at[:10])}</td>"
+        f"<tr><td>{h(i.name)}</td><td>{h(i.category)}</td><td>{h(i.added_by)}</td><td>{h(readable_time(i.added_at))}</td>"
         f"<td>{h(i.confirmation)}</td><td>{h(i.original_name)}</td><td class='mono'>{h(i.sha256[:16])}</td></tr>"
         for i in in_house)
     return (f'<section class="panel"><h2>Reference library</h2>{text}<div class="scroll"><table>'
@@ -269,11 +294,44 @@ def settings_html():
             f"O&ndash;H / N&ndash;H: major &ge; {config.MAJOR:.2f}, minor &ge; {config.MINOR:.2f} of the tallest band")
 
 
-def write_html(results, figures, info, path, analytical=None, library=None):
+def overview_html(results):
+    """Four tiles: how many probable, weak, no match, and how many with a flag to look at."""
+    count = {v: sum(r.verdict == v for r in results) for v in LOOK}
+    flagged = sum(bool(r.flags) for r in results)
+    tiles = [(LOOK[v][0], count[v], LOOK[v][2].lower() if v != "no reliable match" else "no reliable match")
+             for v in LOOK] + [("bad" if flagged else "none", flagged, "with a flag to look at")]
+    return '<div class="tiles">' + "".join(
+        f'<div class="tile {kind}"><b>{n}</b><span><i></i>{h(word)}</span></div>' for kind, n, word in tiles) + "</div>"
+
+
+def signoff_html(signoff, n_spectra):
+    """The review and sign-off: filled in if the report was signed in the app, otherwise fields to fill in."""
+    statement = ("I have looked at the raw spectra and agree with the conclusions above, or I have noted my "
+                 "changes.")
+    if signoff:
+        comment = f"<p>Comment: {h(signoff['comment'])}</p>" if signoff.get("comment") else ""
+        return (f'<section class="panel" id="signoff"><h2>Review and sign-off</h2>'
+                f'<div class="signed"><div class="mark">&#10003;</div><div>'
+                f"<p><b>{h(DECISIONS[signoff['decision']])}</b>, signed by <b>{h(who_text(signoff['name'], signoff['login']))}</b> "
+                f"on {h(readable_time(signoff['signed_at'], with_zone=True))}.</p>{comment}"
+                f'<p class="small">&ldquo;{statement}&rdquo; Recorded in records/signatures.csv with the '
+                f"SHA-256 of this report file ({n_spectra} spectr{'um' if n_spectra == 1 else 'a'}).</p></div></div>"
+                '<div class="ink"><div>Signature (on paper)</div><div>Date</div></div></section>')
+    cells = "".join(f'<td contenteditable="true" data-hint="{hint}"></td>'
+                    for hint in ("your name", "date", "accept / change / re-measure", "a note, if any"))
+    return (f'<section class="panel" id="signoff"><h2>Review and sign-off</h2><p>{statement}</p>'
+            '<table class="sign"><tr><th>Reviewed by</th><th>Date</th><th>Decision</th><th>Comment</th></tr>'
+            f"<tr>{cells}</tr></table>"
+            '<p class="small">Not signed in the program. Sign it there (Export report &rarr; Sign), or type into the '
+            "fields above and print, or fill them in on paper.</p>"
+            '<div class="ink"><div>Signature</div><div>Date</div></div></section>')
+
+
+def write_html(results, figures, info, path, analytical=None, library=None, signoff=None):
     """The whole report page."""
     summary = "".join(
         f"<tr><td><a href='#s{i}'>{h(r.name)}</a></td><td>{pill(r.verdict)}</td><td>{h(r.match)}</td>"
-        f"<td class='num'>{r.r:.2f}</td><td class='num'>{r.gap:.2f}</td><td>{h(r.mode)}</td>"
+        f"<td class='num'>{r.r:.2f}</td><td class='num'>{r.gap:.2f}</td><td>{h(r.compared_as)}</td>"
         f"<td>{flag_pills(r.flags) or '&ndash;'}</td></tr>"
         for i, r in enumerate(results))
     analytical = analytical or [""] * len(results)
@@ -286,16 +344,33 @@ def write_html(results, figures, info, path, analytical=None, library=None):
     fonts = "".join(_font_face(name, weight) for name, weight in WEB_FONTS)
     style = (f"{fonts}:root{{{_tokens(LIGHT)}}}"
              f"@media (prefers-color-scheme:dark){{:root{{{_tokens(DARK)}}}}}{CSS}")
+    n = len(results)
+    analysed_by = who_text(info.get("run_by_name", ""), info["run_by"])
+    valid = info["validation"].passed
+    status = (f'<span class="pill {"good" if valid else "bad"}">{"&#10003;" if valid else "!"}&nbsp;Library '
+              f'{"validated" if valid else "NOT validated"}</span>'
+              + (f'<a class="pill good" href="#signoff">&#10003;&nbsp;Signed: {h(DECISIONS[signoff["decision"]])}</a>'
+                 if signoff else '<a class="pill none" href="#signoff">Not signed yet</a>'))
     page = f"""<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="generator" content="{h(__title__)} {__version__} by {h(__author__)}">
 <title>FTIR Contamination Report</title><style>{style}</style>{plotly_js}</head><body>
 <header class="top"><div class="top-in">{_logo_inline()}<div>
   <h1>FTIR contamination report</h1>
-  <p>{len(results)} spectra, analysed {h(info['run_at'])} by {h(info['run_by'])}</p></div></div></header>
+  <p>{n} spectr{"um" if n == 1 else "a"} &middot; {h(readable_time(info['run_at'], with_zone=True))} &middot;
+  analysed by {h(analysed_by)}</p></div><div class="who">{status}</div></div></header>
 <main>
+{overview_html(results)}
+<section class="panel"><h2>Summary</h2><div class="scroll"><table>
+<tr><th>Sample</th><th>Verdict</th><th>Match</th><th class="num">r</th><th class="num">Lead</th><th>Compared as</th><th>Flags</th></tr>
+{summary}</table></div></section>
+{sections}
+{signoff_html(signoff, n)}
+<h2 class="part">Traceability</h2>
 <div class="grid2">
   <section class="panel"><h2>Run information</h2><dl>
+    <dt>Analysed</dt><dd>{h(readable_time(info['run_at'], with_zone=True))}</dd>
+    <dt>By</dt><dd>{h(analysed_by)}</dd>
     <dt>Program</dt><dd>{h(info['program'])}</dd>
     <dt>Code SHA-256</dt><dd class="mono">{info['code_sha256']}</dd>
     <dt>Software</dt><dd>{h(info['software'])}</dd>
@@ -307,18 +382,11 @@ def write_html(results, figures, info, path, analytical=None, library=None):
     later that the report was made from exactly that file.</li>
     <li>Absorbance conversion, mode correction and the derivative are done on copies and used for matching
     only. The checks look at the raw absorbance.</li>
-    <li>Every run is added to the audit log; rows are never changed or deleted.</li>
-    <li>The program suggests; a person reviews the raw spectra and signs below.</li></ul></section>
+    <li>Every run is added to the audit log, every signature to the signature log; rows are never changed
+    or deleted.</li>
+    <li>The program suggests; a person reviews the raw spectra and signs.</li></ul></section>
 </div>
 {library_html(library)}
-<section class="panel"><h2>Summary</h2><div class="scroll"><table>
-<tr><th>Sample</th><th>Verdict</th><th>Match</th><th class="num">r</th><th class="num">Lead</th><th>Mode</th><th>Flags</th></tr>
-{summary}</table></div></section>
-{sections}
-<section class="panel"><h2>Review and sign-off</h2>
-<p>I have looked at the raw spectra and agree with the conclusions above, or I have noted my changes.</p>
-<table class="sign"><tr><th>Reviewed by</th><th>Date</th><th>Decision</th><th>Signature</th></tr>
-<tr><td></td><td></td><td>accept / change / re-measure</td><td></td></tr></table></section>
 <footer>Generated with {h(__title__)} {__version__}, developed by {h(__author__)}</footer>
 </main>{resize_js}</body></html>"""
     Path(path).write_text(page, encoding="utf-8")
@@ -340,8 +408,10 @@ def results_table(results):
     } for r in results])
 
 
-def write_report(results, library, info, out_dir, audit_log=config.AUDIT_LOG_FILE):
-    """Write report.html and report.csv into out_dir, add the run to the audit log, return the HTML path."""
+def write_report(results, library, info, out_dir, audit_log=config.AUDIT_LOG_FILE, signoff=None,
+                 signature_log=config.SIGNATURE_LOG_FILE):
+    """Write report.html, report.csv (and report.xlsx) into out_dir, add the run to the audit log, return
+    the HTML path. signoff (records.make_signoff): the report is signed, and the signature recorded."""
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     figures, analytical = [], []
@@ -359,7 +429,15 @@ def write_report(results, library, info, out_dir, audit_log=config.AUDIT_LOG_FIL
                 figures.append(f"<figure>{result_svg(r, library)}</figure>")
             analytical.append(analytical_html(i, r, library, ""))
     html_path = out_dir / "report.html"
-    write_html(results, figures, info, html_path, analytical, library)
-    results_table(results).to_csv(out_dir / "report.csv", index=False, float_format="%.3f")
+    write_html(results, figures, info, html_path, analytical, library, signoff)
+    table = results_table(results)
+    table.to_csv(out_dir / "report.csv", index=False, float_format="%.3f")
+    try:                                                           # the same table, formatted for Excel
+        from .log_views import write_results_workbook
+        write_results_workbook(table, info, out_dir / "report.xlsx", signoff)
+    except ImportError:                                            # openpyxl not installed: the CSV is enough
+        pass
     append_audit_log(results, info, audit_log)
+    if signoff:
+        append_signature(signoff, html_path, len(results), signature_log)
     return html_path

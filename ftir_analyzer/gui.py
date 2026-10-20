@@ -41,6 +41,7 @@ License: MIT (see LICENSE)
 """
 
 import gc
+import html
 import sys
 import traceback
 from datetime import datetime
@@ -58,6 +59,7 @@ from . import __author__, __license__, __title__, __version__, config
 from .analysis import NO_MATCH, PROBABLE, WEAK, analyse
 from .checks import BELOW_ZERO_TEXT, describe_co2
 from .evidence import fab_sources
+from .export_view import ExportPanel
 from .inhouse import InHouseLibrary, changes_between, reanalyse
 from .jobs import Job
 from .library import impostor_test, load_library
@@ -69,7 +71,7 @@ from .motion import (MOTION, Card, FadeStack, Motion, Overlay, Sheet, SmoothScro
                      animate, count_up, crossfade, fade_through, make_opaque, rise_in, snapshot, zero_like)
 from .peaks import band_label
 from .plots import save_figure, setup_fonts
-from .records import SampleLog, resolve_modes, run_info
+from .records import SampleLog, readable_time, resolve_modes, run_info
 from .report import write_report
 from .spectrum_io import SpectrumFileError, find_spectrum_files, read_spectra
 from .theme import FONT_FILES, FONTS, THEMES, VERDICT_LOOK, stylesheet
@@ -278,6 +280,20 @@ class ResultView(SmoothScrollArea):
         head.addWidget(self.meta)
         col.addWidget(self.head)
 
+        # 1b. what the last library change did to this result (only for a result that changed)
+        self.change_box = QFrame()
+        self.change_box.setObjectName("ChangeNote")
+        change_row = QHBoxLayout(self.change_box)
+        change_row.setContentsMargins(16, 10, 16, 10)
+        self.change_icon = QLabel()
+        self.change_text = label("", "Body", wrap=True, rich=True)
+        change_row.addWidget(self.change_icon, 0, Qt.AlignTop)
+        change_row.addSpacing(6)
+        change_row.addWidget(self.change_text, 1)
+        self.change_box.hide()
+        col.addWidget(self.change_box)
+        self.changes, self.change_reason = {}, ""
+
         # 2. four facts in one card (two rows of two on a narrow window)
         self.facts = Card()
         self.fact_grid = QGridLayout(self.facts)
@@ -402,8 +418,9 @@ class ResultView(SmoothScrollArea):
 
     def sections(self):
         """The parts of the page, top to bottom (they rise in one after the other)."""
-        return [self.head, self.facts, self.next_box, self.plot, self.top, self.verdict_panel, self.evidence_panel,
-                self.checks_panel, self.sources_panel, self.trace_panel]
+        parts = [self.head, self.change_box, self.facts, self.next_box, self.plot, self.top, self.verdict_panel,
+                 self.evidence_panel, self.checks_panel, self.sources_panel, self.trace_panel]
+        return [part for part in parts if not part.isHidden()]
 
     def bands(self):
         """The visible parts of the page, as rectangles of the viewport (they rise in one after the other)."""
@@ -413,6 +430,10 @@ class ResultView(SmoothScrollArea):
             if not rect.isEmpty():
                 bands.append(rect)
         return bands
+
+    def set_changes(self, changes, reason=""):
+        """What the last library change did: {sample name: Change}, and which change it was."""
+        self.changes, self.change_reason = dict(changes), reason
 
     def play(self):
         """After the page has risen in: the numbers count up and the bars grow."""
@@ -443,6 +464,15 @@ class ResultView(SmoothScrollArea):
         how = "measuring mode unknown" if r.mode == "unknown" else f"measured by {r.mode}"
         fit = f", compared as {r.reading}: the better fit" if r.mode == "unknown" and r.reading != "unknown" else ""
         self.meta.setText(f"{s.path.name}   {how} ({r.mode_source}){fit}")
+        change = self.changes.get(r.name)                                   # changed with the library?
+        if change is not None:
+            self.change_icon.setPixmap(icon_pixmap("history", t["accent_ink"], 20, self.devicePixelRatioF()))
+            self.change_text.setText(
+                f"<span style='color:{t['accent_ink']}; font-weight:600'>Changed</span>&nbsp;&nbsp;"
+                f"{html.escape(change.before)}&nbsp;&nbsp;→&nbsp;&nbsp;<b>{html.escape(change.after)}</b>"
+                + (f"<br><span style='color:{t['muted']}'>{html.escape(self.change_reason)}</span>"
+                   if self.change_reason else ""))
+        self.change_box.setVisible(change is not None)
 
         # facts (the numbers count up)
         self.fact_r.set(f"{r.r:.2f}", "score (Pearson r)", animated)
@@ -552,7 +582,7 @@ class ResultView(SmoothScrollArea):
         # traceability
         clear_layout(self.trace)
         info = library.info_of(r.best)
-        reference = (f"{r.best}: in-house, added by {info.added_by} on {info.added_at[:10]}"
+        reference = (f"{r.best}: in-house, added by {info.added_by} on {readable_time(info.added_at)}"
                      if info.origin == "in-house" else f"{r.best}: {info.source} ({info.licence})")
         facts = [("File", str(s.path), "Mono"), ("File SHA-256", s.sha256, "Mono"),
                  ("Unit as measured", f"{s.unit}, recognised from the {s.unit_source}", "Body2"),
@@ -587,6 +617,7 @@ class MainWindow(QMainWindow):
         self.library, self.validation = None, None
         self.sample_log = SampleLog(sample_log or config.SAMPLE_LOG_FILE)
         self.audit_log = Path(audit_log or config.AUDIT_LOG_FILE)
+        self.signature_log = self.audit_log.parent / "signatures.csv"   # next to the audit log
         self.inhouse_dir = Path(inhouse_dir or config.INHOUSE_DIR)
         self.openspecy_dir = Path(openspecy_dir or config.RECORDS_DIR / "openspecy")
         self.extended = self.settings.value("library_mode", "essentials") == EXTENDED
@@ -639,7 +670,8 @@ class MainWindow(QMainWindow):
         self.act_open = make("Open spectra…", "Ctrl+O", self.open_files, "Choose one or more spectrum files")
         self.act_folder = make("Open folder…", "Ctrl+Shift+O", self.open_folder, "Analyse every spectrum in a folder")
         self.act_demo = make("Open demo spectra", "Ctrl+D", self.open_demo, "Twelve example measurements")
-        self.act_export = make("Export report…", "Ctrl+E", self.export_report, "Write the HTML and CSV report")
+        self.act_export = make("Export report…", "Ctrl+E", self.export_report,
+                               "Write the report (web page and Excel table), and sign it if you like")
         self.act_remove = make("Remove from list", "Delete", self.remove_selected)
         self.act_clear = make("Clear list", "", self.clear_list)
         self.act_quit = make("Exit", "Ctrl+Q", self.close)
@@ -672,13 +704,15 @@ class MainWindow(QMainWindow):
         library_menu.addAction(self.act_add)
         library_menu.addAction(self.act_map)
         library_menu.addSeparator()
-        library_menu.addAction("Open the library change log",
-                               lambda: self.open_record(InHouseLibrary(self.inhouse_dir).log))
+        library_menu.addAction("Library change log (Excel)",
+                               lambda: self.open_record(InHouseLibrary(self.inhouse_dir).log, "Library change log"))
         library_menu.addAction("Open the in-house library folder", lambda: self.open_record(self.inhouse_dir))
         records = bar.addMenu("&Records")
-        records.addAction("Open sample log", lambda: self.open_record(self.sample_log.path))
-        records.addAction("Open audit log", lambda: self.open_record(self.audit_log))
-        records.addAction("Open records folder", lambda: self.open_record(self.sample_log.path.parent))
+        records.addAction("Sample log (Excel)", lambda: self.open_record(self.sample_log.path, "Sample log"))
+        records.addAction("Audit log (Excel)", lambda: self.open_record(self.audit_log, "Audit log"))
+        records.addAction("Signatures (Excel)", lambda: self.open_record(self.signature_log, "Signatures"))
+        records.addSeparator()
+        records.addAction("Open the records folder", lambda: self.open_record(self.sample_log.path.parent))
         help_menu = bar.addMenu("&Help")
         help_menu.addAction(self.act_help)
         help_menu.addAction(self.act_about)
@@ -776,6 +810,8 @@ class MainWindow(QMainWindow):
         side.addWidget(self.search)
 
         self.model = SpectrumListModel()
+        self.pending_glow = False                                      # changed rows still to glow when shown
+        self.last_report, self._signed_last = None, False
         self.proxy = QSortFilterProxyModel()
         self.proxy.setSourceModel(self.model)
         self.proxy.setFilterRole(SpectrumListModel.SEARCH)
@@ -904,16 +940,20 @@ class MainWindow(QMainWindow):
         self.settings.setValue("reduce_motion", Motion.reduced)
         self.notify("Animations off." if Motion.reduced else "Animations on.")
 
-    def notify(self, text, icon_name="circle-check"):
-        """A short message in the bubble at the bottom (and in the status bar)."""
+    def notify(self, text, icon_name="circle-check", action=None):
+        """A short message in the bubble at the bottom (and in the status bar); action = (word, function)."""
         self.set_status(text)
-        self.toast.show_message(text, icon_pixmap(icon_name, Theme.t["tooltip_ink"], 18, self.devicePixelRatioF()))
+        self.toast.show_message(text, icon_pixmap(icon_name, Theme.t["tooltip_ink"], 18, self.devicePixelRatioF()),
+                                action)
 
     # ------------------------------------------------------------------ pages
     def show_page(self, page):
         """Show the Analyze page or the Library page (the new page slides in)."""
         target = self.library_page if page == LIBRARY else self.analyze_page
         self.nav.set_value(page)
+        if target is self.analyze_page and self.pending_glow:          # results changed while it was not shown:
+            self.pending_glow = False                                  # they glow once the page has arrived
+            QTimer.singleShot(Motion.ms("page") if self.pages.currentWidget() is not target else 0, self._start_glow)
         if self.pages.currentWidget() is target:
             return
         self.pages.slide_to(target, 1 if page == LIBRARY else -1)
@@ -1185,6 +1225,7 @@ class MainWindow(QMainWindow):
                 self, __title__, "Remove every spectrum from the list?\nThe files themselves are not touched.") \
                 == QMessageBox.Yes:
             self.model.clear()
+            self.result_view.set_changes({})
             self._update_summary()
             self.set_status("List cleared.")
 
@@ -1343,17 +1384,43 @@ class MainWindow(QMainWindow):
     def _library_changed(self, payload, message, highlight=None):
         """After a library change: the new library and results, and a clear sign of what changed."""
         library, validation, results, changes = payload
+        current = self.current_result()
         self._set_library(library, validation)
-        self.model.replace(results, {c.sample: str(c) for c in changes})
-        animate(self, 1.0, 0.0, 2600, self._glow, QEasingCurve.InQuad)    # the changed rows glow, then fade
+        self.model.replace(results, {c.sample: c for c in changes}, message)
+        self.result_view.set_changes(self.model.updated, f"Library change: {message}")
         self._update_summary()
-        self.show_current(animated=False)
+        on_library = self.pages.currentWidget() is self.library_page
+        changed_here = current is not None and current.name in self.model.updated and not on_library
+        self.show_current(animated=changed_here)                          # the new verdict rises in where it is seen
         if self.model.results:
             message += f". {len(changes)} result{'s' if len(changes) != 1 else ''} changed"
-        self.notify(message + ".")
-        if highlight:
-            self.show_page(LIBRARY)
-            QTimer.singleShot(Motion.ms("page") + 60, lambda: self.library_page.highlight(highlight))
+        action = None
+        if changes and on_library:                                        # the list is not on screen: the rows
+            self.pending_glow = True                                      # glow when the Analyze page is shown
+            action = ("Show", self.show_changed)
+        elif changes:
+            self._start_glow()
+        if highlight and on_library:
+            QTimer.singleShot(Motion.ms("content"), lambda: self.library_page.highlight(highlight))
+        elif highlight and action is None:
+            action = ("See it in the library", lambda: self._show_in_library(highlight))
+        self.notify(message + ".", action=action)
+
+    def show_changed(self):
+        """The Analyze page, with the first result that the last library change changed."""
+        for row in range(self.proxy.rowCount()):
+            r = self.proxy.index(row, 0).data(SpectrumListModel.RESULT)
+            if r is not None and r.name in self.model.updated:
+                self.list.setCurrentIndex(self.proxy.index(row, 0))
+                break
+        self.show_page(ANALYZE)
+
+    def _show_in_library(self, name):
+        self.show_page(LIBRARY)
+        QTimer.singleShot(Motion.ms("page") + 60, lambda: self.library_page.highlight(name))
+
+    def _start_glow(self):
+        animate(self, 1.0, 0.0, 3200, self._glow, QEasingCurve.InQuad)   # the changed rows glow, then fade
 
     def _glow(self, value):
         self.model.glow = value
@@ -1377,21 +1444,37 @@ class MainWindow(QMainWindow):
             self.notify(f"Figure saved: {Path(path).name}", "image-down")
 
     def export_report(self):
+        """The sheet for the report: where it goes, your name, and (if you like) the review and signature."""
         if not self.model.results or self.busy:
-            return
-        folder = QFileDialog.getExistingDirectory(self, "Choose a folder for the report", str(self.last_dir))
-        if folder:
-            self.write_report_to(Path(folder))
+            return None
+        folder = self.settings.value("report_dir", str(self.last_dir))
+        if not Path(folder).is_dir():
+            folder = str(self.last_dir)
+        content = ExportPanel(self.model.results, folder, self.settings.value("user_name", ""))
+        sheet = self._open_sheet("Export the report", content, 640, "REPORT", content.footer)
+        content.cancelled.connect(sheet.close_sheet)
+        content.submitted.connect(self._export_chosen)
+        return content
 
-    def write_report_to(self, folder, ask_to_open=True):
+    def _export_chosen(self, choice):
+        self.settings.setValue("user_name", choice["name"])               # remembered for next time
+        self.settings.setValue("report_dir", str(choice["folder"]))
+        if self.sheet is not None:
+            self.sheet.close_sheet()
+        self.write_report_to(choice["folder"], name=choice["name"], signoff=choice["signoff"])
+
+    def write_report_to(self, folder, ask_to_open=True, name=None, signoff=None):
         """Write the report into a new, dated sub-folder of `folder` (in the background)."""
         out_dir = Path(folder) / f"FTIR_report_{datetime.now():%Y-%m-%d_%H%M%S}"
-        info = run_info(self.library, self.validation)
+        name = self.settings.value("user_name", "") if name is None else name
+        info = run_info(self.library, self.validation, name)
+        self._signed_last = signoff is not None
         results = list(self.model.results)
 
         def job(progress):
             progress(0, 1, "Writing the report")
-            return write_report(results, self.library, info, out_dir, audit_log=self.audit_log)
+            return write_report(results, self.library, info, out_dir, audit_log=self.audit_log, signoff=signoff,
+                                signature_log=self.signature_log)
 
         self.set_status("Writing the report…", busy=True)
         self.run_job(Job(job), lambda path: self._report_written(path, ask_to_open), "The report could not be written")
@@ -1401,22 +1484,37 @@ class MainWindow(QMainWindow):
         self.set_status(f"Report written: {html_path}")
         if not ask_to_open:
             return
-        self.notify("The report is ready. The run was added to the audit log.", "file-down")
+        signed = "signed and " if self._signed_last else ""
+        self.notify(f"The report is ready ({signed}added to the audit log).", "file-down",
+                    ("Open", lambda: QDesktopServices.openUrl(QUrl.fromLocalFile(str(html_path)))))
         box = QMessageBox(QMessageBox.Information, __title__, "The report is ready.", parent=self)
-        box.setInformativeText(f"{html_path}\n\nThe run was added to the audit log.")
+        box.setInformativeText(f"{html_path}\n\nThe run was added to the audit log"
+                               + (", and your signature to the signature log" if self._signed_last else "")
+                               + ". The folder also has the results as an Excel table (report.xlsx).")
         open_button = box.addButton("Open the report", QMessageBox.AcceptRole)
         box.addButton("Close", QMessageBox.RejectRole)
-        box.exec()
-        if box.clickedButton() is open_button:
-            QDesktopServices.openUrl(QUrl.fromLocalFile(str(html_path)))
+        box.setAttribute(Qt.WA_DeleteOnClose)
+        box.buttonClicked.connect(lambda button: QDesktopServices.openUrl(QUrl.fromLocalFile(str(html_path)))
+                                  if button is open_button else None)
+        box.open()                                         # not blocking: the window stays usable behind it
+        self.report_box = box
 
     # ------------------------------------------------------------------ records and help
-    def open_record(self, path):
-        if Path(path).exists():
-            QDesktopServices.openUrl(QUrl.fromLocalFile(str(path)))
-        else:
-            QMessageBox.information(self, __title__, f"{Path(path).name} does not exist yet. "
+    def open_record(self, path, title=None):
+        """Open a record. A log (title given) opens as a formatted Excel copy; the record itself is unchanged."""
+        path = Path(path)
+        if not path.exists():
+            QMessageBox.information(self, __title__, f"{path.name} does not exist yet. "
                                     "It is created the first time it is needed.")
+            return
+        if title and path.suffix.lower() == ".csv":
+            try:
+                from .log_views import view_of
+                path = view_of(path, title)
+                self.notify(f"{title}: opened as a formatted copy. The record itself is not changed.", "files")
+            except ImportError:                                            # openpyxl missing: the plain file
+                self.set_status("For a formatted Excel view: python -m pip install openpyxl")
+        QDesktopServices.openUrl(QUrl.fromLocalFile(str(path)))
 
     def show_help(self):
         dialog = QDialog(self)

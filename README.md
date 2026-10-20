@@ -42,7 +42,14 @@ can be traced back to the exact raw file:
 - **Data integrity (ALCOA).** Raw files are read-only, every file's SHA-256 is recorded, all
   processing happens on copies, the measuring mode is kept in a sample log, every run is added to an
   append-only audit log, every library change is kept in an append-only change log, and the report
-  ends with a review and sign-off block.
+  is signed in the program (name, date, decision, comment, recorded with the report's SHA-256 in an
+  append-only signature log) or on paper.
+- **Records you can read.** The logs stay plain CSV files that are only ever added to; the
+  **Records** menu opens each one as a formatted Excel copy (title, what it is, real dates, verdicts
+  in colour, filters, a frozen header, ready to print). The report's results come as `report.xlsx` too.
+- **Changes you can see.** When a library change changes a result, its row glows, keeps a blue dot,
+  and its page says what it was and what it is now ("Weak: Nylon 6,6 (r 0.88) → Probable: Nylon 6
+  (r 0.96)") and which change did it.
 - **A minimal, modern interface.** Warm greys, one soft accent (powder blue) and pastel tints for the
   status colours, an 8 px spacing grid, flat cards, light and dark themes. It fits any window, from a
   small laptop (960 × 560) to a large screen: checked automatically at 9 window sizes and 3 display
@@ -144,12 +151,12 @@ SETTINGS = {
 | Zoom, pan, reset | `Ctrl` + mouse wheel zooms around the mouse, double-click resets, or use the buttons above the figure |
 | Save a figure | The save button: PNG at 300 or 600 dpi, SVG or PDF (vector: any size). Saves the view on screen |
 | Copy the result | `Ctrl+C` in the list (or right-click → **Copy the result**): verdict, score, flags, next step and the checksums as text, for a lab notebook, an e-mail or a ticket |
-| Write the report | **Export report** or `Ctrl+E`: `report.html` + `report.csv`, and a row in the audit log |
+| Write the report | **Export report** or `Ctrl+E`: choose the folder, give your name and, if you like, sign it (decision, comment). `report.html` + `report.xlsx` + `report.csv`, a row per spectrum in the audit log, and a row in the signature log when signed |
 | Browse the library | **Library** in the middle of the toolbar, or `Ctrl+2` (`Ctrl+1` back to Analyze). Click a card for details |
 | More references | **Library → Open Specy…**: download or import; then switch **Fab essentials / Extended** |
 | Add a reference | **Add to library…** on a result that is not *probable*, or **Library → Add a reference…** (`Ctrl+N`) |
 | Light / dark | The moon / sun button or `Ctrl+T`. **View → Reduce motion** switches the animations off |
-| Records | **Records** menu: sample log, audit log. **Library** menu: the library change log |
+| Records | **Records** menu: sample log, audit log, signatures, each as a formatted Excel copy. **Library** menu: the library change log |
 | Help | `F1` (how it works), **Help → About** |
 
 When a file does not say how it was measured (ATR or transmission), the program asks once, then saves
@@ -363,10 +370,12 @@ Every rule and threshold lives in [`ftir_analyzer/config.py`](ftir_analyzer/conf
 │   ├── openspecy.py     the optional Open Specy references: download, import, choose, validate
 │   ├── analysis.py      the whole pipeline for one spectrum -> one Result
 │   ├── analytical.py    every intermediate step of one analysis (the analytical view)
-│   ├── records.py       sample log and audit log (append-only)
+│   ├── records.py       sample log, audit log and signatures (append-only), readable times
+│   ├── log_views.py     the records and the report's table as formatted Excel sheets
+│   ├── export_view.py   the "Export report" sheet: folder, name, review and signature
 │   ├── plots.py         figures for the app and saved images (matplotlib)
 │   ├── interactive.py   interactive figures for the report and the script (Plotly)
-│   ├── report.py        HTML and CSV report
+│   ├── report.py        HTML, Excel and CSV report
 │   ├── theme.py         design system: colours (light and dark), fonts, sizes, animation times
 │   ├── motion.py        animation, smooth scrolling, cards, segmented control, sheets, toasts, a
 │   │                    row that wraps
@@ -379,7 +388,7 @@ Every rule and threshold lives in [`ftir_analyzer/config.py`](ftir_analyzer/conf
 │   └── assets/          logo, fonts (Inter, IBM Plex Mono), icons (Lucide)
 ├── examples/            demo spectra with known answers; library_demo/ for adding a reference;
 │                        CHECK_IT_YOURSELF.md, a walkthrough with the numbers to expect
-├── records/             sample log, audit log, in-house library (created when first needed)
+├── records/             sample log, audit log, signatures, in-house library (created when first needed)
 ├── tests/               known-answer, library, Open Specy, window, layout and script tests (pytest)
 └── docs/                screenshots
 ```
@@ -391,14 +400,16 @@ pip install pytest
 python -m pytest
 ```
 
-97 tests. 43 cover the analysis: file reading (read-only data, headerless tab-separated files, unit
+102 tests. 46 cover the analysis: file reading (read-only data, headerless tab-separated files, unit
 recognition, clear errors), processing, the verdict rule, the impostor test, the known answer for
 every demo spectrum, the second-component, empty-spot and saturation detection, the CO₂ direction,
 the analytical view (each step reproduced, the score recalculated from step 4), the interactive
 figures, the append-only records, and ATR / transmission: a transmission sample meets the ATR
 library with the same score, an ATR sample meets a transmission reference (r 1.00, and why the
 reference's mode matters), an unknown mode is worked out from the better fit for every demo whose mode
-is known, a wrong mode is flagged, and nothing is corrected when neither reading fits. 8 cover the
+is known, a wrong mode is flagged, and nothing is corrected when neither reading fits; a signed report
+and its row in the signature log (pointing at that exact file), readable times, and the records as
+formatted Excel sheets (the record itself untouched). 8 cover the
 in-house library: provenance of every reference, the similarity map, adding ABS makes demo 10
 *probable ABS*, SAN after ABS is caught before it is added, the Nylon 6 walkthrough with its numbers,
 adding a result as a reference, removing keeps the history, names must be new. 14 cover the Open
@@ -407,12 +418,14 @@ a valid extended library, a second reference of the same material does not weake
 derivative library refused, the download (from where Open Specy keeps it, then the older copy), names
 with a `#`, a deliberately untidy library file, the current FTIR / Raman / NIR file (its FTIR part
 used, a file without one refused), no data made up across a cut-out region, and transmission
-references put into the ATR look. 23 start the window without a screen and use it,
+references put into the ATR look. 25 start the window without a screen and use it,
 including the animations finishing in the right state, the bars growing in the sheets, the closest
 matches, the Library page, adding / refusing / removing a reference, switching to the extended library
 copying a result, new badges already in the picture a transition plays, and the close button on a
-sheet from its first frame. 7 check the layout at 960 × 560, 1280 × 720 and 1920 × 1080: no page scrolls
-sideways, no text is cut off, nothing overlaps, the sheets sit in the middle and the welcome page fits a
+sheet from its first frame, a change shown where it is seen, and exporting a signed report. 7 check
+the layout at 960 × 560, 1280 × 720 and 1920 × 1080: no page scrolls
+sideways or is cut off at the side, no text is cut off, nothing overlaps, every sheet (an in-house
+reference with all its buttons and the export sheet included) sits in the middle and the welcome page fits a
 laptop window without scrolling. 2 run
 `FTIR_Analyzer.py` from start to end.
 

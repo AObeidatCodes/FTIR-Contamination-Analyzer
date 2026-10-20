@@ -95,6 +95,7 @@ LIGHT = {
     # tooltips: small and dark
     "tooltip": "#1C1917",
     "tooltip_ink": "#FAFAF9",
+    "tooltip_action": "#A9C6F5",   # the action in a message bubble (9.8:1 on it)
     # status: (text and icon, pastel background)
     "good": "#2F7A4E", "good_bg": "#E5F3EA",
     "warn": "#85580F", "warn_bg": "#FAF0DC",
@@ -148,6 +149,7 @@ DARK = {
     "header_button_hover": "#2E2C2A",
     "tooltip": "#2E2C2A",
     "tooltip_ink": "#F2F1EF",
+    "tooltip_action": "#A9C6F5",
     "good": "#84D4A3", "good_bg": "#132A1D",
     "warn": "#E8C373", "warn_bg": "#2B2314",
     "none": "#CFCBC6", "none_bg": "#242321",
@@ -257,6 +259,8 @@ QScrollArea#MapScroller, QScrollArea#MapScroller > QWidget, QScrollArea#MapScrol
 #NextStep {{ background: {t['accent_soft']}; border-radius: {r_k}px; }}
 #NextStep[alert="true"] {{ background: {t['bad_bg']}; }}
 #NextStep QLabel {{ color: {t['ink']}; }}
+#ChangeNote {{ background: {t['surface']}; border: 1px solid {t['accent']}; border-radius: {r_k}px; }}
+#ChangeNote QLabel {{ color: {t['ink']}; background: transparent; }}
 #Readout {{ color: {t['ink_2']}; font-size: {SIZE['small']}px; }}
 #Divider {{ background: {t['line']}; }}
 #Callout {{ background: {t['surface_2']}; border-radius: {r_c}px; }}

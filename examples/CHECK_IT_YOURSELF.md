@@ -47,19 +47,24 @@ MTF_NYL_083), where the collection itself names the polymer.
    or Nylon 6,6 (r 0.89)**. Measured by ATR but entered as transmission, the reference is
    multiplied by 1000 / wavenumber for nothing and no longer fits. Click **ATR** again: the numbers
    from step 3 come back.
-5. Click **Add to library**.
-   **You should see:** "Nylon 6 added to the library. 1 result changed.", the 05 row glows, the
-   Library page shows **In-house 1**, and the badge still says **Library validated**.
-6. Click 05 again.
-   **You should see:** **Probable · Nylon 6**, score **0.96**, lead **0.08** over Nylon 6,6. Switch to
-   **Analytical view**: step 4 shows the two fingerprints and r = 0.957.
-7. **Library → Open the library change log.**
-   **You should see:** one `add` row for Nylon 6 with your login name, the time, mode ATR, the
-   confirmation text and the SHA-256 of the saved file and of the source file.
+5. Click **Add to library**. The program stays on the Analyze page, where the change happens.
+   **You should see:** the 05 row glows blue for about three seconds and keeps a small blue dot; the
+   page of 05 rises in again with **Probable · Nylon 6**, score **0.96**, lead **0.08** over
+   Nylon 6,6, and a blue-edged note above the numbers: "**Changed** Weak: Nylon 6,6 (r 0.88) →
+   **Probable: Nylon 6 (r 0.96)** · Library change: Nylon 6 added to the library". The message at the
+   bottom says "Nylon 6 added to the library. 1 result changed." with **See it in the library**;
+   click it: the Library page shows **In-house 1** and the badge still says **Library validated**.
+6. Back on 05, switch to **Analytical view**: step 4 shows the two fingerprints and r = 0.957.
+7. **Library → Library change log (Excel).**
+   **You should see:** Excel opens a formatted copy: title, what the log is, one `add` row for
+   Nylon 6 (in green) with your login name, the time as a real date, mode ATR, the confirmation text
+   and the start of the checksums. The record itself (the CSV) is not touched.
 8. Take it out again: Library page → **In-house** → the Nylon 6 card → **Remove from the library…**,
-   reason e.g. "walkthrough done".
-   **You should see:** 05 back to Weak · Nylon 6,6 (0.88). The change log now has the `add` row
-   **and** a `remove` row: nothing was deleted.
+   reason e.g. "walkthrough done". The program stays on the Library page.
+   **You should see:** the message "Nylon 6 removed from the library. 1 result changed." with
+   **Show**; click it: 05 is selected, glows, and says "Changed: Probable: Nylon 6 (r 0.96) → Weak:
+   Nylon 6,6 (r 0.88)". The change log now has the `add` row **and** a red `remove` row: nothing was
+   deleted.
 
 ## B. ABS is safe, SAN after ABS is refused
 
@@ -79,7 +84,7 @@ The program compares everything in the library's look (ATR). When the mode is no
 the spectrum both ways and uses the one that fits better, and says so. When a mode is given but
 the other one fits clearly better, it flags **mode doubt**.
 
-1. So that the program asks again: **Records → Open records folder** and rename `sample_log.csv`
+1. So that the program asks again: **Records → Open the records folder** and rename `sample_log.csv`
    to `sample_log_before_check.csv` (rename, don't delete: it is a record).
 2. In the list, right-click `07_particle_on_filter` → **Remove from the list**. Then **Open spectra**
    → `examples/07_particle_on_filter.csv`, and answer **Don't know**.
@@ -99,6 +104,22 @@ many of the kept references were ATR, how many were transmission (put into the A
 transmission sample) and how many did not say (used as measured). The badge must still say
 **Library validated**.
 
+## E. Export, sign, and the records in Excel
+
+1. **File → Export report…** (Ctrl+E). A sheet asks: **where** (a folder), **who** (your name, e.g.
+   *Ali Obeidat*; it is remembered) and, if you like, the **review and signature**: a decision
+   (Accept / With changes / Re-measure), a comment (needed unless you accept) and the tick box "I
+   have looked at the raw spectra …". The button then says **Sign and export**.
+2. **You should see** in the report: at the top "12 spectra · 20 Oct 2026, 17:05 (UTC+02:00) ·
+   analysed by Ali Obeidat (your login)", the badges **Library validated** and **Signed: Accepted**,
+   four tiles (probable / weak / no reliable match / with a flag), then the summary. Near the end:
+   "**Accepted**, signed by Ali Obeidat (your login) on …", with your comment. Without signing, the
+   report has fields you can type into before printing, and says **Not signed yet**.
+3. The report's folder also has **report.xlsx**: the results as a formatted Excel table.
+4. **Records → Signatures (Excel)**: one row for the signed report, with the decision in colour and
+   the start of the report's SHA-256. **Records → Audit log (Excel)** and **Sample log (Excel)** open
+   the same way.
+
 ## Checklist
 
 | Check | Expected |
@@ -112,6 +133,9 @@ transmission sample) and how many did not say (used as measured). The badge must
 | SAN after ABS | not safe (r 0.98 to ABS), button grey |
 | 07, mode don't know | Probable PE, compared as ATR (0.97 against 0.81) |
 | 07, mode transmission | Weak PE (0.81), flag mode doubt |
+| After adding Nylon 6 | stays on Analyze; 05 glows; "Changed … → Probable: Nylon 6 (r 0.96)" note |
+| Export → sign | report says "Signed: Accepted" and who and when; a row in Signatures |
+| Records menu | each log opens as a formatted Excel copy |
 
 The Nylon 6 reference is from FasTEX-KCL (MIT, Reeha Parkar) and the dataset of Parkar et al.
 (2025), see `../THIRD_PARTY_NOTICES.md`.

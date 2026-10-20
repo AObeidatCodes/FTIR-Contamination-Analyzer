@@ -8,3 +8,4 @@ plotly>=5.20          # interactive figures (report and FTIR_Analyzer.py)
 nbformat>=4.2         # lets Plotly show figures inside Jupyter / VS Code
 PySide6-Essentials>=6.6   # the desktop app (not needed for FTIR_Analyzer.py)
 rdata>=0.11           # reads Open Specy library files (only for the optional Open Specy references)
+openpyxl>=3.1         # the records and the report's table as formatted Excel sheets

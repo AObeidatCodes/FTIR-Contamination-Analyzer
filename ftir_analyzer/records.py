@@ -1,13 +1,16 @@
 """
 FTIR Contamination Analyzer - records (data integrity)
 
-Two append-only records, kept as plain CSV files so anyone can open them in Excel:
+Three append-only records, kept as plain CSV files (the Records menu opens them as formatted
+Excel sheets, see log_views.py):
 
     sample log   how each raw file was measured (ATR or transmission). Each row belongs to
                  one exact file, identified by its SHA-256 checksum, so the mode is never
                  written into the raw file itself (that would change the raw data).
     audit log    one row per analysed spectrum per report: which file, which result,
                  when, who, which program version, which library.
+    signatures   one row per signed report: who signed, when, the decision and the comment,
+                 and the SHA-256 of the report file they signed.
 
 Rows are only ever added, never changed or deleted (ALCOA: attributable, legible,
 contemporaneous, original, accurate).
@@ -40,6 +43,13 @@ SAMPLE_LOG_HEADER = (
     "# belongs to one exact file, identified by its SHA-256 checksum. Rows are only added.\n"
 )
 SAMPLE_LOG_COLUMNS = ["file", "sha256", "mode", "recorded_by", "recorded_at", "note"]
+SIGNATURE_HEADER = (
+    "# Signatures: one row per signed report. The person states that they looked at the raw spectra\n"
+    "# and agree with the conclusions, or noted their changes. report_sha256 identifies the exact\n"
+    "# report file that was signed. Rows are only added.\n"
+)
+SIGNATURE_COLUMNS = ["signed_at", "signed_by", "login", "decision", "comment", "report", "report_sha256", "spectra"]
+DECISIONS = {"accept": "Accepted", "accept with changes": "Accepted with changes", "re-measure": "Re-measure"}
 
 
 @dataclass(frozen=True)
@@ -49,6 +59,27 @@ class ModeInfo:
     mode: str            # "ATR", "transmission" or "unknown"
     source: str          # where the answer came from, shown in the report
     conflict: str = ""   # "" or a description of a disagreement between the file and the log
+
+
+def readable_time(stamp, with_zone=False):
+    """A recorded time as people write it: '2026-10-20T16:50:00+02:00' -> '20 Oct 2026, 16:50'.
+
+    Only for showing; the records keep the exact original. with_zone=True adds '(UTC+02:00)'.
+    A date alone gives '20 Oct 2026'; anything that is not a time is returned as it is.
+    """
+    text = str(stamp or "").strip()
+    try:
+        moment = datetime.fromisoformat(text)
+    except ValueError:
+        return text
+    if len(text) <= 10:                                                 # a date without a time
+        return f"{moment.day} {moment:%b %Y}"
+    shown = f"{moment.day} {moment:%b %Y, %H:%M}"
+    if with_zone and moment.utcoffset() is not None:
+        minutes = int(moment.utcoffset().total_seconds() // 60)
+        sign = "+" if minutes >= 0 else "-"
+        shown += f" (UTC{sign}{abs(minutes) // 60:02d}:{abs(minutes) % 60:02d})"
+    return shown
 
 
 def current_user():
@@ -142,11 +173,15 @@ def code_fingerprint():
     return digest.hexdigest()
 
 
-def run_info(library, validation):
-    """The facts at the top of every report: when, who, which program, which library, validation."""
+def run_info(library, validation, name=""):
+    """The facts at the top of every report: when, who, which program, which library, validation.
+
+    name: the full name of the person ("Ali Obeidat"); the login name is always recorded too.
+    """
     return {
         "run_at": datetime.now().astimezone().isoformat(timespec="seconds"),
         "run_by": current_user(),
+        "run_by_name": " ".join(str(name).split()),
         "program": f"FTIR Contamination Analyzer {__version__}",
         "code_sha256": code_fingerprint(),
         "software": (f"Python {platform.python_version()}, numpy {np.__version__}, "
@@ -171,3 +206,35 @@ def append_audit_log(results, info, path=config.AUDIT_LOG_FILE):
     } for r in results])
     rows.to_csv(path, mode="a", index=False, header=not path.exists())        # append; header only for a new log
     return path
+
+
+def who_text(name, login):
+    """'Ali Obeidat (aliio)', or just the login name when no full name was given."""
+    return f"{name} ({login})" if name and name != login else login
+
+
+def append_signature(signoff, report_path, n_spectra, path=config.SIGNATURE_LOG_FILE):
+    """Record that a report was signed. Earlier rows are never changed."""
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    row = pd.DataFrame([{
+        "signed_at": signoff["signed_at"], "signed_by": signoff["name"], "login": signoff["login"],
+        "decision": signoff["decision"], "comment": signoff.get("comment", ""), "report": str(report_path),
+        "report_sha256": checksum(report_path), "spectra": n_spectra,
+    }], columns=SIGNATURE_COLUMNS)
+    new_file = not path.exists()
+    if new_file:
+        path.write_text(SIGNATURE_HEADER, encoding="utf-8")
+    row.to_csv(path, mode="a", index=False, header=new_file)
+    return path
+
+
+def make_signoff(name, decision, comment=""):
+    """A sign-off, ready for the report: who (full name and login), when, the decision and the comment."""
+    if decision not in DECISIONS:
+        raise ValueError(f"decision must be one of {', '.join(DECISIONS)}")
+    name = " ".join(str(name).split())
+    if not name:
+        raise ValueError("A report is signed with a name.")
+    return {"name": name, "login": current_user(), "decision": decision, "comment": " ".join(str(comment).split()),
+            "signed_at": datetime.now().astimezone().isoformat(timespec="seconds")}

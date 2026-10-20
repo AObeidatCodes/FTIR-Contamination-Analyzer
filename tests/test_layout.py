@@ -4,7 +4,8 @@ FTIR Contamination Analyzer - tests of the layout at different window sizes
 The window is opened at the sizes a lab laptop and a desktop screen give it (from the
 smallest window the program allows, 960 x 560, up to full HD) and every page and sheet is
 checked the way a careful person would look at it:
-    - no page scrolls sideways (everything fits the width; text wraps or is shortened)
+    - no page scrolls sideways (everything fits the width; text wraps or is shortened), and no
+      page is cut off at the side (wider than the area that shows it)
     - no text is cut off and no button is too narrow for its words
     - nothing overlaps its neighbour
     - a sheet sits in the middle of the window
@@ -26,7 +27,7 @@ pytest.importorskip("PySide6")
 
 from PySide6.QtCore import QEventLoop, QPoint, QRect, QSettings, Qt  # noqa: E402
 from PySide6.QtWidgets import (QAbstractButton, QAbstractScrollArea, QApplication, QLabel,  # noqa: E402
-                               QStackedWidget, QWidget)
+                               QScrollArea, QStackedWidget, QWidget)
 
 from ftir_analyzer import config  # noqa: E402
 from ftir_analyzer.gui import MainWindow, load_fonts  # noqa: E402
@@ -44,6 +45,7 @@ def window(tmp_path_factory):
     load_fonts()
     setup_fonts()
     records = tmp_path_factory.mktemp("records")
+    add_nylon_6(records / "inhouse_library")                       # an in-house reference: its sheet has more buttons
     win = MainWindow(ask_for_files=False, sample_log=records / "sample_log.csv", audit_log=records / "audit_log.csv",
                      inhouse_dir=records / "inhouse_library", openspecy_dir=records / "openspecy")
     Motion.reduced = True
@@ -52,6 +54,24 @@ def window(tmp_path_factory):
     assert wait(app, lambda: win.library is not None and not win.busy, 60), "the library did not load"
     yield win
     win.close()
+
+
+def add_nylon_6(folder):
+    from ftir_analyzer.inhouse import InHouseLibrary, reference_notes
+    from ftir_analyzer.processing import absorbance
+    from ftir_analyzer.spectrum_io import read_spectra
+    path = config.EXAMPLES_DIR / "library_demo" / "Nylon6_reference_fibre_collection.csv"
+    s, notes = read_spectra(path)[0], reference_notes(path)
+    InHouseLibrary(folder).add(notes["reference"], s.wn, absorbance(s), notes["mode"], category=notes["category"],
+                               confirmation=notes["confirmation"], source_path=path)
+
+
+def demo_results(window):
+    """The twelve demo spectra analysed (once), and their names."""
+    if not window.model.results:
+        window.analyse_paths([config.EXAMPLES_DIR], ask=lambda paths: {p: "ATR" for p in paths})
+        assert wait(QApplication.instance(), lambda: not window.busy and len(window.model.results) == 12, 60)
+    return [r.name for r in window.model.results]
 
 
 def wait(app, condition=lambda: False, timeout=0.4):
@@ -77,6 +97,10 @@ def problems(root):
             bar = widget.horizontalScrollBar()
             if bar.isVisible() and bar.maximum() > 0:
                 found.append(f"{type(widget).__name__} scrolls sideways by {bar.maximum()} px")
+            inner = widget.widget() if isinstance(widget, QScrollArea) else None
+            if inner is not None and inner.width() > widget.viewport().width() + 1:   # no scroll bar: cut off
+                found.append(f"{type(widget).__name__} cut off at the side by "
+                             f"{inner.width() - widget.viewport().width()} px")
         if isinstance(widget, ElidedLabel):
             continue                                                  # shortened with … on purpose
         if isinstance(widget, QLabel) and widget.text() and widget.pixmap().isNull():
@@ -109,10 +133,7 @@ def test_pages_fit_the_window(window, size):
     window.resize(*size)
     settle()
     assert (window.width(), window.height()) == size
-    if not window.model.results:
-        window.analyse_paths([config.EXAMPLES_DIR], ask=lambda paths: {p: "ATR" for p in paths})
-        assert wait(QApplication.instance(), lambda: not window.busy and len(window.model.results) == 12, 60)
-    names = [r.name for r in window.model.results]
+    names = demo_results(window)
     window.show_page("analyze")
     window.list.setCurrentIndex(window.proxy.index(names.index("06_PS_calibration_film_transmission"), 0))
     settle(0.8)
@@ -128,7 +149,10 @@ def test_sheets_sit_in_the_middle_and_fit(window, size):
     window.resize(*size)
     window.show_page("library")
     settle()
-    for opener in (window.open_similarity, window.open_openspecy, lambda: window.open_material("PET")):
+    names = demo_results(window)                                   # a long name on the "compare" button
+    window.list.setCurrentIndex(window.proxy.index(names.index("06_PS_calibration_film_transmission"), 0))
+    for opener in (window.open_similarity, window.open_openspecy, lambda: window.open_material("PET"),
+                   lambda: window.open_material("Nylon 6"), window.export_report):
         opener()
         settle(0.5)
         sheet = window.sheet
@@ -141,7 +165,7 @@ def test_sheets_sit_in_the_middle_and_fit(window, size):
     window.open_similarity()
     settle(0.5)
     scroller = window.sheet.findChild(QAbstractScrollArea, "MapScroller")
-    assert not scroller.horizontalScrollBar().isVisible()                            # 16 references fit
+    assert not scroller.horizontalScrollBar().isVisible()                            # 17 references fit
     window.sheet.close_sheet()
     settle(0.3)
 
