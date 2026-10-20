@@ -28,14 +28,15 @@ class Job(QRunnable):
         super().__init__()
         self.function, self.args = function, args
         self.signals = Job.Signals()
-        self.on_done, self.failure_title = None, ""
+        self.on_done, self.failure_title, self.details = None, "", ""
         self.setAutoDelete(False)              # the owner keeps it until it has reported back
 
     def run(self):
         try:
             result = self.function(*self.args, progress=self.signals.progress.emit)
         except Exception as error:             # report it, never crash the window
-            traceback.print_exc()
+            self.details = traceback.format_exc()  # the full story, for the error log
+            print(self.details)
             self.signals.failed.emit(self, f"{type(error).__name__}: {error}")
         else:
             self.signals.done.emit(self, result)

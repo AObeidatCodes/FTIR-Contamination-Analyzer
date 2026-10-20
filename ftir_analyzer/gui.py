@@ -937,7 +937,13 @@ class MainWindow(QMainWindow):
     def _job_failed(self, job, message):
         self._job_finished(job)
         self.set_status(job.failure_title + ".")
-        QMessageBox.critical(self, __title__, f"{job.failure_title}:\n\n{message}")
+        log = write_error_log(f"{job.failure_title}\n{job.details}")
+        box = QMessageBox(QMessageBox.Critical, __title__, f"{job.failure_title}:\n\n{message}", parent=self)
+        if log:
+            box.setInformativeText(f"The details were saved in:\n{log}")
+        box.setDetailedText(job.details)
+        box.setAttribute(Qt.WA_DeleteOnClose)
+        box.open()                                         # not blocking: the window stays usable behind it
 
     def _on_progress(self, step, total, text):
         self.spinner.start()
@@ -1467,15 +1473,21 @@ def run_app(files=(), ask_for_files=True):
     return app.exec()
 
 
-def show_error(kind, error, trace):
-    """Show an unexpected error in a message box and keep the details in records/error_log.txt."""
-    details = "".join(traceback.format_exception(kind, error, trace))
-    print(details, file=sys.stderr)
+def write_error_log(details):
+    """Add the details of an error to records/error_log.txt; returns the file, or None if it could not be written."""
     log = config.RECORDS_DIR / "error_log.txt"
     try:
         log.parent.mkdir(parents=True, exist_ok=True)
         with open(log, "a", encoding="utf-8") as handle:
             handle.write(f"--- {datetime.now():%Y-%m-%d %H:%M:%S}\n{details}\n")
     except OSError:
-        pass
+        return None
+    return log
+
+
+def show_error(kind, error, trace):
+    """Show an unexpected error in a message box and keep the details in records/error_log.txt."""
+    details = "".join(traceback.format_exception(kind, error, trace))
+    print(details, file=sys.stderr)
+    log = write_error_log(details)
     QMessageBox.critical(None, __title__, f"Something went wrong:\n\n{error}\n\nThe details were saved in:\n{log}")

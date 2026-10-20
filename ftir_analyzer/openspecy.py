@@ -6,7 +6,8 @@ spectra of plastics, natural materials and minerals. The program can use part of
 extra references, so that more kinds of samples can be identified:
 
     1. get the library file
-         download   from Open Specy's public storage (OSF, project x7dpz) on this computer, or
+         download   from Open Specy's public storage (AWS, as its R package does; or OSF,
+                    project x7dpz) on this computer, or
          import     a file downloaded by hand (an Open Specy .rds / .RData library file)
        The "nobaseline" library is used: baseline-corrected absorbance spectra, comparable
        with the program's own references. (The "derivative" library holds processed
@@ -44,9 +45,10 @@ import pandas as pd
 
 from . import config
 from .processing import GRID, fingerprint, on_grid
-from .spectrum_io import checksum
+from .spectrum_io import checksum, read_table
 
-OSF_NODE = "x7dpz"                                       # Open Specy's library project on OSF
+AWS_LIBRARY = "https://d2jrxerjcsjhs7.cloudfront.net/medoid_nobaseline.rds"   # where Open Specy's get_lib() looks
+OSF_NODE = "x7dpz"                                       # Open Specy's older library project on OSF
 OSF_FILES = "https://api.osf.io/v2/nodes/{node}/files/osfstorage/"
 PREFERRED = ["medoid_nobaseline", "mediod_nobaseline", "nobaseline"]   # small and representative first
 LICENCE = "CC BY 4.0"
@@ -159,16 +161,24 @@ def read_library_file(path):
         obj = next(iter(found.values()))
     if not isinstance(obj, dict) or not {"wavenumber", "spectra"} <= set(obj):
         raise ValueError(f"{path.name} is not an Open Specy library (it has no 'wavenumber' and 'spectra').")
-    wn = np.asarray(obj["wavenumber"], float)
+    wn = np.asarray(obj["wavenumber"], float).ravel()
     spectra = obj["spectra"]
     if isinstance(spectra, pd.DataFrame):
-        X = spectra.to_numpy(float)
+        X = spectra.apply(pd.to_numeric, errors="coerce").to_numpy(float)   # a text cell becomes NaN
     else:
         X = np.asarray(spectra, float)
+        if X.ndim == 1:
+            X = X[:, None]
         if X.shape[0] != len(wn) and X.shape[1] == len(wn):
             X = X.T
+    if X.shape[0] != len(wn):
+        raise ValueError(f"{path.name}: {len(wn)} wavenumbers, but the spectra have {X.shape[0]} points.")
+    keep = np.isfinite(wn)
+    order = np.argsort(wn[keep])                                        # low -> high, like everywhere else
+    wn, X = wn[keep][order], X[keep][order]
     metadata = obj.get("metadata")
-    metadata = metadata.reset_index(drop=True) if isinstance(metadata, pd.DataFrame) else pd.DataFrame(index=range(X.shape[1]))
+    metadata = metadata.reset_index(drop=True) if isinstance(metadata, pd.DataFrame) else pd.DataFrame()
+    metadata = metadata.reindex(range(X.shape[1]))                      # one row per spectrum, whatever the file has
     return wn, X, metadata
 
 
@@ -193,45 +203,55 @@ def _display_name(text):
 def prepare(wn, X, metadata):
     """Keep the fab-relevant FTIR spectra and give each a name, a material group and a category.
 
-    Returns (entries, skipped) where skipped counts what was left out and why.
+    Returns (entries, skipped) where skipped counts what was left out and why. A spectrum that
+    cannot be read is counted and left out; it never stops the import of the others.
     """
-    from .library import material_group
-    kind = _column(metadata, "spectrum_type", "SpectrumType")
-    identity = _column(metadata, "spectrum_identity", "SpectrumIdentity", "sample_name")
-    polymer = _column(metadata, "polymer")
-    material_class = _column(metadata, "material_class", "polymer_class", "Polymer.Category")
-    organisation = _column(metadata, "organization", "Organization")
-    sample_id = _column(metadata, "sample_name", "SpectrumID", "file_id")
-    skipped = {"Raman": 0, "not likely in a fab": 0, "too little data": 0, "more than 3 of one material": 0}
+    meta = {"kind": _column(metadata, "spectrum_type", "SpectrumType"),
+            "identity": _column(metadata, "spectrum_identity", "SpectrumIdentity", "sample_name"),
+            "polymer": _column(metadata, "polymer"),
+            "material_class": _column(metadata, "material_class", "polymer_class", "Polymer.Category"),
+            "organisation": _column(metadata, "organization", "Organization"),
+            "sample_id": _column(metadata, "sample_name", "SpectrumID", "file_id")}
+    skipped = {"Raman": 0, "not likely in a fab": 0, "too little data": 0, "more than 3 of one material": 0,
+               "could not be read": 0}
     entries, per_group, names = [], {}, set()
     for i in range(X.shape[1]):
-        if kind[i] and "RAMAN" in kind[i].upper():
-            skipped["Raman"] += 1
-            continue
-        described = " ".join(str(v) for v in (polymer[i], identity[i], material_class[i]) if v)
-        category = fab_category(described)
-        if category is None:
-            skipped["not likely in a fab"] += 1
-            continue
-        y = on_grid(wn, X[:, i])
-        if np.isfinite(y).sum() < 200 or np.nanmax(y) <= np.nanmin(y):
-            skipped["too little data"] += 1
-            continue
-        group = material_group(described) or _display_name(material_class[i] or identity[i]).lower()
-        if per_group.get(group, 0) >= PER_GROUP:
-            skipped["more than 3 of one material"] += 1
-            continue
-        per_group[group] = per_group.get(group, 0) + 1
-        base = _display_name(polymer[i] or identity[i] or material_class[i]) or f"Spectrum {i + 1}"
-        name, k = f"{base} (Open Specy)", 2
-        while name in names:
-            name, k = f"{base} {k} (Open Specy)", k + 1
-        names.add(name)
-        low, high = np.nanmin(y), np.nanmax(y)
-        entries.append({"name": name, "group": group, "category": category, "y": (y - low) / (high - low),
-                        "original_name": str(identity[i] or polymer[i] or material_class[i]),
-                        "spectrum_id": str(sample_id[i]), "contributor": str(organisation[i])})
+        try:
+            entry, reason = _prepare_one(wn, X[:, i], {k: v[i] for k, v in meta.items()}, per_group, names, i)
+        except Exception:                                               # one odd spectrum never stops the import
+            entry, reason = None, "could not be read"
+        if entry:
+            entries.append(entry)
+        else:
+            skipped[reason] += 1
     return entries, skipped
+
+
+def _prepare_one(wn, column, meta, per_group, names, i):
+    """One spectrum of the library file -> (entry, None), or (None, why it is left out)."""
+    from .library import material_group
+    if meta["kind"] and "RAMAN" in meta["kind"].upper():
+        return None, "Raman"
+    described = " ".join(str(meta[k]) for k in ("polymer", "identity", "material_class") if meta[k])
+    category = fab_category(described)
+    if category is None:
+        return None, "not likely in a fab"
+    y = on_grid(wn, column)
+    if np.isfinite(y).sum() < 200 or np.nanmax(y) <= np.nanmin(y):
+        return None, "too little data"
+    group = material_group(described) or _display_name(meta["material_class"] or meta["identity"]).lower()
+    if per_group.get(group, 0) >= PER_GROUP:
+        return None, "more than 3 of one material"
+    per_group[group] = per_group.get(group, 0) + 1
+    base = _display_name(meta["polymer"] or meta["identity"] or meta["material_class"]) or f"Spectrum {i + 1}"
+    name, k = f"{base} (Open Specy)", 2
+    while name in names:
+        name, k = f"{base} {k} (Open Specy)", k + 1
+    names.add(name)
+    low, high = np.nanmin(y), np.nanmax(y)
+    return {"name": name, "group": group, "category": category, "y": (y - low) / (high - low),
+            "original_name": str(meta["identity"] or meta["polymer"] or meta["material_class"]),
+            "spectrum_id": str(meta["sample_id"]), "contributor": str(meta["organisation"])}, None
 
 
 def curate(base_library, entries):
@@ -319,8 +339,8 @@ class OpenSpecyLibrary:
         from .library import MaterialInfo
         if not self.installed:
             return []
-        table = pd.read_csv(self.spectra_file, comment="#")
-        index = pd.read_csv(self.index_file, comment="#", dtype=str).fillna("")
+        table = read_table(self.spectra_file)
+        index = read_table(self.index_file, dtype=str).fillna("")
         wn, sha = table.iloc[:, 0].to_numpy(float), checksum(self.spectra_file)
         out = []
         for row in index.itertuples():
@@ -330,7 +350,9 @@ class OpenSpecyLibrary:
                                 contributor=row.contributor, mode="unknown", original_name=row.original_name,
                                 origin="open specy", notes=f"Open Specy id {row.spectrum_id}",
                                 file=self.spectra_file.name, sha256=sha, group=row.group)
-            out.append((info, on_grid(wn, table[row.name].to_numpy(float))))
+            y = on_grid(wn, table[row.name].to_numpy(float))
+            if np.isfinite(y).sum() >= 200:                             # a damaged column is never used
+                out.append((info, y))
         return out
 
     def save(self, entries, summary):
@@ -370,11 +392,33 @@ def import_library(path, base_library, folder=None, progress=None):
     return summary
 
 
+def looks_like_r_file(path):
+    """True if the file starts like an R data file (compressed or not), not like a web page."""
+    with open(path, "rb") as handle:
+        start = handle.read(5)
+    return start[:2] == b"\x1f\x8b" or start[:3] == b"BZh" or start[:5] == b"\xfd7zXZ" or \
+        start[:2] in (b"X\n", b"A\n", b"B\n") or start[:4] in (b"RDX2", b"RDX3", b"RDA2", b"RDA3")
+
+
 def download_and_import(base_library, folder=None, progress=None, opener=urllib.request.urlopen):
-    """Find the nobaseline library on Open Specy's OSF project, download it and import it."""
+    """Download Open Specy's 'medoid nobaseline' library and import it.
+
+    First from where Open Specy's own R package gets it (AWS), then from the older OSF project.
+    """
     say = progress or (lambda *_: None)
-    say(0, 1, "Looking up the Open Specy library")
-    name, _, link = choose_file(list_osf_files(opener=opener))
-    target = Path(folder or config.RECORDS_DIR / "openspecy") / "downloads" / name
-    download(link, target, progress, opener)
-    return import_library(target, base_library, folder, progress)
+    downloads = Path(folder or config.RECORDS_DIR / "openspecy") / "downloads"
+    problems = []
+    for where, find in (("AWS", lambda: ("medoid_nobaseline.rds", AWS_LIBRARY)),
+                        ("OSF", lambda: choose_file(list_osf_files(opener=opener))[::2])):
+        try:
+            say(0, 1, f"Looking up the Open Specy library ({where})")
+            name, link = find()
+            target = download(link, downloads / name, progress, opener)
+            if not looks_like_r_file(target):
+                raise ValueError("the file that came back is not an R library file")
+        except Exception as error:                                      # try the next place
+            problems.append(f"{where}: {error}")
+            continue
+        return import_library(target, base_library, folder, progress)
+    raise ConnectionError("The Open Specy library could not be downloaded. " + " / ".join(problems) +
+                          ". Download it yourself (see the README) and use 'Import a library file'.")

@@ -1441,8 +1441,8 @@ class OpenSpecyPanel(QWidget):
             "Body2", wrap=True))
         steps, steps_body = section("What happens", "nothing is changed in the original file")
         for number, text in enumerate([
-                "The 'nobaseline' library (baseline-corrected absorbance) is downloaded from Open Specy's "
-                "public storage (osf.io), or you choose a file you downloaded yourself (.rds).",
+                "The 'medoid nobaseline' library (baseline-corrected absorbance) is downloaded from where "
+                "Open Specy keeps it (AWS, or osf.io), or you choose a file you downloaded yourself (.rds).",
                 "Only FTIR spectra in fab-relevant material classes are kept.",
                 "Every spectrum is compared with every reference. One that could be confused with a different "
                 "material (r ≥ 0.95) is left out, so the extended library still passes the impostor test.",

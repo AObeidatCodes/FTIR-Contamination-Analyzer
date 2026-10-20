@@ -79,11 +79,17 @@ def fingerprint(y):
     The Savitzky-Golay filter fits a small polynomial over 11 neighbouring points and takes its
     slope, so it smooths the noise while it differentiates. abs() lets both sides of a band count.
     """
+    y = np.asarray(y, float)
     ok = np.isfinite(y)                                               # only the points with data
     d = np.full_like(y, np.nan)                                       # the result starts as all NaN
+    if ok.sum() < config.SAVGOL_WINDOW:                               # too little data for a derivative:
+        return d                                                      # all NaN, which never matches anything
     d[ok] = np.abs(savgol_filter(y[ok], window_length=config.SAVGOL_WINDOW,
                                  polyorder=config.SAVGOL_ORDER, deriv=1))
-    return (d - np.nanmin(d)) / (np.nanmax(d) - np.nanmin(d))         # scale to 0-1 (nanmin/nanmax skip NaN)
+    spread = np.nanmax(d) - np.nanmin(d)
+    if spread == 0:                                                   # a flat line has no shape to compare
+        return np.full_like(y, np.nan)
+    return (d - np.nanmin(d)) / spread                                # scale to 0-1 (nanmin/nanmax skip NaN)
 
 
 def to_library_mode(wn, a, mode, library_mode):

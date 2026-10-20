@@ -32,7 +32,7 @@ import pandas as pd
 import scipy
 
 from . import __version__, config
-from .spectrum_io import checksum, read_mode_note
+from .spectrum_io import checksum, read_mode_note, read_table
 
 SAMPLE_LOG_HEADER = (
     "# Sample log: how each raw file was measured. Written when the sample is measured (or\n"
@@ -69,7 +69,7 @@ class SampleLog:
         """{sha256: (mode, recorded_by, recorded_at)}. If a file was recorded twice, the latest row counts."""
         if not self.path.exists():
             return {}
-        table = pd.read_csv(self.path, comment="#", dtype=str).fillna("")     # everything as text
+        table = read_table(self.path, dtype=str).fillna("")     # everything as text
         return {row.sha256: (row.mode, row.recorded_by, row.recorded_at) for row in table.itertuples()}
 
     def record(self, file_path, mode, who=None, note=""):

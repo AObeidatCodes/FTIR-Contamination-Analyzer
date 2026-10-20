@@ -93,6 +93,8 @@ def noise_level(wn, a):
     one spike cannot inflate it. The worst window counts, because a small band must be
     judged against the noise where the noise is largest (e.g. water-vapour lines).
     """
+    if len(a) < 15:                                                    # too few points for the smooth copy
+        return float(np.std(a)) if len(a) else 0.0
     wiggle = a - savgol_filter(a, 15, 2)                               # the spectrum minus a smooth copy
     scatter = []
     for lo, hi in config.NOISE_WINDOWS:

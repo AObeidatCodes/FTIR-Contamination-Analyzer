@@ -36,11 +36,10 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 import numpy as np
-import pandas as pd
 
 from . import config
 from .processing import CO2_MASK, fingerprint, on_grid, to_library_mode
-from .spectrum_io import checksum, read_mode_note
+from .spectrum_io import checksum, read_mode_note, read_table
 
 
 @dataclass(frozen=True)
@@ -203,12 +202,12 @@ def reference_on_grid(wn, a, mode):
 
 def _load_shipped(index_path):
     """The shipped references listed in the index, with their information and the files they came from."""
-    index = pd.read_csv(index_path, comment="#", dtype=str).fillna("")
+    index = read_table(index_path, dtype=str).fillna("")
     spectra, info, files, tables = {}, {}, {index_path}, {}
     for row in index.itertuples():
         path = Path(index_path).parent / row.file
         if path not in tables:                                          # each file is read once
-            tables[path] = pd.read_csv(path, comment="#")
+            tables[path] = read_table(path)
             files.add(path)
         table = tables[path]
         spectra[row.material] = reference_on_grid(table.iloc[:, 0], table[row.material], row.mode)
@@ -232,9 +231,9 @@ def load_library(path=None, inhouse_dir=None, extended=False, openspecy_dir=None
     from .inhouse import InHouseLibrary                               # here, to avoid a circular import
     from .openspecy import OpenSpecyLibrary
     path = Path(path or config.LIBRARY_INDEX)
-    header = pd.read_csv(path, comment="#", nrows=0).columns
+    header = read_table(path, nrows=0).columns
     if "material" not in header:                                       # an old-style wide file
-        table = pd.read_csv(path, comment="#")
+        table = read_table(path)
         mode = read_mode_note(path) or "unknown"
         spectra = {str(c): on_grid(table.iloc[:, 0].to_numpy(float), table[c].to_numpy(float))
                    for c in table.columns[1:]}
@@ -279,6 +278,8 @@ def pearson(a, b):
     what is left asks "do the two go up and down together?".
     """
     ok = np.isfinite(a) & np.isfinite(b) & ~CO2_MASK                  # ~ means NOT
+    if ok.sum() < config.SAVGOL_WINDOW or np.ptp(a[ok]) == 0 or np.ptp(b[ok]) == 0:
+        return 0.0                                                     # nothing to compare: no similarity
     return float(np.corrcoef(a[ok], b[ok])[0, 1])                      # [0, 1] picks r out of the 2x2 table
 
 

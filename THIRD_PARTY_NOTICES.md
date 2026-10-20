@@ -51,7 +51,8 @@ structure of an Open Specy library file so that the import can be tested.
 ## Open Specy library (CC BY 4.0), optional, not distributed
 
 In extended mode the program downloads, on the user's computer, the Open Specy reference library
-(https://osf.io/x7dpz/, Creative Commons Attribution 4.0) or imports a copy the user downloaded, and
+(the copy Open Specy's R package uses, https://d2jrxerjcsjhs7.cloudfront.net/, or https://osf.io/x7dpz/;
+Creative Commons Attribution 4.0) or imports a copy the user downloaded, and
 keeps a fab-relevant part of it in `records/openspecy/`. These spectra are not part of this project.
 Every report that uses them names Open Specy and cites:
 

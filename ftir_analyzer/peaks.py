@@ -16,16 +16,16 @@ License: MIT (see LICENSE)
 from functools import lru_cache
 
 import numpy as np
-import pandas as pd
 from scipy.signal import find_peaks
 
 from . import config
+from .spectrum_io import read_table
 
 
 @lru_cache(maxsize=1)
 def band_table():
     """The band table (columns: low, high, assignment). Read once, then kept in memory."""
-    return pd.read_csv(config.BAND_TABLE_FILE, comment="#")
+    return read_table(config.BAND_TABLE_FILE)
 
 
 def find_real_peaks(wn, a, min_share=config.PEAK_SHARE, min_distance_cm=config.PEAK_DISTANCE_CM):

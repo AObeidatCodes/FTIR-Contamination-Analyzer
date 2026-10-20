@@ -256,9 +256,10 @@ entries stay in `records/inhouse_library/library_changes.csv` (nothing is ever d
 The shipped library holds 16 well-validated polymer references. For samples outside it, **Library →
 Open Specy…** adds references from the Open Specy library (Cowger et al. 2021, CC BY 4.0):
 
-1. **Download from Open Specy** gets the *nobaseline* library (baseline-corrected absorbance) from
-   Open Specy's public storage on osf.io, on your computer. Or **Import a library file…** if you
-   downloaded it yourself (`.rds`). The *derivative* library is refused: processed derivative spectra
+1. **Download from Open Specy** gets the *medoid nobaseline* library (baseline-corrected absorbance)
+   on your computer, from where Open Specy's own R package gets it
+   (`https://d2jrxerjcsjhs7.cloudfront.net/medoid_nobaseline.rds`), or from the older copy on osf.io.
+   Or **Import a library file…** if you downloaded it yourself (`.rds`). The *derivative* library is refused: processed derivative spectra
    cannot be compared with absorbance.
 2. Only FTIR spectra of materials a fab is likely to see are kept (gloves, wipes, seals,
    fluoropolymers, silicones, resins and adhesives, fibres, silica and other minerals), at most three
@@ -270,8 +271,11 @@ Open Specy…** adds references from the Open Specy library (Cowger et al. 2021,
 4. The result is kept in `records/openspecy/` with an import report. Switch between **Fab
    essentials** and **Extended** on the Library page; the open results are analysed again at once.
 
-The import was tested with a file in Open Specy's format (`tests/data/openspecy_sample.rds`). The
-download itself needs internet access to osf.io on your computer.
+The import was tested with a file in Open Specy's format (`tests/data/openspecy_sample.rds`) and
+with a deliberately untidy one (names with `#`, wavenumbers from high to low, empty and short spectra,
+missing metadata): an odd spectrum is counted in the report and left out, it never stops the import.
+The download needs internet access to Open Specy's storage on your computer. If an import fails, the
+full details are in `records/error_log.txt`.
 
 ![The extended library](docs/library_extended.png)
 

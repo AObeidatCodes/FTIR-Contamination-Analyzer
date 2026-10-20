@@ -38,7 +38,7 @@ from . import config
 from .analysis import analyse
 from .library import MaterialInfo, validation_impact, with_reference
 from .records import current_user
-from .spectrum_io import checksum
+from .spectrum_io import checksum, read_table
 
 CHANGE_COLUMNS = ["time", "user", "action", "material", "file", "file_sha256", "mode", "category",
                   "fab_sources", "check_next", "confirmation", "notes", "source_file", "source_sha256", "reason"]
@@ -58,7 +58,7 @@ class InHouseLibrary:
         """Every change ever made, oldest first (an empty table if there are none)."""
         if not self.log.exists():
             return pd.DataFrame(columns=CHANGE_COLUMNS)
-        return pd.read_csv(self.log, comment="#", dtype=str).fillna("")
+        return read_table(self.log, dtype=str).fillna("")
 
     def active(self):
         """The references in the library now, as MaterialInfo (the last change per material decides)."""
@@ -80,7 +80,7 @@ class InHouseLibrary:
 
     def spectrum(self, entry):
         """(wavenumbers, absorbance) of one in-house reference, as it was measured."""
-        table = pd.read_csv(self.folder / entry.file, comment="#")
+        table = read_table(self.folder / entry.file)
         return table.iloc[:, 0].to_numpy(float), table.iloc[:, 1].to_numpy(float)
 
     # ------------------------------------------------------------------ changing

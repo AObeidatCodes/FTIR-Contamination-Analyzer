@@ -16,6 +16,7 @@ License: MIT (see LICENSE)
 """
 
 import hashlib
+import io
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -50,6 +51,18 @@ def checksum(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
+def read_table(path, **options):
+    """A CSV table that may have '# ...' note lines.
+
+    Only whole note lines are left out. pandas' own comment="#" would also cut a line at a '#'
+    inside a name, so 'Glove batch #2' would lose the rest of its line and shift every column
+    after it.
+    """
+    text = Path(path).read_text(encoding="utf-8", errors="replace")
+    kept = "\n".join(line for line in text.splitlines() if not line.lstrip().startswith("#"))
+    return pd.read_csv(io.StringIO(kept), **options)
+
+
 def read_mode_note(path):
     """The measuring mode from a '# mode: ...' note in the file header, or None if there is none."""
     for line in Path(path).read_text(encoding="utf-8", errors="replace").splitlines():
@@ -73,9 +86,9 @@ def _read_table(path):
     """Read the numeric table from a file, whatever the separator and with or without a header."""
     try:
         # sep=None + engine="python": pandas sniffs the separator (comma, semicolon, tab, space)
-        table = pd.read_csv(path, comment="#", sep=None, engine="python")
+        table = read_table(path, sep=None, engine="python")
         if all(_is_number(c) for c in table.columns):              # the "header" is really the first data row
-            table = pd.read_csv(path, comment="#", sep=None, engine="python", header=None)
+            table = read_table(path, sep=None, engine="python", header=None)
             table.columns = ["wavenumber"] + [f"column {i}" for i in range(1, table.shape[1])]
     except (pd.errors.ParserError, pd.errors.EmptyDataError, UnicodeDecodeError) as error:
         raise SpectrumFileError(f"{Path(path).name}: the file could not be read as a table ({error}).") from error

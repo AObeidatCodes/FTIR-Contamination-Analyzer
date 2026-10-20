@@ -23,11 +23,11 @@ from dataclasses import dataclass, field
 from functools import lru_cache
 
 import numpy as np
-import pandas as pd
 
 from . import config
 from .peaks import find_real_peaks
 from .processing import GRID, baseline_als
+from .spectrum_io import read_table
 
 
 @dataclass(frozen=True)
@@ -96,7 +96,7 @@ def key_bands(y):
 @lru_cache(maxsize=1)
 def _fab_sources_table():
     """The fab-sources table, indexed by material name. Read once, then kept in memory."""
-    return pd.read_csv(config.FAB_SOURCES_FILE, comment="#").set_index("material")
+    return read_table(config.FAB_SOURCES_FILE).set_index("material")
 
 
 def fab_sources(material, library=None):

@@ -8,7 +8,9 @@ way Open Specy labels its own, with one Raman spectrum and one soil spectrum amo
 Checked: only fab-relevant FTIR spectra are kept; a spectrum that could be confused with a
 different material is left out (and reported); the extended library passes the impostor
 test; a second reference of the SAME material does not weaken a verdict; the 'derivative'
-library is refused; the download finds the 'nobaseline' library on OSF.
+library is refused; the download finds the 'nobaseline' library (AWS first, then OSF); an
+untidy library file (names with '#', wavenumbers high -> low, empty or short spectra,
+missing metadata rows) is imported without stopping, and every odd spectrum is counted.
 
 Author : Ali Obeidat
 Version: 1.0.0
@@ -19,6 +21,8 @@ import io
 import json
 from pathlib import Path
 
+import numpy as np
+import pandas as pd
 import pytest
 
 from ftir_analyzer import config
@@ -28,8 +32,9 @@ from ftir_analyzer.library import impostor_test, load_library, material_group
 from ftir_analyzer.spectrum_io import read_spectra
 
 pytest.importorskip("rdata")
-from ftir_analyzer.openspecy import (choose_file, curate, download, import_library, list_osf_files,  # noqa: E402
-                                     prepare, read_library_file)
+from ftir_analyzer.openspecy import (AWS_LIBRARY, OpenSpecyLibrary, choose_file, curate, download,  # noqa: E402
+                                     download_and_import, import_library, list_osf_files, prepare,
+                                     read_library_file)
 
 FIXTURE = Path(__file__).parent / "data" / "openspecy_sample.rds"
 
@@ -137,3 +142,74 @@ def test_download_finds_the_nobaseline_library(tmp_path):
     assert target.read_bytes() == payload and steps
     with pytest.raises(FileNotFoundError):
         choose_file([("derivative.rds", 1, "x")])
+
+
+def test_names_with_a_hash_survive_saving_and_loading(base, tmp_path):
+    """A '#' in a name once cut the saved table short: every Open Specy reference became empty."""
+    entries, _ = prepare(*read_library_file(FIXTURE))
+    kept, _ = curate(base, entries)
+    kept[0]["name"] = "Nylon 6 #2 (Open Specy)"
+    kept[1]["original_name"] = "sample #7, from a glove box"
+    folder = tmp_path / "openspecy"
+    from ftir_analyzer.openspecy import ImportSummary
+    OpenSpecyLibrary(folder).save(kept, ImportSummary("test", len(kept)))
+    extended = load_library(inhouse_dir=tmp_path / "inhouse", extended=True, openspecy_dir=folder)
+    assert len(extended.open_specy) == 6 and "Nylon 6 #2 (Open Specy)" in extended.spectra
+    assert extended.info_of(kept[1]["name"]).original_name == "sample #7, from a glove box"
+    assert impostor_test(extended).passed
+
+
+def untidy_library(path):
+    """The test library made untidy the way a big real library can be."""
+    import rdata
+    wn, X, metadata = read_library_file(FIXTURE)
+    columns = {f"s{i}": X[:, i] for i in range(X.shape[1])}
+    columns["empty"] = np.full(len(wn), np.nan)                        # no data at all
+    short = np.full(len(wn), np.nan)
+    short[100:130] = np.linspace(0, 1, 30)
+    columns["short"] = short                                            # 30 points only
+    columns["flat"] = np.ones(len(wn))                                  # no shape at all
+    spectra = pd.DataFrame(columns).iloc[::-1].reset_index(drop=True)  # wavenumbers high -> low
+    rows = metadata.to_dict("records")
+    rows[3]["spectrum_identity"] = "Nylon #6 fibre"                     # a '#' in a name
+    rows += [{"spectrum_type": "ftir", "spectrum_identity": "PE film #1", "polymer": "POLYETHYLENE",
+              "material_class": "polyolefins (polyalkenes)"}] * 2      # the last spectrum has no row at all
+    obj = {"wavenumber": wn[::-1], "spectra": spectra, "metadata": pd.DataFrame(rows)}
+    rdata.write_rds(path, obj, compression="gzip")
+    return path
+
+
+def test_an_untidy_library_file_is_imported_without_stopping(base, tmp_path):
+    folder = tmp_path / "openspecy"
+    summary = import_library(untidy_library(tmp_path / "medoid_nobaseline.rds"), base, folder)
+    assert summary.kept >= 6
+    assert summary.skipped["too little data"] + summary.skipped["not likely in a fab"] >= 3
+    wn, X, _ = read_library_file(tmp_path / "medoid_nobaseline.rds")
+    assert np.all(np.diff(wn) > 0)                                      # low -> high after reading
+    extended = load_library(inhouse_dir=tmp_path / "inhouse", extended=True, openspecy_dir=folder)
+    assert impostor_test(extended).passed
+    assert all(np.isfinite(y).sum() >= 200 for y in extended.spectra.values())
+
+
+def test_the_download_tries_aws_first_then_osf(base, tmp_path):
+    payload, asked = FIXTURE.read_bytes(), []
+
+    def opener(url, timeout=0):
+        asked.append(url)
+        if url == AWS_LIBRARY:
+            return FakeResponse(b"<html>blocked</html>")                 # a web page, not a library
+        if url.startswith("https://api.osf.io/"):
+            return FakeResponse(json.dumps({"data": [{"attributes": {"kind": "file", "name": "mediod_nobaseline.rds"},
+                                                      "links": {"download": "https://osf.example/m"}}]}).encode())
+        if url == "https://osf.example/m":
+            return FakeResponse(payload, {"Content-Length": str(len(payload))})
+        raise AssertionError(url)
+
+    summary = download_and_import(base, tmp_path / "openspecy", opener=opener)
+    assert asked[0] == AWS_LIBRARY and summary.kept == 6
+
+    def offline(url, timeout=0):
+        raise OSError("no internet")
+
+    with pytest.raises(ConnectionError, match="Import a library file"):
+        download_and_import(base, tmp_path / "other", opener=offline)
