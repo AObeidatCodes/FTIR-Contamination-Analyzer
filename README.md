@@ -74,8 +74,8 @@ All three use the same validated analysis and give the same results.
 ### 1. Get the files
 
 **Easiest:** download the repository as a ZIP:
-**[Ali-Playground-main.zip](https://github.com/AObeidatCodes/Ali-Playground/archive/refs/heads/main.zip)**,
-then right-click the ZIP → *Extract All…* and open the folder **FTIR-Contamination-Analyzer** inside it.
+**[FTIR-Contamination-Analyzer-main.zip](https://github.com/AObeidatCodes/FTIR-Contamination-Analyzer/archive/refs/heads/main.zip)**,
+then right-click the ZIP → *Extract All…* and open the folder **FTIR-Contamination-Analyzer-main** inside it.
 
 (On the GitHub page you can also click the green **Code** button → **Download ZIP**.)
 
@@ -86,7 +86,7 @@ installer, tick **"Add python.exe to PATH"**, then click *Install Now*.
 
 ### 3a. Start the app (Windows)
 
-Double-click **`run_analyzer.bat`** in the **FTIR-Contamination-Analyzer** folder.
+Double-click **`run_analyzer.bat`** in the **FTIR-Contamination-Analyzer-main** folder.
 
 - The first start installs the packages the app needs (a few minutes, only once).
 - If Windows shows *"Windows protected your PC"*, click **More info → Run anyway**. The file is a
@@ -131,7 +131,7 @@ SETTINGS = {
 | --- | --- |
 | "Python was not found" | Install Python (step 2) and tick *Add python.exe to PATH* |
 | The packages cannot be installed | Check the internet connection. On a company laptop, IT may block installing packages: use a personal computer |
-| The ZIP does not contain these files | Use the download link in step 1, then open the folder **FTIR-Contamination-Analyzer** inside it |
+| The ZIP does not contain these files | Use the download link in step 1, then open the folder **FTIR-Contamination-Analyzer-main** inside it |
 | The window does not open | Open a terminal in the folder and run `python run_analyzer.py`: the message explains what is missing |
 | Figures do not appear inside VS Code / Jupyter | `python -m pip install nbformat`, then run again (or the figures open in the browser) |
 
