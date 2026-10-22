@@ -139,7 +139,7 @@ SETTINGS = {
 
 | Action | How |
 | --- | --- |
-| Open spectrum files | **Open spectra** or `Ctrl+O` (CSV / TXT / DPT, %T or absorbance, with or without a header, any separator) |
+| Open spectrum files | **Open spectra** or `Ctrl+O`: CSV / TXT / DPT exports (%T or absorbance, with or without a header, any separator), or the instrument's own files: **JCAMP-DX** (`.jdx`, `.dx`) and **Bruker OPUS** (`.0`, `.1`, …). An instrument file that says how it was measured (ATR or transmission) is not asked about |
 | Open a whole folder | **Open folder** or `Ctrl+Shift+O` |
 | Drag and drop | Drop files or a folder anywhere on the window |
 | Try it | **Demo**: twelve real measurements with known answers ([`examples/README.md`](examples/README.md)) |
@@ -147,6 +147,7 @@ SETTINGS = {
 | Trace the curves | Move the mouse over the spectrum: a dot on every curve, their values, and the band's name |
 | Every processing step | Switch **Result → Analytical view** above the figure |
 | Compare with another material | **Compare with** above the figure, or click one of the **Closest matches** under it |
+| Two finds the same material? | **Compare with → Another sample over this one**: the other sample is drawn as a dashed line, with r between the two in the legend (0.96 for the two PE particles 02 and 07) |
 | See how the shapes differ | **Closest matches**: the best four, side by side; *Spectrum* or *Fingerprint* |
 | Zoom, pan, reset | `Ctrl` + mouse wheel zooms around the mouse, double-click resets, or use the buttons above the figure |
 | Save a figure | The save button: PNG at 300 or 600 dpi, SVG or PDF (vector: any size). Saves the view on screen |
@@ -156,8 +157,9 @@ SETTINGS = {
 | More references | **Library → Open Specy…**: download or import; then switch **Fab essentials / Extended** |
 | Add a reference | **Add to library…** on a result that is not *probable*, or **Library → Add a reference…** (`Ctrl+N`) |
 | Light / dark | The moon / sun button or `Ctrl+T`. **View → Reduce motion** switches the animations off |
-| Records | **Records** menu: sample log, audit log, signatures, each as a formatted Excel copy. **Library** menu: the library change log |
-| Help | `F1` (how it works), **Help → About** |
+| The menus | The **☰** button at the left of the top bar: File, View, Library, Records, Help. Every shortcut works without opening it |
+| Records | **☰ → Records**: sample log, audit log, signatures, each as a formatted Excel copy. **☰ → Library**: the library change log |
+| Help | `F1` (how it works), **☰ → Help → About** |
 
 When a file does not say how it was measured (ATR or transmission), the program asks once, then saves
 the answer in the sample log with your user name and the date. Nothing is written into the raw files.
@@ -172,6 +174,22 @@ readings differ, and changes no verdict. When a mode *is* given but the other on
 transmission: "it fits clearly better as ATR (r 0.97 against 0.81)".
 
 ![Measuring-mode dialog](docs/mode_dialog.png)
+
+**On the figure.** The tallest bands carry their wavenumber; zone names, "unexplained" and the CO₂
+note each take the first place where they touch no other label, curve or line, and this is worked out
+again whenever the window changes size. Unexplained bands that find no room beside their line are
+named together on the panel's title line.
+
+**Second component?** When the match leaves clear bands unexplained, the program fits the spectrum as
+a mix of the match and each other reference (plus a straight background line). If one clearly helps
+(fit r up by 0.02 or more, at least 10 % of the band height, and it has the unexplained bands), the
+band evidence says so, e.g. "Fits as about 70 % PE + 30 % PET". The shares are of the band height,
+not of the mass, and the verdict itself is not changed. If none helps (as for the 1030 cm⁻¹ band of
+demo 07), it says the second material is probably not in the library.
+
+**Water vapour.** The sharp comb of water-vapour lines (air in the beam: purge longer or take a fresh
+background) is looked for at 3580–3950 cm⁻¹ on the file's own points; demo 06 has them. Files with
+points more than 4 cm⁻¹ apart are "not measured", because there the lines cannot be seen.
 
 ### Analytical view
 

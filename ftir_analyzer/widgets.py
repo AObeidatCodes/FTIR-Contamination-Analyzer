@@ -1030,7 +1030,8 @@ class EmptyState(QWidget):
         self.library_link.setObjectName("Link")
         for button in (self.choose, self.demo, self.library_link):
             button.setCursor(Qt.PointingHandCursor)
-        self.formats = QLabel("CSV, TXT or DPT exports in %T or absorbance, with or without a header line")
+        self.formats = QLabel("CSV, TXT or DPT exports, JCAMP-DX (.jdx) or Bruker OPUS (.0, .1 …) files, "
+                              "in %T or absorbance")
         self.formats.setObjectName("SectionHint")
         self.formats.setAlignment(Qt.AlignCenter)
         self.formats.setWordWrap(True)

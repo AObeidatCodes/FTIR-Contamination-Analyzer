@@ -353,10 +353,13 @@ def rise_in(host, old, new, bands, dy=10, duration=None, on_done=None):
     return Overlay(host, frame, duration, on_done=on_done)
 
 
-def crossfade(widget, change, duration=180):
-    """Run change() (for example: switch the theme) and let the old picture fade into the new one."""
+def crossfade(widget, change, duration=180, on_done=None):
+    """Run change() (for example: switch the theme) and let the old picture fade into the new one.
+    on_done: called when the fade has finished (at once with reduced motion)."""
     if Motion.reduced or not widget.isVisible():
         change()
+        if on_done:
+            on_done()
         return
     old = snapshot(widget)
     change()
@@ -367,7 +370,7 @@ def crossfade(widget, change, duration=180):
         p.setOpacity(ease(EASE_OUT, progress))
         p.drawPixmap(0, 0, new)
 
-    Overlay(widget, frame, duration)
+    Overlay(widget, frame, duration, on_done=on_done)
 
 
 # ---------------------------------------------------------------------------- smooth scrolling
@@ -910,6 +913,9 @@ class Sheet(QWidget):
         self.previous_focus = QApplication.focusWidget()           # gets the keyboard focus back afterwards
         self.setAttribute(Qt.WA_OpaquePaintEvent)
         self.setFocusPolicy(Qt.StrongFocus)
+        for other in host.findChildren(Sheet):                     # a sheet still fading out is finished at once,
+            if other is not self and other.isVisible():            # or it would be on the photo of the window
+                other.finish_now()
         self.background = host.grab()                             # the window behind, photographed once
         self.panel = SheetCard(self)
         self.panel.setObjectName("SheetPanel")
@@ -1059,32 +1065,45 @@ class Sheet(QWidget):
             self.panel.hide()
 
         Moving.start()
-
-        def finished():
-            Moving.end()
-            # hand the focus back first: otherwise Qt moves it on as if Tab had been pressed (a focus ring)
-            back = self.previous_focus if alive(self.previous_focus) and self.previous_focus.isVisible() else self.host
-            back.setFocus(Qt.OtherFocusReason)
-            self.hide()
-            self.closed.emit()
-            self.deleteLater()
-
         self._animation = animate(self, self.progress, 0.0, Motion.ms("sheet_out"), self._frame, QEasingCurve.Linear,
-                                  finished)
+                                  self._finished)
+
+    def _finished(self):
+        Moving.end()
+        # hand the focus back first: otherwise Qt moves it on as if Tab had been pressed (a focus ring)
+        back = self.previous_focus if alive(self.previous_focus) and self.previous_focus.isVisible() else self.host
+        back.setFocus(Qt.OtherFocusReason)
+        self.hide()
+        self.closed.emit()
+        self.deleteLater()
+
+    def finish_now(self):
+        """Gone at once, without the fade (another sheet is opening in its place)."""
+        if not self.closing:
+            self.close_sheet()
+        if alive(self._animation):
+            stop(self._animation)
+            self._finished()
 
     def eventFilter(self, obj, event):
         if self.closing:
             return False
         if obj is self.host and event.type() == QEvent.Resize:
-            self.hide()                                            # photograph the resized window without the sheet
-            self.setGeometry(self.host.rect())
-            self.background = self.host.grab()
-            self._place_panel()
-            self.show()
-            self.raise_()
+            self.refresh_background()
         elif obj is self.content and event.type() == QEvent.LayoutRequest and self.has_arrived and not self.tall:
             QTimer.singleShot(0, self._refit)                      # the content changed size: follow it
         return False
+
+    def refresh_background(self):
+        """Photograph the window behind again (it was resized, or its theme changed), without the sheet."""
+        if self.closing:
+            return
+        self.hide()
+        self.setGeometry(self.host.rect())
+        self.background = self.host.grab()
+        self._place_panel()
+        self.show()
+        self.raise_()
 
     def _refit(self):
         if alive(self) and not self.closing and self._panel_rect() != self.panel.geometry():

@@ -3,8 +3,9 @@ FTIR Contamination Analyzer - desktop application
 
 The window a lab user works in:
 
-    toolbar       logo and name; the Analyze | Library switch in the middle; Open spectra /
-                  Open folder / Demo / Export report; the library validation badge; light-dark; help
+    toolbar       one bar: the menu (File, View, Library, Records, Help) behind one button, logo
+                  and name; the Analyze | Library switch in the middle; Open spectra / Open folder /
+                  Demo / Export report; the library validation badge; light-dark; help
     Analyze       left: the analysed spectra (status icon, name, match, score, flags), with a filter
                   right: the result of the selected spectrum
                     name, verdict, match and flags
@@ -711,7 +712,9 @@ class MainWindow(QMainWindow):
         self.act_about = make(f"About {__title__}", "", self.show_about)
 
     def _build_menu(self):
-        bar = self.menuBar()
+        """The menus live behind one button at the left of the top bar (no separate menu bar: one
+        quiet bar instead of two). Every action is also on the window, so its shortcut always works."""
+        bar = self.main_menu = QMenu(self)
         file_menu = bar.addMenu("&File")
         for action in (self.act_open, self.act_folder, self.act_demo, None, self.act_export, None,
                        self.act_remove, self.act_clear, None, self.act_quit):
@@ -745,13 +748,22 @@ class MainWindow(QMainWindow):
         grid.setHorizontalSpacing(16)
         header.setFixedHeight(56)
 
-        # left: logo and name
+        # left: the menu, the logo and the name
         left = QHBoxLayout()
         left.setSpacing(10)
+        self.menu_button = QToolButton()
+        self.menu_button.setToolTip("Menu: open, export, view, library, records, help")
+        self.menu_button.setAccessibleName("Menu")
+        self.menu_button.setIconSize(QSize(18, 18))
+        self.menu_button.setPopupMode(QToolButton.InstantPopup)
+        self.menu_button.setMenu(self.main_menu)
+        self.menu_button.setCursor(Qt.PointingHandCursor)
+        left.addWidget(self.menu_button)
+        left.addSpacing(2)
         self.logo = QLabel()
         titles = QVBoxLayout()
         titles.setSpacing(0)
-        title = QLabel(__title__)
+        self.app_title = title = QLabel(__title__)
         title.setObjectName("AppTitle")
         self.subtitle = subtitle = QLabel(f"Version {__version__} · by {__author__}")
         subtitle.setObjectName("AppSubtitle")
@@ -924,7 +936,13 @@ class MainWindow(QMainWindow):
     # ------------------------------------------------------------------ theme and motion
     def apply_theme(self, name):
         """Switch between the light and the dark theme; the old look fades into the new one."""
-        crossfade(self, lambda: self._apply_theme(name))
+        crossfade(self, lambda: self._apply_theme(name), on_done=self._after_theme)
+
+    def _after_theme(self):
+        """An open sheet shows a photo of the window behind it: photograph it again in the new theme
+        (once the fade has finished, so the photo is of the finished window)."""
+        if self.sheet is not None:
+            self.sheet.refresh_background()
 
     def _apply_theme(self, name):
         Theme.t = THEMES.get(name, THEMES["light"])
@@ -937,6 +955,9 @@ class MainWindow(QMainWindow):
             button.setIcon(icon(icon_name, t["on_primary"] if primary else t["header_ink"]))
         self.theme_button.setIcon(icon("sun" if t["name"] == "dark" else "moon", t["header_ink"]))
         self.help_button.setIcon(icon("circle-help", t["header_ink"]))
+        self.menu_button.setIcon(icon("menu", t["header_ink"]))
+        if self.sheet is not None:                                         # an open sheet's close button
+            self.sheet.set_close_icon(icon("x", t["ink_2"]))
         if not self.search.actions():                                      # the magnifier inside the filter box
             self.search.addAction(icon("search", t["muted"], 16), QLineEdit.LeadingPosition)
         self.search.actions()[0].setIcon(icon("search", t["muted"], 16))
@@ -971,6 +992,8 @@ class MainWindow(QMainWindow):
     def show_page(self, page):
         """Show the Analyze page or the Library page (the new page slides in)."""
         target = self.library_page if page == LIBRARY else self.analyze_page
+        if self.sheet is not None and self.pages.currentWidget() is not target:
+            self.sheet.close_sheet()                                   # a sheet belongs to the page it was opened on
         self.nav.set_value(page)
         if target is self.analyze_page and self.pending_glow:          # results changed while it was not shown:
             self.pending_glow = False                                  # they glow once the page has arrived
@@ -1614,7 +1637,7 @@ class MainWindow(QMainWindow):
     def resizeEvent(self, event):
         """On a narrow window the toolbar makes room in two steps (the tooltips still name everything):
         below 1440 px the buttons show only their icons; below 1180 px the library badge shows only its
-        shield and the version line under the name is left out."""
+        shield, and the name and version next to the logo are left out (the window title still names it)."""
         super().resizeEvent(event)
         compact = 2 if self.width() < 1180 else 1 if self.width() < 1440 else 0
         if compact != self.compact:
@@ -1623,6 +1646,7 @@ class MainWindow(QMainWindow):
                 button.setText(f" {self.header_texts[key]}" if primary or not compact else "")
             self.badge.set_compact(compact == 2)
             self.subtitle.setVisible(compact < 2)
+            self.app_title.setVisible(compact < 2)
 
     def closeEvent(self, event):
         if not self.isMaximized():

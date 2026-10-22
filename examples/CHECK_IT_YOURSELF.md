@@ -119,7 +119,7 @@ transmission sample) and how many did not say (used as measured). The badge must
    "**Accepted**, signed by Ali Obeidat (your login) on …", with your comment. Without signing, the
    report has fields you can type into before printing, and says **Not signed yet**.
 3. The report's folder also has **report.xlsx**: the results as a formatted Excel table.
-4. **Records → Signatures (Excel)**: one row for the signed report, with the decision in colour and
+4. **☰ (top left) → Records → Signatures (Excel)**: one row for the signed report, with the decision in colour and
    the start of the report's SHA-256. **Records → Audit log (Excel)** and **Sample log (Excel)** open
    the same way.
 5. In the open report, make the browser window narrow (half the screen), then wide again.
@@ -128,6 +128,26 @@ transmission sample) and how many did not say (used as measured). The badge must
 6. **Ctrl+P** (print preview). **You should see:** white paper with dark text, even if Windows is in
    dark mode, and the "Raw data and traceability" and "Analytical view" sections printed open.
    Cancel the print; the sections close again.
+
+## F. The new tools (labels, overlay, second component, water vapour, instrument files)
+
+1. Open the demo spectra and click **07_particle_on_filter**. **You should see:** above the score strip
+   "PE (high density) r 0.97", a hollow dot for EVA at 0.59; in the figure the labels 2915, 2850,
+   1465 and 720 above their peaks, and "1030 cm⁻¹ unexplained" beside its dashed line, not touching
+   it. Make the window narrow and wide: the labels move or hide, they never overlap.
+2. Under the figure, **Band evidence → Two-component fit** says that no mix explains 1030 clearly:
+   the second material is probably not in the library.
+3. **Compare with → Another sample over this one → 02_wafer_box_particle_ATR.** **You should see:** a
+   dashed line almost on top of the sample, and in the legend "other sample: 02_… (r = 0.96 to this
+   one)": the two particles are the same material. Choose **No other sample** to remove it.
+4. Click **06_PS_calibration_film_transmission**. **You should see:** the flags *Saturated bands* and
+   *Water-vapour lines*, and under **Checks on the raw spectrum** a row "Water vapour: 11.9× the
+   wiggle of the quiet windows → water-vapour lines".
+5. Open a sheet (e.g. **Library → Similarity map**), then press `Ctrl+T`: the window behind it turns
+   dark too. Press `Ctrl+1`: the sheet closes and the Analyze page shows.
+6. If you have a JCAMP-DX (`.jdx`) or Bruker OPUS (`.0`) file from an instrument: open it like any other
+   file. **You should see:** it is analysed; if the file says how it was measured, the program does
+   not ask.
 
 ## Checklist
 
@@ -144,7 +164,10 @@ transmission sample) and how many did not say (used as measured). The badge must
 | 07, mode transmission | Weak PE (0.81), flag mode doubt |
 | After adding Nylon 6 | stays on Analyze; 05 glows; "Changed … → Probable: Nylon 6 (r 0.96)" note |
 | Export → sign | report says "Signed: Accepted" and who and when; a row in Signatures |
-| Records menu | each log opens as a formatted Excel copy |
+| Records menu (☰) | each log opens as a formatted Excel copy |
+| 07 figure | labels 2915 / 2850 / 1465 / 720; "1030 cm⁻¹ unexplained" clear of its line |
+| 02 over 07 | dashed line, r = 0.96 to this one |
+| 06 | flag Water-vapour lines (11.9×) |
 
 The Nylon 6 reference is from FasTEX-KCL (MIT, Reeha Parkar) and the dataset of Parkar et al.
 (2025), see `../THIRD_PARTY_NOTICES.md`.

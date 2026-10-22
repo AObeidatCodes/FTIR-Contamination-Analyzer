@@ -397,3 +397,30 @@ def test_exporting_a_signed_report(app, window, tmp_path):
     assert window.settings.value("user_name") == "Ali Obeidat"                  # remembered for next time
     assert "Ali Obeidat" in window.signature_log.read_text(encoding="utf-8")
     window.report_box.close()
+
+
+def test_sheets_never_leave_a_trace(app, window):
+    """With animations on: a sheet opened while another is still fading out does not keep it in its
+    picture of the window; switching the page closes the sheet; switching the theme re-photographs
+    the window behind an open sheet."""
+    from ftir_analyzer.motion import Sheet
+    Motion.reduced = False
+    try:
+        window.show_page(LIBRARY)
+        wait(app, lambda: False, 0.6)
+        window.open_similarity()
+        wait(app, lambda: window.sheet is not None and window.sheet.has_arrived, 5)
+        first = window.sheet
+        first.close_sheet()                                              # still fading out ...
+        window.open_material("PET")                                      # ... when the next one opens
+        assert not first.isVisible()                                     # finished at once, not photographed
+        wait(app, lambda: window.sheet.has_arrived, 5)
+        assert [s for s in window.centralWidget().findChildren(Sheet) if s.isVisible()] == [window.sheet]
+        before = window.sheet.background.toImage()
+        window.apply_theme("dark")
+        wait(app, lambda: window.sheet.background.toImage() != before, 5)  # the window behind, photographed again
+        window.show_page("analyze")
+        wait(app, lambda: window.sheet is None, 5)                       # a sheet belongs to its page
+    finally:
+        window.apply_theme("light")
+        Motion.reduced = True
