@@ -77,6 +77,18 @@ def _trace(x, y, name, t, role=SAMPLE, with_bands=False, legend=True, fmt=".4f")
     return trace
 
 
+def _x_range(fig):
+    """The wavenumber range of every curve, high to low (the IR convention: 4000 on the left).
+
+    Given to Plotly as a fixed range: with "autorange" Plotly recalculates the range whenever the
+    window changes size, and on a narrow window it made room for the labels until the axis ran
+    from 4800 to -5700 cm-1. A fixed range stays right at every size; double-click returns to it."""
+    xs = [np.asarray(trace.x, float) for trace in fig.data if trace.x is not None and len(trace.x)]
+    xs = np.concatenate(xs)
+    xs = xs[np.isfinite(xs)]
+    return [float(xs.max()), float(xs.min())]
+
+
 def _style(fig, t, height, rows):
     """The shared look: quiet axes, crosshair across all panels, one hover box per panel."""
     fig.update_layout(
@@ -89,7 +101,7 @@ def _style(fig, t, height, rows):
                 "font": {"size": 12, "color": t["ink_2"]}, "bgcolor": "rgba(0,0,0,0)"},
         dragmode="zoom",
     )
-    fig.update_xaxes(autorange="reversed", showgrid=False, showline=True, linecolor=t["chart_axis"],
+    fig.update_xaxes(range=_x_range(fig), autorange=False, showgrid=False, showline=True, linecolor=t["chart_axis"],
                      ticks="outside", tickcolor=t["chart_axis"], color=t["muted"], zeroline=False,
                      showspikes=True, spikemode="across", spikesnap="cursor", spikecolor=t["muted"],
                      spikethickness=1, spikedash="solid", hoverformat=".0f")
@@ -168,7 +180,7 @@ def analytical_figure(r, library, t=LIGHT):
                                  with_bands=curve.role == SAMPLE and on_grid, legend=False, fmt=fmt), row, 1)
         for lo, hi, label in step.spans:
             fig.add_vrect(x0=lo, x1=hi, fillcolor=t["chart_zone"], opacity=0.07, line_width=0, row=row, col=1,
-                          annotation_text=label, annotation_position="top", annotation_font_size=10,
+                          annotation_text=label, annotation_position="top", annotation_font_size=11,
                           annotation_font_color=t["muted"])
         for name, m in step.rulers:
             # the ruler: a dashed straight line between the two feet, and the measured height

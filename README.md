@@ -323,7 +323,19 @@ camera button. Each spectrum has a closed **Analytical view** section with every
 as an interactive figure. The **Reference library** section lists every in-house reference that was
 used, with who added it, when, how its identity was confirmed and its checksum.
 
+- **The score strip.** Every spectrum's score r is drawn on a 0–1 scale coloured by the verdict rule
+  (grey: no reliable match, amber: weak from 0.60, green: probable from 0.95). The filled dot is the
+  best material, the hollow dot the next *different* material, so the lead the rule asks for (0.08)
+  is the distance between the two dots. The summary table has a small copy of it in every row.
+- **A bar that stays in view** with the parts of the report and the two things a reviewer checks
+  first: is the library validated, is the report signed.
+- **Every screen and paper.** It follows the computer's light or dark setting (the figures too), fits
+  a phone without scrolling sideways, and prints on white paper with every closed section opened, so
+  the PDF keeps the file paths and checksums.
+
 <img src="docs/report.png" alt="The HTML report" width="720">
+
+<img src="docs/report_sample.png" alt="One spectrum in the report: the score strip, the figure and why" width="720">
 
 <img src="docs/report_analytical_view.png" alt="The analytical view in the report" width="720">
 
@@ -445,7 +457,7 @@ card is lifted under the mouse), no gradients, and text of 14 px and up.
   (`validate_palette`) on the light and on the dark background. The similarity map is one warm hue,
   with dark text on every step (6 : 1 or more). Peak labels have a halo, so a line never hides them.
 - **Typeface.** Inter, embedded in the app and in the report, so it looks the same on every computer;
-  IBM Plex Mono for checksums and paths.
+  IBM Plex Mono for checksums and paths (embedded too).
 - **Fits any window.** On a narrow window the toolbar shows icons only, the facts wrap into two rows,
   the cards stack, the Library page's buttons move under its title and long names are shortened
   with … (the full text is in the tooltip). On a low window the welcome page leaves out its

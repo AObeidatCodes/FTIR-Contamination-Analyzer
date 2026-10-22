@@ -318,3 +318,22 @@ def test_interactive_figures(library):
     figure = result_figure(result, library)
     assert {"raw absorbance", "sample, as compared (ATR)"} <= {trace.name for trace in figure.data}
     assert "y5" in [trace.yaxis for trace in analytical_figure(result, library).data]   # five panels
+    # a fixed wavenumber range, 4000 on the left: autorange broke when the window changed size
+    assert figure.layout.xaxis.range == (4000.0, 650.0) and figure.layout.xaxis.autorange is False
+
+
+def test_report_page_works_on_every_screen_and_on_paper(tmp_path, library):
+    pytest.importorskip("plotly")
+    from ftir_analyzer.report import figure_colour_map
+    swap = figure_colour_map()                                 # every figure colour has exactly one dark partner
+    assert swap["#FFFFFF"] == "#1A1918" and len(set(swap.values())) == len(swap)
+    results = [example(name, library, "ATR") for name in ("06_PS_calibration_film_transmission.csv",
+                                                          "07_particle_on_filter.csv")]
+    page = write_report(results, library, run_info(library, impostor_test(library)), tmp_path / "run",
+                        audit_log=tmp_path / "audit.csv").read_text(encoding="utf-8")
+    assert "@media screen and (prefers-color-scheme:dark)" in page   # dark colours never reach the paper
+    assert "beforeprint" in page and "FIGURE_SWAP" in page           # print opens every closed block
+    assert "06_<wbr>PS_<wbr>calibration" in page                     # long names wrap at the underscores
+    assert "font-family:'IBM Plex Mono'" in page                     # checksums look the same everywhere
+    assert "weak from </em>0.60" in page and "probable from </em>0.95" in page   # the score strip
+    assert "&#10003;" not in page                                    # icons, not text symbols

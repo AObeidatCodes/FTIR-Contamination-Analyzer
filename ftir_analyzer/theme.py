@@ -43,7 +43,10 @@ FONT_SANS = "Inter"
 FONT_MONO = "IBM Plex Mono"
 FONT_FILES = ["Inter-Regular.ttf", "Inter-Medium.ttf", "Inter-SemiBold.ttf", "Inter-Bold.ttf",
               "IBMPlexMono-Regular.ttf", "IBMPlexMono-Medium.ttf"]
-WEB_FONTS = [("Inter-Regular.woff2", 400), ("Inter-SemiBold.woff2", 600)]     # embedded in the HTML report
+# Embedded in the HTML report: (file, family, weight). IBM Plex Mono is the unchanged original file
+# (its licence does not allow a cut-down copy to keep the name "Plex").
+WEB_FONTS = [("Inter-Regular.woff2", FONT_SANS, 400), ("Inter-SemiBold.woff2", FONT_SANS, 600),
+             ("IBMPlexMono-Regular.ttf", FONT_MONO, 400)]
 
 # Type scale (pixels): 14 px is the smallest text; 12 px is only used for chart axis labels.
 SIZE = {"caption": 12, "small": 14, "body": 15, "title": 17, "heading": 22, "display": 28, "hero": 40}

@@ -111,14 +111,23 @@ transmission sample) and how many did not say (used as measured). The badge must
    (Accept / With changes / Re-measure), a comment (needed unless you accept) and the tick box "I
    have looked at the raw spectra …". The button then says **Sign and export**.
 2. **You should see** in the report: at the top "12 spectra · 20 Oct 2026, 17:05 (UTC+02:00) ·
-   analysed by Ali Obeidat (your login)", the badges **Library validated** and **Signed: Accepted**,
-   four tiles (probable / weak / no reliable match / with a flag), then the summary. Near the end:
+   analysed by Ali Obeidat (your login)", the badges **Library validated** and **Signed: Accepted**
+   in the bar at the top (it stays there while you scroll), four numbers (probable / weak / no
+   reliable match / with a flag), then the summary. Each spectrum has a **score strip**: a filled dot
+   for its score r, a hollow dot for the next different material, on grey / amber / green zones that
+   start at 0.60 (weak) and 0.95 (probable). Near the end:
    "**Accepted**, signed by Ali Obeidat (your login) on …", with your comment. Without signing, the
    report has fields you can type into before printing, and says **Not signed yet**.
 3. The report's folder also has **report.xlsx**: the results as a formatted Excel table.
 4. **Records → Signatures (Excel)**: one row for the signed report, with the decision in colour and
    the start of the report's SHA-256. **Records → Audit log (Excel)** and **Sample log (Excel)** open
    the same way.
+5. In the open report, make the browser window narrow (half the screen), then wide again.
+   **You should see:** every figure still runs from 4000 on the left to about 650 on the right, and
+   nothing on the page scrolls sideways.
+6. **Ctrl+P** (print preview). **You should see:** white paper with dark text, even if Windows is in
+   dark mode, and the "Raw data and traceability" and "Analytical view" sections printed open.
+   Cancel the print; the sections close again.
 
 ## Checklist
 
