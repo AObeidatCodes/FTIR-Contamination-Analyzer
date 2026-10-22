@@ -7,7 +7,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ftir-contamination-analyzer"
-version = "1.0.0"
+version = "1.1.0"
 description = "Identify contamination from FTIR spectra: validated library search, raw-spectrum checks, band evidence and traceable reports."
 readme = "README.md"
 authors = [{ name = "Ali Obeidat" }]

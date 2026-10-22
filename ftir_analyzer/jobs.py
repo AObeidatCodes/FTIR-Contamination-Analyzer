@@ -7,7 +7,7 @@ and reports back with Qt signals: Qt's safe way to hand results from a backgroun
 to the window.
 
 Author : Ali Obeidat
-Version: 1.0.0
+Version: 1.1.0
 License: MIT (see LICENSE)
 """
 

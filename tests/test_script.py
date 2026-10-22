@@ -5,7 +5,7 @@ The script is run exactly as a user would run it from a terminal, with its setti
 changed to: the demo spectra, ATR for files without a mode note, no browser.
 
 Author : Ali Obeidat
-Version: 1.0.0
+Version: 1.1.0
 License: MIT (see LICENSE)
 """
 

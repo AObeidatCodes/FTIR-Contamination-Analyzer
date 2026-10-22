@@ -40,7 +40,7 @@ Short names used in this file:
     t = theme colours    ms = milliseconds    dx, dy = how far something moves    pix = a snapshot
 
 Author : Ali Obeidat
-Version: 1.0.0
+Version: 1.1.0
 License: MIT (see LICENSE)
 """
 

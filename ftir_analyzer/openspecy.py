@@ -34,7 +34,7 @@ Short names used in this file:
     y = a spectrum on the common grid    r = a Pearson r    entry = one prepared reference (a dict)
 
 Author : Ali Obeidat
-Version: 1.0.0
+Version: 1.1.0
 License: MIT (see LICENSE)
 """
 

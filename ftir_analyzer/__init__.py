@@ -29,11 +29,11 @@ Modules, in the order the data flows through them:
     gui          the desktop application
 
 Author : Ali Obeidat
-Version: 1.0.0
+Version: 1.1.0
 License: MIT (see LICENSE)
 """
 
 __title__ = "FTIR Contamination Analyzer"
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 __author__ = "Ali Obeidat"
 __license__ = "MIT"

@@ -23,7 +23,7 @@ Short names used in this file:
     w = one band position    rect = a rectangle on screen    dpr = device pixel ratio (2 on a "retina" screen)
 
 Author : Ali Obeidat
-Version: 1.0.0
+Version: 1.1.0
 License: MIT (see LICENSE)
 """
 

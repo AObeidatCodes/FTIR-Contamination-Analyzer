@@ -15,7 +15,7 @@ Short names used in this file:
     u_ / r_ = the unknown sample / the reference    pos, h = band positions, band heights    w = one position
 
 Author : Ali Obeidat
-Version: 1.0.0
+Version: 1.1.0
 License: MIT (see LICENSE)
 """
 

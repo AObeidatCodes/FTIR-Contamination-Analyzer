@@ -5,7 +5,7 @@ FTIR Contamination Analyzer - start the application
     python run_analyzer.py --help          all options (batch report without a window, ...)
 
 Author : Ali Obeidat
-Version: 1.0.0
+Version: 1.1.0
 License: MIT (see LICENSE)
 """
 

@@ -17,7 +17,7 @@ FTIR part is used, and no data is made up across the cut-out region; references 
 in transmission are put into the library's ATR look, as samples are.
 
 Author : Ali Obeidat
-Version: 1.0.0
+Version: 1.1.0
 License: MIT (see LICENSE)
 """
 

@@ -36,7 +36,7 @@ Short names used in this file:
     r = one Result    t = the current theme colours    ev = band evidence    c = checks    s = spectrum
 
 Author : Ali Obeidat
-Version: 1.0.0
+Version: 1.1.0
 License: MIT (see LICENSE)
 """
 

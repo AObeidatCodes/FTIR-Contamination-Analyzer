@@ -7,7 +7,7 @@ reference that would make two materials impossible to tell apart is caught befor
 The Nylon 6 walkthrough (examples/CHECK_IT_YOURSELF.md) is checked here with its numbers.
 
 Author : Ali Obeidat
-Version: 1.0.0
+Version: 1.1.0
 License: MIT (see LICENSE)
 """
 

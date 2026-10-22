@@ -10,7 +10,7 @@ change is there at once; one test checks that the animations finish in the right
 Skipped automatically if PySide6 is not installed.
 
 Author : Ali Obeidat
-Version: 1.0.0
+Version: 1.1.0
 License: MIT (see LICENSE)
 """
 

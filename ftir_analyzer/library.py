@@ -26,7 +26,7 @@ Short names used in this file:
     ok = True where both have data    r = Pearson r (the score)    k, v = key and value of a dict
 
 Author : Ali Obeidat
-Version: 1.0.0
+Version: 1.1.0
 License: MIT (see LICENSE)
 """
 

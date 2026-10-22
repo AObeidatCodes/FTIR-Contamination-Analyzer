@@ -15,7 +15,7 @@ Short names used in this file:
     ok = True where there is data (not NaN)    d = steepness (the derivative)
 
 Author : Ali Obeidat
-Version: 1.0.0
+Version: 1.1.0
 License: MIT (see LICENSE)
 """
 

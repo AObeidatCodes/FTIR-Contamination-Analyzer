@@ -28,7 +28,7 @@ Short names used in this file:
     t = a theme (a dict of colour tokens)    qss = Qt style sheet (CSS for Qt widgets)    ms = milliseconds
 
 Author : Ali Obeidat
-Version: 1.0.0
+Version: 1.1.0
 License: MIT (see LICENSE)
 """
 

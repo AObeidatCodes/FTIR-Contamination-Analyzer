@@ -24,7 +24,7 @@ Short names used in this file:
     tall = height of the tallest band    ch / oh / co2 = height of that band
 
 Author : Ali Obeidat
-Version: 1.0.0
+Version: 1.1.0
 License: MIT (see LICENSE)
 """
 

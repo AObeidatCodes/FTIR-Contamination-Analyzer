@@ -5,7 +5,7 @@ Every number the analysis depends on lives here, in one place, with the reason
 it has its value. Changing a rule means changing one line in this file.
 
 Author : Ali Obeidat
-Version: 1.0.0
+Version: 1.1.0
 License: MIT (see LICENSE)
 """
 

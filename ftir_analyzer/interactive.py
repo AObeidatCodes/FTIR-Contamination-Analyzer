@@ -19,7 +19,7 @@ Short names used in this file:
     lo, hi = the ends of a zone    row = which panel (1 = top)
 
 Author : Ali Obeidat
-Version: 1.0.0
+Version: 1.1.0
 License: MIT (see LICENSE)
 """
 

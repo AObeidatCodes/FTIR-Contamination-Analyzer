@@ -1,6 +1,6 @@
 # FTIR Contamination Analyzer
 
-**Developed by Ali Obeidat** · version 1.0.0 · MIT License
+**Developed by Ali Obeidat** · version 1.1.0 · MIT License
 
 Identifies the material behind a contamination (a particle, a fibre, a film or a residue) from its
 FTIR spectrum. It does what is otherwise done by hand, spectrum by spectrum, and writes a report that
