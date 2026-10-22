@@ -103,6 +103,28 @@ def _style(ax, t):
         ax.spines[side].set_linewidth(0.8)
 
 
+def _legend_room(fig, rows=0):
+    """Keep room above the panels for a legend of `rows` lines (0: no room, and stop keeping it).
+
+    The room is a fixed height in points (the unit of the text), not a share of the figure, and it
+    is worked out again whenever the figure changes size, so the legend never meets the panel
+    title, whatever the window size or the display scale."""
+    old = getattr(fig, "_legend_room", None)
+    if old is not None and fig.canvas is not None:
+        fig.canvas.mpl_disconnect(old)
+        fig._legend_room = None
+    if not rows:
+        return
+
+    def fit(_=None):
+        height = max(fig.get_figheight() * 72, 200)                # the figure's height in points
+        fig.subplots_adjust(top=1 - (28 + 12 * rows) / height)
+
+    fit()
+    if fig.canvas is not None:
+        fig._legend_room = fig.canvas.mpl_connect("resize_event", fit)
+
+
 def draw_result(fig, result, library, t=LIGHT, compare=None):
     """Draw one Result into a Figure (cleared first). `t` is the theme (light or dark colours).
 
@@ -174,23 +196,25 @@ def draw_result(fig, result, library, t=LIGHT, compare=None):
                         xycoords=("data", "axes fraction"), ha="left", fontsize=7.5, color=t["ink_2"],
                         bbox={"boxstyle": "round,pad=0.3", "fc": t["chart_surface"], "ec": t["line"], "lw": 0.6})
 
-    legend = bottom.legend(handles=handles, loc="upper left", bbox_to_anchor=(0.0, 0.93), fontsize=8,
-                           frameon=True, framealpha=0.92, edgecolor="none", facecolor=t["chart_surface"],
-                           labelcolor=t["ink_2"], handlelength=1.8, borderaxespad=0.6)
-    legend.set_zorder(7)
+    # The legend sits above both panels, in two columns, so it never covers a curve or a zone
+    rows = (len(handles) + 1) // 2
+    fig.legend(handles=handles, loc="upper left", bbox_to_anchor=(0.07, 0.995), ncol=2, fontsize=8,
+               frameon=False, labelcolor=t["ink_2"], handlelength=1.8, columnspacing=2.0, borderaxespad=0.2)
     bottom.set_ylim(-0.04, 1.16)                                  # head room for the zone labels
     bottom.set_yticks([])
     bottom.set_xlim(config.GRID_STOP, config.GRID_START)          # FTIR convention: high wavenumber on the left
     bottom.set_xlabel("wavenumber (cm$^{-1}$)", color=t["muted"], fontsize=8.5)
     for ax in (top, bottom):
         _style(ax, t)
-    fig.subplots_adjust(left=0.07, right=0.985, top=0.93, bottom=0.1)
+    fig.subplots_adjust(left=0.07, right=0.985, bottom=0.1)
+    _legend_room(fig, rows)
     return drawing
 
 
 def draw_analytical(fig, result, library, t=LIGHT):
     """Draw every processing step, one panel each, sharing the wavenumber axis."""
     setup_fonts()
+    _legend_room(fig)                                            # no legend room here
     fig.clear()
     fig.set_facecolor(t["chart_surface"])
     steps = analytical_steps(result, library)

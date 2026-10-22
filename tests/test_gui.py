@@ -98,8 +98,8 @@ def test_files_are_not_added_twice(app, window):
 def test_selecting_a_result_fills_the_page(app, window):
     select(app, window, "07_particle_on_filter")
     page = window.result_view
-    assert page.fact_r.value.text() == "0.97"
-    assert page.fact_bands.value.text() == "4 of 4"
+    assert f"{page.strip.best_r:.2f}" == "0.97" and page.strip.rival == "EVA (25% VA)"
+    assert page.fact_bands.value.text() == "4 of 4" and page.fact_how.value.text() == "ATR"
     assert "second component" in page.next_text.text()
 
 
@@ -157,7 +157,7 @@ def test_animations_finish_in_the_right_state(app, window):
         select(app, window, "07_particle_on_filter")
         wait(app, lambda: False, 1.5)                                  # let every animation run to the end
         page = window.result_view
-        assert page.fact_r.value.text() == "0.97" and page.fact_bands.value.text() == "4 of 4"
+        assert page.strip.progress == 1.0 and page.fact_bands.value.text() == "4 of 4"
         assert all(section.graphicsEffect() is None for section in page.sections())   # effects removed again
         assert page.bars.growth == 1.0
     finally:

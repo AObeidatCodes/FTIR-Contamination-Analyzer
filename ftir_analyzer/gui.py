@@ -8,7 +8,8 @@ The window a lab user works in:
     Analyze       left: the analysed spectra (status icon, name, match, score, flags), with a filter
                   right: the result of the selected spectrum
                     name, verdict, match and flags
-                    four facts: score, lead over the next material, key bands found, highest absorbance
+                    the score strip: the score r and the next material's against the verdict rule
+                    three facts: key bands found, highest absorbance, how it was compared
                     the next step, in one sentence (and "add to library" when it is not known)
                     the figure, with zoom / pan / save, "compare with ..." and a live band readout
                     (switch to the Analytical view to see every processing step)
@@ -75,9 +76,9 @@ from .records import SampleLog, readable_time, resolve_modes, run_info
 from .report import write_report
 from .spectrum_io import SpectrumFileError, find_spectrum_files, read_spectra
 from .theme import FONT_FILES, FONTS, THEMES, VERDICT_LOOK, stylesheet
-from .widgets import (ElidedLabel, EmptyState, FlowLayout, ModeDialog, Pill, PlotPanel, ScoreBars, SpectrumDelegate,
-                      SpectrumListModel, Theme, chip, clear_layout, flag_pill, icon, icon_pixmap, logo_pixmap,
-                      verdict_pill)
+from .widgets import (ElidedLabel, EmptyState, FlowLayout, ModeDialog, Pill, PlotPanel, ScoreBars, ScoreStrip,
+                      SpectrumDelegate, SpectrumListModel, Theme, chip, clear_layout, flag_pill, icon, icon_pixmap,
+                      logo_pixmap, verdict_pill)
 
 FILE_FILTER = "Spectrum files (" + " ".join(f"*{ext}" for ext in config.SPECTRUM_FILE_TYPES) + ");;All files (*)"
 ANALYZE, LIBRARY = "analyze", "library"
@@ -294,25 +295,34 @@ class ResultView(SmoothScrollArea):
         col.addWidget(self.change_box)
         self.changes, self.change_reason = {}, ""
 
-        # 2. four facts in one card (two rows of two on a narrow window)
+        # 2. one card: the score strip (the verdict rule in one picture, as in the report), and
+        #    under it three facts in one row (one under the other on a very narrow window)
         self.facts = Card()
-        self.fact_grid = QGridLayout(self.facts)
-        self.fact_grid.setContentsMargins(20, 12, 20, 12)
+        card = QVBoxLayout(self.facts)
+        card.setContentsMargins(20, 16, 20, 12)
+        card.setSpacing(12)
+        self.strip = ScoreStrip()
+        card.addWidget(self.strip)
+        rule = QFrame()
+        rule.setObjectName("Divider")
+        rule.setFixedHeight(1)
+        card.addWidget(rule)
+        self.fact_grid = QGridLayout()
         self.fact_grid.setHorizontalSpacing(16)
-        self.fact_grid.setVerticalSpacing(16)
-        self.fact_r = Fact("score (Pearson r)")
-        self.fact_gap = Fact("lead over the next material")
+        self.fact_grid.setVerticalSpacing(12)
+        card.addLayout(self.fact_grid)
         self.fact_bands = Fact("key bands found")
         self.fact_a = Fact("highest absorbance")
-        self.fact_list = [self.fact_r, self.fact_gap, self.fact_bands, self.fact_a]
+        self.fact_how = Fact("compared as")
+        self.fact_list = [self.fact_bands, self.fact_a, self.fact_how]
         self.dividers = []
-        for _ in range(3):
+        for _ in range(2):
             divider = QFrame()
             divider.setObjectName("Divider")
             divider.setFixedWidth(1)
             self.dividers.append(divider)
         self.columns = None
-        self._lay_out(4)
+        self._lay_out(3)
         col.addWidget(self.facts)
 
         # 3. the next step (with "add to library" when the material is not known well)
@@ -377,30 +387,29 @@ class ResultView(SmoothScrollArea):
         side = 32 if width >= 760 else 16                               # narrow: the page keeps its width for content
         if self.page.layout().contentsMargins().left() != side:
             self.page.layout().setContentsMargins(side, 24, side, 32)
-        self._lay_out(4 if width >= 760 else 2)
+        self._lay_out(3 if width >= 520 else 1)
         self._lay_panels(2 if width >= 720 else 1)
 
     def _lay_out(self, columns):
-        """The four facts in one row (with dividers), or in two rows of two."""
+        """The three facts in one row (with dividers), or one under the other."""
         if columns == self.columns:
             return
         self.columns = columns
         for widget in self.fact_list + self.dividers:
             self.fact_grid.removeWidget(widget)
-        for k in range(8):
+        for k in range(6):
             self.fact_grid.setColumnStretch(k, 0)
-        if columns == 4:
+        if columns == 3:
             for i, fact in enumerate(self.fact_list):
                 self.fact_grid.addWidget(fact, 0, 2 * i)
                 self.fact_grid.setColumnStretch(2 * i, 1)
-                if i < 3:
+                if i < 2:
                     self.fact_grid.addWidget(self.dividers[i], 0, 2 * i + 1)
                     self.dividers[i].show()
         else:
             for i, fact in enumerate(self.fact_list):
-                self.fact_grid.addWidget(fact, i // 2, i % 2)
+                self.fact_grid.addWidget(fact, i, 0)
             self.fact_grid.setColumnStretch(0, 1)
-            self.fact_grid.setColumnStretch(1, 1)
             for divider in self.dividers:
                 divider.hide()
 
@@ -436,8 +445,9 @@ class ResultView(SmoothScrollArea):
         self.changes, self.change_reason = dict(changes), reason
 
     def play(self):
-        """After the page has risen in: the numbers count up and the bars grow."""
-        for fact in (self.fact_r, self.fact_gap, self.fact_bands, self.fact_a):
+        """After the page has risen in: the dots slide to their scores, the numbers count up, the bars grow."""
+        self.strip.play()
+        for fact in self.fact_list:
             fact.play()
         self.bars.grow()
 
@@ -474,9 +484,10 @@ class ResultView(SmoothScrollArea):
                    if self.change_reason else ""))
         self.change_box.setVisible(change is not None)
 
-        # facts (the numbers count up)
-        self.fact_r.set(f"{r.r:.2f}", "score (Pearson r)", animated)
-        self.fact_gap.set(f"{r.gap:.2f}", f"lead over {r.runner_up}", animated)
+        # the score strip, and the facts (the numbers count up)
+        self.strip.set_data(r, animated)
+        self.fact_how.set(r.compared_as, "compared as" + ("" if r.mode in ("ATR", "transmission") else
+                                                          ", the better reading"), animated=False)
         self.fact_bands.set(f"{len(ev.found)} of {ev.n_key}" if ev else "–",
                             f"key {r.best} bands found" if ev else "key bands (no match)", animated)
         self.fact_a.set(f"{c.max_a:.2f}", "highest absorbance, saturated" if c.saturated else "highest absorbance",
@@ -1261,14 +1272,14 @@ class MainWindow(QMainWindow):
         detail.remove.connect(lambda n: self.remove_reference(n))
         detail.show_file.connect(self._show_reference_file)
         in_house = self.library.info_of(name).origin == "in-house"
-        self._open_sheet(name, detail, 640, "IN-HOUSE REFERENCE" if in_house else "REFERENCE")
+        self._open_sheet(name, detail, 640)
         return detail
 
     def open_similarity(self):
         if self.library is None:
             return None
         content = SimilarityPanel(self.library, self.validation, similarity_for(self.library))
-        self._open_sheet("Which references could be confused?", content, 1040, "SIMILARITY MAP")
+        self._open_sheet("Similarity map: which references could be confused?", content, 1040)
         return content
 
     def open_add_reference(self, use_current=True):
@@ -1277,7 +1288,7 @@ class MainWindow(QMainWindow):
             return None
         current = self.current_result() if use_current else None
         content = AddReferencePanel(self.library, self.validation, self.model.results, current, self.last_dir)
-        sheet = self._open_sheet("Add a reference to the library", content, 720, "IN-HOUSE LIBRARY",
+        sheet = self._open_sheet("Add a reference to the library", content, 720, "",
                                  content.footer, content.closing, tall=True)
         content.cancelled.connect(sheet.close_sheet)
         content.submitted.connect(self.add_reference)
@@ -1350,7 +1361,7 @@ class MainWindow(QMainWindow):
         content = OpenSpecyPanel(OpenSpecyLibrary(self.openspecy_dir), self.last_dir)
         content.download_requested.connect(lambda: self.get_openspecy(None))
         content.import_requested.connect(self.get_openspecy)
-        self._open_sheet("More references from Open Specy", content, 640, "OPEN SPECY")
+        self._open_sheet("More references from Open Specy", content, 640)
         return content
 
     def get_openspecy(self, path=None):
@@ -1451,7 +1462,7 @@ class MainWindow(QMainWindow):
         if not Path(folder).is_dir():
             folder = str(self.last_dir)
         content = ExportPanel(self.model.results, folder, self.settings.value("user_name", ""))
-        sheet = self._open_sheet("Export the report", content, 640, "REPORT", content.footer)
+        sheet = self._open_sheet("Export the report", content, 640, "", content.footer)
         content.cancelled.connect(sheet.close_sheet)
         content.submitted.connect(self._export_chosen)
         return content

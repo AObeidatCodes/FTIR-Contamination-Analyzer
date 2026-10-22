@@ -447,6 +447,12 @@ Minimal and modern, following a design guide for clean interfaces: warm greys, O
 soft powder blue), an 8 px spacing grid, white cards with a 1 px border (a soft shadow only while a
 card is lifted under the mouse), no gradients, and text of 14 px and up.
 
+- **One picture for the verdict, in the app and in the report.** The score strip shows the score r
+  (filled dot) and the next different material (hollow dot) on a track coloured by the verdict rule:
+  grey below 0.60, amber from 0.60 (weak), green from 0.95 (probable). The lead is the distance
+  between the two dots. When a spectrum is selected the dots slide to their scores.
+- **Nothing decorative.** No small upper-case labels above headings and no icon-topped cards; the
+  figure's legend sits above the panels, so it never covers a curve or a shaded zone.
 - **Soft colours, still readable.** Buttons and badges are pastel tints with dark text (7.3 : 1 or
   more), the status colours are pastel too (green = probable, amber = weak, grey = no reliable match,
   red = do not trust as it is), and a colour never appears without its icon and its word. Lines, bars
@@ -458,7 +464,7 @@ card is lifted under the mouse), no gradients, and text of 14 px and up.
   with dark text on every step (6 : 1 or more). Peak labels have a halo, so a line never hides them.
 - **Typeface.** Inter, embedded in the app and in the report, so it looks the same on every computer;
   IBM Plex Mono for checksums and paths (embedded too).
-- **Fits any window.** On a narrow window the toolbar shows icons only, the facts wrap into two rows,
+- **Fits any window.** On a narrow window the toolbar shows icons only, the facts stack,
   the cards stack, the Library page's buttons move under its title and long names are shortened
   with … (the full text is in the tooltip). On a low window the welcome page leaves out its
   illustration. Nothing scrolls sideways.

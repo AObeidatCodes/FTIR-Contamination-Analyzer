@@ -8,6 +8,8 @@ Small, reusable pieces the main window is made of. Most of them paint themselves
     Pill                 the coloured verdict / flag label: icon + word, never colour alone
     ScoreBars            the ranking as horizontal bars that grow into place, with the weak /
                          probable thresholds marked
+    ScoreStrip           the verdict rule in one picture: the score r (filled dot) and the next
+                         different material (hollow dot) on a track coloured grey / amber / green
     FlowLayout           lays chips (and library cards) out in rows that wrap, like words in a sentence
     SpectrumListModel    the analysed spectra, as a list Qt can display and filter
     SpectrumDelegate     how one row of the list is drawn (status icon, name, match, score, flags);
@@ -283,6 +285,131 @@ class ScoreBars(QWidget):
             ink.setAlphaF(share)
             p.setPen(ink)
             p.drawText(QRect(int(end) + 6, y, 44, self.ROW), Qt.AlignVCenter | Qt.AlignLeft, f"{r:.2f}")
+
+
+# ---------------------------------------------------------------------------- ScoreStrip
+class ScoreStrip(QWidget):
+    """The verdict rule in one picture (the same strip as in the report).
+
+    A track from 0 to 1, coloured by the rule: grey below 0.60 (no reliable match), amber from
+    0.60 (weak), green from 0.95 (probable). The best material is a filled dot at its score r,
+    the next DIFFERENT material a hollow dot at its score; the lead the rule asks for (0.08) is
+    the distance between the two dots. Above the track the two names and scores and the lead;
+    below it the thresholds. When a new result arrives the dots slide in from 0.
+    """
+
+    TRACK, DOT = 10, 14        # track thickness and dot size (pixels)
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.best, self.best_r, self.rival, self.rival_r, self.lead = "", 0.0, "", 0.0, 0.0
+        self.progress = 1.0
+        self._animation = None
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+
+    def set_data(self, r, animated=True):
+        """New scores. animated=True: the dots wait at 0 until play() is called (after the page transition)."""
+        self.best, self.best_r = r.best, r.r
+        self.rival, self.rival_r, self.lead = r.runner_up, r.r - r.gap, r.gap
+        self.setToolTip(f"Score r {r.r:.2f} for {r.best}; the next different material, {r.runner_up}, scores "
+                        f"{self.rival_r:.2f} (lead {r.gap:.2f}; probable needs r ≥ {config.PROBABLE_R:.2f} and "
+                        f"a lead ≥ {config.MIN_GAP:.2f}; weak needs r ≥ {config.WEAK_R:.2f})")
+        stop(self._animation)
+        self._slide(0.0 if animated and not Motion.reduced else 1.0)
+
+    def play(self):
+        stop(self._animation)
+        self._animation = animate(self, 0.0, 1.0, Motion.ms("bars"), self._slide)
+
+    def _slide(self, value):
+        self.progress = value
+        self.update()
+
+    def sizeHint(self):
+        return QSize(360, 76)
+
+    def minimumSizeHint(self):
+        return QSize(200, 76)
+
+    def paintEvent(self, _):
+        t = Theme.t
+        p = QPainter(self)
+        p.setRenderHint(QPainter.Antialiasing)
+        half = self.DOT / 2 + 1
+        x0, x1 = half, self.width() - half                           # where 0 and 1 of the scale are
+        scale = lambda value: x0 + min(max(value, 0.0), 1.0) * (x1 - x0)  # noqa: E731
+        narrow = self.width() < 460
+
+        # the legend line: ● best  r 0.97     ○ next  r 0.59     lead 0.39 (needed 0.08)
+        fm, fm_bold = QFontMetrics(font("small")), QFontMetrics(font("small", QFont.DemiBold))
+        y, x = 0, 0
+        items = [("best", self.best, f"r {self.best_r:.2f}"), ("rival", self.rival, f"r {self.rival_r:.2f}")]
+        # the lead always shows: first the "(needed …)" goes, then the names are shortened with …
+        fixed = 2 * (18 + 8 + 24) + sum(fm_bold.horizontalAdvance(score) for _, _, score in items)
+        names = sum(fm.horizontalAdvance(name) for _, name, _ in items)
+        lead = f"lead {self.lead:.2f}  (needed {config.MIN_GAP:.2f})"
+        if fixed + names + fm.horizontalAdvance(lead) > self.width():
+            lead = f"lead {self.lead:.2f}"
+        name_room = max(40, (self.width() - fixed - fm.horizontalAdvance(lead)) // 2)
+        for kind, name, score in items:
+            centre = QPointF(x + 6, y + 10)
+            if kind == "best":
+                p.setPen(Qt.NoPen)
+                p.setBrush(QColor(t["ink"]))
+            else:
+                p.setPen(QPen(QColor(t["ink_2"]), 2))
+                p.setBrush(Qt.NoBrush)
+            p.drawEllipse(centre, 5, 5)
+            x += 18
+            name = fm.elidedText(name, Qt.ElideRight, name_room)
+            p.setFont(font("small"))
+            p.setPen(QColor(t["ink"] if kind == "best" else t["ink_2"]))
+            p.drawText(QRect(x, y, fm.horizontalAdvance(name) + 2, 20), Qt.AlignVCenter, name)
+            x += fm.horizontalAdvance(name) + 8
+            p.setFont(font("small", QFont.DemiBold if kind == "best" else QFont.Normal))
+            p.drawText(QRect(x, y, fm_bold.horizontalAdvance(score) + 2, 20), Qt.AlignVCenter, score)
+            x += fm_bold.horizontalAdvance(score) + 24
+        p.setFont(font("small"))
+        p.setPen(QColor(t["muted"]))
+        p.drawText(QRect(x, y, max(0, self.width() - x), 20), Qt.AlignVCenter | Qt.AlignLeft, lead)
+
+        # the track: three zones of the verdict rule
+        top = 36 - self.TRACK / 2
+        zones = [(0.0, config.WEAK_R, "none_bg"), (config.WEAK_R, config.PROBABLE_R, "warn_bg"),
+                 (config.PROBABLE_R, 1.0, "good_bg")]
+        track = QPainterPath()
+        track.addRoundedRect(QRectF(x0, top, x1 - x0, self.TRACK), self.TRACK / 2, self.TRACK / 2)
+        p.save()
+        p.setClipPath(track)
+        p.setPen(Qt.NoPen)
+        for lo, hi, key in zones:
+            p.setBrush(QColor(t[key]))
+            p.drawRect(QRectF(scale(lo), top, scale(hi) - scale(lo) + 0.5, self.TRACK))
+        p.restore()
+
+        # the dots slide in from 0 (the hollow one first, so the filled one ends on top)
+        ease = 1 - (1 - self.progress) ** 3
+        for value, filled in ((self.rival_r, False), (self.best_r, True)):
+            centre = QPointF(scale(value * ease), 36)
+            if filled:
+                p.setPen(QPen(QColor(t["surface"]), 2))
+                p.setBrush(QColor(t["ink"]))
+            else:
+                p.setPen(QPen(QColor(t["ink_2"]), 2))
+                p.setBrush(QColor(t["surface"]))
+            p.drawEllipse(centre, self.DOT / 2, self.DOT / 2)
+
+        # the thresholds under the track
+        p.setFont(font("small"))
+        p.setPen(QColor(t["muted"]))
+        base = QRect(0, 50, self.width(), 22)
+        p.drawText(QRect(int(x0) - 4, base.y(), 40, base.height()), Qt.AlignVCenter | Qt.AlignLeft, "0")
+        weak = f"{config.WEAK_R:.2f}" if narrow else f"weak from {config.WEAK_R:.2f}"
+        probable = f"{config.PROBABLE_R:.2f}" if narrow else f"probable from {config.PROBABLE_R:.2f}"
+        w_weak = fm.horizontalAdvance(weak)
+        p.drawText(QRect(int(scale(config.WEAK_R) - w_weak / 2), base.y(), w_weak + 2, base.height()),
+                   Qt.AlignVCenter, weak)
+        p.drawText(QRect(0, base.y(), int(x1) + 4, base.height()), Qt.AlignVCenter | Qt.AlignRight, probable)
 
 
 def chip(text, kind="Chip"):
@@ -811,13 +938,12 @@ class SpectrumArt(QWidget):
         p.drawLine(int(left), int(base), int(right), int(base))
 
 
-class FeatureTile(Card):
-    """One small card on the welcome screen: an icon, a title and one sentence."""
+class FeatureTile(QWidget):
+    """One of the three short points on the welcome screen: a title and one sentence. Plain text
+    in a column, not a card with an icon on top: the words carry it, nothing decorates it."""
 
-    def __init__(self, icon_name, title, text):
+    def __init__(self, title, text):
         super().__init__()
-        self.icon_name = icon_name
-        self.mark = QLabel()
         heading = QLabel(title)
         heading.setObjectName("SectionTitle")
         body = QLabel(text)
@@ -826,18 +952,15 @@ class FeatureTile(Card):
         body.setFixedWidth(224)
         self.blurb = body
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(16, 16, 16, 16)
+        layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(6)
-        layout.addWidget(self.mark)
-        layout.addSpacing(2)
         layout.addWidget(heading)
         layout.addWidget(body)
         layout.addStretch()
-        self.setFixedWidth(264)
-        self.retheme()
+        self.setFixedWidth(240)
 
     def retheme(self):
-        self.mark.setPixmap(icon_pixmap(self.icon_name, Theme.t["accent_ink"], 24, self.devicePixelRatioF() or 2.0))
+        pass
 
 
 class EmptyState(QWidget):
@@ -858,9 +981,6 @@ class EmptyState(QWidget):
         self.page = QWidget()
         self.page.setObjectName("EmptyPage")
         self.logo = QLabel()
-        self.eyebrow = QLabel("FTIR CONTAMINATION ANALYZER")
-        self.eyebrow.setObjectName("Eyebrow")
-        self.eyebrow.setAlignment(Qt.AlignCenter)
         self.title = QLabel("Identify a contamination\nfrom its FTIR spectrum.")
         self.title.setObjectName("HeroTitle")
         self.title.setAlignment(Qt.AlignCenter)
@@ -886,11 +1006,11 @@ class EmptyState(QWidget):
         self.demo.clicked.connect(self.open_demo.emit)
         self.library_link.clicked.connect(self.open_library.emit)
         self.tiles = [
-            FeatureTile("shield-check", "A validated library",
+            FeatureTile("A validated library",
                         "Every reference is tested against all the others each time it loads."),
-            FeatureTile("scan-search", "Checks you can see",
+            FeatureTile("Checks you can see",
                         "Raw-spectrum checks, and every step from the file to the score."),
-            FeatureTile("history", "Traceable by design",
+            FeatureTile("Traceable by design",
                         "Checksums, a sample log and an append-only audit trail."),
         ]
 
@@ -899,7 +1019,7 @@ class EmptyState(QWidget):
         buttons.addWidget(self.choose)
         buttons.addWidget(self.demo)
         self.tile_row = QWidget()
-        tiles = FlowLayout(self.tile_row, spacing=16, row_spacing=16, align="center", even=True)
+        tiles = FlowLayout(self.tile_row, spacing=32, row_spacing=24, align="center", even=True)
         for tile in self.tiles:
             tiles.addWidget(tile)
         layout = QVBoxLayout(self.page)
@@ -907,9 +1027,7 @@ class EmptyState(QWidget):
         layout.setSpacing(0)
         layout.addStretch(2)
         layout.addWidget(self.logo, 0, Qt.AlignCenter)
-        layout.addSpacing(16)
-        layout.addWidget(self.eyebrow)
-        layout.addSpacing(8)
+        layout.addSpacing(24)
         layout.addWidget(self.title)
         layout.addSpacing(16)
         layout.addWidget(self.text, 0, Qt.AlignCenter)
@@ -966,7 +1084,7 @@ class EmptyState(QWidget):
         if Motion.reduced or not self.isVisible():
             return
         self.art.progress = 0.0
-        parts = [self.logo, self.eyebrow, self.title, self.text, self.buttons, self.library_link, self.art,
+        parts = [self.logo, self.title, self.text, self.buttons, self.library_link, self.art,
                  self.tile_row]
         bands = []
         for widget in parts:

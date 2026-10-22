@@ -554,7 +554,6 @@ class LibraryPage(QWidget):
         self.top = top
         titles = QVBoxLayout()
         titles.setSpacing(2)
-        titles.addWidget(text_label("REFERENCE LIBRARY", "Eyebrow"))
         self.title = text_label(ALL, "PageTitle")
         titles.addWidget(self.title)
         self.subtitle = text_label("", "Meta", wrap=True)
