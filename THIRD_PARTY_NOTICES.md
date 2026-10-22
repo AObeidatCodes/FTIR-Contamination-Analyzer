@@ -129,7 +129,7 @@ with a slightly thinner line when it draws them.
 ## Python packages
 
 The program uses numpy, pandas, scipy and matplotlib (BSD-style licences), plotly (MIT),
-rdata (MIT, to read Open Specy files) and PySide6 / Qt (LGPL v3). They are installed separately with `pip` and are not distributed with this
+rdata (MIT, to read Open Specy files), jcamp (MIT, Nathan Hagen, to read JCAMP-DX files), brukeropus (MIT, Josh Duran, to read Bruker OPUS files) and PySide6 / Qt (LGPL v3). They are installed separately with `pip` and are not distributed with this
 project. A report written by the program embeds plotly.js (MIT License, Copyright Plotly, Inc.), so
 that its interactive figures work offline; the licence notice is kept at the top of the embedded
 script.

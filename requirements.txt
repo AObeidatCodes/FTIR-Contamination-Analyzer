@@ -9,3 +9,5 @@ nbformat>=4.2         # lets Plotly show figures inside Jupyter / VS Code
 PySide6-Essentials>=6.6   # the desktop app (not needed for FTIR_Analyzer.py)
 rdata>=0.11           # reads Open Specy library files (only for the optional Open Specy references)
 openpyxl>=3.1         # the records and the report's table as formatted Excel sheets
+jcamp>=1.3             # reads JCAMP-DX instrument files (.jdx, .dx)
+brukeropus>=1.4        # reads Bruker OPUS instrument files (.0, .1, ...)

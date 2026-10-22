@@ -137,7 +137,8 @@ def choose_files():
     root.attributes("-topmost", True)               # the dialog comes to the front
     chosen = filedialog.askopenfilenames(
         title="Choose one or more FTIR spectrum files", initialdir=str(config.EXAMPLES_DIR),
-        filetypes=[("Spectrum files", "*.csv *.txt *.dpt"), ("All files", "*.*")])
+        filetypes=[("Spectrum files", "*.csv *.txt *.dpt *.jdx *.dx *.0 *.1 *.2 *.3 *.4 *.5 *.6 *.7 *.8 *.9"),
+                   ("All files", "*.*")])
     root.destroy()
     return [Path(p) for p in chosen]
 

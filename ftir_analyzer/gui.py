@@ -58,7 +58,7 @@ from PySide6.QtWidgets import (QAbstractItemView, QApplication, QDialog, QFileDi
 
 from . import __author__, __license__, __title__, __version__, config
 from .analysis import NO_MATCH, PROBABLE, WEAK, analyse
-from .checks import BELOW_ZERO_TEXT, describe_co2
+from .checks import BELOW_ZERO_TEXT, describe_co2, describe_vapour
 from .evidence import fab_sources
 from .export_view import ExportPanel
 from .inhouse import InHouseLibrary, changes_between, reanalyse
@@ -80,7 +80,8 @@ from .widgets import (ElidedLabel, EmptyState, FlowLayout, ModeDialog, Pill, Plo
                       SpectrumDelegate, SpectrumListModel, Theme, chip, clear_layout, flag_pill, icon, icon_pixmap,
                       logo_pixmap, verdict_pill)
 
-FILE_FILTER = "Spectrum files (" + " ".join(f"*{ext}" for ext in config.SPECTRUM_FILE_TYPES) + ");;All files (*)"
+FILE_FILTER = ("Spectrum files (" + " ".join([f"*{ext}" for ext in config.SPECTRUM_FILE_TYPES]
+                                            + list(config.INSTRUMENT_FILE_PATTERNS)) + ");;All files (*)")
 ANALYZE, LIBRARY = "analyze", "library"
 
 HOW_IT_WORKS = f"""
@@ -536,6 +537,13 @@ class ResultView(SmoothScrollArea):
                                                    "Body", wrap=True))
                 for w in ev.unexplained:
                     self.evidence_body.addWidget(chip(band_label(w), "ChipExtra"))
+                # the two-component fit: a mix of the match and one other reference, if one clearly helps
+                self.evidence_body.addSpacing(4)
+                self.evidence_body.addWidget(label("Two-component fit", "Body"))
+                self.evidence_body.addWidget(label(
+                    r.mixture.text() if r.mixture else
+                    "No mix of the match and one other library reference explains these bands clearly: "
+                    "the second material is probably not in the library.", "Body2", wrap=True))
             else:
                 self.evidence_body.addWidget(label("Every clear band of the sample is explained by the match.",
                                                    "Body2", wrap=True))
@@ -558,6 +566,7 @@ class ResultView(SmoothScrollArea):
             ("warn" if c.oh in ("major", "minor") else "none", "O–H / N–H",
              f"{c.oh}, {max(c.oh_share, 0):.2f} of the tallest band"),
             ("none", "Noise", f"{c.noise:.4f} A (a band must be ≥ 3× this to count)"),
+            ("warn" if c.vapour_lines else "none", "Water vapour", describe_vapour(c)),
         ]
         if c.below_zero:
             rows.append(("warn", "Below zero", BELOW_ZERO_TEXT))
@@ -857,6 +866,7 @@ class MainWindow(QMainWindow):
         self.empty.open_demo.connect(self.open_demo)
         self.empty.open_library.connect(lambda: self.show_page(LIBRARY))
         self.result_view = ResultView()
+        self.result_view.plot.others = lambda: list(self.model.results)   # "another sample over this one"
         self.result_view.save_figure.connect(self.save_current_figure)
         self.result_view.add_reference.connect(lambda: self.open_add_reference())
         self.stack.addWidget(self.empty)
@@ -1451,7 +1461,7 @@ class MainWindow(QMainWindow):
             f"{png_300};;{png_600};;SVG vector image, any size (*.svg);;PDF vector document (*.pdf)")
         if path:
             save_figure(r, self.library, path, view=view, dpi=600 if chosen == png_600 else 300,
-                        compare=plot.compare)
+                        compare=plot.compare, overlay=plot.overlay)
             self.notify(f"Figure saved: {Path(path).name}", "image-down")
 
     def export_report(self):

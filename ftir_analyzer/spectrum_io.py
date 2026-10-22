@@ -1,7 +1,8 @@
 """
 FTIR Contamination Analyzer - reading spectrum files
 
-Reads instrument exports (CSV, TXT, DPT) into Spectrum objects. The measured values
+Reads instrument exports (CSV, TXT, DPT) and instrument files (JCAMP-DX, Bruker OPUS; see
+instrument_files.py) into Spectrum objects. The measured values
 are kept exactly as they are in the file and are made read-only, so nothing later
 in the program can change them by accident. Each file's SHA-256 checksum is recorded,
 so anyone can prove later that a report was made from this exact file.
@@ -24,6 +25,7 @@ import numpy as np
 import pandas as pd
 
 from . import config
+from .instrument_files import InstrumentFileError, is_instrument_file, is_jcamp, read_instrument_file
 
 
 class SpectrumFileError(ValueError):
@@ -64,7 +66,13 @@ def read_table(path, **options):
 
 
 def read_mode_note(path):
-    """The measuring mode from a '# mode: ...' note in the file header, or None if there is none."""
+    """The measuring mode the file states: a '# mode: ...' note in a text file, the sampling procedure
+    of a JCAMP-DX file or the accessory of an OPUS file. None if the file does not say."""
+    if is_instrument_file(path):
+        try:
+            return read_instrument_file(path)[0].mode
+        except InstrumentFileError:
+            return None
     for line in Path(path).read_text(encoding="utf-8", errors="replace").splitlines():
         if line.lower().startswith("# mode:"):
             note = line.split(":", 1)[1].strip().lower()              # "# mode: ATR" -> "atr"
@@ -119,6 +127,8 @@ def read_spectra(path):
     path = Path(path)
     if not path.is_file():
         raise SpectrumFileError(f"{path.name}: file not found.")
+    if is_instrument_file(path):
+        return _read_instrument(path)
 
     notes = [line.strip() for line in path.read_text(encoding="utf-8", errors="replace").splitlines()
              if line.lstrip().startswith("#")]                        # the "# ..." header lines
@@ -157,7 +167,33 @@ def read_spectra(path):
     return spectra
 
 
+def _read_instrument(path):
+    """A JCAMP-DX or OPUS file -> Spectrum objects (sorted low -> high, read-only, with the file's checksum)."""
+    try:
+        found = read_instrument_file(path)
+    except InstrumentFileError as error:
+        raise SpectrumFileError(str(error)) from error
+    file_checksum, spectra = checksum(path), []
+    for item in found:
+        keep = np.isfinite(item.wn) & np.isfinite(item.y)
+        order = np.argsort(item.wn[keep])
+        wn, raw = item.wn[keep][order].copy(), item.y[keep][order].copy()
+        if len(wn) < 20 or wn.min() < 200 or wn.max() > 8000:
+            raise SpectrumFileError(f"{path.name}: the data does not look like an FTIR spectrum in cm-1.")
+        wn.setflags(write=False)                                       # read-only, as for every other file
+        raw.setflags(write=False)
+        name = item.name if len(found) > 1 else path.stem
+        spectra.append(Spectrum(name, wn, raw, item.unit, item.unit_source, path, file_checksum))
+    return spectra
+
+
+def is_spectrum_file(path):
+    """A file the program can read: a text export by its extension, or an instrument file."""
+    path = Path(path)
+    return path.suffix.lower() in config.SPECTRUM_FILE_TYPES or is_jcamp(path) or is_instrument_file(path)
+
+
 def find_spectrum_files(folder):
     """Every spectrum file in a folder (not in sub-folders), sorted by name."""
     folder = Path(folder)
-    return sorted(p for p in folder.iterdir() if p.is_file() and p.suffix.lower() in config.SPECTRUM_FILE_TYPES)
+    return sorted(p for p in folder.iterdir() if p.is_file() and is_spectrum_file(p))

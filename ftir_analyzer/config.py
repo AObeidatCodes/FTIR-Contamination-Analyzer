@@ -39,6 +39,7 @@ SIGNATURE_LOG_FILE = RECORDS_DIR / "signatures.csv"       # one row per signed r
 # File types the app reads: instrument exports with a wavenumber column and one or more
 # intensity columns (comma, semicolon, tab or space separated, with or without a header).
 SPECTRUM_FILE_TYPES = (".csv", ".txt", ".dpt")
+INSTRUMENT_FILE_PATTERNS = ("*.jdx", "*.dx", "*.[0-9]", "*.[0-9][0-9]")   # JCAMP-DX and Bruker OPUS (.0, .1 ...)
 
 # Categories of the library album, in the order they are shown (where a material comes from in a fab)
 CATEGORIES = ("CMP & cleaning", "Cleanroom consumables", "People & clothing", "Carriers & handling",
@@ -91,6 +92,15 @@ CO2_WARNING = 0.5     # a CO2 artefact half as tall as the tallest band means: p
 # 3750-3950 is where water-vapour lines appear, and they are noise for our purposes.
 NOISE_WINDOWS = ((2000.0, 2250.0), (2450.0, 2750.0), (3750.0, 3950.0))
 
+# Water vapour: the air in the beam leaves a comb of sharp lines (each 1-2 cm-1 wide) when the
+# bench was not purged long enough or the background is old. They are looked for in 3580-3950,
+# where polymers have no sharp bands, against the same sharp wiggle in two quiet windows. Only
+# on the file's own points, and only if they are at most 4 cm-1 apart (coarser data blurs the lines).
+VAPOUR_WINDOW = (3580.0, 3950.0)
+VAPOUR_QUIET = ((2000.0, 2200.0), (2450.0, 2650.0))
+VAPOUR_RATIO = 4.0      # flagged at 4x the quiet windows' wiggle (demo 06, a real case: 9.4; the clean demos: 3.4 or less)
+VAPOUR_MAX_STEP = 4.0   # cm-1 between two data points, at most
+
 # Ruler method: (left foot, right foot, band). A band's height is measured above a
 # straight line drawn between the median levels of its two feet.
 CO2_ZONE = ((2200.0, 2250.0), (2420.0, 2470.0), (2280.0, 2400.0))
@@ -104,6 +114,12 @@ KEY_SHARE = 0.10      # a reference band is "key" if it reaches 10 % of the refe
 EXTRA_SHARE = 0.15    # a sample band must reach 15 % of its tallest band to be called unexplained
 TOLERANCE_CM = 15.0   # two bands are the same band if they are at most 15 cm-1 apart
 EVIDENCE_SHARE = 0.03 # bands are listed from 3 % of the tallest band (small bands still count as evidence)
+
+# Two-component fit (mixture.py): only reported when it clearly helps
+MIX_GAIN = 0.02       # the fit r must rise by at least 0.02 over the match alone (a real second material
+                      # gives 0.05 or more in the tests; noise and a slightly different batch give less)
+MIX_MIN_SHARE = 0.10  # the second reference must make up at least 10 % of the signal: less is noise-sized
+MIX_BAND_SHARE = 0.10 # it "has a band" at an unexplained position if it rises to 10 % of its tallest band there
 
 # --------------------------------------------------------------------------------------
 # Measuring mode and ATR correction

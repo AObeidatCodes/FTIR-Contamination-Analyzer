@@ -143,9 +143,10 @@ def result_figure(r, library, t=LIGHT):
                                  marker={"symbol": "triangle-up", "size": 10, "color": t["chart_found"],
                                          "line": {"color": t["chart_surface"], "width": 1.5}}), 2, 1)
     for w in (r.evidence.unexplained if r.evidence else []):
-        fig.add_vline(x=w, line={"color": t["chart_unexplained"], "width": 1.8, "dash": "dash"}, row=2, col=1,
-                      annotation_text=f"{w:.0f} cm⁻¹ unexplained", annotation_position="top left",
-                      annotation_font_color=t["ink"], annotation_font_size=12)
+        # the line stops under the zone names, and its label keeps 6 px away from it
+        fig.add_vline(x=w, y0=0, y1=0.88, line={"color": t["chart_unexplained"], "width": 1.8, "dash": "dash"},
+                      row=2, col=1, annotation_text=f"{w:.0f} cm⁻¹ unexplained", annotation_position="top left",
+                      annotation=dict(xshift=-6), annotation_font_color=t["ink"], annotation_font_size=12)
     if r.evidence and r.evidence.unexplained:
         fig.add_trace(go.Scatter(x=[None], y=[None], mode="lines", name="band the match cannot explain",
                                  line={"color": t["chart_unexplained"], "dash": "dash", "width": 1.8}), 2, 1)

@@ -7,6 +7,7 @@ Independent of the library match, these checks describe what was actually measur
     C-H          is there an organic C-H stretch?
     O-H / N-H    is there an O-H or N-H band, and how big is it?
     noise        how big is the scatter, so small bands can be judged fairly?
+    water vapour are there sharp lines of water vapour from the air in the beam?
 
 Band heights use the ruler method: a straight line is drawn between the median levels
 of the band's two feet, and the band is measured from that line, so a sloping
@@ -28,7 +29,7 @@ Version: 1.1.0
 License: MIT (see LICENSE)
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 
 import numpy as np
 from scipy.signal import savgol_filter
@@ -51,6 +52,12 @@ class Checks:
     noise: float            # robust noise level (absorbance units)
     co2_signed: float       # CO2 artefact height with its sign: < 0 = points down (less CO2 than in the background)
     tallest_bands: list = field(default_factory=list)   # labels of the 3 tallest bands
+    vapour: float = float("nan")    # water-vapour wiggle / quiet wiggle (NaN = not measured: data too coarse)
+
+    @property
+    def vapour_lines(self):
+        """True if the sharp lines of water vapour stand out (see config.VAPOUR_RATIO)."""
+        return bool(self.vapour >= config.VAPOUR_RATIO)
 
     @property
     def saturated(self):
@@ -80,6 +87,43 @@ def describe_co2(c):
         text += (", pointing down: less CO₂ in the air than during the background scan" if c.co2_direction == "down"
                  else ", pointing up: more CO₂ in the air than during the background scan")
     return text
+
+
+def describe_vapour(c):
+    """The water-vapour check in words."""
+    if not np.isfinite(c.vapour):
+        return "not measured (the data points are too far apart to see the sharp lines)"
+    text = f"{c.vapour:.1f}× the wiggle of the quiet windows"
+    return text + (" → water-vapour lines" if c.vapour_lines else ", no vapour lines")
+
+
+def water_vapour(wn, a):
+    """How strongly the sharp lines of water vapour stand out: the robust scatter of the sharp wiggle
+    in config.VAPOUR_WINDOW divided by the same in the quieter of the two quiet windows.
+    Uses the file's own points (wn, a: absorbance); NaN if they are too far apart or not covered."""
+    wn, a = np.asarray(wn, float), np.asarray(a, float)
+    if len(wn) < 50:
+        return float("nan")
+    step = float(np.median(np.diff(wn)))
+    if step > config.VAPOUR_MAX_STEP:
+        return float("nan")
+    window = max(5, int(25 / step) // 2 * 2 + 1)                       # about 25 cm-1, an odd number of points
+    wiggle = a - savgol_filter(a, window, 2)                           # only what is sharper than ~25 cm-1
+
+    def scatter(lo, hi):
+        part = wiggle[(wn >= lo) & (wn <= hi)]
+        return 1.4826 * np.median(np.abs(part - np.median(part))) if len(part) > 20 else np.nan
+
+    vapour = scatter(*config.VAPOUR_WINDOW)
+    quiet = np.nanmin([scatter(lo, hi) for lo, hi in config.VAPOUR_QUIET])
+    if not (np.isfinite(vapour) and np.isfinite(quiet)) or quiet <= 0:
+        return float("nan")
+    return float(vapour / quiet)
+
+
+def with_vapour(checks, wn, a):
+    """The checks with the water-vapour check added (it needs the file's own points, not the grid)."""
+    return replace(checks, vapour=water_vapour(wn, a))
 
 
 BELOW_ZERO_TEXT = ("The whole spectrum is below zero: more light came through than in the background measurement, "

@@ -46,7 +46,7 @@ import pandas as pd
 
 from . import __author__, __title__, __version__, config
 from .analytical import analytical_steps
-from .checks import BELOW_ZERO_TEXT, describe_co2
+from .checks import BELOW_ZERO_TEXT, describe_co2, describe_vapour
 from .evidence import fab_sources
 from .peaks import band_label
 from .plots import result_svg
@@ -427,6 +427,9 @@ def evidence_html(r):
     if ev.unexplained:
         extra = "".join(f'<span class="chip extra">{h(band_label(w))}</span>' for w in ev.unexplained)
         text += f"<p>Bands the match cannot explain (possible second component):</p><p>{extra}</p>"
+        text += ("<p><b>Two-component fit.</b> " + h(r.mixture.text() if r.mixture else
+                 "No mix of the match and one other library reference explains these bands clearly: "
+                 "the second material is probably not in the library.") + "</p>")
     else:
         text += "<p class='small'>Every clear band of the sample is explained by the match.</p>"
     return text
@@ -439,7 +442,8 @@ def checks_html(r):
             ("CO<sub>2</sub> artefact", h(describe_co2(c)) + (" &rarr; <b>probably no sample</b>" if c.no_sample else "")),
             ("C&ndash;H", f"{h(c.ch)} ({max(c.ch_share, 0):.3f} of the tallest band)"),
             ("O&ndash;H / N&ndash;H", f"{h(c.oh)} ({max(c.oh_share, 0):.2f})"),
-            ("Noise", f"{c.noise:.4f} A")]
+            ("Noise", f"{c.noise:.4f} A"),
+            ("Water vapour", h(describe_vapour(c)))]
     text = '<dl class="kv">' + "".join(f"<dt>{k}</dt><dd>{v}</dd>" for k, v in rows) + "</dl>"
     return text + (f"<p class='small'>{h(BELOW_ZERO_TEXT)}</p>" if c.below_zero else "")
 
@@ -668,10 +672,13 @@ def results_table(results):
         "mode_source": r.mode_source, "compared_as": r.compared_as, "verdict": r.verdict, "match": r.match, "best": r.best,
         "r": r.r, "gap": r.gap, "second": r.runner_up, "ch": r.checks.ch, "ch_share": r.checks.ch_share,
         "oh": r.checks.oh, "oh_share": r.checks.oh_share, "max_A": r.checks.max_a,
-        "co2_share": r.checks.co2_share, "noise": r.checks.noise,
+        "co2_share": r.checks.co2_share, "noise": r.checks.noise, "water_vapour": r.checks.vapour if pd.notna(r.checks.vapour) else "",
         "key_bands_found": len(r.evidence.found) if r.evidence else "",
         "key_bands": r.evidence.n_key if r.evidence else "",
         "unexplained": "; ".join(f"{w:.0f}" for w in r.evidence.unexplained) if r.evidence else "",
+        "mix_other": r.mixture.other if r.mixture else "",
+        "mix_share_other": round(r.mixture.share_other, 3) if r.mixture else "",
+        "mix_fit_r": round(r.mixture.r_fit, 4) if r.mixture else "",
         "flags": "; ".join(label for label, _ in r.flags), "next_step": r.next_step,
         "file_sha256": r.spectrum.sha256,
     } for r in results])

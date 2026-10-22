@@ -21,6 +21,7 @@ import pytest
 
 from ftir_analyzer import config
 from ftir_analyzer.analysis import NO_MATCH, PROBABLE, WEAK, analyse, decide
+from ftir_analyzer.checks import describe_vapour
 from ftir_analyzer.library import impostor_test, load_library, pearson
 from ftir_analyzer.processing import GRID, fingerprint, on_grid, to_library_mode, transmittance_to_absorbance
 from ftir_analyzer.records import SampleLog, resolve_modes, run_info
@@ -337,3 +338,71 @@ def test_report_page_works_on_every_screen_and_on_paper(tmp_path, library):
     assert "font-family:'IBM Plex Mono'" in page                     # checksums look the same everywhere
     assert "weak from </em>0.60" in page and "probable from </em>0.95" in page   # the score strip
     assert "&#10003;" not in page                                    # icons, not text symbols
+
+
+def test_figure_labels_never_touch(library):
+    """Every label of the result view, on every demo spectrum, at a wide and a narrow size: no two
+    labels overlap, and 'unexplained' never sits on its own dashed line."""
+    from matplotlib.backends.backend_agg import FigureCanvasAgg
+    from matplotlib.text import Annotation
+    from ftir_analyzer.plots import result_figure
+    for path in sorted(EXAMPLES.glob("*.csv")):
+        result = example(path.name, library, "ATR")
+        for size in ((10, 5.2), (6, 4)):
+            fig = result_figure(result, library, size=size)
+            FigureCanvasAgg(fig)
+            fig._fit_labels()
+            renderer = fig.canvas.get_renderer()
+            bottom = fig.axes[1]
+            texts = [a for a in bottom.texts if a.get_visible() and a.get_text()] + [fig.axes[0].title, bottom.title]
+            boxes = [a.get_window_extent(renderer) for a in texts] + [fig.legends[0].get_window_extent(renderer)]
+            for i, a in enumerate(boxes):
+                for b in boxes[i + 1:]:
+                    assert not a.overlaps(b), f"{path.name} {size}: two labels overlap"
+            lines = [ln for ln in bottom.get_lines() if len(ln.get_xydata()) == 2]   # the dashed 'unexplained' lines
+            for text in [a for a in bottom.texts if a.get_visible() and a.get_text()]:
+                box = text.get_window_extent(renderer)
+                for ln in lines:
+                    (x, y0), (_, y1) = ln.get_transform().transform(ln.get_xydata())
+                    crosses = box.x0 < x < box.x1 and min(y0, y1) < box.y1 and max(y0, y1) > box.y0
+                    assert not crosses, f"{path.name} {size}: '{text.get_text()}' crosses a line"
+            for note in [a for a in bottom.texts if isinstance(a, Annotation) and "unexplained" in a.get_text()]:
+                line_x = bottom.transData.transform((note.xy[0], 0))[0]
+                box = note.get_window_extent(renderer)
+                assert not box.x0 - 2 <= line_x <= box.x1 + 2, f"{path.name}: label on its line"
+
+
+def test_water_vapour_lines(library):
+    """The polystyrene film (demo 06, a real measurement) has the sharp comb of water-vapour lines;
+    the clean demos do not; data too coarse to show the lines is 'not measured', never 'clean'."""
+    film = example("06_PS_calibration_film_transmission.csv", library, "transmission")
+    assert film.checks.vapour_lines and ("water-vapour lines", "warn") in film.flags
+    assert "purge longer" in film.next_step
+    for name in ("01_wipe_area_particle_ATR.csv", "07_particle_on_filter.csv", "12_shipping_box_film_ATR.csv"):
+        assert not example(name, library, "ATR").checks.vapour_lines
+    coarse = example("08_fibre_on_filter.csv", library, "ATR")           # a point every 7.7 cm-1
+    assert np.isnan(coarse.checks.vapour) and "not measured" in describe_vapour(coarse.checks)
+
+
+def test_two_component_fit(library):
+    """A made-up mix of two references is recognised with the right partner and about the right share;
+    a pure spectrum and a band no reference has are left alone (no invented mix)."""
+    from ftir_analyzer.mixture import two_component_fit
+    from ftir_analyzer.spectrum_io import Spectrum
+    rng = np.random.default_rng(1)
+
+    def scaled(y):
+        return (y - np.nanmin(y)) / np.nanmax(y - np.nanmin(y))
+    for first, second, share in (("PE (high density)", "PET", 0.3), ("PP", "PMMA", 0.25)):
+        mix = (1 - share) * scaled(library.spectra[first]) + share * scaled(library.spectra[second])
+        mix = mix + rng.normal(0, 0.003, len(GRID))
+        keep = np.isfinite(mix)
+        result = analyse(Spectrum("mix", GRID[keep].copy(), mix[keep].copy(), "A", "test", EXAMPLES, "-"),
+                         library, "ATR")
+        assert result.best == first and result.evidence.unexplained          # the second material shows
+        assert result.mixture.other == second
+        assert result.mixture.share_other == pytest.approx(share, abs=0.05)
+        assert result.mixture.r_fit > result.mixture.r_alone + config.MIX_GAIN
+    assert example("01_wipe_area_particle_ATR.csv", library, "ATR").mixture is None     # pure PET
+    particle = example("07_particle_on_filter.csv", library, "ATR")                    # 1030: in no reference
+    assert particle.evidence.unexplained and two_component_fit(particle, library) is None

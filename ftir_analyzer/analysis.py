@@ -10,9 +10,13 @@ Puts every step together for one measured spectrum:
                          reading is checked too, and a clearly better fit is flagged.
     3. library search    every reference material ranked by Pearson r, best first
     4. verdict           probable / weak / no reliable match, with the reason in numbers
-    5. checks            saturation, CO2, C-H, O-H on the raw absorbance
+    5. checks            saturation, CO2, C-H, O-H on the raw absorbance; water vapour on the
+                         file's own points
     6. band evidence     key bands found / missing, unexplained bands (second component?)
     7. next step         one sentence a person can act on, in the order of the method card
+    8. two-component fit with unexplained bands: is it a mix of the match and one other
+                         reference? Reported only when it clearly helps (mixture.py); the
+                         verdict is not changed by it
 
 The program suggests; a person reviews the raw spectrum and decides.
 
@@ -26,14 +30,15 @@ Version: 1.1.0
 License: MIT (see LICENSE)
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 
 import numpy as np
 
 from . import config
-from .checks import Checks, side_checks
+from .checks import Checks, side_checks, with_vapour
 from .evidence import Evidence, band_evidence
 from .library import search
+from .mixture import two_component_fit
 from .processing import GRID, absorbance, on_grid, to_library_mode
 from .spectrum_io import Spectrum, SpectrumFileError
 
@@ -67,6 +72,7 @@ class Result:
     rival: int = 1                              # position in the ranking of the best DIFFERENT material
     reading: str = "unknown"                    # the mode the comparison used ("unknown": as measured)
     other: tuple = ()                           # (the other mode, its best r), for the mode check
+    mixture: object = None                      # a two-component fit that clearly helps (mixture.py), else None
 
     # Short-cuts used by the window and the report
     @property
@@ -191,7 +197,7 @@ def analyse(spectrum, library, mode="unknown", mode_source="not given", conflict
 
     a_grid = on_grid(wn, a)                                                     # 5. checks on the raw absorbance
     ok = np.isfinite(a_grid)
-    checks = side_checks(GRID[ok], a_grid[ok])
+    checks = with_vapour(side_checks(GRID[ok], a_grid[ok]), wn, a)
 
     evidence = band_evidence(compared, library.spectra[ranking[0][0]]) if verdict != NO_MATCH else None   # 6.
     step = advise(verdict, match, checks)                                       # 7.
@@ -202,6 +208,10 @@ def analyse(spectrum, library, mode="unknown", mode_source="not given", conflict
         flags.append(("CO2 artefact: probably no sample", "bad"))
     if checks.saturated:
         flags.append(("saturated bands", "bad"))
+    if checks.vapour_lines:
+        flags.append(("water-vapour lines", "warn"))
+        step += (" Water-vapour lines from the air in the beam: purge longer or take a fresh background; "
+                 "small sharp bands at 1400-1900 and 3500-3950 cm-1 may be vapour, not sample.")
     if evidence and evidence.unexplained:
         flags.append(("second component?", "warn"))
         step += (" Unexplained band(s) at " + ", ".join(f"{w:.0f}" for w in evidence.unexplained)
@@ -222,5 +232,6 @@ def analyse(spectrum, library, mode="unknown", mode_source="not given", conflict
         flags.append(("mode conflict", "bad"))
         step += f" Mode conflict: {conflict}."
 
-    return Result(spectrum, mode, mode_source, conflict, verdict, match, ranking, explain(ranking, verdict, rival),
-                  checks, evidence, step, flags, compared, rival, reading, (other, best[other]))
+    result = Result(spectrum, mode, mode_source, conflict, verdict, match, ranking, explain(ranking, verdict, rival),
+                    checks, evidence, step, flags, compared, rival, reading, (other, best[other]))
+    return replace(result, mixture=two_component_fit(result, library))           # 8. a hint, if it helps

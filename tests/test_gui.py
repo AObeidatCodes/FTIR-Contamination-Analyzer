@@ -143,12 +143,28 @@ def test_analytical_view(app, window):
 def test_compare_with_another_material(app, window):
     select(app, window, "01_wipe_area_particle_ATR")
     plot = window.result_view.plot
-    assert len(plot.compare_menu.actions()) == len(window.library) + 1        # best match, a line, the others
+    # best match, a line, the other materials, a line, the samples' submenu
+    assert len(plot.compare_menu.actions()) == len(window.library) + 3
     plot.set_compare("PBT")
     labels = [trace[0] for trace in plot.drawing.traces[plot.drawing.axes[1]]]
     assert "PBT (scaled)" in labels and "Compared with PBT" in plot.compare_button.text()
     plot.set_compare(None)
     assert "PET (scaled)" in [trace[0] for trace in plot.drawing.traces[plot.drawing.axes[1]]]
+
+
+def test_another_sample_over_this_one(app, window):
+    """Two finds from the same wafer: draw the second over the first, with how alike they are."""
+    select(app, window, "02_wafer_box_particle_ATR")
+    plot = window.result_view.plot
+    other = next(r for r in window.model.results if r.name == "07_particle_on_filter")
+    plot.set_overlay(other)
+    labels = [trace[0] for trace in plot.drawing.traces[plot.drawing.axes[1]]]
+    assert "07_particle_on_filter (scaled)" in labels and "over 07_particle_on_filter" in plot.compare_button.text()
+    legend = [text.get_text() for text in plot.figure.legends[0].get_texts()]
+    assert any(line.startswith("other sample: 07_particle_on_filter (r = 0.9") for line in legend)  # both PE
+    select(app, window, "07_particle_on_filter")                     # never drawn over itself
+    assert plot.overlay is None
+    plot.set_overlay(None)
 
 
 def test_animations_finish_in_the_right_state(app, window):

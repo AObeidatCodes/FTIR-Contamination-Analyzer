@@ -66,8 +66,11 @@ COLUMN_HELP = {
     "lead over the next different material", "second": "the next different material", "ch": "C-H present?",
     "ch_share": "C-H band height / tallest band", "oh": "O-H / N-H", "oh_share": "O-H band height / tallest band",
     "max_A": "highest absorbance", "co2_share": "CO2 band height / tallest band", "noise": "noise (absorbance)",
+    "water_vapour": "sharp wiggle at 3580-3950 / quiet windows (4 or more: water-vapour lines; empty: not measured)",
     "key_bands_found": "key bands of the match found", "key_bands": "key bands of the match",
     "unexplained": "bands the match cannot explain", "next_step": "what to do next",
+    "mix_other": "two-component fit: the second reference (empty: no fit clearly helps)",
+    "mix_share_other": "its share of the band height (not of the mass)", "mix_fit_r": "r of the two-component fit",
 }
 WIDE = {"note", "flags", "fab_sources", "check_next", "confirmation", "notes", "reason", "comment", "next_step",
         "report", "unexplained"}
@@ -83,7 +86,7 @@ ABOUT = {
                           "and the checksums of the files. Rows are only ever added; nothing is deleted.",
 }
 HEADINGS = {"r": "Score (r)", "gap": "Lead", "max_A": "Highest A", "ch": "C-H", "oh": "O-H / N-H",
-            "ch_share": "C-H share", "oh_share": "O-H share", "co2_share": "CO2 share"}
+            "ch_share": "C-H share", "oh_share": "O-H share", "co2_share": "CO2 share", "water_vapour": "Water vapour"}
 TIMES = {"run_at", "recorded_at", "time", "signed_at"}
 VERDICT_COLOURS = {"probable": ("good", "good_bg"), "weak": ("warn", "warn_bg"),
                    "no reliable match": ("none", "none_bg"), "add": ("good", "good_bg"), "remove": ("bad", "bad_bg"),
@@ -141,7 +144,8 @@ def _table(ws, frame, top=FIRST_ROW):
             cell.font = _font()
             moment = _as_time(text) if name in TIMES and text != "" else None
             number = _as_number(text) if name in ("r", "gap", "ch_share", "oh_share", "max_A", "co2_share",
-                                                   "noise", "spectra", "key_bands_found", "key_bands") else None
+                                                   "noise", "water_vapour", "spectra", "key_bands_found",
+                                                   "key_bands") else None
             if moment is not None:
                 cell.value = moment
                 cell.number_format = "d mmm yyyy" if len(str(text)) <= 10 else "d mmm yyyy, hh:mm"

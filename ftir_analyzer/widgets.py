@@ -632,7 +632,8 @@ class PlotPanel(Card):
     Analytical view   every processing step, one panel each (raw -> absorbance -> mode correction
                       -> fingerprint -> checks), with the explanation of each step underneath
     Compare with      draw any other library material instead of the best match, to see by eye
-                      why it scored lower (the menu lists every material with its score)
+                      why it scored lower (the menu lists every material with its score); or
+                      draw another analysed sample as a dashed line, with how alike the two are
     Under the mouse   a cursor line across all panels, a dot on every curve of the panel, and the
                       values of those curves plus the band's name above the figure
     Ctrl + scroll zooms around the mouse, double-click resets, the buttons zoom / pan / save.
@@ -640,6 +641,7 @@ class PlotPanel(Card):
 
     save_requested = Signal()
     compare_changed = Signal(object)                                    # the material drawn instead of the best
+    others = staticmethod(lambda: [])                                   # set by the window: every analysed result
     RESULT, ANALYTICAL = "result", "analytical"
     HEIGHT = {RESULT: 470, ANALYTICAL: 1500}                            # canvas height of each view (pixels)
     HINT = "Move the mouse over the spectrum to trace every curve.  Ctrl + scroll to zoom, double-click to reset."
@@ -647,7 +649,7 @@ class PlotPanel(Card):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.view = self.RESULT
-        self.result = self.library = self.drawing = self.background = self.compare = None
+        self.result = self.library = self.drawing = self.background = self.compare = self.overlay = None
         self.cursors, self.markers, self.home_limits = [], {}, []
         table = band_table()                                            # band ranges, for the readout
         self._bands = (table["low"].to_numpy(float), table["high"].to_numpy(float), table["assignment"].tolist())
@@ -666,7 +668,8 @@ class PlotPanel(Card):
         self.compare_button.setText(" Compare with")
         self.compare_button.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
         self.compare_button.setPopupMode(QToolButton.InstantPopup)
-        self.compare_button.setToolTip("Draw another library material instead of the best match")
+        self.compare_button.setToolTip("Draw another library material instead of the best match, "
+                                       "or another sample over this one")
         self.compare_button.setCursor(Qt.PointingHandCursor)
         self.compare_menu = QMenu(self)
         self.compare_button.setMenu(self.compare_menu)
@@ -776,8 +779,36 @@ class PlotPanel(Card):
             action.triggered.connect(lambda _=False, n=name: self.set_compare(n))
             group.addAction(action)
             self.compare_menu.addAction(action)
+        # another analysed sample, drawn over this one: are the two finds the same material?
+        self.compare_menu.addSeparator()
+        others = [other for other in self.others() if other is not r]
+        samples = self.compare_menu.addMenu("Another sample over this one")
+        samples.setEnabled(bool(others))
+        overlay_group = QActionGroup(samples)
+        none = QAction("No other sample", samples, checkable=True)
+        none.setChecked(self.overlay is None)
+        none.triggered.connect(lambda: self.set_overlay(None))
+        overlay_group.addAction(none)
+        samples.addAction(none)
+        samples.addSeparator()
+        for other in others:
+            action = QAction(f"{other.name}   ({other.match if other.has_match else 'no match'})", samples,
+                             checkable=True)
+            action.setChecked(self.overlay is other)
+            action.triggered.connect(lambda _=False, o=other: self.set_overlay(o))
+            overlay_group.addAction(action)
+            samples.addAction(action)
         shown = self.compare if self.compare and self.compare != r.best else None
-        self.compare_button.setText(f" Compared with {shown}" if shown else " Compare with")
+        words = [f"with {shown}"] if shown else []
+        if self.overlay is not None:
+            words.append(f"over {self.overlay.name}")
+        self.compare_button.setText(" Compared " + " and ".join(words) if words else " Compare with")
+
+    def set_overlay(self, other):
+        """Draw another analysed sample (a Result) over this one as a dashed line (None = no overlay)."""
+        self.overlay = other
+        if self.result is not None:
+            self.show_result(self.result, self.library, keep_compare=True)
 
     def _toggle_zoom(self):
         self.tools["pan"][0].setChecked(False)
@@ -791,6 +822,8 @@ class PlotPanel(Card):
         """Draw a result in the current view; prepare the cursor lines and the dots for tracing."""
         if result is not self.result and not keep_compare:
             self.compare = None                                         # a new spectrum starts with its best match
+        if self.overlay is result or (self.overlay is not None and self.overlay not in self.others()):
+            self.overlay = None                                         # never itself, nor a removed sample
         self.result, self.library = result, library
         if self.compare not in library.spectra:
             self.compare = None
@@ -801,7 +834,7 @@ class PlotPanel(Card):
                 f"<li style='margin-bottom:6px'><b>{step.title}.</b> {step.explanation}</li>"
                 for step in analytical_steps(result, library)) + "</ol>")
         else:
-            self.drawing = draw_result(self.figure, result, library, t, self.compare)
+            self.drawing = draw_result(self.figure, result, library, t, self.compare, self.overlay)
         self._fill_compare_menu()
         axes = self.drawing.axes
         self.cursors = [ax.axvline(config.GRID_STOP, color=t["muted"], lw=0.8, animated=True, visible=False)
