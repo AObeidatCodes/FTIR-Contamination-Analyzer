@@ -387,7 +387,7 @@ THEME_JS = """
   }
   function follow(){ paint(dark.matches ? 'dark' : 'light'); }
   function fit(){                                       // a narrow figure: room on top for the wrapped legend
-    if (typeof Plotly === 'undefined') { return; }
+    if (typeof Plotly === 'undefined' || printing) { return; }
     document.querySelectorAll('.js-plotly-plot').forEach(function(p){
       var top = p.clientWidth < 760 ? 150 : 92;
       if (p.layout.margin && p.layout.margin.t !== top) { Plotly.relayout(p, {'margin.t': top}); }
@@ -401,18 +401,27 @@ THEME_JS = """
   var opened = [];
   // the figures are drawn at the width of the page on paper (an A4 page less its margins and the panel),
   // with the room on top that the wrapped legend needs, instead of the width of the screen
-  var PAPER_WIDTH = 620;
+  // (a figure taller than a page is shortened to one page; legend entries get a fixed width so the
+  // text is never cut off, whatever font the printer substitutes)
+  var PAPER_WIDTH = 620, PAPER_HEIGHT = 950, printing = false, tall = [];
   function onPaper(){
     if (typeof Plotly === 'undefined') { return; }
+    printing = true; tall = [];
     document.querySelectorAll('.js-plotly-plot').forEach(function(p){
-      Plotly.relayout(p, {autosize: false, width: PAPER_WIDTH, 'margin.t': 112});
+      var change = {autosize: false, width: PAPER_WIDTH, 'legend.entrywidthmode': 'pixels', 'legend.entrywidth': 270};
+      if (p.layout.height > PAPER_HEIGHT) { tall.push([p, p.layout.height]); change.height = PAPER_HEIGHT; }
+      else { change['margin.t'] = 112; }
+      Plotly.relayout(p, change);
     });
   }
   function offPaper(){
     if (typeof Plotly === 'undefined') { return; }
+    printing = false;
     document.querySelectorAll('.js-plotly-plot').forEach(function(p){
-      Plotly.relayout(p, {autosize: true, width: null});
+      Plotly.relayout(p, {autosize: true, width: null, 'legend.entrywidthmode': null, 'legend.entrywidth': null});
     });
+    tall.forEach(function(t){ Plotly.relayout(t[0], {height: t[1]}); });
+    tall = [];
     fit();
   }
   window.addEventListener('beforeprint', function(){
