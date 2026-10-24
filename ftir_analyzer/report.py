@@ -319,10 +319,29 @@ footer{color:var(--muted);font-size:14px;text-align:center;margin-top:32px}
   dl.kv{grid-template-columns:1fr}dl.kv dd{margin-bottom:6px}
 }
 @media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+@page{size:A4;margin:12mm}
 @media print{
-  html{color-scheme:light}body{background:#fff;font-size:12pt}
+  html{color-scheme:light}
+  body{background:#fff;font-size:10pt;-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .bar,.skip,.back,.hint{display:none}main{padding:0;max-width:none}
-  .panel{break-inside:avoid-page;border-color:#ccc}section.sample{break-inside:auto}
+  /* paper is wide enough for the full layout: undo the narrow-screen rows, keep the tint of pills and strips */
+  .panel{break-inside:auto;border-color:#ccc;padding:16px}
+  h2,h2.part,h3,h4{break-after:avoid}h2.part{margin:24px 0 12px}
+  .stats,.facts,.next,.check,.chip,.signed,.score,figure,.figure,tr,dl.kv dt,dl.kv dd,.boxes>div>p{break-inside:avoid}
+  .boxes,.grid2{grid-template-columns:1fr 1fr}
+  .stats{grid-template-columns:repeat(4,1fr)}.facts{grid-template-columns:repeat(3,1fr)}
+  .scroll{overflow:visible}
+  table{font-size:9pt}th,td{padding:5px 6px}
+  table.summary thead{display:table-header-group}
+  table.summary tr{display:table-row;padding:0;border-bottom:none}
+  table.summary td{display:table-cell;padding:5px 6px;border-bottom:1px solid var(--line)}
+  table.summary td.how,table.summary td.lead,table.summary td.noflags{display:table-cell}
+  table.summary .pill{margin:0 4px 2px 0;white-space:normal;border-radius:12px}
+  table.summary td:nth-child(2) .pill{white-space:nowrap}
+  .pill{font-size:8.5pt;padding:1px 8px}
+  .mini,.modebar-container{display:none}
+  table.summary td.name{width:27%}table.summary td.name a{overflow-wrap:anywhere}
+  table.summary td.flags{width:24%}
   details{border-top:none}details summary{list-style:none;color:var(--ink)}
   .sign td[contenteditable]:empty:before{content:""}a{color:var(--ink)}
 }
@@ -380,12 +399,29 @@ THEME_JS = """
   if (dark.addEventListener) { dark.addEventListener('change', follow); }
   // printing: light figures on white paper, and every closed block opened so nothing is left out
   var opened = [];
+  // the figures are drawn at the width of the page on paper (an A4 page less its margins and the panel),
+  // with the room on top that the wrapped legend needs, instead of the width of the screen
+  var PAPER_WIDTH = 620;
+  function onPaper(){
+    if (typeof Plotly === 'undefined') { return; }
+    document.querySelectorAll('.js-plotly-plot').forEach(function(p){
+      Plotly.relayout(p, {autosize: false, width: PAPER_WIDTH, 'margin.t': 112});
+    });
+  }
+  function offPaper(){
+    if (typeof Plotly === 'undefined') { return; }
+    document.querySelectorAll('.js-plotly-plot').forEach(function(p){
+      Plotly.relayout(p, {autosize: true, width: null});
+    });
+    fit();
+  }
   window.addEventListener('beforeprint', function(){
     paint('light');
     document.querySelectorAll('details:not([open])').forEach(function(d){ d.open = true; opened.push(d); });
+    onPaper();
   });
   window.addEventListener('afterprint', function(){
-    opened.forEach(function(d){ d.open = false; }); opened = []; follow();
+    opened.forEach(function(d){ d.open = false; }); opened = []; offPaper(); follow();
   });
   // a figure inside a closed block has no size yet: redraw it at full width when the block is opened
   document.querySelectorAll('details').forEach(function(d){
