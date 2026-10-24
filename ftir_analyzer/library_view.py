@@ -123,7 +123,7 @@ class SpectrumChart(QWidget):
     def play(self):
         """Draw the curves in, from left to right."""
         stop(self._animation)
-        self._animation = animate(self, 0.0, 1.0, 800, self._draw_in, EASE_OUT)
+        self._animation = animate(self, 0.0, 1.0, 1100, self._draw_in, EASE_OUT)
 
     def _draw_in(self, value):
         self.progress = value
@@ -747,7 +747,7 @@ class LibraryPage(QWidget):
                               else f"{len(shown)} of {len(self.cards)} references · {self.subtitle_base}")
         if before is not None:                                          # a quick fade-through to the new set
             self.scroll.scroll_to_top()
-            fade_through(viewport, before, snapshot(viewport), dy=8, duration=MOTION["content"] - 60)
+            fade_through(viewport, before, snapshot(viewport), dy=28, duration=MOTION["content"] - 60)
 
     def highlight(self, name):
         """Show one reference: select its category, scroll to its card and let it glow."""
@@ -1496,7 +1496,7 @@ class AddReferencePanel(QWidget):
         for row in rows:
             self.val_rows.addWidget(row)
         if before is not None:                                          # the result fades in, in place
-            fade_through(card, before, snapshot(card), dy=6, duration=MOTION["content"])
+            fade_through(card, before, snapshot(card), dy=16, duration=MOTION["content"])
         self._update_button()
 
     # ------------------------------------------------------------------ the form

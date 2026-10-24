@@ -96,6 +96,9 @@ def _font(size_key="body", weight=QFont.Normal):
     return f
 
 
+POP, POP_BAND = 0.94, 0.975             # how small a page / a section starts before it grows to full size
+
+
 def alive(obj):
     """True if the Qt object behind a Python object still exists."""
     return obj is not None and shiboken6.isValid(obj)
@@ -110,6 +113,7 @@ def bezier(x1, y1, x2, y2):
 
 
 EASE_OUT = bezier(0.23, 1, 0.32, 1)        # things that appear or leave: fast start, long gentle stop
+EASE_POP = bezier(0.16, 1, 0.3, 1)          # the report's "expo out": a quick start and a very long, soft stop
 EASE_IN_OUT = bezier(0.77, 0, 0.175, 1)    # things that move from one place to another on screen
 
 
@@ -325,7 +329,8 @@ def fade_through(host, old, new, dy=8, duration=None, on_done=None):
             on_done()
         return None
     paper = QColor(Look.t["paper"])
-    split = 0.3                                                    # the first 30 % of the time: the old one leaves
+    split = 0.16                                                   # the first 16 % of the time: the old one leaves
+    middle = host.width() / 2
 
     def frame(p, progress):
         p.fillRect(QRect(QPoint(0, 0), host.size()), paper)
@@ -333,9 +338,13 @@ def fade_through(host, old, new, dy=8, duration=None, on_done=None):
             p.setOpacity(1 - ease(EASE_OUT, progress / split))
             p.drawPixmap(0, 0, old)
         else:
-            e = ease(EASE_OUT, (progress - split) / (1 - split))
-            p.setOpacity(e)
-            p.drawPixmap(0, round(dy * (1 - e)), new)
+            e = ease(EASE_POP, (progress - split) / (1 - split))
+            p.setOpacity(min(1.0, e * 1.6))                        # clear a little before it has settled
+            p.setRenderHint(QPainter.SmoothPixmapTransform)
+            p.translate(middle, dy * (1 - e))                      # it grows from 94 % as it rises, like the report
+            p.scale(POP + (1 - POP) * e, POP + (1 - POP) * e)
+            p.translate(-middle, 0)
+            p.drawPixmap(0, 0, new)
 
     return Overlay(host, frame, duration, on_done=on_done)
 
@@ -351,9 +360,10 @@ def rise_in(host, old, new, bands, dy=10, duration=None, on_done=None):
             on_done()
         return None
     paper = QColor(Look.t["paper"])
-    split = 0.22
+    split = 0.14
     stagger = MOTION["stagger"] / duration                         # each band starts this much later
     each = max(0.3, 1 - split - stagger * max(0, len(bands) - 1))
+    middle = host.width() / 2
 
     def frame(p, progress):
         p.fillRect(QRect(QPoint(0, 0), host.size()), paper)
@@ -366,15 +376,22 @@ def rise_in(host, old, new, bands, dy=10, duration=None, on_done=None):
             local = (progress - split - i * stagger) / each
             if local <= 0:
                 continue
-            e = ease(EASE_OUT, local)
-            p.setOpacity(e)
+            e = ease(EASE_POP, min(1.0, local))
+            p.setOpacity(min(1.0, e * 1.6))
             source = QRectF(band.x() * dpr, band.y() * dpr, band.width() * dpr, band.height() * dpr)
-            p.drawPixmap(QRectF(band).translated(0, round(dy * (1 - e))), new, source)
+            p.save()
+            p.setRenderHint(QPainter.SmoothPixmapTransform)
+            scale = 1 - (1 - POP_BAND) * (1 - e)                   # each section grows a little as it rises
+            p.translate(band.center().x(), band.top() + dy * (1 - e))
+            p.scale(scale, scale)
+            p.translate(-band.center().x(), -band.top())
+            p.drawPixmap(QRectF(band), new, source)
+            p.restore()
 
     return Overlay(host, frame, duration, on_done=on_done)
 
 
-def crossfade(widget, change, duration=180, on_done=None):
+def crossfade(widget, change, duration=420, on_done=None):
     """Run change() (for example: switch the theme) and let the old picture fade into the new one.
     on_done: called when the fade has finished (at once with reduced motion)."""
     if Motion.reduced or not widget.isVisible():
@@ -405,7 +422,7 @@ class SmoothScrollArea(QScrollArea):
     The content is opaque, so Qt can move the picture instead of drawing it again.
     """
 
-    STEP, PACE, FRAME = 110, 9.0, 16                               # pixels per notch, glide rate per second, ms
+    STEP, PACE, FRAME = 110, 7.0, 16                               # pixels per notch, glide rate per second, ms
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -930,7 +947,7 @@ class Sheet(QWidget):
 
     closed = Signal()
     arrived = Signal()               # the sheet has appeared: its content may start its own animation
-    MARGIN, RISE, SHADOW = 32, 16, 28  # space around the card, how far it rises, room for its shadow
+    MARGIN, RISE, SHADOW = 32, 36, 28  # space around the card, how far it rises, room for its shadow
 
     def __init__(self, host, title, content, width=600, eyebrow="", footer=None, tall=False, close_icon=None):
         super().__init__(host)
@@ -1150,7 +1167,7 @@ class Sheet(QWidget):
         t = Look.t
         p = QPainter(self)
         p.drawPixmap(0, 0, self.background)
-        e = ease(EASE_OUT, self.progress)
+        e = ease(EASE_POP, self.progress)
         dim = QColor(t["shadow"])
         dim.setAlphaF(t["backdrop_alpha"] * e)
         p.fillRect(self.rect(), dim)
@@ -1158,9 +1175,14 @@ class Sheet(QWidget):
         if self.panel.isVisible():                                 # live: only the shadow; the card paints itself
             p.drawPixmap(rect.left() - s, rect.top() - s, self.shadow)
         else:                                                      # moving: the photo fades in and rises
-            p.setOpacity(e)
-            rise = round((self.RISE if not self.closing else self.RISE / 2) * (1 - e))
-            p.drawPixmap(rect.left() - s, rect.top() - s + rise, self.layer)
+            p.setOpacity(min(1.0, e * 1.6))
+            rise = (self.RISE if not self.closing else self.RISE / 2) * (1 - e)
+            scale = 1 - (1 - POP) * (1 - e)                        # the card grows from 94 % as it rises
+            p.setRenderHint(QPainter.SmoothPixmapTransform)
+            p.translate(rect.center().x(), rect.top() + rise)
+            p.scale(scale, scale)
+            p.translate(-rect.center().x(), -rect.top())
+            p.drawPixmap(rect.left() - s, rect.top() - s, self.layer)
 
 
 def rounded_path(rect, radius):

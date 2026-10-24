@@ -1269,7 +1269,7 @@ class MainWindow(QMainWindow):
             before = snapshot(self.stack)
             self.stack.setCurrentWidget(view)
             view.display(r, self.library, self.sample_log.path, animated=True)
-            fade_through(self.stack, before, snapshot(self.stack), dy=12, duration=MOTION["page"],
+            fade_through(self.stack, before, snapshot(self.stack), dy=40, duration=MOTION["page"],
                          on_done=view.play)
             return
         viewport = view.viewport()
@@ -1277,7 +1277,7 @@ class MainWindow(QMainWindow):
         before = snapshot(viewport)
         view.display(r, self.library, self.sample_log.path, animated=True)     # all the slow work, now
         after = snapshot(viewport)
-        if rise_in(viewport, before, after, view.bands(), dy=8, on_done=view.play) is None:
+        if rise_in(viewport, before, after, view.bands(), dy=30, on_done=view.play) is None:
             view.play()
 
     def copy_result(self):

@@ -1183,7 +1183,7 @@ class EmptyState(QWidget):
                 formats = self.formats
                 rect = rect.united(QRect(formats.mapTo(self, QPoint(0, 0)), formats.size()))
             bands.append(rect)
-        rise_in(self, blank(self, Theme.t["paper"]), snapshot(self), bands, dy=16, duration=720,
+        rise_in(self, blank(self, Theme.t["paper"]), snapshot(self), bands, dy=30, duration=1000,
                 on_done=self.art.play)
 
     def retheme(self):
