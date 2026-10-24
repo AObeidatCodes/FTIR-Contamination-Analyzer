@@ -15,6 +15,7 @@ License: MIT (see LICENSE)
 """
 
 import os
+import re
 import time
 
 import pytest
@@ -393,7 +394,7 @@ def test_exporting_a_signed_report(app, window, tmp_path):
     panel._submit()
     assert wait(app, lambda: not window.busy and str(tmp_path) in str(window.last_report), 60)
     page = window.last_report.read_text(encoding="utf-8")
-    assert "Signed: Re-measure" in page and "06 is saturated" in page
+    assert "Signed: Re-measure" in re.sub(r"<[^>]+>", "", page) and "06 is saturated" in page
     assert window.settings.value("user_name") == "Ali Obeidat"                  # remembered for next time
     assert "Ali Obeidat" in window.signature_log.read_text(encoding="utf-8")
     window.report_box.close()

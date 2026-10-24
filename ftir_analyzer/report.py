@@ -23,6 +23,10 @@ How the page looks (the same design system as the window, see theme.py):
       lead is the distance between the two marks
     - a light and a dark version (follows the computer's setting); printing always uses light
       paper colours and opens every closed block, so the PDF holds the full traceability
+    - calm motion, built into the page (no internet needed): smooth scrolling (Lenis), the title
+      and each spectrum's name rise in word by word (GSAP SplitText), and each part fades up once as
+      it scrolls into view (GSAP ScrollTrigger). The figures never move once they are shown. With
+      "reduce motion" switched on in Windows, or when printing, the page is simply still.
 
 Short names used in this file:
     h = html.escape (makes text safe to put into a web page)    r = one Result
@@ -51,7 +55,7 @@ from .evidence import fab_sources
 from .peaks import band_label
 from .plots import result_svg
 from .records import DECISIONS, append_audit_log, append_signature, readable_time, who_text
-from .theme import DARK, FONTS, ICONS, LIGHT, LOGO_SVG, WEB_FONTS
+from .theme import ASSETS, DARK, FONTS, ICONS, LIGHT, LOGO_SVG, WEB_FONTS
 
 try:                                         # interactive figures if Plotly is installed, vector images if not
     from plotly.offline import get_plotlyjs
@@ -171,6 +175,12 @@ h2.part{margin:48px 0 16px}
   color:var(--ink-2)}
 .num,.stats b,.score,.facts dd,.rank td{font-variant-numeric:tabular-nums}
 
+/* motion (only when the page may move; see MOTION_JS): no CSS smooth scroll under Lenis, and the
+   words of a split heading sit in a mask so they can rise into view */
+html.motion{scroll-behavior:auto}
+html.motion-wait .title h1{opacity:0}
+.ok{color:var(--good);font-weight:600}.alarm{color:var(--bad);font-weight:600}
+
 /* status labels: a pastel tint, dark text of the same hue, an icon and a word */
 .pill{display:inline-flex;align-items:center;gap:6px;flex:none;border-radius:999px;padding:2px 10px;font-size:14px;
   font-weight:600;white-space:nowrap;margin:2px 6px 2px 0;line-height:1.5}
@@ -271,7 +281,7 @@ ol.steps{padding-left:22px}ol.steps li{margin:0 0 8px}
 .ink div{flex:1;min-width:200px;border-top:1px solid var(--ink-2);padding-top:6px;color:var(--muted);font-size:14px}
 
 /* traceability */
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;align-items:start}
 .grid2 .panel{margin:0;min-width:0}
 .panel>h3{margin-bottom:16px}
 .check{display:flex;gap:10px;margin:0 0 12px}.check .icon{margin-top:4px;flex:none}
@@ -292,6 +302,7 @@ footer{color:var(--muted);font-size:14px;text-align:center;margin-top:32px}
 }
 @media (max-width:700px){
   .bar-in,main{padding-left:16px;padding-right:16px}.panel{padding:16px}
+  .status .long{display:none}.bar .status{gap:6px}
   .brand span{display:none}
   .stats{grid-template-columns:1fr 1fr}.stats div,.facts div{padding:12px 16px}
   .stats div:nth-child(3){border-left:none}.stats div:nth-child(n+3){border-top:1px solid var(--line)}
@@ -378,6 +389,90 @@ THEME_JS = """
   });
 })();
 """
+
+
+MOTION_FILES = ["gsap.min.js", "ScrollTrigger.min.js", "SplitText.min.js", "lenis.min.js"]
+
+# The motion of the page. It runs only when the person has not asked for less motion, and every
+# animation ends in the normal, still page: nothing is hidden for good if a script fails, and
+# printing shows everything (the reveals are finished and removed before the page is printed).
+MOTION_JS = """
+(function(){
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { return; }
+  if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined' || typeof Lenis === 'undefined') { return; }
+  gsap.registerPlugin(ScrollTrigger, SplitText);
+  document.documentElement.classList.add('motion');
+
+  // smooth scrolling, driven by the same clock as the animations so both move in step
+  var lenis = new Lenis({ lerp: 0.11, smoothWheel: true });
+  lenis.on('scroll', ScrollTrigger.update);
+  gsap.ticker.add(function (time) { lenis.raf(time * 1000); });
+  gsap.ticker.lagSmoothing(0);
+  // the links in the bar and the summary glide to their part, 72 px under the bar
+  document.querySelectorAll('a[href^="#"]').forEach(function (link) {
+    link.addEventListener('click', function (event) {
+      var target = document.querySelector(link.getAttribute('href'));
+      if (!target) { return; }
+      event.preventDefault();
+      lenis.scrollTo(target, { offset: -72 });
+      history.replaceState(null, '', link.getAttribute('href'));
+    });
+  });
+  // opening a closed block makes the page longer: measure again
+  document.querySelectorAll('details').forEach(function (d) {
+    d.addEventListener('toggle', function () { lenis.resize(); ScrollTrigger.refresh(); });
+  });
+
+  var reveals = [];
+  function rise(heading, delay) {                        // a heading's words rise out of their masks
+    var split = SplitText.create(heading, { type: 'words', mask: 'words' });
+    return gsap.from(split.words, { yPercent: 105, duration: 0.7, ease: 'power3.out', stagger: 0.05, delay: delay || 0,
+      onComplete: function () { split.revert(); } });
+  }
+  document.fonts.ready.then(function () {                // split only once the real font is in place
+    var title = document.querySelector('.title h1');
+    if (title) { rise(title, 0.1); }
+    document.documentElement.classList.remove('motion-wait');     // the title was kept still until now
+    gsap.utils.toArray('.stats, .panel, h2.part').forEach(function (part) {
+      var name = part.querySelector('.sample-head h3');
+      // opacity only (not visibility): a hidden part can still be found with Ctrl+F
+      reveals.push(gsap.from(part, { y: 16, opacity: 0, duration: 0.55, ease: 'power2.out',
+        clearProps: 'transform,opacity',
+        scrollTrigger: { trigger: part, start: 'top 92%', once: true,
+          onEnter: function () { if (name) { rise(name, 0.05); } } } }));
+    });
+    ScrollTrigger.refresh();
+  });
+  // printing: every part shown, still
+  window.addEventListener('beforeprint', function () {
+    reveals.forEach(function (tween) { tween.progress(1); });
+    lenis.stop();
+  });
+  window.addEventListener('afterprint', function () { lenis.start(); });
+})();
+"""
+
+
+# In <head>: keeps the title still until its words are split (no flash), and gives up after 2 s
+# if the motion script cannot run, so the title is never hidden for good.
+MOTION_WAIT = ("<script>if(!matchMedia('(prefers-reduced-motion: reduce)').matches){var d=document.documentElement;"
+               "d.classList.add('motion-wait');setTimeout(function(){d.classList.remove('motion-wait')},2000)}</script>")
+
+
+def _asset(name):
+    """A file of assets/js as text (for the page's <style> or <script>); '' if it is missing."""
+    path = ASSETS / "js" / name
+    return path.read_text(encoding="utf-8") if path.exists() else ""
+
+
+def motion_js():
+    """GSAP (core, ScrollTrigger, SplitText; GreenSock standard licence) and Lenis (MIT), built into the
+    page so it works offline, then the page's own motion. Nothing if the files are missing."""
+    libraries = "".join(_asset(name) for name in MOTION_FILES)
+    if not libraries:
+        return ""
+    return ("<script>/*! Lenis 1.3.27 (MIT, darkroom.engineering); GSAP 3.15.0 (GreenSock standard "
+            f"no-charge licence, https://gsap.com/standard-license) */{libraries}</script><script>{MOTION_JS}</script>")
 
 
 def _logo_inline():
@@ -507,13 +602,14 @@ def section(i, r, figure_svg, analytical="", library=None):
 
 
 def validation_html(validation):
+    """The impostor test in one line, for the run information: the proof that the 'probable' threshold
+    is valid for exactly this library (each reference looked up with itself removed)."""
     ok = validation.passed
-    return (f'<div class="check {"ok" if ok else "alarm"}">{icon("shield-check" if ok else "shield-alert")}<p>'
-            f'<b>Impostor test {"passed" if ok else "FAILED"}.</b> The best WRONG answer scores '
-            f"{validation.score:.2f} ({h(validation.material)} with itself removed &rarr; {h(validation.impostor)}). "
-            + ("This is below the &lsquo;probable&rsquo; threshold, so the verdict rule is valid for this library."
-               if ok else "This reaches &lsquo;probable&rsquo;: re-validate the thresholds before using this report.")
-            + "</p></div>")
+    return (f'<span class="{"ok" if ok else "alarm"}">{"Passed" if ok else "FAILED"}</span>: the best wrong answer '
+            f"scores {validation.score:.2f} ({h(validation.material)} with itself removed &rarr; "
+            f"{h(validation.impostor)}), "
+            + (f"below the probable threshold {config.PROBABLE_R:.2f}." if ok else
+               f"reaching the probable threshold {config.PROBABLE_R:.2f}: re-validate before using this report."))
 
 
 def library_html(library):
@@ -610,10 +706,13 @@ def write_html(results, figures, info, path, analytical=None, library=None, sign
     n = len(results)
     analysed_by = who_text(info.get("run_by_name", ""), info["run_by"])
     valid = info["validation"].passed
+    # on a phone the badges keep only their first word ("Library", "Signed"): the rest is in .long
     status = (f'<a class="pill {"good" if valid else "bad"}" href="#trace">{icon("shield-check" if valid else "shield-alert")}'
-              f'Library {"validated" if valid else "NOT validated"}</a>'
-              + (f'<a class="pill good" href="#signoff">{icon("badge-check")}Signed: {h(DECISIONS[signoff["decision"]])}</a>'
-                 if signoff else f'<a class="pill none" href="#signoff">{icon("clipboard-list")}Not signed yet</a>'))
+              f'<span>Library<span class="long"> {"validated" if valid else "NOT validated"}</span></span></a>'
+              + (f'<a class="pill good" href="#signoff">{icon("badge-check")}<span>Signed<span class="long">: '
+                 f'{h(DECISIONS[signoff["decision"]])}</span></span></a>'
+                 if signoff else f'<a class="pill none" href="#signoff">{icon("clipboard-list")}<span>Not signed'
+                                 '<span class="long"> yet</span></span></a>'))
     page = f"""<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="color-scheme" content="light dark">
@@ -621,7 +720,7 @@ def write_html(results, figures, info, path, analytical=None, library=None, sign
 <meta name="theme-color" content="{DARK['surface']}" media="(prefers-color-scheme: dark)">
 <meta name="generator" content="{h(__title__)} {__version__} by {h(__author__)}">
 <meta name="author" content="{h(__author__)}">
-<title>FTIR Contamination Report</title><style>{style}</style>{plotly_js}</head><body>
+<title>FTIR Contamination Report</title><style>{style}{_asset("lenis.css")}</style>{MOTION_WAIT}{plotly_js}</head><body>
 <a class="skip" href="#overview">Skip to the summary</a>
 <header class="bar"><div class="bar-in">
   <span class="brand">{_logo_inline()}<span>{h(__title__)}</span></span>
@@ -649,19 +748,12 @@ def write_html(results, figures, info, path, analytical=None, library=None, sign
     <dt>Software</dt><dd>{h(info['software'])}</dd>
     <dt>Library</dt><dd>{h(info['library'])}</dd>
     <dt>Library SHA-256</dt><dd class="mono">{info['library_sha256']}</dd>
+    <dt>Library validation</dt><dd>{validation_html(info['validation'])}</dd>
     <dt>Settings</dt><dd>{settings_html()}</dd></dl></section>
-  <section class="panel"><h3>Validation and data integrity</h3>{validation_html(info['validation'])}
-    <ul class="plain"><li>Raw files are only read, never written. Each file&rsquo;s SHA-256 is recorded, so anyone
-    can prove later that the report was made from exactly that file.</li>
-    <li>Absorbance conversion, mode correction and the derivative are done on copies and used for matching
-    only. The checks look at the raw absorbance.</li>
-    <li>Every run is added to the audit log, every signature to the signature log; rows are never changed
-    or deleted.</li>
-    <li>The program suggests; a person reviews the raw spectra and signs.</li></ul></section>
+  {library_html(library)}
 </div>
-{library_html(library)}
 <footer>Generated with {h(__title__)} {__version__}, developed by {h(__author__)}</footer>
-</main>{theme_js}</body></html>"""
+</main>{theme_js}{motion_js()}</body></html>"""
     Path(path).write_text(page, encoding="utf-8")
 
 

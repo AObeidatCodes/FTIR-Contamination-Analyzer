@@ -126,6 +126,19 @@ The full licence text is in `ftir_analyzer/assets/fonts/OFL-IBM-Plex.txt`.
 `ftir_analyzer/assets/icons/LICENSE-lucide.txt`. The app recolours them to the theme and draws them
 with a slightly thinner line when it draws them.
 
+## GSAP 3.15.0 (GreenSock standard "no charge" licence)
+
+`ftir_analyzer/assets/js/gsap.min.js`, `ScrollTrigger.min.js` and `SplitText.min.js`, unchanged from the
+`gsap` package on npm, are built into every HTML report for its motion (headings that rise in word by
+word, parts that fade up as they scroll into view). Copyright GreenSock / Webflow. Used under the
+GreenSock standard "no charge" licence: https://gsap.com/standard-license
+
+## Lenis 1.3.27 (MIT License)
+
+`ftir_analyzer/assets/js/lenis.min.js` and `lenis.css`, unchanged from the `lenis` package on npm, give
+the HTML report its smooth scrolling. Copyright (c) 2024 darkroom.engineering. The full licence text is in
+`ftir_analyzer/assets/js/LICENSE-lenis.txt`.
+
 ## Python packages
 
 The program uses numpy, pandas, scipy and matplotlib (BSD-style licences), plotly (MIT),

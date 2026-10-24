@@ -43,7 +43,7 @@ ftir-analyzer = "ftir_analyzer.__main__:main"
 packages = ["ftir_analyzer"]
 
 [tool.setuptools.package-data]
-ftir_analyzer = ["data/*.csv", "data/*.md", "assets/*.*", "assets/fonts/*", "assets/icons/*"]
+ftir_analyzer = ["data/*.csv", "data/*.md", "assets/*.*", "assets/fonts/*", "assets/icons/*", "assets/js/*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

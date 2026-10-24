@@ -13,6 +13,7 @@ Version: 1.1.0
 License: MIT (see LICENSE)
 """
 
+import re
 from dataclasses import replace
 
 import numpy as np
@@ -254,14 +255,15 @@ def test_a_signed_report_and_its_record(tmp_path, library):
     html_path = write_report(results, library, info, tmp_path / "signed", audit_log=tmp_path / "audit.csv",
                              signoff=signoff, signature_log=signatures)
     page = html_path.read_text(encoding="utf-8")
-    assert "Signed: Accepted with changes" in page and "Ali Obeidat" in page and "1 spectrum " in page
+    seen = re.sub(r"<[^>]+>", "", page)                               # the text as the reader sees it
+    assert "Signed: Accepted with changes" in seen and "Ali Obeidat" in page and "1 spectrum " in page
     assert readable_time(info["run_at"], with_zone=True) in page and info["run_at"] not in page.split("<main>")[0]
     row = pd.read_csv(signatures, comment="#").iloc[0]
     assert row.signed_by == "Ali Obeidat" and row.decision == "accept with changes"
     assert row.report_sha256 == checksum(html_path)                   # the signature points at this exact file
     unsigned = write_report(results, library, info, tmp_path / "unsigned", audit_log=tmp_path / "audit.csv",
                             signature_log=signatures)
-    assert "Not signed yet" in unsigned.read_text(encoding="utf-8") and len(pd.read_csv(signatures, comment="#")) == 1
+    assert "Not signed yet" in re.sub(r"<[^>]+>", "", unsigned.read_text(encoding="utf-8")) and len(pd.read_csv(signatures, comment="#")) == 1
 
 
 def test_readable_times():
@@ -406,3 +408,15 @@ def test_two_component_fit(library):
     assert example("01_wipe_area_particle_ATR.csv", library, "ATR").mixture is None     # pure PET
     particle = example("07_particle_on_filter.csv", library, "ATR")                    # 1030: in no reference
     assert particle.evidence.unexplained and two_component_fit(particle, library) is None
+
+
+def test_report_motion_is_built_in_and_optional(tmp_path, library):
+    """GSAP and Lenis are inside the page (it works offline), the motion steps aside for 'reduce
+    motion' and for printing, and the traceability keeps the impostor test as one line."""
+    page = write_report([example("07_particle_on_filter.csv", library, "ATR")], library,
+                        run_info(library, impostor_test(library)), tmp_path / "run",
+                        audit_log=tmp_path / "audit.csv").read_text(encoding="utf-8")
+    assert "GSAP 3.15.0" in page and "1.3.27" in page and "<script src" not in page   # nothing from the internet
+    assert page.count("prefers-reduced-motion: reduce") >= 2                          # both scripts step aside
+    assert "beforeprint" in page and "SplitText.create" in page and "ScrollTrigger" in page
+    assert "Library validation" in page and "Validation and data integrity" not in page

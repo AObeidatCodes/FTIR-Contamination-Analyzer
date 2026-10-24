@@ -347,6 +347,10 @@ used, with who added it, when, how its identity was confirmed and its checksum.
   is the distance between the two dots. The summary table has a small copy of it in every row.
 - **A bar that stays in view** with the parts of the report and the two things a reviewer checks
   first: is the library validated, is the report signed.
+- **Calm motion, offline.** Smooth scrolling (Lenis), the title and each spectrum's name rising in
+  word by word (GSAP SplitText) and each part fading up once as it comes into view (GSAP
+  ScrollTrigger), all built into the page. The figures never move once shown; with Windows' "show
+  animations" off, and when printing, the page is simply still.
 - **Every screen and paper.** It follows the computer's light or dark setting (the figures too), fits
   a phone without scrolling sideways, and prints on white paper with every closed section opened, so
   the PDF keeps the file paths and checksums.
