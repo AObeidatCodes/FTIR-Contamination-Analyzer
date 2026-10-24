@@ -83,6 +83,23 @@ class Motion:
             return False
 
 
+def _precise_timers():
+    """Windows ticks its timers every 15.6 ms by default, so frames come 13 and 25 ms apart: the motion
+    stutters. Asking for 1 ms ticks while the program runs makes every frame come when it should."""
+    if not sys.platform.startswith("win"):
+        return
+    try:
+        import atexit
+        import ctypes
+        ctypes.windll.winmm.timeBeginPeriod(1)
+        atexit.register(ctypes.windll.winmm.timeEndPeriod, 1)
+    except Exception:
+        pass
+
+
+_precise_timers()
+
+
 class Look:
     """The theme in use right now (set by the window); painted widgets read their colours here."""
 

@@ -61,8 +61,8 @@ RADIUS = {"control": 8, "card": 12}
 # nothing you do often waits more than 0.3 s.
 # Slow and soft, like the report: a page or a result pops in over about a second (a long, gentle stop),
 # while hovering and pressing stay quick (150 ms) so the app still answers at once.
-MOTION = {"hover": 150, "tab": 320, "content": 950, "page": 950, "sheet": 800, "sheet_out": 320,
-          "count": 900, "bars": 1000, "stagger": 70, "toast": 2600}
+MOTION = {"hover": 150, "tab": 320, "content": 1300, "page": 1300, "sheet": 1000, "sheet_out": 360,
+          "count": 1100, "bars": 1200, "stagger": 90, "toast": 2600}
 
 LIGHT = {
     "name": "light",
