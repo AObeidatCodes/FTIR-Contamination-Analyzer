@@ -437,7 +437,10 @@ def test_a_change_is_shown_where_it_is_seen(app, window):
     assert window.current_result().name == "05_fibre_on_wafer_ATR" and "Weak" in view.change_text.text()
 
 
-def test_exporting_a_signed_report(app, window, tmp_path):
+def test_exporting_a_signed_report(app, window, tmp_path, monkeypatch):
+    opened = []
+    monkeypatch.setattr("ftir_analyzer.gui.QDesktopServices",
+                        type("Desktop", (), {"openUrl": staticmethod(lambda url: opened.append(url.toLocalFile()))}))
     panel = window.export_report()
     panel.set_folder(tmp_path)
     panel.name.setText("Ali Obeidat")
@@ -447,13 +450,16 @@ def test_exporting_a_signed_report(app, window, tmp_path):
     panel.comment.setText("06 is saturated: measure a thinner film")
     panel.statement_text.mousePressEvent(type("Click", (), {"button": lambda self: Qt.LeftButton})())
     assert panel.statement.isChecked() and panel.problems() == [] and "Sign" in panel.export_button.text()
-    panel._submit()
+    assert "PDF" in panel.export_button.text() and "web page" in panel.html_button.text()
+    panel._submit("pdf")
     assert wait(app, lambda: not window.busy and str(tmp_path) in str(window.last_report), 60)
+    assert opened and opened[-1].endswith("report.pdf")                        # the button opens what it names
+    window.open_last("report.html")
+    assert opened[-1].endswith("report.html")
     page = window.last_report.read_text(encoding="utf-8")
     assert "Signed: Re-measure" in re.sub(r"<[^>]+>", "", page) and "06 is saturated" in page
     assert window.settings.value("user_name") == "Ali Obeidat"                  # remembered for next time
     assert "Ali Obeidat" in window.signature_log.read_text(encoding="utf-8")
-    window.report_box.close()
 
 
 def test_sheets_never_leave_a_trace(app, window):

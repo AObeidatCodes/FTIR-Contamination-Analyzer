@@ -54,7 +54,7 @@ class ClickLabel(QLabel):
 class ExportPanel(QWidget):
     """The content of the sheet: where the report goes, who made it, and the optional signature."""
 
-    submitted = Signal(dict)          # {"folder": Path, "name": str, "signoff": dict or None}
+    submitted = Signal(dict)          # {"folder": Path, "name": str, "signoff": dict or None, "open": "pdf" or "html"}
     cancelled = Signal()
 
     def __init__(self, results, folder, name=""):
@@ -138,11 +138,16 @@ class ExportPanel(QWidget):
         foot.addWidget(self.problem, 1)
         cancel = QPushButton("Cancel")
         cancel.clicked.connect(self.cancelled.emit)
-        self.export_button = QPushButton(" Export report")
+        self.html_button = QPushButton(" Export web page")
+        self.html_button.setIcon(icon("file-down", t["ink_2"]))
+        self.html_button.setToolTip("Write the report and open the web page (interactive figures)")
+        self.html_button.clicked.connect(lambda: self._submit("html"))
+        self.export_button = QPushButton(" Export as PDF")
         self.export_button.setObjectName("Primary")
         self.export_button.setIcon(icon("file-down", t["on_primary"]))
-        self.export_button.clicked.connect(self._submit)
-        for button in (cancel, self.export_button):
+        self.export_button.setToolTip("Write the report and open the PDF (to read, send or print)")
+        self.export_button.clicked.connect(lambda: self._submit("pdf"))
+        for button in (cancel, self.html_button, self.export_button):
             button.setCursor(Qt.PointingHandCursor)
             foot.addWidget(button)
         self.name.textChanged.connect(lambda _: self._update())
@@ -175,18 +180,20 @@ class ExportPanel(QWidget):
     def _update(self):
         missing = self.problems()
         signing = bool(self.decision.value())
-        self.export_button.setText(" Sign and export" if signing else " Export report")
+        self.export_button.setText(" Sign and export PDF" if signing else " Export as PDF")
+        self.html_button.setText(" Sign and export web page" if signing else " Export web page")
         self.export_button.setEnabled(not missing)
+        self.html_button.setEnabled(not missing)
         self.problem.setText(("Needs " + ", ".join(missing) + ".") if missing else
                              ("Signed as " + (self.name.text().strip() or current_user()) + "." if signing else
                               "Every export is added to the audit log."))
         for widget in (self.comment, self.statement, self.statement_text):
             widget.setEnabled(signing)
 
-    def _submit(self):
+    def _submit(self, kind="pdf"):
         if self.problems():
             return
         name = self.name.text().strip()
         decision = self.decision.value()
         signoff = make_signoff(name, decision, self.comment.text()) if decision else None
-        self.submitted.emit({"folder": self.folder, "name": name, "signoff": signoff})
+        self.submitted.emit({"folder": self.folder, "name": name, "signoff": signoff, "open": kind})

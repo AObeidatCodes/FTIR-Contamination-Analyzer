@@ -612,7 +612,7 @@ MOTION_JS = """
     gsap.utils.toArray('.stats, .panel, h2.part').forEach(function (part) {
       var name = part.querySelector('.sample-head h3');
       // opacity only (not visibility): a hidden part can still be found with Ctrl+F
-      reveals.push(gsap.from(part, { y: 28, opacity: 0, duration: 0.8, ease: 'power3.out',
+      reveals.push(gsap.from(part, { y: 44, scale: 0.94, transformOrigin: '50% 0%', opacity: 0, duration: 1.15, ease: 'expo.out',
         clearProps: 'transform,opacity',
         scrollTrigger: { trigger: part, start: 'top 90%', once: true,
           onEnter: function () {
@@ -622,9 +622,9 @@ MOTION_JS = """
             });
             var still = pieces.filter(function (el) { return el.matches('.figure, figure, .hint'); });
             var moving = pieces.filter(function (el) { return still.indexOf(el) < 0; });
-            gsap.from(moving, { y: 14, opacity: 0, duration: 0.6, ease: 'power2.out', stagger: 0.07, delay: 0.15,
+            gsap.from(moving, { y: 24, scale: 0.96, opacity: 0, duration: 0.9, ease: 'expo.out', stagger: 0.09, delay: 0.12,
               clearProps: 'transform,opacity' });
-            gsap.from(still, { opacity: 0, duration: 0.8, ease: 'power1.out', delay: 0.3, clearProps: 'opacity' });
+            gsap.from(still, { opacity: 0, scale: 0.97, duration: 1.0, ease: 'expo.out', delay: 0.25, clearProps: 'opacity,transform' });
             part.querySelectorAll('.stats b, .strip b, .strip u').forEach(function (el) {
               if (el.closest('.mini')) { return; }
               if (el.matches('.strip b, .strip u')) {

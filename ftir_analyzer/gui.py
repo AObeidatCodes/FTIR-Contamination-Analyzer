@@ -753,6 +753,10 @@ class MainWindow(QMainWindow):
         self.act_demo = make("Open demo spectra", "Ctrl+D", self.open_demo, "Twelve example measurements")
         self.act_export = make("Export report…", "Ctrl+E", self.export_report,
                                "Write the report (web page and Excel table), and sign it if you like")
+        self.act_last_pdf = make("Open last PDF report", "", lambda: self.open_last("report.pdf"),
+                                 "Open the PDF of the report you wrote last")
+        self.act_last_html = make("Open last web report", "", lambda: self.open_last("report.html"),
+                                  "Open the web page of the report you wrote last")
         self.act_remove = make("Remove from list", "Delete", self.remove_selected)
         self.act_clear = make("Clear list", "", self.clear_list)
         self.act_quit = make("Exit", "Ctrl+Q", self.close)
@@ -776,7 +780,7 @@ class MainWindow(QMainWindow):
         quiet bar instead of two). Every action is also on the window, so its shortcut always works."""
         bar = self.main_menu = QMenu(self)
         file_menu = bar.addMenu("&File")
-        for action in (self.act_open, self.act_folder, self.act_demo, None, self.act_export, None,
+        for action in (self.act_open, self.act_folder, self.act_demo, None, self.act_export, self.act_last_pdf, self.act_last_html, None,
                        self.act_remove, self.act_clear, None, self.act_quit):
             file_menu.addSeparator() if action is None else file_menu.addAction(action)
         view_menu = bar.addMenu("&View")
@@ -1565,9 +1569,18 @@ class MainWindow(QMainWindow):
         self.settings.setValue("report_dir", str(choice["folder"]))
         if self.sheet is not None:
             self.sheet.close_sheet()
-        self.write_report_to(choice["folder"], name=choice["name"], signoff=choice["signoff"])
+        self.write_report_to(choice["folder"], name=choice["name"], signoff=choice["signoff"],
+                             open_with=choice.get("open"))
 
-    def write_report_to(self, folder, ask_to_open=True, name=None, signoff=None):
+    def open_last(self, filename):
+        """Open a file of the report written last (the PDF or the web page)."""
+        path = self.last_report.with_name(filename) if self.last_report else None
+        if path is None or not path.exists():
+            self.notify("No report written yet: use Export report first.", "file-down")
+            return
+        QDesktopServices.openUrl(QUrl.fromLocalFile(str(path)))
+
+    def write_report_to(self, folder, ask_to_open=True, name=None, signoff=None, open_with=None):
         """Write the report into a new, dated sub-folder of `folder` (in the background)."""
         out_dir = Path(folder) / f"FTIR_report_{datetime.now():%Y-%m-%d_%H%M%S}"
         name = self.settings.value("user_name", "") if name is None else name
@@ -1581,14 +1594,21 @@ class MainWindow(QMainWindow):
                                 signature_log=self.signature_log)
 
         self.set_status("Writing the report…", busy=True)
-        self.run_job(Job(job), lambda path: self._report_written(path, ask_to_open), "The report could not be written")
+        self.run_job(Job(job), lambda path: self._report_written(path, ask_to_open, open_with), "The report could not be written")
 
-    def _report_written(self, html_path, ask_to_open=True):
+    def _report_written(self, html_path, ask_to_open=True, open_with=None):
         self.last_report = html_path
         self.set_status(f"Report written: {html_path}")
         if not ask_to_open:
             return
         pdf_path = html_path.with_name("report.pdf")
+        if open_with:                                      # the button said which one: open it straight away
+            chosen = pdf_path if open_with == "pdf" and pdf_path.exists() else html_path
+            signed = "signed and " if self._signed_last else ""
+            self.notify(f"The report is ready ({signed}added to the audit log). Opened {chosen.name}.", "file-down",
+                        ("Show the folder", lambda: QDesktopServices.openUrl(QUrl.fromLocalFile(str(html_path.parent)))))
+            QDesktopServices.openUrl(QUrl.fromLocalFile(str(chosen)))
+            return
         opener = pdf_path if pdf_path.exists() else html_path
         signed = "signed and " if self._signed_last else ""
         self.notify(f"The report is ready ({signed}added to the audit log).", "file-down",
