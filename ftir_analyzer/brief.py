@@ -69,3 +69,9 @@ def band_height_fn(r, library):
         return float(close.max()) if len(close) else None
 
     return lambda w: (near(sample, w, config.TOLERANCE_CM), near(match, w, 10) if match else None)
+
+
+def check_kinds(c):
+    """The colour of each of the six checks (good, warn, bad, none), in the order of check_rows."""
+    return ["bad" if c.saturated else "good", "bad" if c.no_sample else "good", "good" if c.ch == "present" else "none",
+            "warn" if c.oh in ("major", "minor") else "none", "none", "warn" if c.vapour_lines else "none"]

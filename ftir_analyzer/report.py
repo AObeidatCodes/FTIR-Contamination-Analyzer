@@ -162,6 +162,7 @@ a:hover{text-decoration:underline;text-underline-offset:3px}
 .bar nav a:hover{background:var(--surface-2);text-decoration:none}
 .bar .status{margin-left:auto;display:flex;gap:8px}
 .bar .status .pill{margin:0}
+button.pill{font:inherit;font-size:14px;font-weight:600;border:0;cursor:pointer}
 
 main{max-width:1136px;margin:0 auto;padding:32px 24px 64px}
 .title h1{font-size:24px;font-weight:600;line-height:1.25;margin:0;text-wrap:balance}
@@ -298,6 +299,10 @@ ol.steps{padding-left:22px}ol.steps li{margin:0 0 8px}
 /* traceability */
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;align-items:start}
 .grid2 .panel{margin:0;min-width:0}
+.grid2.even{align-items:stretch}
+h4.sub{margin:20px 0 8px;font-size:14px;color:var(--muted);font-weight:400}
+.ref{padding:10px 0;border-top:1px solid var(--line)}.ref b{display:block;margin-bottom:4px}
+dd.copy{cursor:copy}dd.copy:hover{color:var(--accent-ink)}
 .panel>h3{margin-bottom:16px}
 .check{display:flex;gap:10px;margin:0 0 12px}.check .icon{margin-top:4px;flex:none}
 .check.ok .icon{color:var(--good)}.check.alarm .icon,.check.alarm b{color:var(--bad)}
@@ -538,6 +543,30 @@ BAND_JS = """
 """
 
 
+# Small things of the page that need no library: the motion switch in the bar (your choice is kept in this
+# browser; without one the page follows the system's "animation effects" setting) and click-to-copy checksums.
+UI_JS = """
+(function(){
+  var button = document.getElementById('motion-toggle');
+  if (button) {
+    var show = function(){ button.textContent = window.ftirMotion ? 'Motion on' : 'Motion off';
+                           button.setAttribute('aria-pressed', window.ftirMotion ? 'true' : 'false'); };
+    show();
+    button.addEventListener('click', function(){
+      try { localStorage.setItem('ftir-motion', window.ftirMotion ? 'off' : 'on'); } catch (e) { return; }
+      location.reload();
+    });
+  }
+  document.querySelectorAll('dd.copy').forEach(function(dd){
+    dd.addEventListener('click', function(){
+      var text = dd.textContent;
+      try { navigator.clipboard.writeText(dd.getAttribute('data-copy')).then(function(){
+        dd.textContent = 'Copied'; setTimeout(function(){ dd.textContent = text; }, 900); }); } catch (e) { return; }
+    });
+  });
+})();
+"""
+
 MOTION_FILES = ["gsap.min.js", "ScrollTrigger.min.js", "SplitText.min.js", "lenis.min.js"]
 
 # The motion of the page. It runs only when the person has not asked for less motion, and every
@@ -545,7 +574,7 @@ MOTION_FILES = ["gsap.min.js", "ScrollTrigger.min.js", "SplitText.min.js", "leni
 # printing shows everything (the reveals are finished and removed before the page is printed).
 MOTION_JS = """
 (function(){
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { return; }
+  if (!window.ftirMotion) { return; }                    // switched off by the person or by the system
   if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined' || typeof Lenis === 'undefined') { return; }
   gsap.registerPlugin(ScrollTrigger, SplitText);
   document.documentElement.classList.add('motion');
@@ -583,10 +612,32 @@ MOTION_JS = """
     gsap.utils.toArray('.stats, .panel, h2.part').forEach(function (part) {
       var name = part.querySelector('.sample-head h3');
       // opacity only (not visibility): a hidden part can still be found with Ctrl+F
-      reveals.push(gsap.from(part, { y: 16, opacity: 0, duration: 0.55, ease: 'power2.out',
+      reveals.push(gsap.from(part, { y: 28, opacity: 0, duration: 0.8, ease: 'power3.out',
         clearProps: 'transform,opacity',
-        scrollTrigger: { trigger: part, start: 'top 92%', once: true,
-          onEnter: function () { if (name) { rise(name, 0.05); } } } }));
+        scrollTrigger: { trigger: part, start: 'top 90%', once: true,
+          onEnter: function () {
+            if (name) { rise(name, 0.05); }
+            var pieces = gsap.utils.toArray(part.querySelectorAll(':scope > *, :scope > div > *')).filter(function (el) {
+              return !el.matches('.sample-head, h2, h3');
+            });
+            var still = pieces.filter(function (el) { return el.matches('.figure, figure, .hint'); });
+            var moving = pieces.filter(function (el) { return still.indexOf(el) < 0; });
+            gsap.from(moving, { y: 14, opacity: 0, duration: 0.6, ease: 'power2.out', stagger: 0.07, delay: 0.15,
+              clearProps: 'transform,opacity' });
+            gsap.from(still, { opacity: 0, duration: 0.8, ease: 'power1.out', delay: 0.3, clearProps: 'opacity' });
+            part.querySelectorAll('.stats b, .strip b, .strip u').forEach(function (el) {
+              if (el.closest('.mini')) { return; }
+              if (el.matches('.strip b, .strip u')) {
+                gsap.from(el, { left: '0%', duration: 1.1, ease: 'power3.out', delay: 0.4, clearProps: 'left' });
+              } else {
+                var end = parseInt(el.textContent, 10), counter = { v: 0 };
+                if (isNaN(end)) { return; }
+                gsap.to(counter, { v: end, duration: 0.9, ease: 'power2.out', delay: 0.2,
+                  onUpdate: function () { el.textContent = Math.round(counter.v); },
+                  onComplete: function () { el.textContent = end; } });
+              }
+            });
+          } } }));
     });
     ScrollTrigger.refresh();
   });
@@ -602,8 +653,10 @@ MOTION_JS = """
 
 # In <head>: keeps the title still until its words are split (no flash), and gives up after 2 s
 # if the motion script cannot run, so the title is never hidden for good.
-MOTION_WAIT = ("<script>if(!matchMedia('(prefers-reduced-motion: reduce)').matches){var d=document.documentElement;"
-               "d.classList.add('motion-wait');setTimeout(function(){d.classList.remove('motion-wait')},2000)}</script>")
+MOTION_WAIT = ("<script>(function(){var p=null;try{p=localStorage.getItem('ftir-motion')}catch(e){}"
+               "var sys=matchMedia('(prefers-reduced-motion: reduce)').matches;window.ftirMotion=p?p==='on':!sys;"
+               "if(window.ftirMotion){var d=document.documentElement;d.classList.add('motion-wait');"
+               "setTimeout(function(){d.classList.remove('motion-wait')},2000)}})()</script>")
 
 
 def _asset(name):
@@ -769,10 +822,41 @@ def validation_html(validation):
                f"reaching the probable threshold {config.PROBABLE_R:.2f}: re-validate before using this report."))
 
 
-def library_html(library):
-    """Which references the run used; every in-house reference with who added it and how it was confirmed."""
+def short_hash(value):
+    """A checksum as its first and last characters; the whole value is in the tooltip and is copied by a click."""
+    value = str(value)
+    return f"{value[:8]}…{value[-6:]}" if len(value) > 20 else value
+
+
+def fact(label, value, full=None, copy=False):
+    """One fact as a label and a value on one line; `full` is the whole text in the tooltip."""
+    title = f' title="{h(full)}"' if full else ""
+    mark = f' class="mono copy" data-copy="{h(full)}"' if copy else ""
+    return f"<dt>{h(label)}</dt><dd{mark}{title}>{h(value)}</dd>"
+
+
+def software_short(text):
+    """'Python 3.13.2, numpy 2.2.3, ...' as 'Python 3.13.2 + 3 libraries' (the whole list is in the tooltip)."""
+    parts = [part.strip() for part in text.split(",") if part.strip()]
+    return f"{parts[0]} + {len(parts) - 1} librar{'y' if len(parts) == 2 else 'ies'}" if len(parts) > 1 else text
+
+
+def validation_short(validation):
+    """The impostor test in a few words (the whole sentence is validation_html, in the tooltip)."""
+    ok = validation.passed
+    return (f"{'Passed' if ok else 'FAILED'} · best wrong answer {validation.score:.2f} "
+            f"{'<' if ok else '≥'} {config.PROBABLE_R:.2f}")
+
+
+def library_html(library, info):
+    """The library the run used: its checksum and validation, which references, every in-house reference with
+    who added it and how it was confirmed."""
+    rows = (fact("Library", info["library"].split(",")[0], info["library"]) + fact("Library SHA-256", short_hash(info["library_sha256"]),
+            info["library_sha256"], copy=True)
+            + fact("Validation", validation_short(info["validation"]), plain_text(validation_html(info["validation"]))))
+    head = f'<section class="panel"><h3>Library</h3><dl class="kv one">{rows}</dl>'
     if library is None:
-        return ""
+        return head + "</section>"
     in_house = [library.info_of(n) for n in library.in_house]
     open_specy = len(library.open_specy)
     shipped = len(library) - len(in_house) - open_specy
@@ -783,19 +867,29 @@ def library_html(library):
                "Analytical Chemistry 93(21), 7543-7548), validated against every other reference before use."
                if open_specy else "") + "</p>")
     if not in_house:
-        return f'<section class="panel"><h3>Reference library</h3>{text}</section>'
-    rows = "".join(
-        f"<tr><td data-label='In-house reference'>{h(i.name)}</td><td data-label='Category'>{h(i.category)}</td>"
-        f"<td data-label='Added by'>{h(i.added_by)}</td><td data-label='On'>{h(readable_time(i.added_at))}</td>"
-        f"<td data-label='Identity confirmed by'>{h(i.confirmation)}</td>"
-        f"<td data-label='Made from'>{h(i.original_name)}</td>"
-        f"<td class='mono' data-label='File SHA-256'>{h(i.sha256[:16])}</td></tr>"
-        for i in in_house)
-    return (f'<section class="panel"><h3>Reference library</h3>{text}<table class="refs">'
-            "<thead><tr><th>In-house reference</th><th>Category</th><th>Added by</th><th>On</th><th>Identity confirmed by"
-            "</th><th>Made from</th><th>File SHA-256</th></tr></thead>"
-            f"<tbody>{rows}</tbody></table><p class='small'>Every addition and removal is kept in "
-            "records/inhouse_library/library_changes.csv, which is only ever appended to.</p></section>")
+        return head + text + "</section>"
+    refs = "".join(
+        f'<div class="ref"><b>{h(i.name)}</b><dl class="kv">'
+        + fact("Added", f"{i.category} · {i.added_by} · {readable_time(i.added_at)}")
+        + fact("Confirmed by", i.confirmation, i.confirmation)
+        + fact("Made from", f"{i.original_name} · {short_hash(i.sha256)}", f"{i.original_name} · {i.sha256}", copy=False)
+        + "</dl></div>" for i in in_house)
+    return (head + f'<h4 class="sub">Reference library</h4>{text}{refs}<p class="small">Every addition and removal is '
+            "kept in records/inhouse_library/library_changes.csv, which is only ever appended to.</p></section>")
+
+
+def plain_text(markup):
+    """HTML as plain text (for a tooltip)."""
+    return html.unescape(re.sub(r"<[^>]+>", "", markup))
+
+
+def rules_html():
+    """The rules the verdicts used, one short line each."""
+    rows = [("Probable", f"r ≥ {config.PROBABLE_R} and lead ≥ {config.MIN_GAP}"), ("Weak", f"r ≥ {config.WEAK_R}"),
+            ("Saturated", f"A > {config.SATURATED_A}"), ("CO₂ warning", f"≥ {config.CO2_WARNING} of the tallest band"),
+            ("C–H present", f"≥ {config.CH_MIN_SHARE:.0%} of the tallest band, ≥ {config.MIN_SN:.0f}× noise"),
+            ("O–H / N–H", f"major ≥ {config.MAJOR:.2f}, minor ≥ {config.MINOR:.2f}")]
+    return '<h4 class="sub">Rules used</h4><dl class="kv one">' + "".join(fact(k, v, v) for k, v in rows) + "</dl>"
 
 
 def settings_html():
@@ -870,7 +964,9 @@ def write_html(results, figures, info, path, analytical=None, library=None, sign
     # on a phone the badges keep only their first word ("Library", "Signed"): the rest is in .long
     status = (f'<a class="pill {"good" if valid else "bad"}" href="#trace">{icon("shield-check" if valid else "shield-alert")}'
               f'<span>Library<span class="long"> {"validated" if valid else "NOT validated"}</span></span></a>'
-              + (f'<a class="pill good" href="#signoff">{icon("badge-check")}<span>Signed<span class="long">: '
+              + '<button type="button" class="pill none" id="motion-toggle" title="Scroll animations: click to switch. '
+        'Without a choice the page follows the animation setting of the system."></button>'
+      + (f'<a class="pill good" href="#signoff">{icon("badge-check")}<span>Signed<span class="long">: '
                  f'{h(DECISIONS[signoff["decision"]])}</span></span></a>'
                  if signoff else f'<a class="pill none" href="#signoff">{icon("clipboard-list")}<span>Not signed'
                                  '<span class="long"> yet</span></span></a>'))
@@ -900,21 +996,18 @@ def write_html(results, figures, info, path, analytical=None, library=None, sign
 {sections}
 {signoff_html(signoff, n)}
 <h2 class="part" id="trace">Traceability</h2>
-<div class="grid2">
-  <section class="panel"><h3>Run information</h3><dl class="kv">
-    <dt>Analysed</dt><dd>{h(readable_time(info['run_at'], with_zone=True))}</dd>
-    <dt>By</dt><dd>{h(analysed_by)}</dd>
-    <dt>Program</dt><dd>{h(info['program'])}</dd>
-    <dt>Code SHA-256</dt><dd class="mono">{info['code_sha256']}</dd>
-    <dt>Software</dt><dd>{h(info['software'])}</dd>
-    <dt>Library</dt><dd>{h(info['library'])}</dd>
-    <dt>Library SHA-256</dt><dd class="mono">{info['library_sha256']}</dd>
-    <dt>Library validation</dt><dd>{validation_html(info['validation'])}</dd>
-    <dt>Settings</dt><dd>{settings_html()}</dd></dl></section>
-  {library_html(library)}
+<div class="grid2 even">
+  <section class="panel"><h3>Run</h3><dl class="kv one">
+    {fact("Analysed", readable_time(info["run_at"], with_zone=True))}
+    {fact("By", analysed_by)}
+    {fact("Program", info["program"], info["program"])}
+    {fact("Software", software_short(info["software"]), info["software"])}
+    {fact("Code SHA-256", short_hash(info["code_sha256"]), info["code_sha256"], copy=True)}</dl>
+    {rules_html()}</section>
+  {library_html(library, info)}
 </div>
 <footer>Generated with {h(__title__)} {__version__}, developed by {h(__author__)}</footer>
-{band_js}</main>{theme_js}{motion_js()}</body></html>"""
+{band_js}<script>{UI_JS}</script></main>{theme_js}{motion_js()}</body></html>"""
     Path(path).write_text(page, encoding="utf-8")
 
 

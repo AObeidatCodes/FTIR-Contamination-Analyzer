@@ -1588,18 +1588,26 @@ class MainWindow(QMainWindow):
         self.set_status(f"Report written: {html_path}")
         if not ask_to_open:
             return
+        pdf_path = html_path.with_name("report.pdf")
+        opener = pdf_path if pdf_path.exists() else html_path
         signed = "signed and " if self._signed_last else ""
         self.notify(f"The report is ready ({signed}added to the audit log).", "file-down",
-                    ("Open", lambda: QDesktopServices.openUrl(QUrl.fromLocalFile(str(html_path)))))
+                    ("Open PDF" if opener == pdf_path else "Open",
+                     lambda: QDesktopServices.openUrl(QUrl.fromLocalFile(str(opener)))))
         box = QMessageBox(QMessageBox.Information, __title__, "The report is ready.", parent=self)
-        box.setInformativeText(f"{html_path}\n\nThe run was added to the audit log"
-                               + (", and your signature to the signature log" if self._signed_last else "")
-                               + ". The folder also has the results as an Excel table (report.xlsx).")
-        open_button = box.addButton("Open the report", QMessageBox.AcceptRole)
+        box.setInformativeText(f"{html_path.parent}\n\nThe PDF (report.pdf) is for reading, sending and printing; "
+                               "the web page (report.html) has the interactive figures; the Excel table is "
+                               "report.xlsx. The run was added to the audit log"
+                               + (", and your signature to the signature log" if self._signed_last else "") + ".")
+        buttons = {}
+        if pdf_path.exists():
+            buttons[box.addButton("Open the PDF", QMessageBox.AcceptRole)] = pdf_path
+        buttons[box.addButton("Open the web report", QMessageBox.AcceptRole)] = html_path
+        buttons[box.addButton("Show the folder", QMessageBox.ActionRole)] = html_path.parent
         box.addButton("Close", QMessageBox.RejectRole)
         box.setAttribute(Qt.WA_DeleteOnClose)
-        box.buttonClicked.connect(lambda button: QDesktopServices.openUrl(QUrl.fromLocalFile(str(html_path)))
-                                  if button is open_button else None)
+        box.buttonClicked.connect(lambda button: QDesktopServices.openUrl(QUrl.fromLocalFile(str(buttons[button])))
+                                  if button in buttons else None)
         box.open()                                         # not blocking: the window stays usable behind it
         self.report_box = box
 

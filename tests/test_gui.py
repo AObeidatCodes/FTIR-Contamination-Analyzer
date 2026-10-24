@@ -344,6 +344,16 @@ def test_export_report(app, window, tmp_path):
     assert window.audit_log.exists()
 
 
+def test_the_report_message_offers_the_pdf(app, window, tmp_path):
+    window.write_report_to(tmp_path, ask_to_open=False)
+    assert wait(app, lambda: not window.busy and hasattr(window, "last_report"), 120)
+    assert window.last_report.with_name("report.pdf").exists()
+    window._report_written(window.last_report)
+    texts = [button.text() for button in window.report_box.buttons()]
+    assert set(texts) == {"Open the PDF", "Open the web report", "Show the folder", "Close"}
+    window.report_box.close()
+
+
 def test_copy_the_result(app, window):
     """Ctrl+C in the list puts a short, traceable summary of the result on the clipboard."""
     if not window.model.results:

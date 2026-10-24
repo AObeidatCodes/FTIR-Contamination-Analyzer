@@ -285,6 +285,8 @@ def test_bands_in_the_report_can_be_pointed_at(tmp_path, library):
                         audit_log=tmp_path / "audit.csv").read_text(encoding="utf-8")
     assert 'class="chip band"' in page and 'data-fig="result0"' in page and 'class="band-card" hidden' in page
     assert "bandmark" in page                                         # the script that marks a band in the figure
+    assert 'id="motion-toggle"' in page and "window.ftirMotion" in page   # the motion switch in the bar
+    assert "Rules used" in page and 'class="grid2 even"' in page          # the traceability: two panels of one height
 
 
 def test_readable_times():
@@ -438,6 +440,6 @@ def test_report_motion_is_built_in_and_optional(tmp_path, library):
                         run_info(library, impostor_test(library)), tmp_path / "run",
                         audit_log=tmp_path / "audit.csv").read_text(encoding="utf-8")
     assert "GSAP 3.15.0" in page and "1.3.27" in page and "<script src" not in page   # nothing from the internet
-    assert page.count("prefers-reduced-motion: reduce") >= 2                          # both scripts step aside
+    assert "prefers-reduced-motion: reduce" in page and "window.ftirMotion" in page   # the page steps aside, or follows the switch
     assert "beforeprint" in page and "SplitText.create" in page and "ScrollTrigger" in page
-    assert "Library validation" in page and "Validation and data integrity" not in page
+    assert "Validation" in page and "Validation and data integrity" not in page

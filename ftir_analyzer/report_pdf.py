@@ -31,10 +31,10 @@ from matplotlib import font_manager, ticker
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 from matplotlib.backends.backend_pdf import PdfPages
 from matplotlib.figure import Figure
-from matplotlib.patches import Circle
+from matplotlib.patches import Circle, FancyBboxPatch
 
 from . import __author__, __title__, __version__, config
-from .brief import check_rows, clean_name, short_flag
+from .brief import check_kinds, check_rows, clean_name, short_flag
 from .evidence import fab_sources
 from .peaks import band_label
 from .plots import peak_positions, scaled, setup_fonts
@@ -135,6 +135,18 @@ class Page:
         self.ax.plot([x0, x1], [y0, y1], color=colour or T["line_strong"], lw=lw, solid_capstyle="butt",
                      **({"dashes": dash} if dash else {}))
 
+    def box(self, x, y, w, h, fill=None, edge=None, radius=6.0, lw=0.8):
+        """A rounded rectangle (radius 0: square corners)."""
+        style = f"round,pad=0,rounding_size={radius}" if radius else "square,pad=0"
+        self.ax.add_patch(FancyBboxPatch((x, y), w, h, boxstyle=style, fc=fill or "none", ec=edge or "none", lw=lw))
+
+    def pill(self, x, y, word, kind, size=8.5):
+        """A status label: a pastel tint with the word in the dark of the same hue. Returns its width."""
+        w = Ruler.width(word, size, "medium") + 16
+        self.box(x, y, w, size + 8, T[f"{kind}_bg"], None, (size + 8) / 2)
+        self.text(x + 8, y + 3.6, word, size, T[kind], "medium")
+        return w
+
     def dot(self, x, y, radius=2.6, fill=None, edge=None, lw=1.0):
         self.ax.add_patch(Circle((x, y), radius, fc=fill or "none", ec=edge or "none", lw=lw))
 
@@ -181,29 +193,34 @@ class Document:
 
 # ------------------------------------------------------------------------------------------------ page 1
 
-def counts_row(page, y, results):
-    cells = [(sum(r.verdict == "probable" for r in results), "probable"),
-             (sum(r.verdict == "weak" for r in results), "weak"),
-             (sum(r.verdict == "no reliable match" for r in results), "no reliable match"),
-             (sum(bool(r.flags) for r in results), "with a flag")]
-    x = M
-    for n, word in cells:
-        page.text(x, y, str(n), 28, T["ink"], "medium")
-        page.text(x, y + 36, word, 8.5, T["muted"])
-        x += max(Ruler.width(word, 8.5), 30) + 40
-    return y + 62
+def counts_card(page, y, results):
+    """The four counts in one bordered strip: a dot in the verdict's colour, the word, the number."""
+    cells = [("good", sum(r.verdict == "probable" for r in results), "probable"),
+             ("warn", sum(r.verdict == "weak" for r in results), "weak"),
+             ("none", sum(r.verdict == "no reliable match" for r in results), "no reliable match"),
+             ("bad" if any(r.flags for r in results) else "none", sum(bool(r.flags) for r in results), "with a flag")]
+    h, w = 58.0, WIDTH / 4
+    page.box(M, y, WIDTH, h, "white", T["line_strong"], 8)
+    for i, (kind, n, word) in enumerate(cells):
+        x = M + i * w
+        if i:
+            page.line(x, y + 10, x, y + h - 10, T["line"])
+        page.dot(x + 18, y + 17, 3.2, T[kind])
+        page.text(x + 27, y + 12, word, 8.5, T["muted"])
+        page.text(x + 15, y + 25, str(n), 22, T["ink"], "medium")
+    return y + h + 24
 
 
-COLUMNS = [("Sample", 0, 168, "left"), ("Verdict", 168, 74, "left"), ("Match", 242, 100, "left"),
-           ("r", 342, 30, "right"), ("Lead", 372, 34, "right"), ("Flag", 424, WIDTH - 424, "left")]
-ROW = 22.0
+COLUMNS = [("Sample", 0, 166, "left"), ("Verdict", 166, 78, "left"), ("Match", 244, 114, "left"),
+           ("r", 358, 28, "right"), ("Lead", 386, 32, "right"), ("Flag", 430, WIDTH - 430, "left")]
+ROW = 25.0
 
 
 def table_head(page, y):
+    page.box(M, y - 5, WIDTH, 20, T["surface_2"], None, 5)
     for name, x, w, align in COLUMNS:
-        page.line_text(M + x, y, name, w - (8 if align == "right" else 0), 8, T["muted"], ha=align)
-    page.line(M, y + 15, M + WIDTH, y + 15, RULE, 0.7)
-    return y + 15
+        page.line_text(M + x + (6 if align == "left" else 0), y, name, w - 12, 8, T["muted"], ha=align)
+    return y + 20
 
 
 def summary_table(doc, page, y, results):
@@ -212,24 +229,24 @@ def summary_table(doc, page, y, results):
     for r in results:
         if y + ROW > BOTTOM:
             page = doc.new()
-            y = table_head(page, M + 12)
-        top = y + 6
-        page.line_text(M, top, clean_name(r.name), COLUMNS[0][2] - 10, 9, T["ink"], "medium")
-        page.verdict(M + COLUMNS[1][1], top, r, 9)
-        page.line_text(M + COLUMNS[2][1], top, r.match if r.has_match else "–", COLUMNS[2][2] - 8, 9, T["ink"])
-        page.line_text(M + COLUMNS[3][1], top, f"{r.r:.2f}", COLUMNS[3][2] - 8, 9, T["ink"], ha="right")
-        page.line_text(M + COLUMNS[4][1], top, f"{r.gap:.2f}", COLUMNS[4][2] - 8, 9, T["ink"], ha="right")
+            y = table_head(page, M + 14)
+        top = y + 6.5
+        page.line_text(M + 6, top, clean_name(r.name), COLUMNS[0][2] - 14, 9, T["ink"], "medium")
+        page.pill(M + COLUMNS[1][1] + 4, top - 3.5, WORD[r.verdict], STYLE[r.verdict], 8)
+        page.line_text(M + COLUMNS[2][1] + 6, top, r.match if r.has_match else "–", COLUMNS[2][2] - 10, 9, T["ink"])
+        page.line_text(M + COLUMNS[3][1], top, f"{r.r:.2f}", COLUMNS[3][2] - 6, 9, T["ink"], "medium", ha="right")
+        page.line_text(M + COLUMNS[4][1], top, f"{r.gap:.2f}", COLUMNS[4][2] - 6, 9, T["ink_2"], ha="right")
         fx, fw = M + COLUMNS[5][1], COLUMNS[5][2]
         if r.flags:
             label, kind = r.flags[0]
             more = f" +{len(r.flags) - 1}" if len(r.flags) > 1 else ""
-            page.dot(fx + 3, top + 5, 2.6, T["bad"] if kind == "bad" else T["warn"])
-            page.line_text(fx + 11, top, short_flag(label) + more, fw - 11, 9, T["ink"])
+            page.pill(fx + 4, top - 3.5, Ruler.fit(short_flag(label) + more, 8, fw - 24, "medium"),
+                      "bad" if kind == "bad" else "warn", 8)
         else:
-            page.line_text(fx, top, "–", fw, 9, T["muted"])
+            page.line_text(fx + 6, top, "–", fw, 9, T["muted"])
         y += ROW
         page.line(M, y, M + WIDTH, y, T["line"])
-    return page, y + 18
+    return page, y + 20
 
 
 def signoff_block(page, y, signoff):
@@ -238,11 +255,13 @@ def signoff_block(page, y, signoff):
     if signoff:
         who = who_text(signoff["name"], signoff["login"])
         when = readable_time(signoff["signed_at"], with_zone=True)
-        page.dot(M + 3, y + 5, 2.7, T["good"])
-        page.line_text(M + 11, y, f"{DECISIONS[signoff['decision']]} · signed by {who} · {when}", WIDTH - 11, 9.5,
-                       T["ink"], "medium")
-        if signoff.get("comment"):
-            page.paragraph(M + 11, y + 16, signoff["comment"], WIDTH - 11, 8.5, T["ink_2"], most=3)
+        comment = Ruler.wrap(signoff["comment"], 8.5, WIDTH - 28) if signoff.get("comment") else []
+        h = 34 + 12 * min(len(comment), 3)
+        page.box(M, y, WIDTH, h, T["good_bg"], None, 8)
+        page.line_text(M + 14, y + 11, f"{DECISIONS[signoff['decision']]} · signed by {who} · {when}", WIDTH - 28, 9.5,
+                       T["good"], "medium")
+        if comment:
+            page.paragraph(M + 14, y + 27, signoff["comment"], WIDTH - 28, 8.5, T["ink_2"], most=3)
         return
     page.line_text(M, y, STATEMENT, WIDTH, 8.5, T["ink_2"])
     y += 46
@@ -259,61 +278,78 @@ def first_page(doc, results, info, signoff):
     n = len(results)
     page = doc.new(right=f"{readable_time(info['run_at'], with_zone=True)}  ·  analysed by "
                    f"{who_text(info.get('run_by_name', ''), info['run_by'])}")
-    page.text(M, 60, "Contamination report", 26, T["ink"], "medium")
+    page.text(M, 56, "Contamination report", 26, T["ink"], "medium")
     ok = info["validation"].passed
-    page.dot(M + 3, 106, 2.7, T["good"] if ok else T["bad"])
-    page.line_text(M + 11, 100, f"{n} spectr{'um' if n == 1 else 'a'}  ·  "
-                   f"{'library validated' if ok else 'LIBRARY NOT VALIDATED'}  ·  {info['library']}", WIDTH - 11, 9,
-                   T["muted"])
-    y = counts_row(page, 134, results)
-    page, y = summary_table(doc, page, y + 14, results)
+    badge = "Library validated" if ok else "Library NOT validated"
+    w = Ruler.width(badge, 8.5, "medium") + 16
+    page.pill(PAGE_W - M - w, 62, badge, "good" if ok else "bad", 8.5)
+    page.line_text(M, 100, f"{n} spectr{'um' if n == 1 else 'a'}  ·  {info['library']}", WIDTH, 9, T["muted"])
+    y = counts_card(page, 128, results)
+    page, y = summary_table(doc, page, y + 6, results)
     if y + 110 > BOTTOM:
         page = doc.new()
-        y = M + 12
+        y = M + 14
     signoff_block(page, max(y + 6, BOTTOM - 96), signoff)
 
 
 # ------------------------------------------------------------------------------------------ one spectrum
 
-def figures_row(page, y, r):
+def facts_card(page, y, r):
+    """Five figures in one bordered strip, like the report's: label above, the number below."""
     ev = r.evidence
-    cells = [(f"{r.r:.2f}", "score r"), (f"{r.gap:.2f}", f"lead, needs {config.MIN_GAP:.2f}"),
-             (f"{len(ev.found)} of {ev.n_key}" if ev else "–", "key bands found"),
-             (f"{r.checks.max_a:.2f}", "highest absorbance"), (r.compared_as, "compared as")]
-    x = M
-    for value, label in cells:
-        size = 20 if len(value) <= 6 else 14
-        page.text(x, y + (20 - size) * 0.9, value, size, T["ink"], "medium")
-        page.text(x, y + 26, label, 8, T["muted"])
-        x += max(Ruler.width(value, size, "medium"), Ruler.width(label, 8)) + 32
-    return y + 48
+    cells = [("Score r", f"{r.r:.2f}"), (f"Lead (needs {config.MIN_GAP:.2f})", f"{r.gap:.2f}"),
+             ("Key bands found", f"{len(ev.found)} of {ev.n_key}" if ev else "–"),
+             ("Highest absorbance", f"{r.checks.max_a:.2f}"), ("Compared as", r.compared_as)]
+    h, w = 50.0, WIDTH / 5
+    page.box(M, y, WIDTH, h, "white", T["line_strong"], 8)
+    for i, (label, value) in enumerate(cells):
+        x = M + i * w
+        if i:
+            page.line(x, y + 9, x, y + h - 9, T["line"])
+        page.line_text(x + 13, y + 9, label, w - 18, 7.6, T["muted"])
+        page.line_text(x + 13, y + 22, value, w - 18, 15 if len(value) <= 9 else 11, T["ink"], "medium")
+    return y + h + 14
 
 
-def score_strip(page, y, r):
-    """The verdict rule in one picture: r on a 0-1 scale, the two thresholds marked."""
+def score_block(page, y, r):
+    """The verdict rule in one picture: r on a 0-1 scale, grey / amber / green by the two thresholds."""
     weak, probable = config.WEAK_R, config.PROBABLE_R
-    w = WIDTH
+    h = 8.0
 
     def at(v):
-        return M + min(max(v, 0.0), 1.0) * w
+        return M + min(max(v, 0.0), 1.0) * WIDTH
 
-    page.line(M, y, M + w, y, T["line_strong"], 0.8)
-    for v in (weak, probable):
-        page.line(at(v), y - 3, at(v), y + 3, T["muted"], 0.6)
-    page.dot(at(r.r - r.gap), y, 3.1, "white", T["ink_2"], 1.0)
-    page.dot(at(r.r), y, 3.1, T["ink"])
-    page.text(M, y + 7, "0", 7, T["muted"])
-    page.text(at(weak) + 4, y + 7, f"weak from {weak:.2f}", 7, T["muted"])
-    page.text(at(probable) - 4, y + 7, f"probable from {probable:.2f}", 7, T["muted"], ha="right")
-    return y + 22
+    page.box(M, y, WIDTH, h, T["good_bg"], None, 4)
+    page.box(M, y, at(weak) - M, h, T["none_bg"], None, 4)
+    page.box(at(weak) - 6, y, 6, h, T["none_bg"], None, 0)
+    page.box(at(weak), y, at(probable) - at(weak), h, T["warn_bg"], None, 0)
+    other = r.r - r.gap
+    page.dot(at(other), y + h / 2, 4.6, "white", T["ink_2"], 1.3)
+    page.dot(at(r.r), y + h / 2, 4.6, T["ink"])
+    page.text(M, y + 13, "0", 7.4, T["muted"])
+    page.text(at(weak), y + 13, f"weak from {weak:.2f}", 7.4, T["muted"], ha="center")
+    page.text(at(probable), y + 13, f"probable from {probable:.2f}", 7.4, T["muted"], ha="right")
+    x, y2 = M, y + 30
+    for filled, name, score in ((True, r.best, r.r), (False, r.runner_up, other)):
+        page.dot(x + 4, y2 + 5, 3.8, T["ink"] if filled else "white", None if filled else T["ink_2"], 1.2)
+        label = f"{name}  r {score:.2f}"
+        page.text(x + 13, y2, label, 8.6, T["ink"], "medium" if filled else "normal")
+        x += 13 + Ruler.width(label, 8.6, "medium") + 20
+    page.text(x, y2, f"lead {r.gap:.2f}", 8.6, T["ink"], "medium")
+    page.text(x + Ruler.width(f"lead {r.gap:.2f}", 8.6, "medium") + 8, y2, f"(needed {config.MIN_GAP:.2f})", 8.6, T["muted"])
+    return y2 + 24
 
 
-def next_step(page, y, r):
+def next_box(page, y, r):
     alert = any(kind == "bad" for _, kind in r.flags)
-    page.line(M, y + 1, M, y + 12, T["bad"] if alert else T["accent"], 1.6)
-    page.text(M + 9, y, "Next step", 8.5, T["bad"] if alert else T["accent_ink"], "medium")
-    end = page.paragraph(M + 68, y, r.next_step, WIDTH - 68, 8.8, T["ink"], most=3)
-    return end + 8
+    lines = Ruler.wrap(r.next_step, 8.8, WIDTH - 100)[:4]
+    h = max(30.0, len(lines) * 12.6 + 16)
+    colour = T["bad"] if alert else T["accent_ink"]
+    page.box(M, y, WIDTH, h, T["bad_bg"] if alert else T["accent_soft"], None, 8)
+    page.text(M + 14, y + (h - 12) / 2, "→", 10, colour, "medium")
+    page.text(M + 30, y + (h - 11) / 2, "Next step", 8.8, colour, "medium")
+    page.paragraph(M + 90, y + 8, r.next_step, WIDTH - 104, 8.8, T["ink"], most=4, lead=1.43)
+    return y + h + 14
 
 
 def draw_chart(page, x, y, w, h, r, library):
@@ -343,7 +379,7 @@ def draw_chart(page, x, y, w, h, r, library):
         page.text(lx + 19, y, label, 7.6, T["ink_2"])
         lx += 19 + Ruler.width(label, 7.6) + 18
 
-    left, axis_h, title_h, gap = 8.0, 30.0, 14.0, 14.0
+    left, axis_h, title_h, gap = 30.0, 30.0, 14.0, 14.0
     top0 = y + 24
     inner = h - 24 - axis_h
     top_h = (inner - 2 * title_h - gap) * 0.27
@@ -388,7 +424,7 @@ def draw_chart(page, x, y, w, h, r, library):
                      transform=ax2.get_xaxis_transform())
         for wn in ev.unexplained:
             ax2.axvline(wn, ymax=0.9, color=T["chart_unexplained"], lw=0.9, ls=(0, (3, 2)), zorder=4)
-            ax2.text(wn - 30, 0.86, f"{wn:.0f} unexplained", ha="right", va="center", fontsize=7, color=T["ink"],
+            ax2.text(wn - 55, 0.86, f"{wn:.0f} unexplained", ha="right", va="center", fontsize=7, color=T["ink"],
                      transform=ax2.get_xaxis_transform(), family=SANS)
 
     # the tallest bands, named just above their peak; a label that would touch another is left out
@@ -419,84 +455,116 @@ def kv(page, x, y, width, rows, label_w, size=8.4):
     return y
 
 
-def spectrum_columns(page, y, r, library):
-    """Why / band evidence / checks, three columns. Returns the y below them."""
-    col = (WIDTH - 2 * 24) / 3
-    xs = [M, M + col + 24, M + 2 * (col + 24)]
-    for x, title in zip(xs, ("Why this verdict", "Band evidence", "Checks on the raw spectrum")):
-        page.text(x, y, title, 9.5, T["ink"], "medium")
-    y += 17
+def card(page, x, y, w, h, title):
+    """A bordered card with a title, like the panels of the web report. Returns the y where its content starts."""
+    page.box(x, y, w, h, "white", T["line_strong"], 8)
+    page.text(x + 12, y + 10, title, 9.4, T["ink"], "medium")
+    return y + 30
 
-    end = [y, y, y]
-    # why
-    yy = page.paragraph(xs[0], y, r.reason, col, 8.2, T["ink_2"], most=3) + 3
+
+def chip_flow(page, x, y, width, items, size=7.8, rows=3):
+    """Small rounded labels in a flow. items: [(text, kind)], kind 'found', 'missing' or 'extra'."""
+    cx, cy, row, hidden = x, y, 0, 0
+    for k, (text, kind) in enumerate(items):
+        w = Ruler.width(text, size) + 14
+        if cx + w > x + width:
+            row += 1
+            cx, cy = x, cy + 17
+        if row >= rows:
+            hidden = len(items) - k
+            break
+        if kind == "extra":
+            page.box(cx, cy, w, 14, T["warn_bg"], None, 5)
+        elif kind == "missing":
+            page.box(cx, cy, w, 14, "white", T["line_strong"], 5)
+        else:
+            page.box(cx, cy, w, 14, T["surface_2"], T["line"], 5)
+        page.text(cx + 7, cy + 3, text, size, T["warn"] if kind == "extra" else T["muted"] if kind == "missing"
+                  else T["ink"], "medium" if kind == "extra" else "normal")
+        cx += w + 5
+    if hidden:
+        page.text(cx, cy + 3, f"+{hidden}", size, T["muted"])
+    return cy + 17
+
+
+def spectrum_cards(page, y, r, library, h):
+    """Why / band evidence / checks as three cards. Returns the y below them."""
+    gap = 12.0
+    room = WIDTH - 2 * gap
+    ws = [room * 0.35, room * 0.27, room * 0.38]
+    xs = [M, M + ws[0] + gap, M + ws[0] + ws[1] + 2 * gap]
+    inner = ws[0] - 24
+    top = [card(page, x, y, w, h, title) for x, w, title in zip(
+        xs, ws, ("Why this verdict", "Band evidence", "Checks on the raw spectrum"))]
+
+    # why: the reason and the best scores (the best one in the accent colour)
+    yy = page.paragraph(xs[0] + 12, top[0], r.reason, inner, 7.9, T["ink_2"], most=3, lead=1.38) + 5
     for k, (name, score) in enumerate(r.ranking[:4]):
         first = k == 0
-        page.line_text(xs[0], yy, name, 78, 8.2, T["ink"] if first else T["muted"])
-        page.line(xs[0] + 82, yy + 5, xs[0] + 82 + max(score, 0) * (col - 118), yy + 5,
-                  T["ink"] if first else T["line_strong"], 1.6 if first else 1.1)
-        page.text(xs[0] + col, yy, f"{score:.2f}", 8.2, T["ink"] if first else T["muted"], ha="right")
-        yy += 13.5
-    end[0] = yy
+        page.line_text(xs[0] + 12, yy, name, 62, 7.9, T["ink"] if first else T["muted"], "medium" if first else "normal")
+        page.line(xs[0] + 78, yy + 4.8, xs[0] + 78 + max(score, 0) * (inner - 112), yy + 4.8,
+                  T["accent"] if first else T["line_strong"], 2.4 if first else 1.6)
+        page.text(xs[0] + 12 + inner, yy, f"{score:.2f}", 7.9, T["ink"] if first else T["muted"], ha="right")
+        yy += 13
 
-    # band evidence
+    # band evidence: every band a small label
     ev = r.evidence
+    x0 = xs[1] + 12
+    inner_band = ws[1] - 24
     if not ev:
-        yy = page.paragraph(xs[1], y, "No match to explain. The tallest bands, to read by hand:", col, 8.2,
-                            T["ink_2"], most=2) + 2
+        yy = page.paragraph(x0, top[1], "No match to explain. The tallest bands:", inner, 7.9, T["ink_2"], most=2) + 2
         for label in r.checks.tallest_bands[:3]:
-            page.line_text(xs[1], yy, label, col, 8.2, T["ink"])
+            page.line_text(x0, yy, label, inner, 7.9, T["ink"])
             yy += 12
     else:
-        yy = page.paragraph(xs[1], y, f"{len(ev.found)} of {ev.n_key} key bands found", col, 8.4,
-                            T["ink"], "medium", most=1)
-        if ev.found:
-            yy = page.paragraph(xs[1], yy + 1, " · ".join(f"{w:.0f}" for w in ev.found), col, 8.2, T["ink_2"], most=2)
-        if ev.missing:
-            yy = page.paragraph(xs[1], yy + 1, "missing " + " · ".join(f"{w:.0f}" for w in ev.missing), col, 8.2,
-                                T["warn"], most=1)
+        page.line_text(x0, top[1], f"{len(ev.found)} of {ev.n_key} key bands found", inner, 8.2, T["ink"], "medium")
+        yy = chip_flow(page, x0, top[1] + 14, inner_band, [(f"{w_:.0f}", "found") for w_ in ev.found]
+                       + [(f"{w_:.0f} missing", "missing") for w_ in ev.missing], rows=2)
         if ev.unexplained:
-            yy = page.paragraph(xs[1], yy + 5, "not explained: " + " · ".join(f"{w:.0f}" for w in ev.unexplained),
-                                col, 8.2, T["bad"], most=2)
-            names = "; ".join(band_label(w) for w in ev.unexplained)
-            yy = page.paragraph(xs[1], yy, names, col, 7.4, T["muted"], most=3)
+            page.text(x0, yy + 3, "not explained by the match", 7.4, T["muted"])
+            chip_flow(page, x0, yy + 15, inner_band, [(f"{w_:.0f}", "extra") for w_ in ev.unexplained], rows=1)
         else:
-            yy = page.paragraph(xs[1], yy + 4, "Every clear band is explained by the match.", col, 7.8, T["muted"],
-                                most=2)
-    end[1] = yy
+            page.line_text(x0, yy + 3, "Every clear band is explained.", inner, 7.6, T["muted"])
 
-    # checks
-    end[2] = kv(page, xs[2], y, col, check_rows(r.checks), 62, 8.2)
-    return max(end)
+    # checks: a status dot, the name, the short value
+    yy = top[2]
+    for (name, value), kind in zip(check_rows(r.checks), check_kinds(r.checks)):
+        page.dot(xs[2] + 16, yy + 4.6, 2.5, T[kind])
+        page.line_text(xs[2] + 24, yy, name, 56, 7.9, T["muted"])
+        page.line_text(xs[2] + 24 + 58, yy, value, ws[2] - 24 - 70, 7.9, T["ink"])
+        yy += 13.2
+    return y + h
 
 
 def spectrum_page(doc, i, n, r, library):
     page = doc.new(right=f"Spectrum {i + 1} of {n}")
-    y = 52
+    y = 50
     match = r.match if r.has_match else ""
-    block = 11 + Ruler.width(WORD[r.verdict], 10.5) + (14 + Ruler.width(match, 10.5, "medium") if match else 0)
+    pill_w = Ruler.width(WORD[r.verdict], 9.5, "medium") + 16
+    block = pill_w + (12 + Ruler.width(match, 11, "medium") if match else 0)
     page.line_text(M, y, clean_name(r.name), WIDTH - block - 24, 20, T["ink"], "medium")
-    vx = PAGE_W - M - block
-    page.verdict(vx, y + 6, r, 10.5)
+    px = PAGE_W - M - block
+    page.pill(px, y + 3, WORD[r.verdict], STYLE[r.verdict], 9.5)
     if match:
-        page.text(vx + 11 + Ruler.width(WORD[r.verdict], 10.5) + 14, y + 6, match, 10.5, T["ink"], "medium")
-    y += 31
+        page.text(px + pill_w + 12, y + 4, match, 11, T["ink"], "medium")
+    y += 32
     page.line_text(M, y, f"{r.spectrum.path.name}  ·  measured by {r.mode_text}", WIDTH, 8.2, T["muted"])
-    y += 24
-    y = figures_row(page, y, r)
-    y = score_strip(page, y + 2, r) + 6
-    y = next_step(page, y, r) + 4
+    y += 22
+    y = facts_card(page, y, r)
+    y = score_block(page, y + 2, r)
+    y = next_box(page, y, r)
 
-    # what stands under the figure: three columns (about 118 pt) and the traceability line (about 40 pt)
-    chart_h = BOTTOM - y - 118 - 40 - 24
-    draw_chart(page, M, y, WIDTH, chart_h, r, library)
+    # what stands under the figure: three cards (122 pt), the source line, the traceability line
+    cards_h = 122.0
+    chart_h = BOTTOM - y - cards_h - 38 - 14
+    page.box(M, y, WIDTH, chart_h, "white", T["line_strong"], 8)
+    draw_chart(page, M + 12, y + 10, WIDTH - 24, chart_h - 18, r, library)
     y += chart_h + 14
-    y = spectrum_columns(page, y, r, library)
+    spectrum_cards(page, y, r, library, cards_h)
 
     sources = fab_sources(r.best, library) if r.has_match else None
     s = r.spectrum
-    foot_y = BOTTOM - 28
-    page.line(M, foot_y - 8, M + WIDTH, foot_y - 8, T["line"])
+    foot_y = BOTTOM - 24
     if sources:
         page.line_text(M, foot_y, f"Where it can come from: {sources[0]}.  Check next: {sources[1]}.", WIDTH, 7.6,
                        T["ink_2"])
