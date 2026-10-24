@@ -41,7 +41,7 @@ from .openspecy import CITATION, LICENCE
 from .jobs import Job
 from .library import reference_on_grid, similarity_matrix
 from .motion import (EASE_OUT, MOTION, Card, FlowLayout, Segmented, SmoothScrollArea, Spinner, alive, animate,
-                     fade_through, make_opaque, snapshot, stop)
+                     fade_through, make_opaque, snapshot, stop, warm_up)
 from .peaks import band_label, band_table
 from .processing import GRID, absorbance
 from .records import readable_time
@@ -399,6 +399,14 @@ class MaterialCard(Card):
         p.end()
         self._picture = picture
 
+    def prepare(self):
+        """Draw the card's picture now, if it is missing (see motion.warm_up)."""
+        if self._picture is None or self._picture.size() != self.size() * (self.devicePixelRatioF() or 1.0):
+            lift, self.lift = self.lift, 0.0
+            resting = self.body()
+            self.lift = lift
+            self._draw_picture(resting)
+
     def paintEvent(self, _):
         t = Theme.t
         p = QPainter(self)
@@ -659,6 +667,12 @@ class LibraryPage(QWidget):
         self._fill_categories()
         self._update_banner()
         self._filter(animated=False)
+        if self.isVisible():
+            warm_up(self.grid.visible_cards())
+
+    def showEvent(self, event):
+        super().showEvent(event)
+        warm_up(self.grid.visible_cards())                           # drawn before they scroll into view
 
     def _fill_categories(self):
         current = self.categories.currentItem().data(Qt.UserRole) if self.categories.currentItem() else ALL

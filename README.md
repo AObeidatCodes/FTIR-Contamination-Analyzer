@@ -500,6 +500,12 @@ card is lifted under the mouse), no gradients, and text of 14 px and up.
   at all and Python's garbage collector waits (a collection can take two or three frames). A sheet is
   photographed once with its shadow and only fades in and rises 16 px: a short distance looks smooth
   even where the screen and Qt are not in step.
+- **Scrolling that glides.** A mouse-wheel notch moves a target; every frame (60 a second) the page
+  covers the same share of the distance still to go, timed by the clock, so a late frame does not make
+  it stutter (the same idea as Lenis in the report). The small charts on the result tiles and library
+  cards are drawn once, in quiet moments just after a page appears, so none is drawn for the first time
+  while it scrolls into view. Touchpads and `Ctrl` + wheel work as before; with Windows' "show
+  animations" off, the wheel scrolls in plain steps.
 - **Nothing pops in.** Qt shows a widget that was just put into a layout a moment later, and styles it
   a moment after that. Before the picture of the new state is taken, all of it is done, so the badges,
   flags and the close button are already in the picture and the real page that replaces it at the end

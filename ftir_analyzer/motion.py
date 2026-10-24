@@ -45,6 +45,7 @@ License: MIT (see LICENSE)
 """
 
 import gc
+import math
 import re
 import sys
 
@@ -198,6 +199,26 @@ class Moving:
         if cls.count == 0 and getattr(cls, "paused", False):
             cls.paused = False
             gc.enable()
+
+
+def warm_up(widgets, delay=350):
+    """Draw these widgets' cached pictures ahead of time (their prepare()), one per quiet moment and
+    never while something moves. Without it a picture is drawn the first time its widget scrolls
+    into view, and that one slow frame (5-20 ms) is felt as a hitch in the scrolling."""
+    queue = [w for w in widgets if hasattr(w, "prepare")]
+
+    def step():
+        if not queue:
+            return
+        if Moving.count:                                           # something is moving: later
+            QTimer.singleShot(60, step)
+            return
+        widget = queue.pop(0)
+        if alive(widget) and widget.width() > 0:
+            widget.prepare()
+        QTimer.singleShot(0, step)                                 # the next one after the next events
+
+    QTimer.singleShot(delay, step)
 
 
 # ---------------------------------------------------------------------------- the transition layer
@@ -375,64 +396,69 @@ def crossfade(widget, change, duration=180, on_done=None):
 
 # ---------------------------------------------------------------------------- smooth scrolling
 class SmoothScrollArea(QScrollArea):
-    """A scroll area where every mouse-wheel notch adds a short, decelerating push.
+    """A scroll area where the mouse wheel moves a target and the page glides after it.
 
-    Notches that follow quickly add up, so a fast spin travels further and a single click
-    moves calmly. Touchpads already send smooth pixel steps: those are passed straight on.
+    Every frame the page covers the same share of the distance still to go (as Lenis does in
+    the report), measured by the real time since the last frame, so it moves at the same pace
+    whether a frame comes early or late. Notches that follow quickly add up, so a fast spin
+    travels further. Touchpads already send smooth pixel steps: those are passed straight on.
     The content is opaque, so Qt can move the picture instead of drawing it again.
     """
 
-    STEP, DURATION = 110, 380                                      # pixels per notch, ms per push
+    STEP, PACE, FRAME = 110, 9.0, 16                               # pixels per notch, glide rate per second, ms
 
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWidgetResizable(True)
         self.setFrameShape(QFrame.NoFrame)
-        self.pushes = []                                           # [(distance, start time ms)]
-        self.applied, self.clock = 0.0, QElapsedTimer()
+        self.target = self.position = 0.0
+        self.last_frame, self.clock = 0, QElapsedTimer()
         self.clock.start()
         self.timer = QTimer(self)
         self.timer.setTimerType(Qt.PreciseTimer)
-        self.timer.setInterval(8)
+        self.timer.setInterval(self.FRAME)
         self.timer.timeout.connect(self._tick)
         self.recent = []                                           # times of the last wheel notches
 
     def wheelEvent(self, event):
         delta = event.angleDelta().y()
         if Motion.reduced or not event.pixelDelta().isNull() or event.modifiers() or not delta or delta % 120:
+            self.stop_glide()
             super().wheelEvent(event)                              # touchpad, Ctrl / Shift + wheel: as usual
             return
-        now = self.clock.elapsed()
+        bar, now = self.verticalScrollBar(), self.clock.elapsed()
+        if not self.timer.isActive() or round(self.position) != bar.value():
+            self.target = self.position = float(bar.value())       # start from where the page is now
+            self.last_frame = now
         self.recent = [stamp for stamp in self.recent if now - stamp < 500] + [now]
         boost = 1 + min(1.0, (len(self.recent) - 1) / 8)           # a fast spin travels further
-        self.pushes.append((-delta / 120 * self.STEP * boost, now, 0.0))
+        self.target = min(max(self.target - delta / 120 * self.STEP * boost, bar.minimum()), bar.maximum())
         if not self.timer.isActive():
             self.timer.start()
         event.accept()
 
     def _tick(self):
-        """One frame: every push hands over the distance it covered since the last frame."""
-        bar, now, moved, kept = self.verticalScrollBar(), self.clock.elapsed(), 0.0, []
-        for distance, start, used in self.pushes:
-            share = ease(EASE_OUT, (now - start) / self.DURATION)
-            moved += distance * (share - used)
-            if share < 1:
-                kept.append((distance, start, share))
-        self.pushes = kept
-        self.applied += moved
-        whole = int(self.applied)                                  # move by whole pixels, keep the rest
-        if whole:
-            self.applied -= whole
-            bar.setValue(bar.value() + whole)
-        at_end = (moved < 0 and bar.value() <= bar.minimum()) or (moved > 0 and bar.value() >= bar.maximum())
-        if not self.pushes or at_end:
-            self.pushes, self.applied = [], 0.0
+        """One frame: cover the share of the remaining distance that the time since the last frame allows."""
+        bar, now = self.verticalScrollBar(), self.clock.elapsed()
+        if round(self.position) != bar.value():                    # moved by the scroll bar or the keys
+            self.stop_glide()
+            return
+        dt, self.last_frame = min(now - self.last_frame, 100), now
+        self.target = min(max(self.target, bar.minimum()), bar.maximum())
+        self.position += (self.target - self.position) * (1 - math.exp(-dt / 1000 * self.PACE))
+        if abs(self.target - self.position) < 2:                   # the last pixels: arrive, no crawl
+            self.position = self.target
             self.timer.stop()
+        bar.setValue(round(self.position))
+
+    def stop_glide(self):
+        self.timer.stop()
+        self.target = self.position = float(self.verticalScrollBar().value())
 
     def scroll_to_top(self):
-        self.pushes, self.applied = [], 0.0
         self.timer.stop()
         self.verticalScrollBar().setValue(0)
+        self.target = self.position = 0.0
 
 
 def make_opaque(widget, colour):

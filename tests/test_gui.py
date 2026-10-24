@@ -23,7 +23,8 @@ import pytest
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")       # no screen needed
 pytest.importorskip("PySide6")
 
-from PySide6.QtCore import QEventLoop, QSettings, Qt  # noqa: E402
+from PySide6.QtCore import QEventLoop, QPoint, QPointF, QSettings, Qt  # noqa: E402
+from PySide6.QtGui import QWheelEvent  # noqa: E402
 from PySide6.QtWidgets import QApplication  # noqa: E402
 
 from ftir_analyzer import config  # noqa: E402
@@ -179,6 +180,34 @@ def test_animations_finish_in_the_right_state(app, window):
         assert page.bars.growth == 1.0
     finally:
         Motion.reduced = True
+
+
+def test_the_wheel_glides_and_stops(app, window):
+    select(app, window, "07_particle_on_filter")
+    page = window.result_view
+    bar, viewport = page.verticalScrollBar(), page.viewport()
+    bar.setValue(0)
+    centre = QPointF(viewport.width() / 2, viewport.height() / 2)
+
+    def notch():
+        app.sendEvent(viewport, QWheelEvent(centre, viewport.mapToGlobal(centre), QPoint(0, 0), QPoint(0, -120),
+                                            Qt.NoButton, Qt.NoModifier, Qt.NoScrollPhase, False))
+    Motion.reduced = False
+    try:
+        notch()
+        assert bar.value() == 0 and page.timer.isActive()            # it glides, it does not jump
+        assert wait(app, lambda: not page.timer.isActive(), 3)
+        assert bar.value() == min(page.STEP, bar.maximum())          # and arrives exactly one notch down
+        bar.setValue(0)
+        notch()
+        bar.setValue(bar.maximum())                                  # the scroll bar takes over: the glide gives way
+        wait(app, lambda: not page.timer.isActive(), 1)
+        assert bar.value() == bar.maximum()
+    finally:
+        Motion.reduced = True
+    bar.setValue(0)
+    notch()
+    assert not page.timer.isActive()                                 # reduced motion: the usual scroll step
 
 
 def test_library_page(app, window):

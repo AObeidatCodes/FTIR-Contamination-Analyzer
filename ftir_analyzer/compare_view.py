@@ -34,7 +34,7 @@ from PySide6.QtGui import QColor, QFont, QFontMetrics, QPainter, QPen, QPixmap
 from PySide6.QtWidgets import QGridLayout, QHBoxLayout, QLabel, QSizePolicy, QVBoxLayout
 
 from . import config
-from .motion import EASE_OUT, MOTION, Card, Look, Segmented, animate, stop
+from .motion import EASE_OUT, MOTION, Card, Look, Segmented, animate, stop, warm_up
 from .processing import CO2_MASK, GRID, fingerprint
 from .widgets import font, line_pen, polylines
 
@@ -178,6 +178,11 @@ class MatchTile(Card):
             p.drawText(QRectF(x - 24, rect.bottom() + 4, 48, 16), Qt.AlignCenter, str(w))
         p.end()
         self._picture = picture
+
+    def prepare(self):
+        """Draw the chart picture now, if it is missing (see motion.warm_up)."""
+        if self._picture is None or self._picture.size() != self.size() * (self.devicePixelRatioF() or 1.0):
+            self._draw_picture()
 
     def paintEvent(self, _):
         t = Look.t
@@ -324,6 +329,7 @@ class TopMatches(Card):
             tile.set_data(i + 1, name, score, score - best_r, sample, reference, mask,
                           selected=name == (self.current or r.best))
             tile.show()
+        warm_up([t for t in self.tiles if not t.isHidden()])          # drawn before they scroll into view
 
     def _choose(self, name):
         best = self.result.best if self.result else None
