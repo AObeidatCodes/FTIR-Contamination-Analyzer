@@ -67,8 +67,9 @@ class ExportPanel(QWidget):
         counts = {v: sum(r.verdict == v for r in results) for v in (PROBABLE, WEAK, NO_MATCH)}
         column.addWidget(text_label(
             f"{len(results)} spectr{'um' if len(results) == 1 else 'a'}: {counts[PROBABLE]} probable, "
-            f"{counts[WEAK]} weak, {counts[NO_MATCH]} with no reliable match. The report is a web page that opens in "
-            "any browser and prints to PDF; the results also come as an Excel table.", "Body2", wrap=True))
+            f"{counts[WEAK]} weak, {counts[NO_MATCH]} with no reliable match. The report comes as a PDF (A4 "
+            "pages, to read, send or print), as a web page with interactive figures, and as an Excel table.",
+            "Body2", wrap=True))
 
         # 1. where
         where_card, where_body = section("1   Where")

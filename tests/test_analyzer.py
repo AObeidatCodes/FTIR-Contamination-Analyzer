@@ -266,6 +266,27 @@ def test_a_signed_report_and_its_record(tmp_path, library):
     assert "Not signed yet" in re.sub(r"<[^>]+>", "", unsigned.read_text(encoding="utf-8")) and len(pd.read_csv(signatures, comment="#")) == 1
 
 
+def test_pdf_report_has_a_page_per_spectrum(tmp_path, library):
+    from ftir_analyzer.records import make_signoff
+    names = ("01_wipe_area_particle_ATR.csv", "07_particle_on_filter.csv", "08_fibre_on_filter.csv")   # clean, second band, no match
+    results = [example(name, library, "ATR") for name in names]
+    info = run_info(library, impostor_test(library), "Ali Obeidat")
+    for run, signoff in (("open", None), ("signed", make_signoff("Ali Obeidat", "accept", "checked by hand"))):
+        html_path = write_report(results, library, info, tmp_path / run, audit_log=tmp_path / "audit.csv",
+                                 signoff=signoff, signature_log=tmp_path / "signatures.csv")
+        pdf = (html_path.parent / "report.pdf").read_bytes()
+        assert pdf.startswith(b"%PDF")
+        assert len(re.findall(rb"/Type /Page(?!s)", pdf)) >= 1 + len(results) + 1    # summary, one per spectrum, traceability
+
+
+def test_bands_in_the_report_can_be_pointed_at(tmp_path, library):
+    results = [example("01_wipe_area_particle_ATR.csv", library, "ATR")]
+    page = write_report(results, library, run_info(library, impostor_test(library)), tmp_path / "run",
+                        audit_log=tmp_path / "audit.csv").read_text(encoding="utf-8")
+    assert 'class="chip band"' in page and 'data-fig="result0"' in page and 'class="band-card" hidden' in page
+    assert "bandmark" in page                                         # the script that marks a band in the figure
+
+
 def test_readable_times():
     from ftir_analyzer.records import readable_time
     assert readable_time("2026-10-20T16:50:00+02:00") == "20 Oct 2026, 16:50"

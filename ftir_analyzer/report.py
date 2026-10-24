@@ -46,13 +46,14 @@ import re
 from pathlib import Path
 
 import matplotlib
+import numpy as np
 import pandas as pd
 
 from . import __author__, __title__, __version__, config
 from .analytical import analytical_steps
 from .checks import BELOW_ZERO_TEXT, describe_co2, describe_vapour
-from .evidence import fab_sources
-from .peaks import band_label
+from .evidence import fab_sources, relative_spectrum
+from .peaks import band_label, band_names
 from .plots import result_svg
 from .records import DECISIONS, append_audit_log, append_signature, readable_time, who_text
 from .theme import ASSETS, DARK, FONTS, ICONS, LIGHT, LOGO_SVG, WEB_FONTS
@@ -263,6 +264,18 @@ dl.kv dt{color:var(--muted)}dl.kv dd{margin:0;min-width:0}
   padding:0 8px;margin:2px 4px 2px 0;font-size:14px;color:var(--ink-2);font-variant-numeric:tabular-nums}
 .chip.missing{background:transparent;border-style:dashed;color:var(--muted)}
 .chip.extra{background:var(--warn-bg);border-color:transparent;color:var(--warn);font-weight:600}
+/* a band you can point at: it marks itself in the figure, and a click pins it and tells about it */
+button.chip{font:inherit;font-size:14px;line-height:1.5;cursor:pointer;text-align:left}
+button.chip:hover,button.chip:focus-visible{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-ink)}
+button.chip[aria-pressed=true]{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-ink);font-weight:600}
+.band-card{margin:8px 0 0;padding:12px 16px;border:1px solid var(--accent);border-radius:12px;background:var(--surface-2);
+  font-size:15px}
+.band-card[hidden]{display:none}
+.band-card b{display:block;font-size:16px;margin-bottom:4px}
+.band-card p{margin:0 0 6px}.band-card .acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.band-card button{font:inherit;font-size:14px;color:var(--accent-ink);background:transparent;border:1px solid var(--line-strong);
+  border-radius:8px;padding:2px 10px;cursor:pointer}
+.band-card button:hover{background:var(--accent-soft);border-color:var(--accent)}
 details{margin-top:16px;border-top:1px solid var(--line);padding-top:12px}
 details summary{cursor:pointer;color:var(--accent-ink);font-weight:600;padding:4px 0;border-radius:8px}
 details summary:hover{text-decoration:underline;text-underline-offset:3px}
@@ -443,6 +456,80 @@ THEME_JS = """
 """
 
 
+# The bands in the "Band evidence" box. Hovering one marks it in the result figure of its spectrum; a click
+# pins the mark and opens a short card (what the band usually is, how high it is in the sample and in the
+# match) with two buttons: show it in the figure (zoomed), or the whole spectrum again. Clicking a key-band
+# triangle in the figure does the same as clicking its button.
+BAND_JS = """
+(function(){
+  if (typeof Plotly === 'undefined') { return; }
+  var pinned = {};
+  var accent = function(){ return getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#4C6FBF'; };
+  var plotOf = function(chip){ return document.getElementById(chip.getAttribute('data-fig')); };
+  var bandOf = function(chip){ return Number(chip.getAttribute('data-band')); };
+  function mark(p, w){                                   // w = null clears the mark
+    if (!p || !p.layout) { return; }
+    var shapes = (p.layout.shapes || []).filter(function(s){ return s.name !== 'bandmark'; });
+    if (w !== null) {
+      shapes.push({name: 'bandmark', type: 'rect', xref: 'x2', yref: 'y2 domain', x0: w - 7, x1: w + 7, y0: 0, y1: 1,
+                   fillcolor: accent(), opacity: 0.18, line: {width: 0}, layer: 'below'});
+      shapes.push({name: 'bandmark', type: 'line', xref: 'x2', yref: 'y2 domain', x0: w, x1: w, y0: 0, y1: 1,
+                   line: {color: accent(), width: 2}});
+    }
+    Plotly.relayout(p, {shapes: shapes});
+  }
+  function line(card, tag, text){
+    var el = document.createElement(tag); el.textContent = text; card.appendChild(el); return el;
+  }
+  function percent(v){ return v === null ? 'no data there' : Math.round(v * 100) + ' %'; }
+  function fill(card, info, chip){
+    card.textContent = '';
+    var state = {found: 'a key band of ' + info.match + ', found in the sample',
+                 missing: 'a key band of ' + info.match + ', missing from the sample',
+                 extra: 'a clear band of the sample that ' + info.match + ' does not explain'}[info.kind];
+    line(card, 'b', info.w + ' cm\\u207b\\u00b9: ' + state);
+    line(card, 'p', 'Usually: ' + info.name + '.');
+    line(card, 'p', 'Height, the tallest band of each spectrum = 100 %: sample ' + percent(info.sample) +
+                    ', ' + info.match + ' ' + percent(info.ref) + '.');
+    var acts = document.createElement('div'); acts.className = 'acts';
+    var zoom = document.createElement('button'); zoom.type = 'button'; zoom.textContent = 'Show it in the figure';
+    zoom.addEventListener('click', function(){
+      var p = plotOf(chip);
+      Plotly.relayout(p, {'xaxis2.range': [info.w + 90, info.w - 90]});
+      p.scrollIntoView({block: 'center', behavior: 'smooth'});
+    });
+    var all = document.createElement('button'); all.type = 'button'; all.textContent = 'Whole spectrum';
+    all.addEventListener('click', function(){ Plotly.relayout(plotOf(chip), {'xaxis2.autorange': true}); });
+    acts.appendChild(zoom); acts.appendChild(all); card.appendChild(acts);
+  }
+  function pin(chip){
+    var id = chip.getAttribute('data-fig'), card = chip.closest('div').querySelector('.band-card');
+    var again = pinned[id] === chip;
+    if (pinned[id]) { pinned[id].setAttribute('aria-pressed', 'false'); delete pinned[id]; }
+    if (again) { card.hidden = true; mark(plotOf(chip), null); return; }
+    pinned[id] = chip; chip.setAttribute('aria-pressed', 'true');
+    fill(card, JSON.parse(chip.getAttribute('data-info')), chip); card.hidden = false;
+    mark(plotOf(chip), bandOf(chip));
+  }
+  function rest(chip){ var p = pinned[chip.getAttribute('data-fig')]; mark(plotOf(chip), p ? bandOf(p) : null); }
+  document.querySelectorAll('button.chip.band').forEach(function(chip){
+    ['mouseenter', 'focus'].forEach(function(e){ chip.addEventListener(e, function(){ mark(plotOf(chip), bandOf(chip)); }); });
+    ['mouseleave', 'blur'].forEach(function(e){ chip.addEventListener(e, function(){ rest(chip); }); });
+    chip.addEventListener('click', function(){ pin(chip); });
+  });
+  window.addEventListener('load', function(){
+    document.querySelectorAll('.js-plotly-plot[id^="result"]').forEach(function(p){
+      p.on('plotly_click', function(ev){
+        var pt = ev.points && ev.points[0];
+        if (!pt || pt.data.name !== 'key band of the match, found') { return; }
+        var chip = document.querySelector('button.chip.band[data-fig="' + p.id + '"][data-band="' + Math.round(pt.x) + '"]');
+        if (chip && pinned[p.id] !== chip) { pin(chip); chip.scrollIntoView({block: 'nearest', behavior: 'smooth'}); }
+      });
+    });
+  });
+})();
+"""
+
 MOTION_FILES = ["gsap.min.js", "ScrollTrigger.min.js", "SplitText.min.js", "lenis.min.js"]
 
 # The motion of the page. It runs only when the person has not asked for less motion, and every
@@ -563,23 +650,49 @@ def mini_strip(r):
             f'<b style="left:{min(max(r.r, 0), 1) * 100:.1f}%"></b></span>')
 
 
-def evidence_html(r):
+def height_near(wn, rel, w, tolerance):
+    """The tallest relative band height within `tolerance` cm-1 of w, or None if the spectrum has no data there."""
+    near = rel[np.abs(wn - w) <= tolerance]
+    return float(near.max()) if len(near) else None
+
+
+def band_chip(r, i, w, kind, text, heights):
+    """One band as a button: hovering it marks the band in the figure, clicking pins it and tells about it.
+    Without Plotly there is no figure to mark, so the band stays a plain label."""
+    cls = {"found": "", "missing": " missing", "extra": " extra"}[kind]
+    if not INTERACTIVE:
+        return f'<span class="chip{cls}">{text}</span>'
+    sample, match = heights
+    info = {"w": round(w), "kind": kind, "match": r.best, "name": band_names(w) or "not in the band table",
+            "sample": None if sample is None else round(sample, 2), "ref": None if match is None else round(match, 2)}
+    return (f'<button type="button" class="chip band{cls}" data-fig="result{i}" data-band="{w:.0f}" '
+            f'aria-pressed="false" data-info="{h(json.dumps(info))}">{text}</button>')
+
+
+def evidence_html(r, i=0, library=None):
     ev = r.evidence
     if not ev:
         chips = "".join(f'<span class="chip">{h(b)}</span>' for b in r.checks.tallest_bands) or "none found"
         return f"<p>No match to explain. The tallest bands, to read by hand:</p><p>{chips}</p>"
-    found = "".join(f'<span class="chip">{w:.0f}</span>' for w in ev.found)
-    missing = "".join(f'<span class="chip missing">{w:.0f} missing</span>' for w in ev.missing)
-    text = f"<p>{len(ev.found)} of {ev.n_key} key {h(r.best)} bands are in the sample.</p><p>{found}{missing}</p>"
+    sample = relative_spectrum(r.compared)
+    match = relative_spectrum(library.spectra[r.best]) if library is not None else None
+
+    def heights(w):
+        return (height_near(*sample, w, config.TOLERANCE_CM), height_near(*match, w, 10) if match else None)
+
+    found = "".join(band_chip(r, i, w, "found", f"{w:.0f}", heights(w)) for w in ev.found)
+    missing = "".join(band_chip(r, i, w, "missing", f"{w:.0f} missing", heights(w)) for w in ev.missing)
+    text = (f"<p>{len(ev.found)} of {ev.n_key} key {h(r.best)} bands are in the sample.</p><p>{found}{missing}</p>"
+            + ('<p class="hint">Hover a band to mark it in the figure; click it to read about it.</p>' if INTERACTIVE else ""))
     if ev.unexplained:
-        extra = "".join(f'<span class="chip extra">{h(band_label(w))}</span>' for w in ev.unexplained)
+        extra = "".join(band_chip(r, i, w, "extra", h(band_label(w)), heights(w)) for w in ev.unexplained)
         text += f"<p>Bands the match cannot explain (possible second component):</p><p>{extra}</p>"
         text += ("<p><b>Two-component fit.</b> " + h(r.mixture.text() if r.mixture else
                  "No mix of the match and one other library reference explains these bands clearly: "
                  "the second material is probably not in the library.") + "</p>")
     else:
         text += "<p class='small'>Every clear band of the sample is explained by the match.</p>"
-    return text
+    return text + ('<div class="band-card" hidden></div>' if INTERACTIVE else "")
 
 
 def checks_html(r):
@@ -637,7 +750,7 @@ def section(i, r, figure_svg, analytical="", library=None):
   {figure_svg}
   <div class="boxes">
     <div><h4>Why this verdict</h4><p>{h(r.reason)}</p>{ranking_html(r)}</div>
-    <div><h4>Band evidence</h4>{evidence_html(r)}</div>
+    <div><h4>Band evidence</h4>{evidence_html(r, i, library)}</div>
     <div><h4>Checks on the raw spectrum</h4>{checks_html(r)}</div>
     <div><h4>Where it can come from in a fab</h4>{sources_html(r, library)}</div>
   </div>
@@ -753,6 +866,7 @@ def write_html(results, figures, info, path, analytical=None, library=None, sign
     analytical = analytical or [""] * len(results)
     sections = "".join(section(i, r, figures[i], analytical[i], library) for i, r in enumerate(results))
     plotly_js = f"<script>{get_plotlyjs()}</script>" if INTERACTIVE else ""
+    band_js = f"<script>{BAND_JS}</script>" if INTERACTIVE else ""
     theme_js = f"<script>var FIGURE_SWAP = {json.dumps(figure_colour_map())};{THEME_JS}</script>"
     fonts = "".join(_font_face(name, family, weight) for name, family, weight in WEB_FONTS)
     # dark colours only on screen: printed pages always get the light (paper) colours
@@ -808,7 +922,7 @@ def write_html(results, figures, info, path, analytical=None, library=None, sign
   {library_html(library)}
 </div>
 <footer>Generated with {h(__title__)} {__version__}, developed by {h(__author__)}</footer>
-</main>{theme_js}{motion_js()}</body></html>"""
+{band_js}</main>{theme_js}{motion_js()}</body></html>"""
     Path(path).write_text(page, encoding="utf-8")
 
 
@@ -860,6 +974,8 @@ def write_report(results, library, info, out_dir, audit_log=config.AUDIT_LOG_FIL
         write_results_workbook(table, info, out_dir / "report.xlsx", signoff)
     except ImportError:                                            # openpyxl not installed: the CSV is enough
         pass
+    from .report_pdf import write_pdf                              # the same report as A4 pages (see report_pdf.py)
+    write_pdf(results, library, info, out_dir / "report.pdf", signoff)
     append_audit_log(results, info, audit_log)
     if signoff:
         append_signature(signoff, html_path, len(results), signature_log)

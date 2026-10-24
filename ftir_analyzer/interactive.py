@@ -139,7 +139,9 @@ def result_figure(r, library, t=LIGHT):
     # band evidence: key bands found, bands the match cannot explain
     if r.evidence and r.evidence.found:
         fig.add_trace(go.Scatter(x=r.evidence.found, y=[-0.04] * len(r.evidence.found), mode="markers",
-                                 name="key band of the match, found", hovertemplate="key band %{x:.0f}<extra></extra>",
+                                 name="key band of the match, found", customdata=band_names(r.evidence.found),
+                                 hovertemplate="key band %{x:.0f}<br><i>%{customdata}</i><br>click to read about it"
+                                               "<extra></extra>",
                                  marker={"symbol": "triangle-up", "size": 10, "color": t["chart_found"],
                                          "line": {"color": t["chart_surface"], "width": 1.5}}), 2, 1)
     for w in (r.evidence.unexplained if r.evidence else []):
