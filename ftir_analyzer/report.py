@@ -287,6 +287,13 @@ ol.steps{padding-left:22px}ol.steps li{margin:0 0 8px}
 .check{display:flex;gap:10px;margin:0 0 12px}.check .icon{margin-top:4px;flex:none}
 .check.ok .icon{color:var(--good)}.check.alarm .icon,.check.alarm b{color:var(--bad)}
 .check p{margin:0}
+/* the in-house references as short labelled rows: seven columns never fit beside the run information */
+table.refs thead{display:none}
+table.refs,table.refs tbody,table.refs tr{display:block}
+table.refs tr{padding:12px 0;border-bottom:1px solid var(--line)}
+table.refs tbody tr:last-child{border-bottom:none}
+table.refs td{display:grid;grid-template-columns:minmax(6em,9em) 1fr;gap:12px;border:none;padding:2px 0;overflow-wrap:anywhere}
+table.refs td:before{content:attr(data-label);color:var(--muted)}
 ul.plain{margin:0;padding-left:20px}ul.plain li{margin:0 0 6px}
 footer{color:var(--muted);font-size:14px;text-align:center;margin-top:32px}
 
@@ -628,13 +635,16 @@ def library_html(library):
     if not in_house:
         return f'<section class="panel"><h3>Reference library</h3>{text}</section>'
     rows = "".join(
-        f"<tr><td>{h(i.name)}</td><td>{h(i.category)}</td><td>{h(i.added_by)}</td><td>{h(readable_time(i.added_at))}</td>"
-        f"<td>{h(i.confirmation)}</td><td>{h(i.original_name)}</td><td class='mono'>{h(i.sha256[:16])}</td></tr>"
+        f"<tr><td data-label='In-house reference'>{h(i.name)}</td><td data-label='Category'>{h(i.category)}</td>"
+        f"<td data-label='Added by'>{h(i.added_by)}</td><td data-label='On'>{h(readable_time(i.added_at))}</td>"
+        f"<td data-label='Identity confirmed by'>{h(i.confirmation)}</td>"
+        f"<td data-label='Made from'>{h(i.original_name)}</td>"
+        f"<td class='mono' data-label='File SHA-256'>{h(i.sha256[:16])}</td></tr>"
         for i in in_house)
-    return (f'<section class="panel"><h3>Reference library</h3>{text}<div class="scroll"><table>'
+    return (f'<section class="panel"><h3>Reference library</h3>{text}<table class="refs">'
             "<thead><tr><th>In-house reference</th><th>Category</th><th>Added by</th><th>On</th><th>Identity confirmed by"
             "</th><th>Made from</th><th>File SHA-256</th></tr></thead>"
-            f"<tbody>{rows}</tbody></table></div><p class='small'>Every addition and removal is kept in "
+            f"<tbody>{rows}</tbody></table><p class='small'>Every addition and removal is kept in "
             "records/inhouse_library/library_changes.csv, which is only ever appended to.</p></section>")
 
 
