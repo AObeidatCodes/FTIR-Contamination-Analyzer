@@ -41,7 +41,7 @@ from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg, NavigationToolb
 from matplotlib.figure import Figure  # noqa: E402
 from PySide6.QtCore import (QAbstractListModel, QByteArray, QEasingCurve, QEvent, QModelIndex, QPoint, QPointF,  # noqa: E402
                             QRect, QRectF, QSize, Qt, Signal)
-from PySide6.QtGui import (QAction, QActionGroup, QColor, QCursor, QFont, QFontMetrics, QIcon,  # noqa: E402
+from PySide6.QtGui import (QAction, QActionGroup, QColor, QCursor, QFont, QFontMetrics, QIcon, QImage,  # noqa: E402
                            QPainter, QPainterPath, QPen, QPixmap, QPolygonF)
 from PySide6.QtSvg import QSvgRenderer  # noqa: E402
 from PySide6.QtWidgets import (QApplication, QDialog, QFrame, QHBoxLayout, QLabel, QMenu, QPushButton, QScrollArea,  # noqa: E402
@@ -649,6 +649,33 @@ class SpectrumDelegate(QStyledItemDelegate):
 # ---------------------------------------------------------------------------- the plot
 class TraceCanvas(FigureCanvasQTAgg):
     """The figure's canvas. The mouse wheel scrolls the page; Ctrl + wheel zooms the spectrum."""
+
+    # Matplotlib copies the picture out of its buffer on every paint (about 7 ms for this canvas on a 250 %
+    # screen), so every step of a scroll paid that twice. Here the picture is made into a pixmap once per change
+    # of the figure, and a paint only draws that pixmap.
+    _pixmap = None
+
+    def draw(self):
+        self._pixmap = None
+        super().draw()
+
+    def blit(self, bbox=None):
+        self._pixmap = None
+        super().blit(bbox)
+
+    def paintEvent(self, event):
+        self._draw_idle()                                               # a pending draw, if any
+        if not hasattr(self, "renderer"):
+            return
+        if self._pixmap is None:
+            buf = self.renderer.buffer_rgba()
+            height, width = buf.shape[:2]
+            image = QImage(buf, width, height, width * 4, QImage.Format_RGBX8888)   # the figure is opaque
+            self._pixmap = QPixmap.fromImage(image)
+            self._pixmap.setDevicePixelRatio(self.device_pixel_ratio)
+        painter = QPainter(self)
+        painter.drawPixmap(0, 0, self._pixmap)
+        painter.end()
 
     def wheelEvent(self, event):
         if event.modifiers() & Qt.ControlModifier:

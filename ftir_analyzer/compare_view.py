@@ -178,10 +178,18 @@ class MatchTile(Card):
             p.drawText(QRectF(x - 24, rect.bottom() + 4, 48, 16), Qt.AlignCenter, str(w))
         p.end()
         self._picture = picture
+        self._picture_key = (self.width(), self.height(), self.devicePixelRatioF())
+
+    def _picture_stale(self):
+        """True when the cached picture is missing or was drawn for another size or screen scale (compared as
+        numbers: the picture's own pixel size is rounded, so on a 250 % screen it never equals the widget's and
+        the picture was drawn again on every paint, about 18 ms each)."""
+        return self._picture is None or getattr(self, "_picture_key", None) != (
+            self.width(), self.height(), self.devicePixelRatioF())
 
     def prepare(self):
         """Draw the chart picture now, if it is missing (see motion.warm_up)."""
-        if self._picture is None or self._picture.size() != self.size() * (self.devicePixelRatioF() or 1.0):
+        if self._picture_stale():
             self._draw_picture()
 
     def paintEvent(self, _):
@@ -214,7 +222,7 @@ class MatchTile(Card):
                    QFontMetrics(p.font()).elidedText(self.name, Qt.ElideRight, int(name_w)))
 
         # the chart (drawn once), then what follows the mouse
-        if self._picture is None or self._picture.size() != self.size() * (self.devicePixelRatioF() or 1.0):
+        if self._picture_stale():
             self._draw_picture()
         p.drawPixmap(QPointF(0, -2 * self.lift), self._picture)
         rect = self._plot_rect()

@@ -113,17 +113,17 @@ class SpectrumChart(QWidget):
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
     def set_data(self, main, main_label="", bands=(), other=None, other_label="", animated=False):
-        """New curves. animated=True: they start empty and draw themselves in when play() is called."""
+        """New curves, shown whole at once (`animated` is kept for callers: the spectrum no longer draws itself in)."""
         self.main = None if main is None else scaled(main)
         self.other = None if other is None else scaled(other)
         self.main_label, self.other_label, self.bands = main_label, other_label, list(bands)
         stop(self._animation)
-        self._draw_in(0.0 if animated else 1.0)
+        self._draw_in(1.0)
 
     def play(self):
-        """Draw the curves in, from left to right."""
+        """Nothing to play: the curves are already there when the reference opens."""
         stop(self._animation)
-        self._animation = animate(self, 0.0, 1.0, 1100, self._draw_in, EASE_OUT)
+        self._draw_in(1.0)
 
     def _draw_in(self, value):
         self.progress = value
@@ -398,10 +398,18 @@ class MaterialCard(Card):
                    f"{self.n_bands} key bands")
         p.end()
         self._picture = picture
+        self._picture_key = (self.width(), self.height(), self.devicePixelRatioF())
+
+    def _picture_stale(self):
+        """True when the cached picture is missing or was drawn for another size or screen scale (compared as
+        numbers: the picture's own pixel size is rounded, so on a 250 % screen it never equals the widget's and
+        the picture was drawn again on every paint, about 18 ms each)."""
+        return self._picture is None or getattr(self, "_picture_key", None) != (
+            self.width(), self.height(), self.devicePixelRatioF())
 
     def prepare(self):
         """Draw the card's picture now, if it is missing (see motion.warm_up)."""
-        if self._picture is None or self._picture.size() != self.size() * (self.devicePixelRatioF() or 1.0):
+        if self._picture_stale():
             lift, self.lift = self.lift, 0.0
             resting = self.body()
             self.lift = lift
@@ -413,7 +421,7 @@ class MaterialCard(Card):
         lift, self.lift = self.lift, 0.0
         resting = self.body()                                            # the picture is drawn resting ...
         self.lift = lift
-        if self._picture is None or self._picture.size() != self.size() * (self.devicePixelRatioF() or 1.0):
+        if self._picture_stale():
             self._draw_picture(resting)
         body = self.body()
         self.paint_card(p, body)
