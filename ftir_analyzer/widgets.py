@@ -420,6 +420,38 @@ def chip(text, kind="Chip"):
     return label
 
 
+class BandButton(QPushButton):
+    """One band of the band evidence as a button: hovering it marks the band in the figure, a click pins it.
+    kind: 'found', 'missing' or 'extra' (a band the match cannot explain)."""
+
+    hovered = Signal(bool)
+
+    def __init__(self, w, text, kind="found"):
+        super().__init__(text)
+        self.w, self.kind = w, kind
+        self.setObjectName("BandChip")
+        self.setProperty("kind", kind)
+        self.setCheckable(True)
+        self.setCursor(Qt.PointingHandCursor)
+        self.setFocusPolicy(Qt.StrongFocus)
+
+    def enterEvent(self, event):
+        super().enterEvent(event)
+        self.hovered.emit(True)
+
+    def leaveEvent(self, event):
+        super().leaveEvent(event)
+        self.hovered.emit(False)
+
+    def focusInEvent(self, event):
+        super().focusInEvent(event)
+        self.hovered.emit(True)
+
+    def focusOutEvent(self, event):
+        super().focusOutEvent(event)
+        self.hovered.emit(False)
+
+
 class ElidedLabel(QLabel):
     """One line of text that is shortened with '…' when it does not fit; the full text is in the tooltip.
 
@@ -651,6 +683,7 @@ class PlotPanel(Card):
         self.view = self.RESULT
         self.result = self.library = self.drawing = self.background = self.compare = self.overlay = None
         self.cursors, self.markers, self.home_limits = [], {}, []
+        self.band_artists = []                                          # the mark of a band (see mark_band)
         table = band_table()                                            # band ranges, for the readout
         self._bands = (table["low"].to_numpy(float), table["high"].to_numpy(float), table["assignment"].tolist())
 
@@ -843,9 +876,30 @@ class PlotPanel(Card):
                                      animated=True, zorder=10)[0]
                              for _, _, _, colour, _ in self.drawing.traces.get(ax, [])] for ax in axes}
         self.home_limits = [(ax, ax.get_xlim(), ax.get_ylim()) for ax in axes]
+        self.band_artists = []                                          # the figure was drawn again: no mark
         self.navigator.update()                                         # new figure = new zoom history
         self.readout.setText(self.HINT)
         self.canvas.draw()                      # now, not later: the drawing must never land inside an animation
+
+    def mark_band(self, w):
+        """Mark the band at wavenumber w in the comparison panel (a wash and a line); None clears the mark."""
+        if self.view != self.RESULT or self.drawing is None or len(self.drawing.axes) < 2:
+            return
+        for artist in self.band_artists:
+            artist.remove()
+        self.band_artists = []
+        if w is not None:
+            ax, colour = self.drawing.axes[1], Theme.t["accent"]
+            self.band_artists = [ax.axvspan(w - 7, w + 7, color=colour, alpha=0.18, lw=0, zorder=1),
+                                 ax.axvline(w, color=colour, lw=1.6, zorder=6)]
+        self.canvas.draw_idle()
+
+    def zoom_to(self, w, half=90):
+        """Zoom the spectrum to w +/- half cm-1 (the panels share the wavenumber axis)."""
+        if self.view != self.RESULT or self.drawing is None:
+            return
+        self.drawing.axes[-1].set_xlim(w + half, w - half)
+        self.canvas.draw_idle()
 
     def reset_view(self):
         """Back to the full spectrum, as first drawn."""

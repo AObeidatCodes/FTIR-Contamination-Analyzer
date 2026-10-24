@@ -59,7 +59,8 @@ from PySide6.QtWidgets import (QAbstractItemView, QApplication, QDialog, QFileDi
 
 from . import __author__, __license__, __title__, __version__, config
 from .analysis import NO_MATCH, PROBABLE, WEAK, analyse
-from .checks import BELOW_ZERO_TEXT, describe_co2, describe_vapour
+from .brief import band_height_fn, check_rows
+from .checks import BELOW_ZERO_TEXT
 from .evidence import fab_sources
 from .export_view import ExportPanel
 from .inhouse import InHouseLibrary, changes_between, reanalyse
@@ -71,13 +72,13 @@ from .openspecy import OpenSpecyLibrary, download_and_import, import_library
 from .compare_view import TopMatches
 from .motion import (MOTION, Card, FadeStack, Motion, Overlay, Sheet, SmoothScrollArea, Spinner, Tabs, Toast,
                      animate, count_up, crossfade, fade_through, make_opaque, rise_in, snapshot, zero_like)
-from .peaks import band_label
+from .peaks import band_label, band_names
 from .plots import save_figure, setup_fonts
 from .records import SampleLog, readable_time, resolve_modes, run_info
 from .report import write_report
 from .spectrum_io import SpectrumFileError, find_spectrum_files, read_spectra
 from .theme import FONT_FILES, FONTS, THEMES, VERDICT_LOOK, stylesheet
-from .widgets import (ElidedLabel, EmptyState, FlowLayout, ModeDialog, Pill, PlotPanel, ScoreBars, ScoreStrip,
+from .widgets import (BandButton, ElidedLabel, EmptyState, FlowLayout, ModeDialog, Pill, PlotPanel, ScoreBars, ScoreStrip,
                       SpectrumDelegate, SpectrumListModel, Theme, chip, clear_layout, flag_pill, icon, icon_pixmap,
                       logo_pixmap, verdict_pill)
 
@@ -454,6 +455,62 @@ class ResultView(SmoothScrollArea):
         self.bars.grow()
 
     # ------------------------------------------------------------------
+    # ------------------------------------------------------------------ bands
+    def _band_button(self, r, w, text, kind, heights):
+        """One band as a button: hover marks it in the figure, a click pins it and zooms to it."""
+        button = BandButton(w, text, kind)
+        sample, match = heights(w)
+        button.info = {"w": w, "kind": kind, "match": r.best, "name": band_names(w) or "not in the band table",
+                       "sample": sample, "ref": match}
+        button.hovered.connect(lambda on, b=button: self.plot.mark_band(
+            b.w if on else (self.pinned_band.w if self.pinned_band else None)))
+        button.clicked.connect(lambda _=False, b=button: self._pin_band(b))
+        return button
+
+    def _band_info_row(self):
+        """Two short lines about the pinned band, with a button back to the whole spectrum."""
+        row = QWidget()
+        line = QHBoxLayout(row)
+        line.setContentsMargins(0, 6, 0, 0)
+        self.band_text = QLabel()
+        self.band_text.setObjectName("Body2")
+        self.band_text.setTextFormat(Qt.RichText)
+        line.addWidget(self.band_text, 1)
+        whole = QPushButton("Whole spectrum")
+        whole.setCursor(Qt.PointingHandCursor)
+        whole.clicked.connect(self.plot.reset_view)
+        line.addWidget(whole, 0, Qt.AlignTop)
+        row.hide()
+        return row
+
+    def _pin_band(self, button):
+        """Pin a band (a second click on it lets go): mark it, zoom to it, say what it is, bring the figure up."""
+        previous, self.pinned_band = self.pinned_band, None
+        if previous is not None:
+            previous.setChecked(False)
+        if previous is button:
+            button.setChecked(False)
+            self.band_info.hide()
+            self.plot.mark_band(None)
+            self.plot.reset_view()
+            return
+        self.pinned_band = button
+        button.setChecked(True)
+        info = button.info
+        state = {"found": f"key band of {info['match']}, found", "missing": f"key band of {info['match']}, missing",
+                 "extra": f"not explained by {info['match']}"}[info["kind"]]
+
+        def share(value):
+            return "no band" if value is None else f"{value * 100:.0f} %"
+        usual = info["name"].split(";")[0]
+        self.band_text.setText(f"<b>{info['w']:.0f} cm⁻¹</b>&nbsp;&nbsp;{html.escape(usual)}"
+                               f"<br><span style='color:{Theme.t['muted']}'>{state} · sample {share(info['sample'])} "
+                               f"· {html.escape(info['match'])} {share(info['ref'])}</span>")
+        self.band_info.show()
+        self.plot.mark_band(info["w"])
+        self.plot.zoom_to(info["w"])
+        self.ensureWidgetVisible(self.plot, 0, 40)
+
     def display(self, r, library, sample_log_path, animated=True):
         """Fill every part of the page with one result."""
         t = Theme.t
@@ -520,24 +577,32 @@ class ResultView(SmoothScrollArea):
         self.reason.setText(r.reason)
         self.bars.set_data(r.ranking[:5], r.verdict, animated)
 
-        # band evidence
+        # band evidence: every band is a button (hover marks it in the figure, a click pins and zooms to it)
         clear_layout(self.evidence_body)
+        self.pinned_band = self.band_info = None
         if ev:
-            self.evidence_body.addWidget(label(f"{len(ev.found)} of {ev.n_key} key bands of {r.best} are in the "
-                                               "sample." + (" Missing bands are dashed." if ev.missing else ""),
+            self.evidence_body.addWidget(label(f"{len(ev.found)} of {ev.n_key} key bands of {r.best} found",
+                                               "Body", wrap=True))
+            self.evidence_body.addWidget(label("Hover a band to mark it in the figure, click to zoom to it.",
                                                "Body2", wrap=True))
+            heights = band_height_fn(r, library)
             chips = QWidget()
             flow = FlowLayout(chips)
             for w in ev.found:
-                flow.addWidget(chip(f"{w:.0f}"))
+                flow.addWidget(self._band_button(r, w, f"{w:.0f}", "found", heights))
             for w in ev.missing:
-                flow.addWidget(chip(f"{w:.0f} missing", "ChipMissing"))
+                flow.addWidget(self._band_button(r, w, f"{w:.0f} missing", "missing", heights))
             self.evidence_body.addWidget(chips)
             if ev.unexplained:
                 self.evidence_body.addWidget(label("Bands the match cannot explain (possible second component):",
                                                    "Body", wrap=True))
+                extra = QWidget()
+                extra_flow = FlowLayout(extra)
                 for w in ev.unexplained:
-                    self.evidence_body.addWidget(chip(band_label(w), "ChipExtra"))
+                    button = self._band_button(r, w, f"{w:.0f}", "extra", heights)
+                    button.setToolTip(band_label(w))
+                    extra_flow.addWidget(button)
+                self.evidence_body.addWidget(extra)
                 # the two-component fit: a mix of the match and one other reference, if one clearly helps
                 self.evidence_body.addSpacing(4)
                 self.evidence_body.addWidget(label("Two-component fit", "Body"))
@@ -548,6 +613,8 @@ class ResultView(SmoothScrollArea):
             else:
                 self.evidence_body.addWidget(label("Every clear band of the sample is explained by the match.",
                                                    "Body2", wrap=True))
+            self.band_info = self._band_info_row()
+            self.evidence_body.addWidget(self.band_info)
         else:
             self.evidence_body.addWidget(label("No match to explain. The tallest bands, to read by hand:",
                                                "Body2", wrap=True))
@@ -555,20 +622,13 @@ class ResultView(SmoothScrollArea):
                 self.evidence_body.addWidget(chip(text))
         self.evidence_body.addStretch()
 
-        # checks
+        # checks: one short line each (see brief.py)
         clear_layout(self.checks_body)
         organic = c.ch == "present"
-        rows = [
-            ("good" if not c.saturated else "bad", "Saturation",
-             f"highest A = {c.max_a:.2f}" + (": too dark, measure thinner or use ATR" if c.saturated else ": fine")),
-            ("bad" if c.no_sample else "good", "Sample present",
-             f"CO₂ artefact {describe_co2(c)}" + (". Probably no sample" if c.no_sample else "")),
-            ("good" if organic else "none", "C–H (organic)", f"{c.ch}, {max(c.ch_share, 0):.3f} of the tallest band"),
-            ("warn" if c.oh in ("major", "minor") else "none", "O–H / N–H",
-             f"{c.oh}, {max(c.oh_share, 0):.2f} of the tallest band"),
-            ("none", "Noise", f"{c.noise:.4f} A (a band must be ≥ 3× this to count)"),
-            ("warn" if c.vapour_lines else "none", "Water vapour", describe_vapour(c)),
-        ]
+        kinds = ["good" if not c.saturated else "bad", "bad" if c.no_sample else "good", "good" if organic else "none",
+                 "warn" if c.oh in ("major", "minor") else "none", "none", "warn" if c.vapour_lines else "none"]
+        names = ["Saturation", "CO₂ artefact", "C–H (organic)", "O–H / N–H", "Noise", "Water vapour"]
+        rows = [(kind, name, text) for kind, name, (_, text) in zip(kinds, names, check_rows(c))]
         if c.below_zero:
             rows.append(("warn", "Below zero", BELOW_ZERO_TEXT))
         icons = {"good": "circle-check", "warn": "circle-alert", "bad": "triangle-alert", "none": "circle-minus"}
@@ -579,7 +639,7 @@ class ResultView(SmoothScrollArea):
             line.addWidget(mark, 0, Qt.AlignTop)
             line.addWidget(label(name, "Body"), 0, Qt.AlignTop)
             line.addSpacing(12)
-            value = label(text, "Body2", wrap=True)
+            value = label(text, "Body2", wrap=name == "Below zero")
             value.setAlignment(Qt.AlignRight | Qt.AlignTop)
             line.addWidget(value, 1)
             self.checks_body.addLayout(line)

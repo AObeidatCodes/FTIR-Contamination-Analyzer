@@ -46,13 +46,13 @@ import re
 from pathlib import Path
 
 import matplotlib
-import numpy as np
 import pandas as pd
 
 from . import __author__, __title__, __version__, config
 from .analytical import analytical_steps
-from .checks import BELOW_ZERO_TEXT, describe_co2, describe_vapour
-from .evidence import fab_sources, relative_spectrum
+from .brief import band_height_fn, check_rows
+from .checks import BELOW_ZERO_TEXT
+from .evidence import fab_sources
 from .peaks import band_label, band_names
 from .plots import result_svg
 from .records import DECISIONS, append_audit_log, append_signature, readable_time, who_text
@@ -260,6 +260,7 @@ figure svg{display:block;width:100%;height:auto}
 .rank tr:first-child .bar-cell span{background:var(--ink)}
 dl.kv{display:grid;grid-template-columns:max-content 1fr;gap:6px 16px;margin:0}
 dl.kv dt{color:var(--muted)}dl.kv dd{margin:0;min-width:0}
+dl.kv.one dt,dl.kv.one dd{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .chip{display:inline-block;border:1px solid var(--line);background:var(--surface-2);border-radius:8px;
   padding:0 8px;margin:2px 4px 2px 0;font-size:14px;color:var(--ink-2);font-variant-numeric:tabular-nums}
 .chip.missing{background:transparent;border-style:dashed;color:var(--muted)}
@@ -268,11 +269,12 @@ dl.kv dt{color:var(--muted)}dl.kv dd{margin:0;min-width:0}
 button.chip{font:inherit;font-size:14px;line-height:1.5;cursor:pointer;text-align:left}
 button.chip:hover,button.chip:focus-visible{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-ink)}
 button.chip[aria-pressed=true]{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-ink);font-weight:600}
-.band-card{margin:8px 0 0;padding:12px 16px;border:1px solid var(--accent);border-radius:12px;background:var(--surface-2);
-  font-size:15px}
+.band-card{margin:8px 0 0;padding:10px 14px;border:1px solid var(--accent);border-radius:12px;background:var(--surface-2);
+  font-size:14px;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px}
 .band-card[hidden]{display:none}
-.band-card b{display:block;font-size:16px;margin-bottom:4px}
-.band-card p{margin:0 0 6px}.band-card .acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.band-card span{white-space:nowrap}.band-card span:nth-child(2){max-width:26ch;overflow:hidden;text-overflow:ellipsis}
+.band-card b{font-size:15px}.band-card em{font-style:normal;color:var(--muted);flex-basis:100%}
+.band-card .acts{display:flex;gap:8px;margin-left:auto}
 .band-card button{font:inherit;font-size:14px;color:var(--accent-ink);background:transparent;border:1px solid var(--line-strong);
   border-radius:8px;padding:2px 10px;cursor:pointer}
 .band-card button:hover{background:var(--accent-soft);border-color:var(--accent)}
@@ -463,7 +465,7 @@ THEME_JS = """
 BAND_JS = """
 (function(){
   if (typeof Plotly === 'undefined') { return; }
-  var pinned = {};
+  var pinned = {}, home = {};
   var accent = function(){ return getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#4C6FBF'; };
   var plotOf = function(chip){ return document.getElementById(chip.getAttribute('data-fig')); };
   var bandOf = function(chip){ return Number(chip.getAttribute('data-band')); };
@@ -478,38 +480,42 @@ BAND_JS = """
     }
     Plotly.relayout(p, {shapes: shapes});
   }
-  function line(card, tag, text){
+  function toFigure(chip, w){                            // zoom to the band and bring the figure into view
+    var p = plotOf(chip);
+    Plotly.relayout(p, {'xaxis2.range': [w + 90, w - 90]});
+    p.scrollIntoView({block: 'center', behavior: 'smooth'});
+  }
+  function wholeSpectrum(p){ if (home[p.id]) { Plotly.relayout(p, {'xaxis2.range': home[p.id]}); } }
+  function add(card, tag, text){
     var el = document.createElement(tag); el.textContent = text; card.appendChild(el); return el;
   }
-  function percent(v){ return v === null ? 'no data there' : Math.round(v * 100) + ' %'; }
+  function percent(v){ return v === null ? 'no band' : Math.round(v * 100) + ' %'; }
   function fill(card, info, chip){
     card.textContent = '';
     var state = {found: 'a key band of ' + info.match + ', found in the sample',
                  missing: 'a key band of ' + info.match + ', missing from the sample',
                  extra: 'a clear band of the sample that ' + info.match + ' does not explain'}[info.kind];
-    line(card, 'b', info.w + ' cm\\u207b\\u00b9: ' + state);
-    line(card, 'p', 'Usually: ' + info.name + '.');
-    line(card, 'p', 'Height, the tallest band of each spectrum = 100 %: sample ' + percent(info.sample) +
-                    ', ' + info.match + ' ' + percent(info.ref) + '.');
+    add(card, 'b', info.w + ' cm\u207b\u00b9').title = state;
+    add(card, 'span', info.name.split(';')[0]).title = info.name;
+    add(card, 'span', 'sample ' + percent(info.sample));
+    add(card, 'span', info.match + ' ' + percent(info.ref));
     var acts = document.createElement('div'); acts.className = 'acts';
-    var zoom = document.createElement('button'); zoom.type = 'button'; zoom.textContent = 'Show it in the figure';
-    zoom.addEventListener('click', function(){
-      var p = plotOf(chip);
-      Plotly.relayout(p, {'xaxis2.range': [info.w + 90, info.w - 90]});
-      p.scrollIntoView({block: 'center', behavior: 'smooth'});
-    });
+    var look = document.createElement('button'); look.type = 'button'; look.textContent = 'Show in the figure';
+    look.addEventListener('click', function(){ toFigure(chip, info.w); });
     var all = document.createElement('button'); all.type = 'button'; all.textContent = 'Whole spectrum';
-    all.addEventListener('click', function(){ Plotly.relayout(plotOf(chip), {'xaxis2.autorange': true}); });
-    acts.appendChild(zoom); acts.appendChild(all); card.appendChild(acts);
+    all.addEventListener('click', function(){ wholeSpectrum(plotOf(chip)); });
+    acts.appendChild(look); acts.appendChild(all); card.appendChild(acts);
+    add(card, 'em', state);
   }
   function pin(chip){
     var id = chip.getAttribute('data-fig'), card = chip.closest('div').querySelector('.band-card');
     var again = pinned[id] === chip;
     if (pinned[id]) { pinned[id].setAttribute('aria-pressed', 'false'); delete pinned[id]; }
-    if (again) { card.hidden = true; mark(plotOf(chip), null); return; }
+    if (again) { card.hidden = true; mark(plotOf(chip), null); wholeSpectrum(plotOf(chip)); return; }
     pinned[id] = chip; chip.setAttribute('aria-pressed', 'true');
     fill(card, JSON.parse(chip.getAttribute('data-info')), chip); card.hidden = false;
     mark(plotOf(chip), bandOf(chip));
+    toFigure(chip, bandOf(chip));
   }
   function rest(chip){ var p = pinned[chip.getAttribute('data-fig')]; mark(plotOf(chip), p ? bandOf(p) : null); }
   document.querySelectorAll('button.chip.band').forEach(function(chip){
@@ -519,6 +525,7 @@ BAND_JS = """
   });
   window.addEventListener('load', function(){
     document.querySelectorAll('.js-plotly-plot[id^="result"]').forEach(function(p){
+      home[p.id] = p.layout.xaxis2.range.slice();
       p.on('plotly_click', function(ev){
         var pt = ev.points && ev.points[0];
         if (!pt || pt.data.name !== 'key band of the match, found') { return; }
@@ -529,6 +536,7 @@ BAND_JS = """
   });
 })();
 """
+
 
 MOTION_FILES = ["gsap.min.js", "ScrollTrigger.min.js", "SplitText.min.js", "lenis.min.js"]
 
@@ -650,12 +658,6 @@ def mini_strip(r):
             f'<b style="left:{min(max(r.r, 0), 1) * 100:.1f}%"></b></span>')
 
 
-def height_near(wn, rel, w, tolerance):
-    """The tallest relative band height within `tolerance` cm-1 of w, or None if the spectrum has no data there."""
-    near = rel[np.abs(wn - w) <= tolerance]
-    return float(near.max()) if len(near) else None
-
-
 def band_chip(r, i, w, kind, text, heights):
     """One band as a button: hovering it marks the band in the figure, clicking pins it and tells about it.
     Without Plotly there is no figure to mark, so the band stays a plain label."""
@@ -674,11 +676,7 @@ def evidence_html(r, i=0, library=None):
     if not ev:
         chips = "".join(f'<span class="chip">{h(b)}</span>' for b in r.checks.tallest_bands) or "none found"
         return f"<p>No match to explain. The tallest bands, to read by hand:</p><p>{chips}</p>"
-    sample = relative_spectrum(r.compared)
-    match = relative_spectrum(library.spectra[r.best]) if library is not None else None
-
-    def heights(w):
-        return (height_near(*sample, w, config.TOLERANCE_CM), height_near(*match, w, 10) if match else None)
+    heights = band_height_fn(r, library)
 
     found = "".join(band_chip(r, i, w, "found", f"{w:.0f}", heights(w)) for w in ev.found)
     missing = "".join(band_chip(r, i, w, "missing", f"{w:.0f} missing", heights(w)) for w in ev.missing)
@@ -696,15 +694,9 @@ def evidence_html(r, i=0, library=None):
 
 
 def checks_html(r):
+    """The checks on the raw spectrum: one short line each (see brief.py)."""
     c = r.checks
-    # max(..., 0): a band that dips below its ruler line is shown as 0, not as -0.00
-    rows = [("Saturation", f"highest A = {c.max_a:.2f}" + (" &rarr; <b>saturated</b>" if c.saturated else "")),
-            ("CO<sub>2</sub> artefact", h(describe_co2(c)) + (" &rarr; <b>probably no sample</b>" if c.no_sample else "")),
-            ("C&ndash;H", f"{h(c.ch)} ({max(c.ch_share, 0):.3f} of the tallest band)"),
-            ("O&ndash;H / N&ndash;H", f"{h(c.oh)} ({max(c.oh_share, 0):.2f})"),
-            ("Noise", f"{c.noise:.4f} A"),
-            ("Water vapour", h(describe_vapour(c)))]
-    text = '<dl class="kv">' + "".join(f"<dt>{k}</dt><dd>{v}</dd>" for k, v in rows) + "</dl>"
+    text = '<dl class="kv one">' + "".join(f"<dt>{h(k)}</dt><dd>{h(v)}</dd>" for k, v in check_rows(c)) + "</dl>"
     return text + (f"<p class='small'>{h(BELOW_ZERO_TEXT)}</p>" if c.below_zero else "")
 
 

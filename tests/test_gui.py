@@ -318,6 +318,23 @@ def test_save_figure(window, tmp_path):
             assert path.stat().st_size > 10_000
 
 
+def test_bands_can_be_pointed_at_and_clicked(app, window):
+    from ftir_analyzer.widgets import BandButton
+    view = window.result_view
+    buttons = [b for b in view.findChildren(BandButton) if b.kind == "found"]
+    assert buttons, "the best spectrum has key bands to point at"
+    button = buttons[0]
+    button.click()                                                                  # pin: mark, zoom, say what it is
+    assert view.pinned_band is button and len(view.plot.band_artists) == 2 and not view.band_info.isHidden()
+    low, high = sorted(view.plot.drawing.axes[-1].get_xlim())
+    assert high - low < 400 and low < button.w < high
+    assert f"{button.w:.0f} cm" in view.band_text.text()
+    button.click()                                                                  # a second click lets go
+    assert view.pinned_band is None and not view.plot.band_artists and view.band_info.isHidden()
+    low, high = sorted(view.plot.drawing.axes[-1].get_xlim())
+    assert high - low > 3000                                                        # the whole spectrum again
+
+
 def test_export_report(app, window, tmp_path):
     window.write_report_to(tmp_path, ask_to_open=False)
     assert wait(app, lambda: not window.busy and hasattr(window, "last_report"), 120)
