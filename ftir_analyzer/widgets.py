@@ -17,8 +17,8 @@ Small, reusable pieces the main window is made of. Most of them paint themselves
     PlotPanel            the figure, with a Result / Analytical view switch, "compare with ...",
                          zoom / pan / reset / save, and live tracing: under the mouse, every
                          curve's value and the name of the band at that wavenumber
-    HomeSpectrum         a real demo spectrum, the picture on the home screen
-    EmptyState           the home screen: a real spectrum and the ways to start
+    MatchShow            a real demo sample being identified, on a loop
+    EmptyState           the home screen: that loop and the ways to start
     ModeDialog           asks how files were measured (ATR / transmission / don't know)
 
 Short names used in this file:
@@ -40,8 +40,9 @@ matplotlib.use("QtAgg")                                  # draw matplotlib figur
 import numpy as np  # noqa: E402
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg, NavigationToolbar2QT  # noqa: E402
 from matplotlib.figure import Figure  # noqa: E402
-from PySide6.QtCore import (QAbstractListModel, QByteArray, QEasingCurve, QEvent, QModelIndex, QPoint, QPointF,  # noqa: E402
-                            QRect, QRectF, QSize, Qt, Signal)
+from PySide6.QtCore import (QAbstractListModel, QByteArray, QEasingCurve, QElapsedTimer, QEvent, QLineF, QModelIndex,
+                            QPoint, QPointF, QTimer,  # noqa: E402
+                            QRect, QRectF, QSize, Qt, QTimer, Signal)
 from PySide6.QtGui import (QAction, QActionGroup, QColor, QCursor, QFont, QFontMetrics, QIcon, QImage,  # noqa: E402
                            QPainter, QPainterPath, QPen, QPixmap, QPolygonF)
 from PySide6.QtSvg import QSvgRenderer  # noqa: E402
@@ -52,10 +53,12 @@ from PySide6.QtWidgets import (QApplication, QBoxLayout, QDialog, QFrame, QHBoxL
 from . import config  # noqa: E402
 from .analysis import NO_MATCH  # noqa: E402
 from .analytical import analytical_steps  # noqa: E402
-from .motion import (EASE_OUT, Card, FlowLayout, Look, Motion, Segmented, SmoothScrollArea, animate,  # noqa: E402
+from .motion import (EASE_OUT, EASE_POP, Card, FlowLayout, Look, Motion, Moving, Segmented, SmoothScrollArea,
+                     animate, ease,  # noqa: E402
                      blank, make_opaque, rise_in, snapshot, stop)
 from .peaks import band_table  # noqa: E402
 from .plots import draw_analytical, draw_result  # noqa: E402
+from .processing import GRID  # noqa: E402
 from .theme import FONT_SANS, ICONS, LOGO_SVG, SIZE, VERDICT_LOOK  # noqa: E402
 
 Theme = Look        # the theme in use right now; painted widgets read their colours from Theme.t
@@ -998,97 +1001,189 @@ class PlotPanel(Card):
 
 
 # ------------------------------------------------------------------------------- the home screen
-class HomeSpectrum(QWidget):
-    """A real measurement on the home screen: the first demo spectrum, its tallest bands read from the data
-    itself, on a wavenumber axis. Drawn once into a picture; it never redraws while the page moves."""
+def _on_scale(y):
+    """A spectrum from 0 to 1 with its gaps closed, for a line that moves."""
+    y = np.asarray(y, float)
+    known = np.isfinite(y)
+    y = np.interp(np.arange(y.size), np.flatnonzero(known), y[known])
+    low, high = y.min(), y.max()
+    return (y - low) / (high - low) if high > low else y * 0
 
-    FILE = config.EXAMPLES_DIR / "01_wipe_area_particle_ATR.csv"
-    TOP, BOTTOM = 26, 30
-    LABELS, APART = 5, 60                                              # bands named, and cm-1 between two of them
+
+class MatchShow(QWidget):
+    """The home screen's picture: a real demo spectrum being identified, on a loop.
+
+    The sample stays still while the five best references of its real result slide over it, weakest first;
+    each score counts up beside the chart, and the last one locks in with the real verdict. The sample and the
+    axis are a picture drawn once, so a frame only moves one line. It runs only while it is on screen, waits
+    while another transition plays, and with reduced motion it simply shows the finished match.
+    """
+
+    STEP, HOLD, FADE = 1.8, 5.0, 0.6                                   # seconds per reference, at the end, between loops
+    SLIDE, ROW_IN = 0.9, 0.7                                           # seconds a line takes to move, a row to rise in
+    TOP, BOTTOM, SIDE, GAP, ROW = 34, 30, 190, 36, 34                  # pixels
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setMinimumHeight(190)
+        self.setMinimumHeight(240)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.sample, self.rows, self.verdict, self.source = None, [], "", ""
+        self.seconds = 0.0
         self._picture, self._picture_key = None, None
-        try:
-            rows = [line for line in self.FILE.read_text(encoding="utf-8").splitlines() if line[:1].isdigit()]
-            self.wn, self.a = np.loadtxt(rows, delimiter=",", unpack=True)
-        except (OSError, ValueError):                                  # no demo file: the page works without it
-            self.wn, self.a = np.array([]), np.array([])
+        self.clock = QElapsedTimer()
+        self.timer = QTimer(self)
+        self.timer.setTimerType(Qt.PreciseTimer)
+        self.timer.setInterval(16)
+        self.timer.timeout.connect(self._tick)
 
-    def has_data(self):
-        return self.wn.size > 1
+    def set_result(self, result, library):
+        """Show this real result: its compared spectrum and its five best references, weakest first."""
+        self.sample = _on_scale(result.compared)
+        self.rows = [(name, float(r), _on_scale(library.spectra[name]))
+                     for name, r in reversed(result.ranking[:5]) if name in library.spectra]
+        self.verdict = f"{result.verdict.capitalize()}: {result.best}"
+        self.source = result.name
+        self.restart()
 
-    def bands(self):
-        """The tallest bands of the spectrum, at least APART cm-1 from each other: [(wavenumber, height)]."""
-        peaks = np.flatnonzero((self.a[1:-1] > self.a[:-2]) & (self.a[1:-1] >= self.a[2:])) + 1
-        chosen = []
-        for i in peaks[np.argsort(self.a[peaks])[::-1]]:
-            if all(abs(self.wn[i] - w) >= self.APART for w, _ in chosen):
-                chosen.append((float(self.wn[i]), float(self.a[i])))
-            if len(chosen) == self.LABELS:
-                break
-        return chosen
+    def length(self):
+        return self.STEP * len(self.rows) + self.HOLD + self.FADE
+
+    def restart(self):
+        self.seconds = 0.0 if not Motion.reduced else self.length() - self.FADE - 0.001
+        self._picture = None
+        self._run()
+        self.update()
+
+    def _run(self):
+        if self.isVisible() and self.rows and not Motion.reduced:
+            self.clock.start()
+            self.timer.start()
+        else:
+            self.timer.stop()
+
+    def showEvent(self, event):
+        super().showEvent(event)
+        self._run()
+
+    def hideEvent(self, event):
+        super().hideEvent(event)
+        self.timer.stop()
+
+    def _tick(self):
+        step = min(self.clock.restart() / 1000, 0.05)                  # a late frame never makes it jump
+        if Moving.count:                                               # a page or a sheet is moving: wait for it
+            return
+        self.seconds = (self.seconds + step) % self.length()
+        self.update()
+
+    # ---------------------------------------------------------------- the moment
+    def state(self):
+        """Where the loop is now: (index of the current reference, how far its line has moved, locked in or not)."""
+        last = len(self.rows) - 1
+        index = min(last, int(self.seconds / self.STEP))
+        slide = ease(EASE_POP, (self.seconds - index * self.STEP) / self.SLIDE)
+        return index, slide, self.seconds >= last * self.STEP + self.SLIDE
+
+    def _chart_rect(self):
+        return QRectF(0, self.TOP, self.width() - self.SIDE - self.GAP, self.height() - self.TOP - self.BOTTOM)
+
+    def _points(self, y, rect):
+        xs = rect.left() + (config.GRID_STOP - GRID) / (config.GRID_STOP - config.GRID_START) * rect.width()
+        return xs.tolist(), (rect.bottom() - 4 - y * (rect.height() - 4)).tolist()
+
+    def _polygon(self, y, rect):
+        return QPolygonF([QPointF(a, b) for a, b in zip(*self._points(y, rect))])
+
+    def _segments(self, y, rect):
+        """The moving line as separate pieces: Qt joins one long smooth line about ten times slower on a
+        250 % screen (38 ms against 4 ms), and that is the difference between a stutter and a glide."""
+        xs, ys = self._points(y, rect)
+        return [QLineF(a, b, c, d) for a, b, c, d in zip(xs, ys, xs[1:], ys[1:])]
+
+    def _draw_picture(self):
+        """Everything that stays still: the axis, its numbers and the sample."""
+        t = Theme.t
+        dpr = self.devicePixelRatioF() or 1.0
+        picture = QPixmap(int(self.width() * dpr), int(self.height() * dpr))
+        picture.setDevicePixelRatio(dpr)
+        picture.fill(QColor(t["paper"]))
+        rect = self._chart_rect()
+        p = QPainter(picture)
+        p.setRenderHint(QPainter.Antialiasing)
+        p.setPen(QPen(QColor(t["line_strong"]), 1))
+        p.drawLine(QPointF(rect.left(), rect.bottom() + 0.5), QPointF(rect.right(), rect.bottom() + 0.5))
+        p.setFont(font("small"))
+        p.setPen(QColor(t["muted"]))
+        for value in (4000, 3000, 2000, 1000):
+            x = rect.left() + (config.GRID_STOP - value) / (config.GRID_STOP - config.GRID_START) * rect.width()
+            p.drawText(QRectF(x, rect.bottom() + 8, 90, 18), Qt.AlignLeft | Qt.AlignVCenter,
+                       f"{value} cm⁻¹" if value == 1000 else str(value))
+        p.drawText(QRectF(0, 0, rect.width(), 20), Qt.AlignLeft | Qt.AlignVCenter, f"Demo sample: {self.source}")
+        p.setPen(QPen(QColor(t["ink"]), 1.3, Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin))
+        p.drawPolyline(self._polygon(self.sample, rect))
+        p.end()
+        self._picture, self._picture_key = picture, self._key()
 
     def _key(self):
         return self.width(), self.height(), self.devicePixelRatioF() or 1.0, Theme.t["name"]
 
-    def _x(self, w):
-        return (config.GRID_STOP - w) / (config.GRID_STOP - config.GRID_START) * self.width()
-
-    def _draw_picture(self):
-        t = Theme.t
-        dpr = self.devicePixelRatioF() or 1.0
-        width, height = self.width(), self.height()
-        picture = QPixmap(int(width * dpr), int(height * dpr))
-        picture.setDevicePixelRatio(dpr)
-        picture.fill(QColor(t["paper"]))
-        p = QPainter(picture)
-        p.setRenderHint(QPainter.Antialiasing)
-        base, low, high = height - self.BOTTOM, np.nanmin(self.a), np.nanmax(self.a)
-
-        def y(value):
-            return base - 4 - (value - low) / (high - low) * (base - 4 - self.TOP)
-
-        p.setPen(QPen(QColor(t["line_strong"]), 1))
-        p.drawLine(QPointF(0, base + 0.5), QPointF(width, base + 0.5))
-        p.setFont(font("small"))
-        p.setPen(QColor(t["muted"]))
-        for value in (4000, 3000, 2000, 1000):
-            p.drawText(QRectF(self._x(value), base + 8, 90, 18), Qt.AlignLeft | Qt.AlignVCenter,
-                       f"{value} cm⁻¹" if value == 1000 else str(value))
-        order = np.argsort(-self.wn)
-        p.setPen(QPen(QColor(t["ink"]), 1.3, Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin))
-        p.drawPolyline(QPolygonF([QPointF(self._x(a), y(b)) for a, b in zip(self.wn[order], self.a[order])]))
-        p.setPen(QColor(t["ink_2"]))
-        taken = []
-        for value, tall in self.bands():
-            box = QRectF(self._x(value) - 24, y(tall) - 19, 48, 16)
-            if box.right() > width:                                    # never cut off at the edge
-                box.moveRight(width)
-            if not any(box.intersects(other) for other in taken):      # never two labels on each other
-                taken.append(box)
-                p.drawText(box, Qt.AlignCenter, f"{value:.0f}")
-        p.end()
-        self._picture, self._picture_key = picture, self._key()
-
     def prepare(self):
-        """Draw the picture now, if it is missing or out of date."""
-        if self.has_data() and (self._picture is None or self._picture_key != self._key()):
+        if self.rows and (self._picture is None or self._picture_key != self._key()):
             self._draw_picture()
 
     def paintEvent(self, _):
+        if not self.rows:
+            return
         self.prepare()
-        if self._picture is not None:
-            QPainter(self).drawPixmap(0, 0, self._picture)
+        t = Theme.t
+        p = QPainter(self)
+        p.setRenderHint(QPainter.Antialiasing)
+        p.drawPixmap(0, 0, self._picture)
+        index, slide, locked = self.state()
+        before = self.rows[max(0, index - 1)][2]
+        line = before + (self.rows[index][2] - before) * slide
+        colour = QColor(t["good" if locked else "accent"])
+        p.setPen(QPen(colour, 1.6, Qt.SolidLine, Qt.SquareCap))
+        p.drawLines(self._segments(line, self._chart_rect()))
+
+        left = self.width() - self.SIDE
+        last = len(self.rows) - 1
+        for row, (name, r, _) in enumerate(self.rows):
+            e = ease(EASE_POP, (self.seconds - row * self.STEP) / self.ROW_IN)
+            if e <= 0:
+                continue
+            best = row == last
+            ink = t["good"] if best and locked else t["accent"] if row == index else t["muted"]
+            y = self.TOP + row * self.ROW + (1 - e) * 14
+            p.setOpacity(e)
+            p.setPen(QColor(ink))
+            p.setFont(font("body", QFont.DemiBold if row == index else QFont.Normal))
+            room = QRectF(left, y, self.SIDE, self.ROW)
+            p.drawText(room.adjusted(0, 0, -52, 0), Qt.AlignLeft | Qt.AlignVCenter,
+                       QFontMetrics(p.font()).elidedText(name, Qt.ElideRight, self.SIDE - 56))
+            p.drawText(room, Qt.AlignRight | Qt.AlignVCenter, f"{r * e:.2f}")
+        p.setOpacity(1.0)
+        if locked:
+            e = ease(EASE_POP, (self.seconds - last * self.STEP - self.SLIDE) / self.ROW_IN)
+            p.setOpacity(e)
+            p.setPen(QColor(t["good"]))
+            p.setFont(font("title", QFont.DemiBold))
+            y = self.TOP + len(self.rows) * self.ROW + 14 + (1 - e) * 14
+            p.drawText(QRectF(left, y, self.SIDE, 32), Qt.AlignLeft | Qt.AlignVCenter,
+                       QFontMetrics(p.font()).elidedText(self.verdict, Qt.ElideRight, self.SIDE))
+            p.setOpacity(1.0)
+        leaving = (self.seconds - (self.length() - self.FADE)) / self.FADE
+        if leaving > 0:                                                # the loop closes softly: back to the sample
+            wash = QColor(t["paper"])
+            wash.setAlphaF(min(1.0, leaving))
+            p.fillRect(self.rect(), wash)
 
 
 class EmptyState(QWidget):
-    """The home screen, before any spectrum is opened: a real spectrum and the ways to start.
+    """The home screen, before any spectrum is opened: the app identifying a real sample, and the ways to start.
 
-    It fits any window: the actions move under the headline on a narrow one, and the spectrum takes the
-    height that is left (the page scrolls rather than squeezing it on a very low window).
+    It fits any window: the actions move under the headline on a narrow one, and the picture takes the height
+    that is left (the page scrolls rather than squeezing it on a very low window).
     """
 
     choose_files = Signal()
@@ -1101,8 +1196,8 @@ class EmptyState(QWidget):
         self.setObjectName("EmptyPage")
         self.page = QWidget()
         self.page.setObjectName("EmptyPage")
-        self.title = QLabel("Drop a spectrum anywhere.")
-        self.title.setObjectName("HeroTitle")
+        self.title = QLabel("Drop a spectrum anywhere")
+        self.title.setObjectName("PageTitle")
         self.title.setWordWrap(True)
         self.formats = QLabel("CSV, TXT, DPT, JCAMP-DX or Bruker OPUS, in %T or absorbance")
         self.formats.setObjectName("Body2")
@@ -1115,16 +1210,10 @@ class EmptyState(QWidget):
         self.choose.clicked.connect(self.choose_files.emit)
         self.demo.clicked.connect(self.open_demo.emit)
         self.library_link.clicked.connect(self.open_library.emit)
-        self.art = HomeSpectrum()
-        self.caption = QLabel("Demo measurement: a particle found near a wiping step, by ATR. "
-                              "Your own spectrum takes its place.")
-        self.caption.setObjectName("SectionHint")
-        self.caption.setWordWrap(True)
-        self.art.setVisible(self.art.has_data())
-        self.caption.setVisible(self.art.has_data())
+        self.show_match = MatchShow()
 
         words = QVBoxLayout()
-        words.setSpacing(6)
+        words.setSpacing(4)
         words.addWidget(self.title)
         words.addWidget(self.formats)
         self.buttons = QWidget()
@@ -1132,22 +1221,18 @@ class EmptyState(QWidget):
         for button in (self.library_link, self.demo, self.choose):
             button.setCursor(Qt.PointingHandCursor)
             buttons.addWidget(button)
-        self.head = QWidget()
-        self.head_layout = QBoxLayout(QBoxLayout.LeftToRight, self.head)
-        self.head_layout.setContentsMargins(0, 0, 0, 0)
-        self.head_layout.setSpacing(16)
-        self.head_layout.addLayout(words, 1)
-        self.head_layout.addWidget(self.buttons)
+        self.foot = QWidget()
+        self.foot_layout = QBoxLayout(QBoxLayout.LeftToRight, self.foot)
+        self.foot_layout.setContentsMargins(0, 0, 0, 0)
+        self.foot_layout.setSpacing(16)
+        self.foot_layout.addLayout(words, 1)
+        self.foot_layout.addWidget(self.buttons)
         layout = QVBoxLayout(self.page)
-        layout.setContentsMargins(self.MARGIN, 40, self.MARGIN, 24)
+        layout.setContentsMargins(self.MARGIN, 32, self.MARGIN, 28)
         layout.setSpacing(0)
-        layout.addWidget(self.head)
+        layout.addWidget(self.show_match, 1)
         layout.addSpacing(24)
-        layout.addWidget(self.art, 1)
-        layout.addSpacing(10)
-        layout.addWidget(self.caption)
-        if not self.art.has_data():
-            layout.addStretch(1)
+        layout.addWidget(self.foot)
 
         self.scroll = SmoothScrollArea()
         self.scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
@@ -1163,25 +1248,26 @@ class EmptyState(QWidget):
         self.title.ensurePolished()
         inside = self.width() - 2 * self.MARGIN
         room = sum(b.sizeHint().width() for b in (self.library_link, self.demo, self.choose)) + 2 * self.GAP + 2
-        narrow = self.title.fontMetrics().horizontalAdvance(self.title.text()) + 16 + room > inside
-        self.head_layout.setDirection(QBoxLayout.TopToBottom if narrow else QBoxLayout.LeftToRight)
+        words = max(self.title.fontMetrics().horizontalAdvance(self.title.text()),
+                    self.formats.fontMetrics().horizontalAdvance(self.formats.text()))
+        narrow = words + 16 + room > inside
+        self.foot_layout.setDirection(QBoxLayout.TopToBottom if narrow else QBoxLayout.LeftToRight)
         self.buttons.setFixedWidth(inside if narrow else room)
 
     def play(self):
-        """The entrance: the headline rises in, then the spectrum and its caption. The line is never drawn in."""
+        """The entrance: the words rise in; the loop starts from its beginning."""
         if Motion.reduced or not self.isVisible():
             return
-        self.art.prepare()
-        bands = [QRect(widget.mapTo(self, QPoint(0, 0)), widget.size())
-                 for widget in (self.head, self.art, self.caption) if widget.isVisible()]
-        rise_in(self, blank(self, Theme.t["paper"]), snapshot(self), bands, dy=30, duration=1000)
+        self.show_match.restart()
+        rise_in(self, blank(self, Theme.t["paper"]), snapshot(self),
+                [QRect(self.foot.mapTo(self, QPoint(0, 0)), self.foot.size())], dy=30, duration=1000)
 
     def retheme(self):
         make_opaque(self.page, Theme.t["paper"])
         make_opaque(self.scroll.viewport(), Theme.t["paper"])
         self.choose.setIcon(icon("files", Theme.t["on_primary"]))
         self.demo.setIcon(icon("flask-conical", Theme.t["ink_2"]))
-        self.art.update()
+        self.show_match.update()
 
 
 # ---------------------------------------------------------------------------- measuring-mode dialog

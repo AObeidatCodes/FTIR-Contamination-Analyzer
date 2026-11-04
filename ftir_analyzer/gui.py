@@ -1089,12 +1089,21 @@ class MainWindow(QMainWindow):
         elif self.ask_on_start:
             QTimer.singleShot(250, self.open_files)                         # "which spectrum?" straight away
 
+    def _show_demo_match(self):
+        """The home screen shows the real result of the first demo sample against the library in use."""
+        try:
+            spectrum = read_spectra(config.EXAMPLES_DIR / "01_wipe_area_particle_ATR.csv")[0]
+        except (OSError, SpectrumFileError, IndexError):                 # no demo file: the home screen stays plain
+            return
+        self.empty.show_match.set_result(analyse(spectrum, self.library, "ATR", "file note"), self.library)
+
     def _set_library(self, library, validation):
         """Use a (new) library: the badge, the Library page and its validation."""
         if self.library is None:                       # the first time: everything made at start-up stays,
             gc.collect()                               # so the garbage collector can skip it from now on
             gc.freeze()                                # (its rounds get shorter: no pause while things move)
         self.library, self.validation = library, validation
+        self._show_demo_match()
         v = validation
         self.badge.kind = "good" if v.passed else "bad"
         self.badge.text = "Library validated" if v.passed else "Library NOT validated"

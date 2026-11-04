@@ -30,7 +30,7 @@ from PySide6.QtWidgets import (QAbstractButton, QAbstractScrollArea, QApplicatio
                                QScrollArea, QStackedWidget, QWidget)
 
 from ftir_analyzer import config  # noqa: E402
-from ftir_analyzer.gui import MainWindow, load_fonts  # noqa: E402
+from ftir_analyzer.gui import LIBRARY, MainWindow, load_fonts  # noqa: E402
 from ftir_analyzer.motion import Motion, Overlay, Sheet, Toast  # noqa: E402
 from ftir_analyzer.plots import setup_fonts  # noqa: E402
 from ftir_analyzer.widgets import ElidedLabel  # noqa: E402
@@ -102,7 +102,7 @@ def problems(root):
                 found.append(f"{type(widget).__name__} cut off at the side by "
                              f"{inner.width() - widget.viewport().width()} px")
         if isinstance(widget, ElidedLabel):
-            continue                                                  # shortened with … on purpose
+            continue                                                  # shortened with â€¦ on purpose
         if isinstance(widget, QLabel) and widget.text() and widget.pixmap().isNull():
             if widget.wordWrap():
                 if widget.heightForWidth(widget.width()) > widget.height() + 2:
@@ -181,10 +181,14 @@ def test_the_welcome_page_fits_a_laptop_window(tmp_path):
     page = win.empty
     assert not page.scroll.verticalScrollBar().isVisible()                         # no scrolling needed
     assert problems(win) == []
-    assert page.art.isVisible() and page.art.height() >= page.art.minimumHeight()  # the real spectrum fills the page
-    assert [round(w) for w, _ in page.art.bands()] == [722, 1239, 1093, 1713, 1017]  # read from the data itself
+    show = page.show_match
+    assert show.isVisible() and show.height() >= show.minimumHeight()
+    assert [name for name, _, _ in show.rows][-2:] == ["PBT", "PET"] and show.verdict == "Probable: PET"  # real
     win.resize(700, 720)                                                           # narrow: actions under the headline
     settle()
     assert page.buttons.mapTo(page, QPoint(0, 0)).y() > page.title.mapTo(page, QPoint(0, 0)).y()
+    win.show_page(LIBRARY)
+    settle()
+    assert not show.timer.isActive()                                                # it stops when it is not seen
     assert problems(win) == []
     win.close()
