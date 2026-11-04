@@ -181,6 +181,10 @@ def test_the_welcome_page_fits_a_laptop_window(tmp_path):
     page = win.empty
     assert not page.scroll.verticalScrollBar().isVisible()                         # no scrolling needed
     assert problems(win) == []
-    tiles = [QRect(t.mapTo(page, QPoint(0, 0)), t.size()) for t in page.tiles]
-    assert len({t.top() for t in tiles}) == 1 and len({t.height() for t in tiles}) == 1   # one tidy row
+    assert page.art.isVisible() and page.art.height() >= page.art.minimumHeight()  # the real spectrum fills the page
+    assert [round(w) for w, _ in page.art.bands()] == [722, 1239, 1093, 1713, 1017]  # read from the data itself
+    win.resize(700, 720)                                                           # narrow: actions under the headline
+    settle()
+    assert page.buttons.mapTo(page, QPoint(0, 0)).y() > page.title.mapTo(page, QPoint(0, 0)).y()
+    assert problems(win) == []
     win.close()

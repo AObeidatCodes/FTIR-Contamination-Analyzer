@@ -17,7 +17,8 @@ Small, reusable pieces the main window is made of. Most of them paint themselves
     PlotPanel            the figure, with a Result / Analytical view switch, "compare with ...",
                          zoom / pan / reset / save, and live tracing: under the mouse, every
                          curve's value and the name of the band at that wavenumber
-    EmptyState           the welcome screen: what the program does and the ways to start
+    HomeSpectrum         a real demo spectrum, the picture on the home screen
+    EmptyState           the home screen: a real spectrum and the ways to start
     ModeDialog           asks how files were measured (ATR / transmission / don't know)
 
 Short names used in this file:
@@ -44,7 +45,7 @@ from PySide6.QtCore import (QAbstractListModel, QByteArray, QEasingCurve, QEvent
 from PySide6.QtGui import (QAction, QActionGroup, QColor, QCursor, QFont, QFontMetrics, QIcon, QImage,  # noqa: E402
                            QPainter, QPainterPath, QPen, QPixmap, QPolygonF)
 from PySide6.QtSvg import QSvgRenderer  # noqa: E402
-from PySide6.QtWidgets import (QApplication, QDialog, QFrame, QHBoxLayout, QLabel, QMenu, QPushButton, QScrollArea,  # noqa: E402
+from PySide6.QtWidgets import (QApplication, QBoxLayout, QDialog, QFrame, QHBoxLayout, QLabel, QMenu, QPushButton, QScrollArea,  # noqa: E402
                                QSizePolicy, QStyle, QStyledItemDelegate, QToolButton, QToolTip, QVBoxLayout,
                                QWidget)
 
@@ -996,167 +997,157 @@ class PlotPanel(Card):
             self.canvas.blit(self.figure.bbox)
 
 
-# ---------------------------------------------------------------------------- the welcome screen
-class SpectrumArt(QWidget):
-    """A decorative absorbance spectrum that draws itself from left to right: the welcome illustration."""
+# ------------------------------------------------------------------------------- the home screen
+class HomeSpectrum(QWidget):
+    """A real measurement on the home screen: the first demo spectrum, its tallest bands read from the data
+    itself, on a wavenumber axis. Drawn once into a picture; it never redraws while the page moves."""
+
+    FILE = config.EXAMPLES_DIR / "01_wipe_area_particle_ATR.csv"
+    TOP, BOTTOM = 26, 30
+    LABELS, APART = 5, 60                                              # bands named, and cm-1 between two of them
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.progress = 1.0
-        self._animation = None
-        self.setMinimumHeight(128)
-        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.setMinimumHeight(190)
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self._picture, self._picture_key = None, None
+        try:
+            rows = [line for line in self.FILE.read_text(encoding="utf-8").splitlines() if line[:1].isdigit()]
+            self.wn, self.a = np.loadtxt(rows, delimiter=",", unpack=True)
+        except (OSError, ValueError):                                  # no demo file: the page works without it
+            self.wn, self.a = np.array([]), np.array([])
 
-    def play(self):
-        """Draw the line again, from nothing (1.6 s, slowing down at the end)."""
-        stop(self._animation)
-        self._animation = animate(self, 0.0, 1.0, 1400, self._step, EASE_OUT)
+    def has_data(self):
+        return self.wn.size > 1
 
-    def _step(self, value):
-        self.progress = value
-        self.update()
+    def bands(self):
+        """The tallest bands of the spectrum, at least APART cm-1 from each other: [(wavenumber, height)]."""
+        peaks = np.flatnonzero((self.a[1:-1] > self.a[:-2]) & (self.a[1:-1] >= self.a[2:])) + 1
+        chosen = []
+        for i in peaks[np.argsort(self.a[peaks])[::-1]]:
+            if all(abs(self.wn[i] - w) >= self.APART for w, _ in chosen):
+                chosen.append((float(self.wn[i]), float(self.a[i])))
+            if len(chosen) == self.LABELS:
+                break
+        return chosen
+
+    def _key(self):
+        return self.width(), self.height(), self.devicePixelRatioF() or 1.0, Theme.t["name"]
+
+    def _x(self, w):
+        return (config.GRID_STOP - w) / (config.GRID_STOP - config.GRID_START) * self.width()
+
+    def _draw_picture(self):
+        t = Theme.t
+        dpr = self.devicePixelRatioF() or 1.0
+        width, height = self.width(), self.height()
+        picture = QPixmap(int(width * dpr), int(height * dpr))
+        picture.setDevicePixelRatio(dpr)
+        picture.fill(QColor(t["paper"]))
+        p = QPainter(picture)
+        p.setRenderHint(QPainter.Antialiasing)
+        base, low, high = height - self.BOTTOM, np.nanmin(self.a), np.nanmax(self.a)
+
+        def y(value):
+            return base - 4 - (value - low) / (high - low) * (base - 4 - self.TOP)
+
+        p.setPen(QPen(QColor(t["line_strong"]), 1))
+        p.drawLine(QPointF(0, base + 0.5), QPointF(width, base + 0.5))
+        p.setFont(font("small"))
+        p.setPen(QColor(t["muted"]))
+        for value in (4000, 3000, 2000, 1000):
+            p.drawText(QRectF(self._x(value), base + 8, 90, 18), Qt.AlignLeft | Qt.AlignVCenter,
+                       f"{value} cm⁻¹" if value == 1000 else str(value))
+        order = np.argsort(-self.wn)
+        p.setPen(QPen(QColor(t["ink"]), 1.3, Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin))
+        p.drawPolyline(QPolygonF([QPointF(self._x(a), y(b)) for a, b in zip(self.wn[order], self.a[order])]))
+        p.setPen(QColor(t["ink_2"]))
+        taken = []
+        for value, tall in self.bands():
+            box = QRectF(self._x(value) - 24, y(tall) - 19, 48, 16)
+            if box.right() > width:                                    # never cut off at the edge
+                box.moveRight(width)
+            if not any(box.intersects(other) for other in taken):      # never two labels on each other
+                taken.append(box)
+                p.drawText(box, Qt.AlignCenter, f"{value:.0f}")
+        p.end()
+        self._picture, self._picture_key = picture, self._key()
+
+    def prepare(self):
+        """Draw the picture now, if it is missing or out of date."""
+        if self.has_data() and (self._picture is None or self._picture_key != self._key()):
+            self._draw_picture()
 
     def paintEvent(self, _):
-        t = Theme.t
-        p = QPainter(self)
-        p.setRenderHint(QPainter.Antialiasing)
-        w, h = self.width(), self.height()
-        x = np.linspace(0, 1, 500)
-        bands = [(0.10, 0.30, 0.060), (0.30, 0.95, 0.010), (0.33, 0.55, 0.009), (0.52, 0.25, 0.015),
-                 (0.64, 0.80, 0.012), (0.70, 0.45, 0.010), (0.80, 0.60, 0.018), (0.90, 0.35, 0.008)]
-        y = sum(a * np.exp(-((x - c) / s) ** 2) for c, a, s in bands)
-        n = max(2, int(len(x) * self.progress))                        # how much of the line is drawn so far
-        left, right, base, top = w * 0.12, w * 0.88, h - 18, 14
-        points = [QPointF(left + xi * (right - left), base - yi * (base - top)) for xi, yi in zip(x[:n], y[:n])]
-        path = QPainterPath(points[0])
-        for point in points[1:]:
-            path.lineTo(point)
-        fill = QPainterPath(path)
-        fill.lineTo(points[-1].x(), base)
-        fill.lineTo(left, base)
-        fill.closeSubpath()
-        wash = QColor(t["accent"])                                     # a faint, flat tint under the line
-        wash.setAlphaF(0.06)
-        p.fillPath(fill, wash)
-        p.setPen(QPen(QColor(t["accent"]), 2.2, Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin))
-        p.drawPath(path)
-        if self.progress < 0.999:                                       # the pen's tip while it draws
-            glow = QColor(t["accent"])
-            glow.setAlphaF(0.25)
-            p.setPen(Qt.NoPen)
-            p.setBrush(glow)
-            p.drawEllipse(points[-1], 7, 7)
-            p.setBrush(QColor(t["accent"]))
-            p.drawEllipse(points[-1], 3.2, 3.2)
-        p.setPen(QPen(QColor(t["line_strong"]), 1))
-        p.drawLine(int(left), int(base), int(right), int(base))
-
-
-class FeatureTile(QWidget):
-    """One of the three short points on the welcome screen: a title and one sentence. Plain text
-    in a column, not a card with an icon on top: the words carry it, nothing decorates it."""
-
-    def __init__(self, title, text):
-        super().__init__()
-        heading = QLabel(title)
-        heading.setObjectName("SectionTitle")
-        body = QLabel(text)
-        body.setObjectName("Body2")
-        body.setWordWrap(True)
-        body.setFixedWidth(224)
-        self.blurb = body
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(6)
-        layout.addWidget(heading)
-        layout.addWidget(body)
-        layout.addStretch()
-        self.setFixedWidth(240)
-
-    def retheme(self):
-        pass
+        self.prepare()
+        if self._picture is not None:
+            QPainter(self).drawPixmap(0, 0, self._picture)
 
 
 class EmptyState(QWidget):
-    """Shown before any spectrum is opened: what the program does, and the ways to start.
+    """The home screen, before any spectrum is opened: a real spectrum and the ways to start.
 
-    It fits any window: the page scrolls rather than squeezing anything; on a low window the
-    decorative spectrum is left out and the headline gets smaller; on a narrow one the three
-    tiles wrap onto more lines and the text narrows.
+    It fits any window: the actions move under the headline on a narrow one, and the spectrum takes the
+    height that is left (the page scrolls rather than squeezing it on a very low window).
     """
 
     choose_files = Signal()
     open_demo = Signal()
     open_library = Signal()
+    MARGIN, GAP = 44, 12
 
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setObjectName("EmptyPage")
         self.page = QWidget()
         self.page.setObjectName("EmptyPage")
-        self.logo = QLabel()
-        self.title = QLabel("Identify a contamination\nfrom its FTIR spectrum.")
+        self.title = QLabel("Drop a spectrum anywhere.")
         self.title.setObjectName("HeroTitle")
-        self.title.setAlignment(Qt.AlignCenter)
-        self.text = QLabel("Choose one or more spectrum files, or drop them anywhere on this window. "
-                           "Each spectrum is compared with a validated reference library, checked for "
-                           "warning signs and explained band by band.")
-        self.text.setObjectName("Body2")
-        self.text.setWordWrap(True)
-        self.text.setAlignment(Qt.AlignCenter)
-        self.choose = QPushButton(" Choose spectrum files…")
-        self.choose.setObjectName("Primary")
-        self.demo = QPushButton(" Open the demo spectra")
-        self.library_link = QPushButton("Browse the reference library  ›")
-        self.library_link.setObjectName("Link")
-        for button in (self.choose, self.demo, self.library_link):
-            button.setCursor(Qt.PointingHandCursor)
-        self.formats = QLabel("CSV, TXT or DPT exports, JCAMP-DX (.jdx) or Bruker OPUS (.0, .1 …) files, "
-                              "in %T or absorbance")
-        self.formats.setObjectName("SectionHint")
-        self.formats.setAlignment(Qt.AlignCenter)
+        self.title.setWordWrap(True)
+        self.formats = QLabel("CSV, TXT, DPT, JCAMP-DX or Bruker OPUS, in %T or absorbance")
+        self.formats.setObjectName("Body2")
         self.formats.setWordWrap(True)
-        self.art = SpectrumArt()
+        self.choose = QPushButton(" Choose files")
+        self.choose.setObjectName("Primary")
+        self.demo = QPushButton(" Open demo")
+        self.library_link = QPushButton("Browse the library  ›")
+        self.library_link.setObjectName("Link")
         self.choose.clicked.connect(self.choose_files.emit)
         self.demo.clicked.connect(self.open_demo.emit)
         self.library_link.clicked.connect(self.open_library.emit)
-        self.tiles = [
-            FeatureTile("A validated library",
-                        "Every reference is tested against all the others each time it loads."),
-            FeatureTile("Checks you can see",
-                        "Raw-spectrum checks, and every step from the file to the score."),
-            FeatureTile("Traceable by design",
-                        "Checksums, a sample log and an append-only audit trail."),
-        ]
+        self.art = HomeSpectrum()
+        self.caption = QLabel("Demo measurement: a particle found near a wiping step, by ATR. "
+                              "Your own spectrum takes its place.")
+        self.caption.setObjectName("SectionHint")
+        self.caption.setWordWrap(True)
+        self.art.setVisible(self.art.has_data())
+        self.caption.setVisible(self.art.has_data())
 
+        words = QVBoxLayout()
+        words.setSpacing(6)
+        words.addWidget(self.title)
+        words.addWidget(self.formats)
         self.buttons = QWidget()
-        buttons = FlowLayout(self.buttons, spacing=16, align="center")
-        buttons.addWidget(self.choose)
-        buttons.addWidget(self.demo)
-        self.tile_row = QWidget()
-        tiles = FlowLayout(self.tile_row, spacing=32, row_spacing=24, align="center", even=True)
-        for tile in self.tiles:
-            tiles.addWidget(tile)
+        buttons = FlowLayout(self.buttons, spacing=self.GAP, align="left")
+        for button in (self.library_link, self.demo, self.choose):
+            button.setCursor(Qt.PointingHandCursor)
+            buttons.addWidget(button)
+        self.head = QWidget()
+        self.head_layout = QBoxLayout(QBoxLayout.LeftToRight, self.head)
+        self.head_layout.setContentsMargins(0, 0, 0, 0)
+        self.head_layout.setSpacing(16)
+        self.head_layout.addLayout(words, 1)
+        self.head_layout.addWidget(self.buttons)
         layout = QVBoxLayout(self.page)
-        layout.setContentsMargins(40, 32, 40, 32)
+        layout.setContentsMargins(self.MARGIN, 40, self.MARGIN, 24)
         layout.setSpacing(0)
-        layout.addStretch(2)
-        layout.addWidget(self.logo, 0, Qt.AlignCenter)
+        layout.addWidget(self.head)
         layout.addSpacing(24)
-        layout.addWidget(self.title)
-        layout.addSpacing(16)
-        layout.addWidget(self.text, 0, Qt.AlignCenter)
-        layout.addSpacing(24)
-        layout.addWidget(self.buttons)
-        layout.addSpacing(8)
-        layout.addWidget(self.library_link, 0, Qt.AlignCenter)
-        layout.addWidget(self.formats)
-        self.art_gap = layout.count()
-        layout.addSpacing(16)
-        layout.addWidget(self.art)
-        layout.addSpacing(16)
-        layout.addWidget(self.tile_row)
-        layout.addStretch(3)
+        layout.addWidget(self.art, 1)
+        layout.addSpacing(10)
+        layout.addWidget(self.caption)
+        if not self.art.has_data():
+            layout.addStretch(1)
 
         self.scroll = SmoothScrollArea()
         self.scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
@@ -1169,59 +1160,27 @@ class EmptyState(QWidget):
     # ---------------------------------------------------------- fitting the window
     def resizeEvent(self, event):
         super().resizeEvent(event)
-        self._fit()
-
-    def _fit(self):
-        """Narrow the text to the width; then, step by step, leave out what does not fit the height:
-        first the decorative spectrum, then the logo (and the title gets smaller)."""
-        self.text.setFixedWidth(max(280, min(600, self.width() - 96)))
-        self._set_heights()
-        width, height = max(1, self.width()), self.height()
-        for art, roomy in ((True, True), (False, True), (False, False)):
-            self.art.setVisible(art)
-            self.logo.setVisible(roomy)
-            if self.title.property("compact") != (not roomy):
-                self.title.setProperty("compact", not roomy)
-                self.title.style().unpolish(self.title)
-                self.title.style().polish(self.title)
-            layout = self.page.layout()
-            layout.invalidate()
-            if layout.totalHeightForWidth(width) <= height:
-                break
-
-    def _set_heights(self):
-        for label in [self.text] + [tile.blurb for tile in self.tiles]:  # wrapped text: the height its lines need
-            label.ensurePolished()
-            label.setMinimumHeight(label.heightForWidth(min(label.maximumWidth(), 600)) + 4)
+        self.title.ensurePolished()
+        inside = self.width() - 2 * self.MARGIN
+        room = sum(b.sizeHint().width() for b in (self.library_link, self.demo, self.choose)) + 2 * self.GAP + 2
+        narrow = self.title.fontMetrics().horizontalAdvance(self.title.text()) + 16 + room > inside
+        self.head_layout.setDirection(QBoxLayout.TopToBottom if narrow else QBoxLayout.LeftToRight)
+        self.buttons.setFixedWidth(inside if narrow else room)
 
     def play(self):
-        """The entrance: the parts rise in one after the other, then the spectrum draws itself."""
+        """The entrance: the headline rises in, then the spectrum and its caption. The line is never drawn in."""
         if Motion.reduced or not self.isVisible():
             return
-        self.art.progress = 0.0
-        parts = [self.logo, self.title, self.text, self.buttons, self.library_link, self.art,
-                 self.tile_row]
-        bands = []
-        for widget in parts:
-            if not widget.isVisible():
-                continue
-            rect = QRect(widget.mapTo(self, QPoint(0, 0)), widget.size())
-            if widget is self.library_link:
-                formats = self.formats
-                rect = rect.united(QRect(formats.mapTo(self, QPoint(0, 0)), formats.size()))
-            bands.append(rect)
-        rise_in(self, blank(self, Theme.t["paper"]), snapshot(self), bands, dy=30, duration=1000,
-                on_done=self.art.play)
+        self.art.prepare()
+        bands = [QRect(widget.mapTo(self, QPoint(0, 0)), widget.size())
+                 for widget in (self.head, self.art, self.caption) if widget.isVisible()]
+        rise_in(self, blank(self, Theme.t["paper"]), snapshot(self), bands, dy=30, duration=1000)
 
     def retheme(self):
-        self._set_heights()
         make_opaque(self.page, Theme.t["paper"])
         make_opaque(self.scroll.viewport(), Theme.t["paper"])
-        self.logo.setPixmap(logo_pixmap(64, self.devicePixelRatioF() or 2.0))
         self.choose.setIcon(icon("files", Theme.t["on_primary"]))
         self.demo.setIcon(icon("flask-conical", Theme.t["ink_2"]))
-        for tile in self.tiles:
-            tile.retheme()
         self.art.update()
 
 
