@@ -1011,24 +1011,28 @@ def _on_scale(y):
 
 
 class MatchShow(QWidget):
-    """The home screen's picture: a real demo spectrum being identified, on a loop.
+    """The home screen's picture: every demo sample being identified, one after the other, on a loop.
 
-    The sample stays still while the five best references of its real result slide over it, weakest first;
-    each score counts up beside the chart, and the last one locks in with the real verdict. The sample and the
-    axis are a picture drawn once, so a frame only moves one line. It runs only while it is on screen, waits
-    while another transition plays, and with reduced motion it simply shows the finished match.
+    A sample stays still while the five best references of its real result slide over it, weakest first; each
+    score counts up beside the chart, and the last one locks in with the real verdict, whatever it is. The
+    sample and the axis are a picture drawn once, so a frame only moves one line, and when nothing is moving no
+    frame is drawn at all. It runs only while it is on screen, waits while another transition plays, and with
+    reduced motion it simply shows the first finished match.
     """
 
-    STEP, HOLD, FADE = 1.8, 5.0, 0.6                                   # seconds per reference, at the end, between loops
+    INTRO, STEP, HOLD, FADE = 0.7, 1.8, 3.0, 0.6                       # seconds: fading in, per reference, the verdict, out
     SLIDE, ROW_IN = 0.9, 0.7                                           # seconds a line takes to move, a row to rise in
+    SETTLED = 0.999                                                    # how far along a line counts as arrived
     TOP, BOTTOM, SIDE, GAP, ROW = 34, 30, 190, 36, 34                  # pixels
 
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setMinimumHeight(240)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        self.sample, self.rows, self.verdict, self.source = None, [], "", ""
+        self.shows, self.at = [], 0                                    # every sample's match, and the one on screen
+        self.sample, self.rows, self.verdict, self.kind, self.source = None, [], "", "good", ""
         self.seconds = 0.0
+        self._xs = (None, None)
         self._picture, self._picture_key = None, None
         self.clock = QElapsedTimer()
         self.timer = QTimer(self)
@@ -1036,17 +1040,27 @@ class MatchShow(QWidget):
         self.timer.setInterval(16)
         self.timer.timeout.connect(self._tick)
 
-    def set_result(self, result, library):
-        """Show this real result: its compared spectrum and its five best references, weakest first."""
-        self.sample = _on_scale(result.compared)
-        self.rows = [(name, float(r), _on_scale(library.spectra[name]))
-                     for name, r in reversed(result.ranking[:5]) if name in library.spectra]
-        self.verdict = f"{result.verdict.capitalize()}: {result.best}"
-        self.source = result.name
+    def set_results(self, results, library):
+        """Show these real results: each one's compared spectrum and its five best references, weakest first."""
+        self.shows = []
+        for result in results:
+            kind, word, _ = VERDICT_LOOK[result.verdict]
+            rows = [(name, float(r), _on_scale(library.spectra[name]))
+                    for name, r in reversed(result.ranking[:5]) if name in library.spectra]
+            if rows:
+                self.shows.append((_on_scale(result.compared), rows, f"{word}: {result.best}" if result.has_match else word,
+                                   kind, result.name))
+        self._use(0)
         self.restart()
 
+    def _use(self, at):
+        self.at = at
+        if self.shows:
+            self.sample, self.rows, self.verdict, self.kind, self.source = self.shows[at]
+        self._picture = None
+
     def length(self):
-        return self.STEP * len(self.rows) + self.HOLD + self.FADE
+        return self.INTRO + self.STEP * len(self.rows) + self.HOLD + self.FADE
 
     def restart(self):
         self.seconds = 0.0 if not Motion.reduced else self.length() - self.FADE - 0.001
@@ -1071,33 +1085,52 @@ class MatchShow(QWidget):
 
     def _tick(self):
         step = min(self.clock.restart() / 1000, 0.05)                  # a late frame never makes it jump
-        if Moving.count:                                               # a page or a sheet is moving: wait for it
+        if Moving.count or self.window().isMinimized():                # a page or a sheet is moving: wait for it
             return
-        self.seconds = (self.seconds + step) % self.length()
-        self.update()
+        self.seconds += step
+        if self.seconds >= self.length():                              # hidden by the fade: the next sample
+            self.seconds = 0.0
+            self._use((self.at + 1) % len(self.shows))
+        if self._still():
+            return
+        veiled = self.seconds < self.INTRO or self.seconds > self.length() - self.FADE
+        if veiled or self.state()[1] < self.SETTLED:
+            self.update()
+        else:                                                          # the line rests: only the scores change
+            self.update(self.width() - self.SIDE, 0, self.SIDE, self.height())
+
+    def _still(self):
+        """True when this frame would look the same as the last one, so it need not be drawn."""
+        moment, settle = self.moment(), max(self.SLIDE, self.ROW_IN) + 0.02
+        if moment < 0 or self.seconds >= self.length() - self.FADE:
+            return False
+        done = (len(self.rows) - 1) * self.STEP + settle
+        return moment >= done if moment >= done - settle else moment % self.STEP >= settle
 
     # ---------------------------------------------------------------- the moment
+    def moment(self):
+        """Seconds since this sample's first reference began to appear."""
+        return self.seconds - self.INTRO
+
     def state(self):
         """Where the loop is now: (index of the current reference, how far its line has moved, locked in or not)."""
-        last = len(self.rows) - 1
-        index = min(last, int(self.seconds / self.STEP))
-        slide = ease(EASE_POP, (self.seconds - index * self.STEP) / self.SLIDE)
-        return index, slide, self.seconds >= last * self.STEP + self.SLIDE
+        last, moment = len(self.rows) - 1, self.moment()
+        index = max(0, min(last, int(moment / self.STEP)))
+        slide = ease(EASE_POP, (moment - index * self.STEP) / self.SLIDE)
+        return index, slide, moment >= last * self.STEP + self.SLIDE
 
     def _chart_rect(self):
         return QRectF(0, self.TOP, self.width() - self.SIDE - self.GAP, self.height() - self.TOP - self.BOTTOM)
 
-    def _points(self, y, rect):
-        xs = rect.left() + (config.GRID_STOP - GRID) / (config.GRID_STOP - config.GRID_START) * rect.width()
-        return xs.tolist(), (rect.bottom() - 4 - y * (rect.height() - 4)).tolist()
-
-    def _polygon(self, y, rect):
-        return QPolygonF([QPointF(a, b) for a, b in zip(*self._points(y, rect))])
-
-    def _segments(self, y, rect):
-        """The moving line as separate pieces: Qt joins one long smooth line about ten times slower on a
-        250 % screen (38 ms against 4 ms), and that is the difference between a stutter and a glide."""
-        xs, ys = self._points(y, rect)
+    def _segments(self, y, rect, every=1):
+        """A line as separate pieces: Qt joins one long smooth line about ten times slower on a 250 % screen
+        (38 ms against 4 ms), and that is the difference between a stutter and a glide."""
+        key, xs = self._xs
+        if key != rect.width():                                        # the same for every line until a resize
+            xs = (rect.left() + (config.GRID_STOP - GRID) / (config.GRID_STOP - config.GRID_START) * rect.width()).tolist()
+            self._xs = rect.width(), xs
+        ys = (rect.bottom() - 4 - y * (rect.height() - 4)).tolist()
+        xs, ys = xs[::every], ys[::every]
         return [QLineF(a, b, c, d) for a, b, c, d in zip(xs, ys, xs[1:], ys[1:])]
 
     def _draw_picture(self):
@@ -1118,9 +1151,10 @@ class MatchShow(QWidget):
             x = rect.left() + (config.GRID_STOP - value) / (config.GRID_STOP - config.GRID_START) * rect.width()
             p.drawText(QRectF(x, rect.bottom() + 8, 90, 18), Qt.AlignLeft | Qt.AlignVCenter,
                        f"{value} cm⁻¹" if value == 1000 else str(value))
-        p.drawText(QRectF(0, 0, rect.width(), 20), Qt.AlignLeft | Qt.AlignVCenter, f"Demo sample: {self.source}")
-        p.setPen(QPen(QColor(t["ink"]), 1.3, Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin))
-        p.drawPolyline(self._polygon(self.sample, rect))
+        p.drawText(QRectF(0, 0, rect.width(), 20), Qt.AlignLeft | Qt.AlignVCenter,
+                   f"Demo sample {self.at + 1} of {len(self.shows)}: {self.source}")
+        p.setPen(QPen(QColor(t["ink"]), 1.3, Qt.SolidLine, Qt.SquareCap))
+        p.drawLines(self._segments(self.sample, rect))
         p.end()
         self._picture, self._picture_key = picture, self._key()
 
@@ -1131,7 +1165,7 @@ class MatchShow(QWidget):
         if self.rows and (self._picture is None or self._picture_key != self._key()):
             self._draw_picture()
 
-    def paintEvent(self, _):
+    def paintEvent(self, event):
         if not self.rows:
             return
         self.prepare()
@@ -1142,18 +1176,20 @@ class MatchShow(QWidget):
         index, slide, locked = self.state()
         before = self.rows[max(0, index - 1)][2]
         line = before + (self.rows[index][2] - before) * slide
-        colour = QColor(t["good" if locked else "accent"])
+        colour = QColor(t[self.kind if locked else "accent"])
         p.setPen(QPen(colour, 1.6, Qt.SolidLine, Qt.SquareCap))
-        p.drawLines(self._segments(line, self._chart_rect()))
+        chart = self._chart_rect()
+        if event.rect().intersects(chart.toAlignedRect()):             # moving: half the points, too fast to see
+            p.drawLines(self._segments(line, chart, 1 if slide >= self.SETTLED else 2))
 
         left = self.width() - self.SIDE
         last = len(self.rows) - 1
         for row, (name, r, _) in enumerate(self.rows):
-            e = ease(EASE_POP, (self.seconds - row * self.STEP) / self.ROW_IN)
+            e = ease(EASE_POP, (self.moment() - row * self.STEP) / self.ROW_IN)
             if e <= 0:
                 continue
             best = row == last
-            ink = t["good"] if best and locked else t["accent"] if row == index else t["muted"]
+            ink = t[self.kind] if best and locked else t["accent"] if row == index else t["muted"]
             y = self.TOP + row * self.ROW + (1 - e) * 14
             p.setOpacity(e)
             p.setPen(QColor(ink))
@@ -1164,18 +1200,19 @@ class MatchShow(QWidget):
             p.drawText(room, Qt.AlignRight | Qt.AlignVCenter, f"{r * e:.2f}")
         p.setOpacity(1.0)
         if locked:
-            e = ease(EASE_POP, (self.seconds - last * self.STEP - self.SLIDE) / self.ROW_IN)
+            e = ease(EASE_POP, (self.moment() - last * self.STEP - self.SLIDE) / self.ROW_IN)
             p.setOpacity(e)
-            p.setPen(QColor(t["good"]))
+            p.setPen(QColor(t[self.kind]))
             p.setFont(font("title", QFont.DemiBold))
             y = self.TOP + len(self.rows) * self.ROW + 14 + (1 - e) * 14
             p.drawText(QRectF(left, y, self.SIDE, 32), Qt.AlignLeft | Qt.AlignVCenter,
                        QFontMetrics(p.font()).elidedText(self.verdict, Qt.ElideRight, self.SIDE))
             p.setOpacity(1.0)
         leaving = (self.seconds - (self.length() - self.FADE)) / self.FADE
-        if leaving > 0:                                                # the loop closes softly: back to the sample
+        veil = max(1 - self.seconds / self.INTRO, leaving)
+        if veil > 0:                                                   # one sample fades out, the next one fades in
             wash = QColor(t["paper"])
-            wash.setAlphaF(min(1.0, leaving))
+            wash.setAlphaF(min(1.0, veil))
             p.fillRect(self.rect(), wash)
 
 

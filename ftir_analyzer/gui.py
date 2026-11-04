@@ -76,7 +76,7 @@ from .peaks import band_label, band_names
 from .plots import save_figure, setup_fonts
 from .records import SampleLog, readable_time, resolve_modes, run_info
 from .report import write_report
-from .spectrum_io import SpectrumFileError, find_spectrum_files, read_spectra
+from .spectrum_io import SpectrumFileError, find_spectrum_files, read_mode_note, read_spectra
 from .theme import FONT_FILES, FONTS, THEMES, VERDICT_LOOK, stylesheet
 from .widgets import (BandButton, ElidedLabel, EmptyState, FlowLayout, ModeDialog, Pill, PlotPanel, ScoreBars, ScoreStrip,
                       SpectrumDelegate, SpectrumListModel, Theme, chip, clear_layout, flag_pill, icon, icon_pixmap,
@@ -170,6 +170,18 @@ def analyse_files(paths, modes, library, progress):
         except Exception as error:
             problems.append(f"{path.name}: unexpected error ({type(error).__name__}: {error}).")
     return results, problems
+
+
+def analyse_demos(library, progress):
+    """Background job: the real result of every demo sample, for the home screen. A file that cannot be read is
+    left out. Nothing is written anywhere."""
+    results = []
+    for path in sorted(config.EXAMPLES_DIR.glob("[0-9][0-9]_*.csv")):
+        try:
+            results.append(analyse(read_spectra(path)[0], library, read_mode_note(path) or "unknown", "file note"))
+        except (OSError, SpectrumFileError, IndexError):
+            continue
+    return library, results
 
 
 def change_library(inhouse_dir, results, change, extended, openspecy_dir, progress):
@@ -1090,12 +1102,17 @@ class MainWindow(QMainWindow):
             QTimer.singleShot(250, self.open_files)                         # "which spectrum?" straight away
 
     def _show_demo_match(self):
-        """The home screen shows the real result of the first demo sample against the library in use."""
-        try:
-            spectrum = read_spectra(config.EXAMPLES_DIR / "01_wipe_area_particle_ATR.csv")[0]
-        except (OSError, SpectrumFileError, IndexError):                 # no demo file: the home screen stays plain
-            return
-        self.empty.show_match.set_result(analyse(spectrum, self.library, "ATR", "file note"), self.library)
+        """The home screen shows the real results of the demo samples against the library in use."""
+        job = Job(analyse_demos, self.library)                           # a background job: the window stays free
+        self.jobs.append(job)                                            # kept alive until it has reported back
+        job.signals.done.connect(self._demo_analysed)
+        self.pool.start(job)
+
+    def _demo_analysed(self, job, payload):
+        self.jobs.remove(job)
+        library, results = payload
+        if library is self.library:                                      # else the library changed meanwhile
+            self.empty.show_match.set_results(results, library)
 
     def _set_library(self, library, validation):
         """Use a (new) library: the badge, the Library page and its validation."""

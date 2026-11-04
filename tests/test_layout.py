@@ -183,7 +183,11 @@ def test_the_welcome_page_fits_a_laptop_window(tmp_path):
     assert problems(win) == []
     show = page.show_match
     assert show.isVisible() and show.height() >= show.minimumHeight()
+    assert wait(app, lambda: show.rows, 30)
     assert [name for name, _, _ in show.rows][-2:] == ["PBT", "PET"] and show.verdict == "Probable: PET"  # real
+    assert len(show.shows) == 12 and {kind for *_, kind, _ in show.shows} >= {"good", "warn", "none"}     # all of them
+    show._use(1)
+    assert show.source.startswith("02_") and show._picture is None
     win.resize(700, 720)                                                           # narrow: actions under the headline
     settle()
     assert page.buttons.mapTo(page, QPoint(0, 0)).y() > page.title.mapTo(page, QPoint(0, 0)).y()
