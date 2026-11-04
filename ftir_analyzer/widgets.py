@@ -1023,7 +1023,7 @@ class MatchShow(QWidget):
     INTRO, STEP, HOLD, FADE = 0.7, 1.8, 3.0, 0.6                       # seconds: fading in, per reference, the verdict, out
     SLIDE, ROW_IN = 0.9, 0.7                                           # seconds a line takes to move, a row to rise in
     SETTLED = 0.999                                                    # how far along a line counts as arrived
-    TOP, BOTTOM, SIDE, GAP, ROW = 34, 30, 190, 36, 34                  # pixels
+    TOP, BOTTOM, SIDE, GAP, ROW = 34, 30, 236, 36, 34                  # pixels
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -1205,8 +1205,7 @@ class MatchShow(QWidget):
             p.setPen(QColor(t[self.kind]))
             p.setFont(font("title", QFont.DemiBold))
             y = self.TOP + len(self.rows) * self.ROW + 14 + (1 - e) * 14
-            p.drawText(QRectF(left, y, self.SIDE, 32), Qt.AlignLeft | Qt.AlignVCenter,
-                       QFontMetrics(p.font()).elidedText(self.verdict, Qt.ElideRight, self.SIDE))
+            p.drawText(QRectF(left, y, self.SIDE, 72), Qt.AlignLeft | Qt.AlignTop | Qt.TextWordWrap, self.verdict)
             p.setOpacity(1.0)
         leaving = (self.seconds - (self.length() - self.FADE)) / self.FADE
         veil = max(1 - self.seconds / self.INTRO, leaving)
