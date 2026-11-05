@@ -162,7 +162,7 @@ def build(results_path, target):
 <div class="panel"><h4>Other results</h4>{other_table(r)}</div>
 
 <div class="panel"><h4>Limits</h4><ul class="plain">
-<li>Using separate thresholds, and the limit of {r['short_list']}, were decided after seeing the benchmark. The spectra in this test had not been scored.</li>
+<li>Using separate thresholds, and the limit of {r['short_list']}, were decided after seeing the benchmark. The labels and counts of these spectra had been read, but not their scores.</li>
 <li>The fibres were scored in the benchmark, so they are a second look and not independent proof.</li>
 <li>Open Specy spectra are processed, coarse and mostly environmental, and have no physical-sample ID.</li>
 <li>The calibration and test spectra come from different sources ({counts['calibration_clusters']} and {counts['test_clusters']} groups), so coverage can differ from 90%.</li>

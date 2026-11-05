@@ -175,6 +175,12 @@ def test_the_tool_stops_on_a_changed_data_file(tmp_path):
         run.check_data(tmp_path)
 
 
+def test_the_report_rebuilds_from_the_saved_results_alone(tmp_path):
+    from benchmark.report import build
+    page = build(run.RESULTS / "results.json", tmp_path / "report.html").read_text(encoding="utf-8")
+    assert "Deviations from the protocol" in page and "Wrong answers and false probables" in page
+
+
 def test_the_committed_outcomes_keep_labels_only_for_failures():
     import pandas as pd
     rows = pd.DataFrame([{"id": "a", "dataset": "x", "truth": "PE", "kind": IN, "contributor": "c", "doubtful": False,
