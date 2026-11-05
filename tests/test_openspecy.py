@@ -38,6 +38,12 @@ from ftir_analyzer.processing import GRID, fingerprint, on_grid
 from ftir_analyzer.spectrum_io import read_spectra
 
 pytest.importorskip("rdata")
+
+
+def needs_writing(rdata):
+    """These tests write their own R files, and rdata can only do that from 1.0, which needs Python 3.11. Reading works on all."""
+    if not hasattr(rdata, "write_rds"):
+        pytest.skip("Writing an R file needs rdata 1.0 or newer")
 from ftir_analyzer.openspecy import NOT_STATED, _keep  # noqa: E402
 from ftir_analyzer.openspecy import (AWS_LIBRARY, OpenSpecyLibrary, choose_file, curate, download,  # noqa: E402
                                      download_and_import, import_library, list_osf_files, prepare,
@@ -191,6 +197,7 @@ def test_names_with_a_hash_survive_saving_and_loading(base, tmp_path):
 def untidy_library(path):
     """The test library made untidy the way a big real library can be."""
     import rdata
+    needs_writing(rdata)
     wn, X, metadata = read_library_file(FIXTURE)
     columns = {f"s{i}": X[:, i] for i in range(X.shape[1])}
     columns["empty"] = np.full(len(wn), np.nan)                        # no data at all
@@ -276,6 +283,7 @@ def open_specy_object(wn, spectra, metadata):
 def typed_library(path, kinds=("ftir", "raman", "nir"), transmission=()):
     """The test library laid out like Open Specy's current files: {ftir, raman, nir}."""
     import rdata
+    needs_writing(rdata)
     from rdata.conversion.to_r import DEFAULT_CLASS_MAP
     wn, X, metadata = read_library_file(FIXTURE)
     ftir = np.concatenate([np.arange(800.0, 2201.0, 2.0), np.arange(2420.0, 3201.0, 2.0)])   # CO2 cut out
