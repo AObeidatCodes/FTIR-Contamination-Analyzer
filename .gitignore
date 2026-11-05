@@ -12,3 +12,6 @@ records/*
 
 # Reports written into the project folder
 FTIR_report_*/
+
+# Benchmark spectra stay out of the repository; only results are committed
+benchmark/data/
