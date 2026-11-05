@@ -20,4 +20,14 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - run: python -m pip install -r requirements.txt pytest
-      - run: python -m pytest -q -o faulthandler_timeout=300
+      - name: Run the tests
+        shell: bash
+        run: |
+          python -m pytest -q -o faulthandler_timeout=300 --tb=line -rf --show-capture=no 2>&1 | tee pytest_output.txt
+          exit ${PIPESTATUS[0]}
+      - name: Show the failures on the run page
+        if: failure()
+        shell: bash
+        run: |
+          tail -n 1 pytest_output.txt | cut -c1-200 | while IFS= read -r line; do echo "::error::$line"; done
+          grep -E '^(FAILED|ERROR) ' pytest_output.txt | cut -c1-400 | head -n 9 | while IFS= read -r line; do echo "::error::$line"; done
