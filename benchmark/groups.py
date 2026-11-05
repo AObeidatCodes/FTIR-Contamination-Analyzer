@@ -44,7 +44,7 @@ from .sets import FIBRES, OPEN_SPECY, OUT, read_fibres, read_open_specy    # noq
 LOCKED_COMMIT = "6675e0c"
 MATCHING = ("ftir_analyzer/analysis.py", "ftir_analyzer/library.py", "ftir_analyzer/processing.py")
 USEFUL_PURITY, USEFUL_REACH = 0.90, 0.50
-DEVIATIONS = []
+DEVIATIONS = ["Added after the results were seen: how many groups span more than one contributor, because a group from one contributor may be repeats of one item. No rule or limit changed."]
 
 
 def check_program():
@@ -59,7 +59,7 @@ def fingerprint_of(item, library):
     return fingerprint(analyse(spectrum, library, mode=item.mode, mode_source="benchmark").compared)
 
 
-def measure(scores, truths, link=config.UNKNOWN_LINK_R, size=config.UNKNOWN_GROUP_SIZE):
+def measure(scores, truths, sources, link=config.UNKNOWN_LINK_R, size=config.UNKNOWN_GROUP_SIZE):
     """The protocol's figures for one data set."""
     groups = link_groups(scores, link, size)
     members = [[truths[i] for i in group] for group in groups]
@@ -75,6 +75,7 @@ def measure(scores, truths, link=config.UNKNOWN_LINK_R, size=config.UNKNOWN_GROU
     return {"samples": len(truths), "groups": len(groups), "pure_groups": sum(len(set(names)) == 1 for names in members),
             "grouped": grouped, "majority": majority, "purity": purity, "reach": reach,
             "sizes": [len(group) for group in groups], "pairs": len(a), "different_pairs": different,
+            "across_sources": sum(len({sources[i] for i in group}) > 1 for group in groups),
             "pair_interval": scoring.wilson(different, len(a)), "materials": materials,
             "useful": purity is not None and purity >= USEFUL_PURITY and reach >= USEFUL_REACH}
 
@@ -95,7 +96,7 @@ def run(data_folder, say=print):
     for name, items in ((FIBRES, fibres), (OPEN_SPECY, specy)):
         say(f"{name}: {len(items)} spectra")
         scores = similarity([fingerprint_of(item, library) for item in items])
-        results["sets"][name] = measure(scores, [item.truth for item in items])
+        results["sets"][name] = measure(scores, [item.truth for item in items], [item.contributor for item in items])
     results["seconds"] = round(time.time() - started)
     RESULTS.mkdir(exist_ok=True)
     (RESULTS / "groups_results.json").write_text(json.dumps(results, indent=1, default=float), encoding="utf-8")
@@ -111,6 +112,7 @@ def result_table(r):
                 ("Linked pairs of different materials", lambda d: f"{pct(d['different_pairs'] / d['pairs'] if d['pairs'] else None)}"
                                                                   f"&nbsp;({d['different_pairs']}&nbsp;of&nbsp;{d['pairs']})"),
                 ("95% interval, pairs", lambda d: f"{100 * d['pair_interval'][0]:.1f}&nbsp;to&nbsp;{100 * d['pair_interval'][1]:.1f}%"),
+                ("Groups spanning more than one contributor", lambda d: f"{d['across_sources']} of {d['groups']}"),
                 ("Usable", lambda d: "yes" if d["useful"] else "no"))
     rows = [row([name, value(r["sets"][FIBRES]), value(r["sets"][OPEN_SPECY])], ["", "num", "num"]) for name, value in measures]
     return table(["Measure", "Fibres", "Open Specy"], rows)
