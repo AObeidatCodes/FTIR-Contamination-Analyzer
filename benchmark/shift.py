@@ -56,6 +56,7 @@ RESULTS = HERE / "results"
 DATA_FILE = HERE / "data" / "shift" / "FTIR-PLASTIC.zip"
 DATA_SHA256 = "c8a5a378efcff70e959cfe7af26d7e7131e2508043ee99675328e582aa7b8dd9"
 LOCKED_COMMIT = "bb86688"
+LAST_RUNNABLE = "70c25ea"                                  # later commits changed the program, so check this one out
 TABLES = ("FTIR-PLASTIC-c4/FTIR_PLASTIC_c4.csv", "FTIR-PLASTIC-c8/FTIR_PLASTIC_c8.csv")
 TRUTH = {"PET": "PET", "HDPE": "PE", "LDPE": "PE", "PVC": "PVC", "PP": "PP", "PS": "PS"}
 MODE, UNIT = "ATR", "%T"                                   # every file header says so
@@ -117,7 +118,8 @@ def locked():
         raise SystemExit("The data file is not the one the protocol names: this step will not run.")
     changed = subprocess.run(["git", "diff", "--quiet", LOCKED_COMMIT, "--", "ftir_analyzer"], cwd=REPO).returncode
     if changed:
-        raise SystemExit(f"ftir_analyzer/ differs from the locked commit {LOCKED_COMMIT}: this step will not run.")
+        raise SystemExit(f"ftir_analyzer/ differs from the locked commit {LOCKED_COMMIT}: this step will not run. "
+                         f"Check out {LAST_RUNNABLE} to repeat it.")
     return subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=REPO, capture_output=True, text=True).stdout.strip()
 
 

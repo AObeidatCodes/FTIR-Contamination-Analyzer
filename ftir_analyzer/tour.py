@@ -14,7 +14,7 @@ Short names used in this file:
     w = the tour's window    rv = its result page
 
 Author : Ali Obeidat
-Version: 1.1.0
+Version: 2.0.0
 License: MIT (see LICENSE)
 """
 
@@ -314,8 +314,8 @@ class Tour(QObject):
         self.w.show_page(self.analyze)
         self.rv.scroll_to_top()
         change = self.w.model.updated.get(self.w.current_result().name)
-        text = f"{change.before} became {change.after}." if change else "The library was validated again."
-        return ("The answer changed", f"{text} The library was validated again, every spectrum was analysed again, "
+        text = f"{change.before} became {change.after}." if change else "The library was checked again."
+        return ("The answer changed", f"{text} The library was checked again, every spectrum was analysed again, "
                 "and the change is written down in the library's log.", self.rv.change_box)
 
     def _open_trends(self):

@@ -8,7 +8,7 @@ Short names used in this file:
     c = the Checks of one spectrum    r = one Result
 
 Author : Ali Obeidat
-Version: 1.1.0
+Version: 2.0.0
 License: MIT (see LICENSE)
 """
 
@@ -19,7 +19,7 @@ from .evidence import relative_spectrum
 from .peaks import band_names
 
 # The flags of analysis.py, in one or two words (the long label is the tooltip)
-FLAG_SHORT = {"CO2 artefact: probably no sample": "CO₂ artefact", "saturated bands": "Saturated",
+FLAG_SHORT = {"measure again": "Re-measure", "CO2 artefact: weak or no sample": "CO₂ artefact", "saturated bands": "Saturated",
               "water-vapour lines": "Water vapour", "second component?": "2nd component",
               "mode unknown": "Mode unknown", "mode doubt": "Mode doubt", "mode conflict": "Mode conflict"}
 
@@ -40,7 +40,7 @@ def check_rows(c):
     if c.co2_share >= 0.1:
         co2 += " · points " + ("down" if c.co2_direction == "down" else "up")
     if c.no_sample:
-        co2 += " · probably no sample"
+        co2 += " · weak or no sample"
     if not np.isfinite(c.vapour):
         vapour = "not measured"
     else:

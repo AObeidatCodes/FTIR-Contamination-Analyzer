@@ -15,7 +15,7 @@ Short names used in this file:
     r = one Result    sha = SHA-256 checksum of a file
 
 Author : Ali Obeidat
-Version: 1.1.0
+Version: 2.0.0
 License: MIT (see LICENSE)
 """
 

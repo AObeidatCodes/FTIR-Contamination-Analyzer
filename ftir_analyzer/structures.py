@@ -14,7 +14,7 @@ Short names used in this file:
     w = a wavenumber (cm-1)    group = a band group, e.g. "C=O"
 
 Author : Ali Obeidat
-Version: 1.1.0
+Version: 2.0.0
 License: MIT (see LICENSE)
 """
 

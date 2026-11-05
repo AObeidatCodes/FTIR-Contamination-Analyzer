@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: "FTIR Contamination Analyzer"
+version: 2.0.0
+authors:
+  - family-names: Obeidat
+    given-names: Ali
+license: MIT
+repository-code: "https://github.com/aobeidatcodes/ftir-contamination-analyzer"
+abstract: >-
+  Identifies the material behind a contamination from its FTIR spectrum, with a reference library search,
+  checks on the raw spectrum, band evidence and a traceable report.
+keywords:
+  - FTIR
+  - spectroscopy
+  - contamination
+  - failure analysis
+  - semiconductor

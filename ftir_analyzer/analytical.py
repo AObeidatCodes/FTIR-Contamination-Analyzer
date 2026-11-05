@@ -20,7 +20,7 @@ Short names used in this file:
     fp = fingerprint    r = Pearson r    t = tallest band height    lo, hi = ends of a range
 
 Author : Ali Obeidat
-Version: 1.1.0
+Version: 2.0.0
 License: MIT (see LICENSE)
 """
 

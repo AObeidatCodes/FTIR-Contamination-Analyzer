@@ -5,7 +5,7 @@ Every number the analysis depends on lives here, in one place, with the reason
 it has its value. Changing a rule means changing one line in this file.
 
 Author : Ali Obeidat
-Version: 1.1.0
+Version: 2.0.0
 License: MIT (see LICENSE)
 """
 
@@ -23,7 +23,8 @@ LIBRARY_FILE = DATA_DIR / "library_openftir_atr.csv"      # its spectra (OpenFTI
 LIBRARY_MODE = "ATR"                                       # every reference is put into this mode when loaded
 BAND_TABLE_FILE = DATA_DIR / "band_table.csv"             # band ranges and their assignments
 FAB_SOURCES_FILE = DATA_DIR / "fab_sources.csv"           # where a material can come from in a fab
-EXAMPLES_DIR = PROJECT_DIR / "examples"                   # demo spectra
+FROM_SOURCE = (PROJECT_DIR / "run_analyzer.py").exists()  # True when it runs from its own folder, not as an installed package
+EXAMPLES_DIR = (PROJECT_DIR if FROM_SOURCE else PACKAGE_DIR) / "examples"   # demo spectra
 TRENDS_DEMO_DIR = EXAMPLES_DIR / "trends_demo"            # made-up records for the Trends page
 
 # A repeat: at least this many samples of one material on one tool within this many days. A starting value, not a
@@ -37,8 +38,7 @@ UNKNOWN_LINK_R, UNKNOWN_GROUP_SIZE = 0.95, 3
 # Records (sample log and audit log) are kept next to the app when it runs from its own
 # folder, otherwise in the user's home folder. The environment variable FTIR_ANALYZER_RECORDS
 # can point somewhere else (for example a shared lab drive).
-_DEFAULT_RECORDS = (PROJECT_DIR / "records" if (PROJECT_DIR / "run_analyzer.py").exists()
-                    else Path.home() / "FTIR Analyzer records")
+_DEFAULT_RECORDS = PROJECT_DIR / "records" if FROM_SOURCE else Path.home() / "FTIR Analyzer records"
 RECORDS_DIR = Path(os.environ.get("FTIR_ANALYZER_RECORDS", _DEFAULT_RECORDS))
 SAMPLE_LOG_FILE = RECORDS_DIR / "sample_log.csv"          # how each raw file was measured
 INHOUSE_DIR = RECORDS_DIR / "inhouse_library"             # references the lab adds itself (append-only log)
@@ -103,7 +103,7 @@ CH_MIN_SHARE = 0.01   # C-H counts from 1 % of the tallest band (pure CO2 gas: 0
 MIN_SN = 3.0          # detection limit as in ICH Q2: a band counts only if it is 3x the noise
 MAJOR = 1 / 3         # a loud band (O-H) at >= 1/3 of the tallest band is part of the material
 MINOR = 1 / 10        # ... between 1/10 and 1/3 it is minor, below 1/10 a trace
-CO2_WARNING = 0.5     # a CO2 artefact half as tall as the tallest band means: probably no sample
+CO2_WARNING = 0.5     # a CO2 artefact half as tall as the tallest band: a weak signal, or no sample
 REMEASURE_SN = 20.0   # tallest band / noise below this: measure again. With noise added to 587 spectra, none of 415
                       # noisy copies below 20 reached a right 'probable' (5 of 109 at 20-30), and none was wrong
 

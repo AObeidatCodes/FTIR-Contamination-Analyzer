@@ -141,6 +141,12 @@ GreenSock standard "no charge" licence: https://gsap.com/standard-license
 the HTML report its smooth scrolling. Copyright (c) 2024 darkroom.engineering. The full licence text is in
 `ftir_analyzer/assets/js/LICENSE-lenis.txt`.
 
+## FTIR-Plastics, test data only, not distributed
+
+The shift test in `benchmark/` read FTIR-Plastics (Villegas Camacho et al., Zenodo, 2024,
+doi:10.5281/zenodo.10736650, CC BY 4.0). The spectra are not in this repository or in the app. Only the results of the
+test are, in `benchmark/results/`.
+
 ## Python packages
 
 The program uses numpy, pandas, scipy and matplotlib (BSD-style licences), plotly (MIT),

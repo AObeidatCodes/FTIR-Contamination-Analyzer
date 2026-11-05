@@ -19,7 +19,7 @@ Short names used in this file:
     left = what is left    r1, r2 = the best score and the best score of a different material
 
 Author : Ali Obeidat
-Version: 1.1.0
+Version: 2.0.0
 License: MIT (see LICENSE)
 """
 

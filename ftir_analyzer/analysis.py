@@ -27,7 +27,7 @@ Short names used in this file:
     reading = the measuring mode the comparison used ("ATR", "transmission", or "unknown" = as measured)
 
 Author : Ali Obeidat
-Version: 1.1.0
+Version: 2.0.0
 License: MIT (see LICENSE)
 """
 
@@ -150,8 +150,8 @@ def explain(ranking, verdict, rival=1):
 def advise(verdict, match, checks):
     """One sentence a person can act on, in the order of the method card."""
     if checks.no_sample:                                     # method card step 1: is there a sample at all?
-        text = ("CO2 artefact as big as the sample bands: probably no sample here. "
-                "Check the microscope image, take a fresh background.")
+        text = ("CO2 artefact as big as the sample bands: the sample signal is weak, or there is no sample here. "
+                "Check the sample and its contact, take a fresh background.")
     elif verdict == PROBABLE:
         text = f"Probable {match}. Check the raw spectrum, then sign."
     elif verdict == WEAK:
@@ -214,7 +214,7 @@ def analyse(spectrum, library, mode="unknown", mode_source="not given", conflict
     # Flags: short labels for the list and the report, each with a severity
     flags = [("measure again", "bad")] if redo else []
     if checks.no_sample:
-        flags.append(("CO2 artefact: probably no sample", "bad"))
+        flags.append(("CO2 artefact: weak or no sample", "bad"))
     if checks.saturated:
         flags.append(("saturated bands", "bad"))
     if checks.vapour_lines:

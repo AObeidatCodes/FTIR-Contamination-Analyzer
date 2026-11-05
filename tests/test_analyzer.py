@@ -9,7 +9,7 @@ out from the better fit, and a stated mode that fits clearly worse is flagged.
     python -m pytest            (from the project folder)
 
 Author : Ali Obeidat
-Version: 1.1.0
+Version: 2.0.0
 License: MIT (see LICENSE)
 """
 
@@ -457,4 +457,4 @@ def test_report_motion_is_built_in_and_optional(tmp_path, library):
     assert "GSAP 3.15.0" in page and "1.3.27" in page and "<script src" not in page   # nothing from the internet
     assert "prefers-reduced-motion: reduce" in page and "window.ftirMotion" in page   # the page steps aside, or follows the switch
     assert "beforeprint" in page and "SplitText.create" in page and "ScrollTrigger" in page
-    assert "Validation" in page and "Validation and data integrity" not in page
+    assert "Library check" in page and "Validation and data integrity" not in page

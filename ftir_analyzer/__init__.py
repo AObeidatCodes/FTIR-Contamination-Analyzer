@@ -3,7 +3,7 @@ FTIR Contamination Analyzer
 
 Identifies the material behind a contamination (a particle, a film, a residue)
 from its FTIR spectrum. The app compares the spectrum with a reference library,
-gives a validated verdict, checks the raw spectrum for warning signs, explains
+gives a verdict with its reason, checks the raw spectrum for warning signs, explains
 every match band by band, and writes a traceable report.
 
 Modules, in the order the data flows through them:
@@ -21,6 +21,11 @@ Modules, in the order the data flows through them:
     plots        the figures of the app and saved images (matplotlib)
     interactive  the interactive figures of the report and the script (Plotly)
     report       the HTML / CSV report
+    trends       counts samples and finds repeats, from the records
+    unknowns     groups samples with no probable verdict that look alike
+    instrument_check   the polystyrene band check and its log
+    review       the report register and second-person reviews
+    known_material     takes a clean spectrum out and searches what is left
     theme        the design system: colours, fonts, sizes, animation times (light and dark)
     motion       animation and the pieces that move (cards, segmented control, sheets, toasts)
     widgets      the building blocks of the window (pills, score bars, list, plot, dialogs)
@@ -29,11 +34,11 @@ Modules, in the order the data flows through them:
     gui          the desktop application
 
 Author : Ali Obeidat
-Version: 1.1.0
+Version: 2.0.0
 License: MIT (see LICENSE)
 """
 
 __title__ = "FTIR Contamination Analyzer"
-__version__ = "1.1.0"
+__version__ = "2.0.0"
 __author__ = "Ali Obeidat"
 __license__ = "MIT"

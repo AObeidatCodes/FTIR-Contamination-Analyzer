@@ -5,7 +5,7 @@ Every shipped reference has a model, its formula fits its atoms, its bonds are r
 up for a band that material's reference spectrum really has.
 
 Author : Ali Obeidat
-Version: 1.1.0
+Version: 2.0.0
 License: MIT (see LICENSE)
 """
 

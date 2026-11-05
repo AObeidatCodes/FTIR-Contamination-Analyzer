@@ -16,7 +16,7 @@ Short names used in this file:
     r = a Pearson r    s = one Sample    n = how many    y = a fingerprint on the common grid
 
 Author : Ali Obeidat
-Version: 1.1.0
+Version: 2.0.0
 License: MIT (see LICENSE)
 """
 

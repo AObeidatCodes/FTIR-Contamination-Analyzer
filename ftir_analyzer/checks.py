@@ -3,7 +3,7 @@ FTIR Contamination Analyzer - checks on the raw spectrum
 
 Independent of the library match, these checks describe what was actually measured:
     saturation   are the strongest bands too dark to trust?
-    CO2          is the CO2 artefact as big as the sample? (then there is probably no sample)
+    CO2          is the CO2 artefact as big as the sample? (then the sample signal is weak, or there is no sample)
     C-H          is there an organic C-H stretch?
     O-H / N-H    is there an O-H or N-H band, and how big is it?
     noise        how big is the scatter, so small bands can be judged fairly?
@@ -27,7 +27,7 @@ Short names used in this file:
     tall = height of the tallest band    ch / oh / co2 = height of that band
 
 Author : Ali Obeidat
-Version: 1.1.0
+Version: 2.0.0
 License: MIT (see LICENSE)
 """
 
@@ -109,8 +109,8 @@ def measure_again(c):
     """Why this spectrum should be measured again, each reason with what to do (empty: no reason)."""
     reasons = []
     if c.no_sample:                                                    # the first question: is there a sample at all?
-        reasons.append("CO2 artefact as big as the sample bands: probably no sample here. "
-                       "Check the microscope image, take a fresh background.")
+        reasons.append("CO2 artefact as big as the sample bands: the sample signal is weak, or there is no sample here. "
+                       "Check the sample and its contact, take a fresh background.")
     if c.below_zero:
         reasons.append("The whole spectrum is below zero: take the background on a comparable spot.")
     if c.saturated:

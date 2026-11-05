@@ -20,7 +20,7 @@ Short names used in this file:
     r = a Pearson r (a score) or one Result    info = a MaterialInfo (what is known about a reference)
 
 Author : Ali Obeidat
-Version: 1.1.0
+Version: 2.0.0
 License: MIT (see LICENSE)
 """
 
@@ -586,7 +586,7 @@ class LibraryPage(QWidget):
         self.map_button.setToolTip("Every reference against every other: which ones could be confused")
         self.add_button = QPushButton(" Add a reference…")
         self.add_button.setObjectName("Primary")
-        self.add_button.setToolTip("Add a material the lab identified itself (validated before it is saved)")
+        self.add_button.setToolTip("Add a material the lab identified itself (checked before it is saved)")
         self.actions = QWidget()
         actions = FlowLayout(self.actions, spacing=8, row_spacing=8, align="right")
         actions.addWidget(self.mode)
@@ -725,7 +725,7 @@ class LibraryPage(QWidget):
         self.banner.style().polish(self.banner)
         self.banner_icon.setPixmap(icon_pixmap("shield-check" if v.passed else "shield-alert", t[kind], 20,
                                                self.devicePixelRatioF() or 2.0))
-        verdict = "Validated." if v.passed else "NOT validated."
+        verdict = "Passed." if v.passed else "Failed."
         self.banner_text.setText(
             f"<b style='color:{t[kind]}'>{verdict}</b> Impostor test: each reference is searched for with itself "
             f"removed. The best <i>wrong</i> match is {v.material} → {v.impostor} at r = {v.score:.2f}, "
@@ -802,7 +802,7 @@ class MaterialDetail(QWidget):
         row.addWidget(tag)
         row.addWidget(text_label(info.category, "Body2"))
         row.addSpacing(6)
-        row.addWidget(Pill("good", "In-house reference" if info.origin == "in-house" else "Validated reference",
+        row.addWidget(Pill("good", "In-house reference" if info.origin == "in-house" else "Shipped reference",
                            "shield-plus" if info.origin == "in-house" else "badge-check"))
         row.addStretch()
         column.addLayout(row)
@@ -1233,7 +1233,7 @@ class AddReferencePanel(QWidget):
         column.addWidget(text_label(
             "Use this for a material the lab has identified by other means (a known part, the supplier's data "
             "sheet, SEM-EDX). From then on it is recognised. Nothing is saved until you press 'Add to library', "
-            "and the program first checks that the library stays validated.", "Body2", wrap=True))
+            "and the program first checks that the library still passes.", "Body2", wrap=True))
 
         # 1. the spectrum
         spec_card, spec_body = section("1   The spectrum")
@@ -1297,7 +1297,7 @@ class AddReferencePanel(QWidget):
         self.name.textChanged.connect(self._check_name)
 
         # 3. validation
-        val_card, self.val_body = section("3   Validation before adding", "worked out automatically")
+        val_card, self.val_body = section("3   Check before adding", "worked out automatically")
         self.val_status = QHBoxLayout()
         self.spinner = Spinner(16, colour_key="accent")
         self.val_text = text_label("Choose a spectrum first.", "Body2", wrap=True)
@@ -1402,7 +1402,7 @@ class AddReferencePanel(QWidget):
         library, validation, results = self.library, self.validation, self.results
 
         def work(progress):
-            progress(0, 1, "Validating")
+            progress(0, 1, "Checking")
             return addition_preview(library, name, y, results, before=validation)
 
         self.job = Job(work)
@@ -1423,7 +1423,7 @@ class AddReferencePanel(QWidget):
     def _preview_failed(self, job, message):
         self.job = None
         self.spinner.stop()
-        self.val_text.setText(f"The validation could not be run: {message}")
+        self.val_text.setText(f"The check could not be run: {message}")
 
     def _show_preview(self):
         t = Theme.t
@@ -1502,7 +1502,7 @@ class AddReferencePanel(QWidget):
         verdict_row.addWidget(mark, 0, Qt.AlignTop)
         if good:
             text = (f"<b>Safe to add.</b> {name} is clearly different from every reference (closest: {nearest}, "
-                    f"r = {score:.2f}) and the library stays validated.")
+                    f"r = {score:.2f}) and the library still passes.")
         else:
             text = (f"<b>Not safe to add.</b> {name} and {nearest} are too similar (r = {score:.2f} ≥ "
                     f"{config.PROBABLE_R}): the program could not tell them apart, so a wrong 'probable' answer "
@@ -1543,7 +1543,7 @@ class AddReferencePanel(QWidget):
         if not self.confirmation.text().strip():
             missing.append("how the identity was confirmed")
         if self.preview is None:
-            missing.append("the validation")
+            missing.append("the check")
         elif not (self.preview[0].passed and self.preview[0].distinct):
             missing.append("a reference that keeps the library valid")
         return missing

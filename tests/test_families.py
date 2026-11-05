@@ -5,7 +5,7 @@ A family is chemistry and never changes a verdict. It is only named when two clo
 references differ is read from the references themselves.
 
 Author : Ali Obeidat
-Version: 1.1.0
+Version: 2.0.0
 License: MIT (see LICENSE)
 """
 

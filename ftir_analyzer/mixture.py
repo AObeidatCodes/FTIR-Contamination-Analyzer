@@ -26,7 +26,7 @@ Short names used in this file:
     ok = the points used (data present, CO2 region left out)
 
 Author : Ali Obeidat
-Version: 1.1.0
+Version: 2.0.0
 License: MIT (see LICENSE)
 """
 

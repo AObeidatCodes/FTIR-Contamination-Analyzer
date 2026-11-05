@@ -1,12 +1,14 @@
 # FTIR Contamination Analyzer
 
-**Developed by Ali Obeidat** · version 1.1.0 · MIT License
+**Developed by Ali Obeidat** · version 2.0.0 · MIT License
+
+New here? Start with the [quick start](docs/QUICK_START.md). Changes are in the [changelog](CHANGELOG.md).
 
 Identifies the material behind a contamination (a particle, a fibre, a film or a residue) from its
 FTIR spectrum. It does what is otherwise done by hand, spectrum by spectrum, and writes a report that
 can be traced back to the exact raw file:
 
-- **Validated library search.** Derivative fingerprint plus Pearson r against an ATR reference
+- **Library search with a built-in check.** Derivative fingerprint plus Pearson r against an ATR reference
   library. The "probable" threshold is checked by an *impostor test* every time the library is loaded.
 - **Clear verdict with its reason.** *probable*, *weak* or *no reliable match*, with the numbers that
   decided it.
@@ -36,7 +38,7 @@ can be traced back to the exact raw file:
   impossible to tell apart is refused.
 - **More references when you need them (Open Specy).** An optional *extended* mode adds fab-relevant
   FTIR spectra from the Open Specy library (gloves, wipes, seals, fluoropolymers, silicones, resins,
-  fibres, silica ...), downloaded or imported on your computer and validated before they are used.
+  fibres, silica ...), downloaded or imported on your computer and checked before they are used.
 - **Fab context.** Where the material can come from in a semiconductor fab, and what to check next
   (a starting point for the 8D / root-cause analysis).
 - **Data integrity (ALCOA).** Raw files are read-only, every file's SHA-256 is recorded, all
@@ -67,7 +69,7 @@ can be traced back to the exact raw file:
 | **As code** | One Python script with `# %%` cells, like a notebook: file dialog, results table, interactive figures, report | `FTIR_Analyzer.py` in VS Code, Spyder or Jupyter |
 | **Batch** | No window at all: a folder in, a report out | `python -m ftir_analyzer --report OUT_FOLDER examples` |
 
-All three use the same validated analysis and give the same results.
+All three use the same analysis and give the same results.
 
 ## How to run it (step by step)
 
@@ -265,7 +267,7 @@ greyed). Move the mouse over a chart to read both values; click one to draw it i
 
 **Library** (`Ctrl+2`) shows every reference as a card: its spectrum, its name, its fab category and
 where it came from. The categories on the left filter the cards; the search field finds a material,
-a category or a source. The banner on top shows the library's validation: each reference is searched
+a category or a source. The banner on top shows the library's check: each reference is searched
 for with itself removed, and the best *wrong* match (PET → PBT, r = 0.90) must stay below 0.95.
 
 ![The reference library](docs/library.png)
@@ -302,16 +304,16 @@ reference collection is added, and only to *weak* if that reference is entered w
 2. **Library → Add a reference… → A file**, and choose
    `examples/library_demo/ABS_reference_known_part.csv` (ABS measured on a known part). The file's
    header lines fill in the form: name, category, where it comes from in a fab, what to check next,
-   and how its identity was confirmed. A few seconds later the validation is ready, *before* anything
+   and how its identity was confirmed. A few seconds later the check is ready, *before* anything
    is saved:
    - most similar existing reference: PS at r 0.88 (below 0.95: clearly different)
    - impostor test: 0.90 now, 0.90 with ABS (still valid)
    - your spectra on screen: 2 of 20 would change, among them `10_tool_cover_fragment_ATR`:
      *weak PS* → **probable ABS**
 
-   ![The validation before adding](docs/add_reference.png)
+   ![The check before adding](docs/add_reference.png)
 
-3. **Add to library.** The library is loaded again, validated again, and every spectrum is analysed
+3. **Add to library.** The library is loaded again, checked again, and every spectrum is analysed
    again. The results that changed glow for a moment and keep a small blue dot.
    `10_tool_cover_fragment_ATR` is now **probable ABS (r 0.99)**, with all 7 key ABS bands found,
    and the fab sources entered with the reference.
@@ -337,7 +339,7 @@ entries stay in `records/inhouse_library/library_changes.csv` (nothing is ever d
 
 ### More references: Open Specy (extended mode)
 
-The shipped library holds 16 well-validated polymer references. For samples outside it, **Library →
+The shipped library holds 16 polymer references. For samples outside it, **Library →
 Open Specy…** adds references from the Open Specy library (Cowger et al. 2021):
 
 1. **Download the newest** gets the *medoid nobaseline* library (baseline-corrected absorbance)
@@ -386,6 +388,8 @@ not checked for repeats. **Demo data** shows made-up samples.
 
 The default repeat of 3 samples in 30 days is a starting value, not a measured one. Change it on the page.
 
+![Trends with demo data](docs/trends.png)
+
 **Unknown groups** shows samples with no probable verdict that look alike, so a material without a name can still be
 seen coming back. A group does not say what the material is. **Add a reference…** opens the usual checked form, with
 the group's most typical sample if its file is still there. Fingerprints are kept from export onwards in
@@ -394,6 +398,8 @@ the group's most typical sample if its file is still there. Fingerprints are kep
 ### Quality
 
 **Quality** (`Ctrl+4`) holds two checks. **Demo data** shows made-up records.
+
+![The Quality page with demo data](docs/quality.png)
 
 **Instrument check.** Measure a polystyrene film in transmission and choose the file. The app finds seven bands, places
 each top between the data points, and compares it with its published position. A band more than 1 cm⁻¹ away fails the
@@ -461,7 +467,7 @@ used, with who added it, when, how its identity was confirmed and its checksum.
   best material, the hollow dot the next *different* material, so the lead the rule asks for (0.08)
   is the distance between the two dots. The summary table has a small copy of it in every row.
 - **A bar that stays in view** with the parts of the report and the two things a reviewer checks
-  first: is the library validated, is the report signed.
+  first: did the library pass its check, is the report signed.
 - **Calm motion, offline.** Smooth scrolling (Lenis), the title and each spectrum's name rising in
   word by word (GSAP SplitText) and each part fading up once as it comes into view (GSAP
   ScrollTrigger), all built into the page. The figures never move once shown; with Windows' "show
@@ -470,11 +476,11 @@ used, with who added it, when, how its identity was confirmed and its checksum.
   a phone without scrolling sideways, and prints on white paper with every closed section opened, so
   the PDF keeps the file paths and checksums.
 
-<img src="docs/report.png" alt="The HTML report" width="720">
+<img src="docs/report.png" alt="The first page of the PDF report" width="720">
 
-<img src="docs/report_sample.png" alt="One spectrum in the report: the score strip, the figure and why" width="720">
+<img src="docs/report_sample.png" alt="One spectrum in the PDF report: the score strip, the figure and why" width="720">
 
-<img src="docs/report_analytical_view.png" alt="The analytical view in the report" width="720">
+<img src="docs/report_analytical_view.png" alt="The analytical view in the web report" width="720">
 
 ### Without a window (batch / automation)
 
@@ -561,7 +567,7 @@ pip install pytest
 python -m pytest
 ```
 
-340 tests. Those for the analysis cover file reading (read-only data, headerless tab-separated files, unit
+344 tests. Those for the analysis cover file reading (read-only data, headerless tab-separated files, unit
 recognition, clear errors), processing, the verdict rule, the impostor test, the known answer for
 every demo spectrum, the second-component, empty-spot and saturation detection, the CO₂ direction,
 the analytical view (each step reproduced, the score recalculated from step 4), the interactive
@@ -646,7 +652,7 @@ card is lifted under the mouse), no gradients, and text of 14 px and up.
   motion** switches it off, and it starts off if Windows' "Show animations" is off.
 - **Keyboard and focus.** Every action has a shortcut, the controls can be reached with Tab and show
   a focus ring, `Esc` closes a sheet.
-- **The window never freezes.** Loading and validating the library, analysing, checking a new
+- **The window never freezes.** Loading and checking the library, analysing, checking a new
   reference, importing Open Specy and writing the report run in the background. If something goes
   wrong, the message has the details and they are kept in `records/error_log.txt`.
 
@@ -796,6 +802,6 @@ your computer, each keeps the licence its source gives, and only the *nobaseline
 
 ## Author
 
-**Ali Obeidat**. Design, implementation and validation. Licensed under the MIT License
+**Ali Obeidat**. Design, implementation and testing. Licensed under the MIT License
 (see [`LICENSE`](LICENSE)). The font, icons and spectra are open-source third-party material,
 credited in [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).

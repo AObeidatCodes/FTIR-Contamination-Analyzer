@@ -20,7 +20,7 @@ Short names used in this file:
     ws = worksheet    wb = workbook    col = column number (1 = A)    t = theme colours
 
 Author : Ali Obeidat
-Version: 1.1.0
+Version: 2.0.0
 License: MIT (see LICENSE)
 """
 

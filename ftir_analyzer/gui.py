@@ -38,7 +38,7 @@ Short names used in this file:
     r = one Result    t = the current theme colours    ev = band evidence    c = checks    s = spectrum
 
 Author : Ali Obeidat
-Version: 1.1.0
+Version: 2.0.0
 License: MIT (see LICENSE)
 """
 
@@ -1113,7 +1113,7 @@ class MainWindow(QMainWindow):
             self.header_buttons[key] = (button, icon_name, primary)
             self.header_texts[key] = text
         right.addSpacing(8)
-        self.badge = Pill("none", "Validating the library…", "shield-check")
+        self.badge = Pill("none", "Checking the library…", "shield-check")
         self.badge.setCursor(Qt.PointingHandCursor)
         self.badge.mousePressEvent = lambda _: self.show_page(LIBRARY)    # click: open the library
         right.addWidget(self.badge)
@@ -1433,13 +1433,13 @@ class MainWindow(QMainWindow):
         self._show_demo_match()
         v = validation
         self.badge.kind = "good" if v.passed else "bad"
-        self.badge.text = "Library validated" if v.passed else "Library NOT validated"
+        self.badge.text = "Library checked" if v.passed else "Library check failed"
         self.badge.icon_name = "shield-check" if v.passed else "shield-alert"
         self.badge.setToolTip(f"{library.name}, compared in {library.mode} mode.\n"
                               f"Impostor test: the best WRONG match scores {v.score:.2f} ({v.material} with itself "
                               f"removed → {v.impostor}).\n" + (f"Below the 'probable' threshold {config.PROBABLE_R}: "
                               "the verdict rule is valid for this library." if v.passed else
-                              "This reaches 'probable': re-validate the thresholds.") + "\nClick to open the library.")
+                              "This reaches 'probable': do not rely on its verdicts.") + "\nClick to open the library.")
         self.badge.updateGeometry()
         self.badge.update()
         self.library_page.set_mode("extended" if self.extended else "essentials",
@@ -2038,7 +2038,7 @@ class MainWindow(QMainWindow):
         version = label(f"Version {__version__}", "Meta")
         author = label(f"Developed by {__author__}", "SectionTitle")
         about = label("Identifies the material behind a contamination (a particle, a fibre, a film or a residue) "
-                      "from its FTIR spectrum: a validated library search, checks on the raw spectrum, "
+                      "from its FTIR spectrum: a library search with a built-in check, checks on the raw spectrum, "
                       "band-by-band evidence, an in-house library the lab can extend safely, and a traceable "
                       "report with an audit trail.", "Body", wrap=True)
         credits = label(f"License: {__license__}. Reference spectra: OpenFTIR (MIT). Demo spectra: OpenFTIR (MIT), "

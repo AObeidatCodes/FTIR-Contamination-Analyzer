@@ -7,8 +7,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ftir-contamination-analyzer"
-version = "1.1.0"
-description = "Identify contamination from FTIR spectra: validated library search, raw-spectrum checks, band evidence and traceable reports."
+version = "2.0.0"
+description = "Identify contamination from FTIR spectra: library search, raw-spectrum checks, band evidence and traceable reports."
 readme = "README.md"
 authors = [{ name = "Ali Obeidat" }]
 maintainers = [{ name = "Ali Obeidat" }]
@@ -23,6 +23,9 @@ dependencies = [
     "nbformat>=4.2",
     "PySide6-Essentials>=6.6",
     "rdata>=0.11",
+    "openpyxl>=3.1",
+    "jcamp>=1.3",
+    "brukeropus>=1.4",
 ]
 keywords = ["FTIR", "spectroscopy", "contamination", "failure analysis", "semiconductor", "quality"]
 classifiers = [
@@ -40,10 +43,18 @@ test = ["pytest>=7"]
 ftir-analyzer = "ftir_analyzer.__main__:main"
 
 [tool.setuptools]
-packages = ["ftir_analyzer"]
+packages = ["ftir_analyzer", "ftir_analyzer.examples", "ftir_analyzer.examples.library_demo", "ftir_analyzer.examples.trends_demo"]
+
+[tool.setuptools.package-dir]
+"ftir_analyzer.examples" = "examples"
+"ftir_analyzer.examples.library_demo" = "examples/library_demo"
+"ftir_analyzer.examples.trends_demo" = "examples/trends_demo"
 
 [tool.setuptools.package-data]
 ftir_analyzer = ["data/*.csv", "data/*.json", "data/*.md", "assets/*.*", "assets/fonts/*", "assets/icons/*", "assets/js/*"]
+"ftir_analyzer.examples" = ["*.csv", "*.md"]
+"ftir_analyzer.examples.library_demo" = ["*"]
+"ftir_analyzer.examples.trends_demo" = ["*.csv"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

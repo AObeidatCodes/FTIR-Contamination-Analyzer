@@ -13,7 +13,7 @@ Short names used in this file:
     p = the painter    t = theme colours    w, h = width and height    xyz = atom positions in angstrom
 
 Author : Ali Obeidat
-Version: 1.1.0
+Version: 2.0.0
 License: MIT (see LICENSE)
 """
 

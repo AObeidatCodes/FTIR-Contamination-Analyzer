@@ -18,7 +18,7 @@ Short names used in this file:
     r = one Result       M = the page margin    w = a width in points
 
 Author : Ali Obeidat
-Version: 1.1.0
+Version: 2.0.0
 License: MIT (see LICENSE)
 """
 
@@ -284,7 +284,7 @@ def first_page(doc, results, info, signoff):
                    f"{who_text(info.get('run_by_name', ''), info['run_by'])}")
     page.text(M, 56, "Contamination report", 26, T["ink"], "medium")
     ok = info["validation"].passed
-    badge = "Library validated" if ok else "Library NOT validated"
+    badge = "Library checked" if ok else "Library check failed"
     w = Ruler.width(badge, 8.5, "medium") + 16
     page.pill(PAGE_W - M - w, 62, badge, "good" if ok else "bad", 8.5)
     page.line_text(M, 100, f"{n} spectr{'um' if n == 1 else 'a'}  ·  {info['library']}", WIDTH, 9, T["muted"])
@@ -665,13 +665,13 @@ def run_page(doc, info, library):
     ok = validation.passed
     check = (f"{'passed' if ok else 'FAILED'} · the best wrong answer scores {validation.score:.2f} "
              f"({validation.material} without itself → {validation.impostor}), "
-             + (f"below {config.PROBABLE_R:.2f}" if ok else f"reaching {config.PROBABLE_R:.2f}: re-validate"))
+             + (f"below {config.PROBABLE_R:.2f}" if ok else f"reaching {config.PROBABLE_R:.2f}: do not rely on it"))
     from .report import settings_html
     settings = plain(settings_html()).split("\n")
     rows = [("Analysed", readable_time(info["run_at"], with_zone=True)),
             ("By", who_text(info.get("run_by_name", ""), info["run_by"])), ("Program", info["program"]),
             ("Code SHA-256", info["code_sha256"]), ("Software", info["software"]), ("Library", info["library"]),
-            ("Library SHA-256", info["library_sha256"]), ("Library validation", check),
+            ("Library SHA-256", info["library_sha256"]), ("Library check", check),
             *([("Instrument check", info["instrument_check"])] if info.get("instrument_check") else []),
             ("Probable when", settings[0].replace("probable: ", "")), ("Saturation, CO₂", settings[1]),
             ("C–H present", settings[2].replace("C–H present: ", "")),
@@ -695,7 +695,7 @@ def run_page(doc, info, library):
             + (f" and {len(in_house)} in-house reference{'s' if len(in_house) != 1 else ''} added by the lab."
                if in_house else ". No in-house references were used.")
             + (f" Extended mode: {len(library.open_specy)} references from the Open Specy library (Cowger "
-               "et al. 2021, Analytical Chemistry 93(21), 7543-7548), validated against every other reference "
+               "et al. 2021, Analytical Chemistry 93(21), 7543-7548), checked against every other reference "
                "before use." if library.open_specy else ""))
     y = page.paragraph(M, y, text, WIDTH, 8.6, T["ink_2"]) + 8
     for ref in in_house:

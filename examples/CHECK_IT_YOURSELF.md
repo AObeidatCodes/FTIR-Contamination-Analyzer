@@ -18,7 +18,7 @@ at the end.
 
 **You should see** the twenty results of the table in `examples/README.md`, for example
 `01` probable PET (r 0.97), `05` weak Nylon 6,6 (r 0.88), `10` weak PS (r 0.88). The badge at the top
-says **Library validated**.
+says **Library checked**.
 
 ## A. Nylon 6: a new reference raises the score
 
@@ -35,7 +35,7 @@ MTF_NYL_083), where the collection itself names the polymer.
    **You should see:** name **Nylon 6**, category **People & clothing**, measured by **ATR**, and
    under the chart "3451 points, 550–4000 cm⁻¹, %T · details read from the file's notes". The file
    is in transmittance; the program turns it into absorbance itself.
-3. Scroll to **3 Validation before adding** and wait a second.
+3. Scroll to **3 Check before adding** and wait a second.
    **You should see:**
    - Most similar existing reference: **Nylon 6,6, r 0.90** (below the 0.95 line: different enough)
    - Impostor test: now 0.90 → with it **0.90 (Nylon 6,6 → Nylon 6)**, green
@@ -53,7 +53,7 @@ MTF_NYL_083), where the collection itself names the polymer.
    Nylon 6,6, and a blue-edged note above the numbers: "**Changed** Weak: Nylon 6,6 (r 0.88) →
    **Probable: Nylon 6 (r 0.96)** · Library change: Nylon 6 added to the library". The message at the
    bottom says "Nylon 6 added to the library. 1 result changed." with **See it in the library**;
-   click it: the Library page shows **In-house 1** and the badge still says **Library validated**.
+   click it: the Library page shows **In-house 1** and the badge still says **Library checked**.
 6. Back on 05, switch to **Analytical view**: step 4 shows the two fingerprints and r = 0.957.
 7. **Library → Library change log (Excel).**
    **You should see:** Excel opens a formatted copy: title, what the log is, one `add` row for
@@ -102,7 +102,7 @@ the other one fits clearly better, it flags **mode doubt**.
 **Library → Open Specy… → Download.** The report at the end has a line **Measured by: …**: how
 many of the kept references were ATR, how many were transmission (put into the ATR look, like a
 transmission sample) and how many did not say (used as measured). The badge must still say
-**Library validated**.
+**Library checked**.
 
 ## E. Export, sign, and the records in Excel
 
@@ -111,7 +111,7 @@ transmission sample) and how many did not say (used as measured). The badge must
    (Accept / With changes / Re-measure), a comment (needed unless you accept) and the tick box "I
    have looked at the raw spectra …". The button then says **Sign and export**.
 2. **You should see** in the report: at the top "20 spectra · 20 Oct 2026, 17:05 (UTC+02:00) ·
-   analysed by Ali Obeidat (your login)", the badges **Library validated** and **Signed: Accepted**
+   analysed by Ali Obeidat (your login)", the badges **Library checked** and **Signed: Accepted**
    in the bar at the top (it stays there while you scroll), four numbers (probable / weak / no
    reliable match / with a flag), then the summary. Each spectrum has a **score strip**: a filled dot
    for its score r, a hollow dot for the next different material, on grey / amber / green zones that

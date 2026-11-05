@@ -35,7 +35,7 @@ Short names used in this file:
     pct = a position on the score strip, in percent of its width
 
 Author : Ali Obeidat
-Version: 1.1.0
+Version: 2.0.0
 License: MIT (see LICENSE)
 """
 
@@ -990,7 +990,7 @@ def validation_html(validation):
             f"scores {validation.score:.2f} ({h(validation.material)} with itself removed &rarr; "
             f"{h(validation.impostor)}), "
             + (f"below the probable threshold {config.PROBABLE_R:.2f}." if ok else
-               f"reaching the probable threshold {config.PROBABLE_R:.2f}: re-validate before using this report."))
+               f"reaching the probable threshold {config.PROBABLE_R:.2f}: do not rely on this report."))
 
 
 def short_hash(value):
@@ -1024,7 +1024,7 @@ def library_html(library, info):
     who added it and how it was confirmed."""
     rows = (fact("Library", info["library"].split(",")[0], info["library"]) + fact("Library SHA-256", short_hash(info["library_sha256"]),
             info["library_sha256"], copy=True)
-            + fact("Validation", validation_short(info["validation"]), plain_text(validation_html(info["validation"])))
+            + fact("Library check", validation_short(info["validation"]), plain_text(validation_html(info["validation"])))
             + (fact("Instrument check", info["instrument_check"], info["instrument_check"]) if info.get("instrument_check") else ""))
     head = f'<section class="panel"><h3>Library</h3><dl class="kv one">{rows}</dl>'
     if library is None:
@@ -1147,7 +1147,7 @@ def write_html(results, figures, info, path, analytical=None, library=None, sign
     valid = info["validation"].passed
     # on a phone the badges keep only their first word ("Library", "Signed"): the rest is in .long
     status = (f'<a class="pill {"good" if valid else "bad"}" href="#trace">{icon("shield-check" if valid else "shield-alert")}'
-              f'<span>Library<span class="long"> {"validated" if valid else "NOT validated"}</span></span></a>'
+              f'<span>Library<span class="long"> {"checked" if valid else "check failed"}</span></span></a>'
               + '<button type="button" class="pill none" id="motion-toggle" title="Scroll animations: click to switch. '
         'Without a choice the page follows the animation setting of the system."></button>'
       + (f'<a class="pill good" href="#signoff">{icon("badge-check")}<span>Signed<span class="long">: '

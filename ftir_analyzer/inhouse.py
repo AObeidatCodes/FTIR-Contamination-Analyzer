@@ -21,7 +21,7 @@ Short names used in this file:
     y = a spectrum on the common grid    r = one Result
 
 Author : Ali Obeidat
-Version: 1.1.0
+Version: 2.0.0
 License: MIT (see LICENSE)
 """
 

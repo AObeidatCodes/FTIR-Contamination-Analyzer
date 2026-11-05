@@ -36,7 +36,7 @@ Short names used in this file:
     pt = points (1/72 inch, the unit of text sizes)    box = a label's rectangle on screen
 
 Author : Ali Obeidat
-Version: 1.1.0
+Version: 2.0.0
 License: MIT (see LICENSE)
 """
 
