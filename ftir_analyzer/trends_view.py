@@ -37,6 +37,11 @@ def short_date(day):
     return f"{day.day} {day:%b}"
 
 
+def date_range(first, last):
+    """'4 Nov to 9 Nov', or one date if both are the same day."""
+    return short_date(first) if first == last else f"{short_date(first)} to {short_date(last)}"
+
+
 class RankChart(QWidget):
     """A ranking: each row a name, a bar split by verdict, the number of samples, and the cumulative share."""
 
@@ -300,7 +305,7 @@ class TrendsPage(QWidget):
             line = QHBoxLayout(row)
             line.setContentsMargins(12, 8, 12, 8)
             where = f" on {', '.join(group.tools)}" if group.tools else ""
-            line.addWidget(text_label(f"{len(group.samples)} samples{where}: {short_date(group.first)} to {short_date(group.last)}",
+            line.addWidget(text_label(f"{len(group.samples)} samples{where}: {date_range(group.first, group.last)}",
                                       "Body", wrap=True), 1)
             if not self.demo:
                 add = QPushButton(" Add a reference…")
@@ -328,7 +333,7 @@ class TrendsPage(QWidget):
             alert.setPixmap(icon_pixmap("triangle-alert", Theme.t["warn"], 16, self.devicePixelRatioF()))
             line.addWidget(alert)
             line.addWidget(text_label(f"{repeat.material} on {repeat.tool}: {repeat.samples} samples, "
-                                      f"{short_date(repeat.first)} to {short_date(repeat.last)}", "Body", wrap=True), 1)
+                                      f"{date_range(repeat.first, repeat.last)}", "Body", wrap=True), 1)
             self.repeat_rows.addWidget(row)
         if not found:
             self.repeat_rows.addWidget(text_label("No repeats in this period.", "Body2"))
