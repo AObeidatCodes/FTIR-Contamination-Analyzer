@@ -45,14 +45,14 @@ from matplotlib.figure import Figure  # noqa: E402
 from PySide6.QtCore import (QAbstractListModel, QByteArray, QEasingCurve, QElapsedTimer, QEvent, QLineF, QModelIndex,
                             QPoint, QPointF, QTimer,  # noqa: E402
                             QRect, QRectF, QSize, Qt, QTimer, Signal)
-from PySide6.QtGui import (QAction, QActionGroup, QColor, QCursor, QFont, QFontMetrics, QIcon, QImage,  # noqa: E402
+from PySide6.QtGui import (QAction, QActionGroup, QBrush, QColor, QCursor, QFont, QFontMetrics, QIcon, QImage, QLinearGradient,  # noqa: E402
                            QPainter, QPainterPath, QPen, QPixmap, QPolygonF)
 from PySide6.QtSvg import QSvgRenderer  # noqa: E402
 from PySide6.QtWidgets import (QApplication, QBoxLayout, QDialog, QFrame, QHBoxLayout, QLabel, QMenu, QPushButton, QScrollArea,  # noqa: E402
                                QSizePolicy, QStyle, QStyledItemDelegate, QToolButton, QToolTip, QVBoxLayout,
                                QWidget)
 
-from . import config  # noqa: E402
+from . import __author__, __version__, config  # noqa: E402
 from .analysis import NO_MATCH  # noqa: E402
 from .analytical import analytical_steps  # noqa: E402
 from .motion import (EASE_OUT, EASE_POP, Card, FlowLayout, Look, Motion, Moving, Segmented, SmoothScrollArea,
@@ -61,7 +61,7 @@ from .motion import (EASE_OUT, EASE_POP, Card, FlowLayout, Look, Motion, Moving,
 from .peaks import band_table  # noqa: E402
 from .plots import draw_analytical, draw_result  # noqa: E402
 from .processing import GRID  # noqa: E402
-from .theme import FONT_SANS, ICONS, LOGO_SVG, SIZE, VERDICT_LOOK  # noqa: E402
+from .theme import FONT_MONO, FONT_SANS, ICONS, LOGO_SVG, SIZE, VERDICT_LOOK  # noqa: E402
 
 Theme = Look        # the theme in use right now; painted widgets read their colours from Theme.t
 
@@ -121,6 +121,13 @@ def font(size_key="body", weight=QFont.Normal):
     f = QFont(FONT_SANS)
     f.setPixelSize(SIZE[size_key])
     f.setWeight(weight)
+    return f
+
+
+def mono_font():
+    """The small monospaced font of the signature."""
+    f = QFont(FONT_MONO)
+    f.setPixelSize(SIZE["small"])
     return f
 
 
@@ -1026,12 +1033,18 @@ class MatchShow(QWidget):
     sample and the axis are a picture drawn once, so a frame only moves one line, and when nothing is moving no
     frame is drawn at all. It runs only while it is on screen, waits while another transition plays, and with
     reduced motion it simply shows the first finished match.
+
+    The signature (name and version) sits on the level of the axis, under the scores. When a verdict locks in, a
+    light in the verdict's colour crosses it once. Click it for the About box.
     """
 
+    about_requested = Signal()
     INTRO, STEP, HOLD, FADE = 0.7, 1.8, 3.0, 0.6                       # seconds: fading in, per reference, the verdict, out
     SLIDE, ROW_IN = 0.9, 0.7                                           # seconds a line takes to move, a row to rise in
     SETTLED = 0.999                                                    # how far along a line counts as arrived
     TOP, BOTTOM, SIDE, GAP, ROW = 34, 30, 236, 36, 34                  # pixels
+    GLINT, GLINT_WAIT, GLINT_WIDTH = 1.5, 0.5, 70                      # seconds across, seconds after the lock, pixels
+    SIGNED_FROM = 300                                                  # pixels: on a lower picture the verdict needs the corner
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -1040,6 +1053,9 @@ class MatchShow(QWidget):
         self.shows, self.queue = [], []                                # every sample's match, and the ones still to come
         self.sample, self.rows, self.verdict, self.kind, self.source = None, [], "", "good", ""
         self.seconds = 0.0
+        self.signature = f"{__author__} · v{__version__}"
+        self.over_signature = False
+        self.setMouseTracking(True)
         self._xs = (None, None)
         self._picture, self._picture_key = None, None
         self.clock = QElapsedTimer()
@@ -1117,7 +1133,7 @@ class MatchShow(QWidget):
     def _still(self):
         """True when this frame would look the same as the last one, so it need not be drawn."""
         moment, settle = self.moment(), max(self.SLIDE, self.ROW_IN) + 0.02
-        if moment < 0 or self.seconds >= self.length() - self.FADE:
+        if moment < 0 or self.seconds >= self.length() - self.FADE or self._glint() is not None:
             return False
         done = (len(self.rows) - 1) * self.STEP + settle
         return moment >= done if moment >= done - settle else moment % self.STEP >= settle
@@ -1134,8 +1150,58 @@ class MatchShow(QWidget):
         slide = ease(EASE_POP, (moment - index * self.STEP) / self.SLIDE)
         return index, slide, moment >= last * self.STEP + self.SLIDE
 
+    def _glint(self):
+        """How far the light has crossed the signature, from 0 to 1, or None while it is not crossing."""
+        if Motion.reduced or not self.rows:
+            return None
+        since = self.moment() - (len(self.rows) - 1) * self.STEP - self.SLIDE - self.GLINT_WAIT
+        return since / self.GLINT if 0 <= since <= self.GLINT else None
+
     def _chart_rect(self):
         return QRectF(0, self.TOP, self.width() - self.SIDE - self.GAP, self.height() - self.TOP - self.BOTTOM)
+
+    def _signature_rect(self):
+        """The signature's text: at the right edge, level with the numbers of the axis."""
+        width = QFontMetrics(mono_font()).horizontalAdvance(self.signature)
+        return QRectF(self.width() - width, self._chart_rect().bottom() + 8, width, 18)
+
+    def _draw_signature(self, p):
+        if self.height() < self.SIGNED_FROM:
+            return
+        t = Theme.t
+        text, line = self._signature_rect(), self._chart_rect().bottom() + 0.5
+        p.setPen(QPen(QColor(t["line_strong"]), 1))
+        p.drawLine(QPointF(self.width() - self.SIDE, line), QPointF(self.width(), line))
+        ink, glint = QColor(t["accent"] if self.over_signature else t["muted"]), self._glint()
+        if glint is None:
+            p.setPen(ink)
+        else:
+            x = text.left() - self.GLINT_WIDTH + (text.width() + 2 * self.GLINT_WIDTH) * glint
+            light = QLinearGradient(x - self.GLINT_WIDTH, 0, x + self.GLINT_WIDTH, 0)
+            light.setColorAt(0, ink)
+            light.setColorAt(0.5, QColor(t[self.kind]))
+            light.setColorAt(1, ink)
+            p.setPen(QPen(QBrush(light), 1))
+        p.setFont(mono_font())
+        p.drawText(text, Qt.AlignRight | Qt.AlignVCenter, self.signature)
+
+    def mouseMoveEvent(self, event):
+        over = self.height() >= self.SIGNED_FROM and self._signature_rect().contains(event.position())
+        if over != self.over_signature:
+            self._hover_signature(over)
+
+    def leaveEvent(self, _):
+        if self.over_signature:
+            self._hover_signature(False)
+
+    def _hover_signature(self, over):
+        self.over_signature = over
+        self.setCursor(Qt.PointingHandCursor if over else Qt.ArrowCursor)
+        self.update(self._signature_rect().toAlignedRect())
+
+    def mousePressEvent(self, _):
+        if self.over_signature:
+            self.about_requested.emit()
 
     def _segments(self, y, rect, every=1):
         """A line as separate pieces: Qt joins one long smooth line about ten times slower on a 250 % screen
@@ -1162,10 +1228,12 @@ class MatchShow(QWidget):
         p.drawLine(QPointF(rect.left(), rect.bottom() + 0.5), QPointF(rect.right(), rect.bottom() + 0.5))
         p.setFont(font("small"))
         p.setPen(QColor(t["muted"]))
+        metrics = QFontMetrics(p.font())
+        scale = rect.width() / (config.GRID_STOP - config.GRID_START)
         for value in (4000, 3000, 2000, 1000):
-            x = rect.left() + (config.GRID_STOP - value) / (config.GRID_STOP - config.GRID_START) * rect.width()
-            p.drawText(QRectF(x, rect.bottom() + 8, 90, 18), Qt.AlignLeft | Qt.AlignVCenter,
-                       f"{value} cm⁻¹" if value == 1000 else str(value))
+            text = f"{value} cm⁻¹" if value == 1000 and 1000 * scale >= 96 else str(value)   # a narrow chart: no unit
+            x = min(rect.left() + (config.GRID_STOP - value) * scale, rect.right() - metrics.horizontalAdvance(text))
+            p.drawText(QRectF(x, rect.bottom() + 8, 90, 18), Qt.AlignLeft | Qt.AlignVCenter, text)
         p.drawText(QRectF(0, 0, rect.width(), 20), Qt.AlignLeft | Qt.AlignVCenter, self.source)
         p.setPen(QPen(QColor(t["ink"]), 1.3, Qt.SolidLine, Qt.SquareCap))
         p.drawLines(self._segments(self.sample, rect))
@@ -1180,12 +1248,13 @@ class MatchShow(QWidget):
             self._draw_picture()
 
     def paintEvent(self, event):
-        if not self.rows:
-            return
-        self.prepare()
         t = Theme.t
         p = QPainter(self)
         p.setRenderHint(QPainter.Antialiasing)
+        if not self.rows:
+            self._draw_signature(p)
+            return
+        self.prepare()
         p.drawPixmap(0, 0, self._picture)
         index, slide, locked = self.state()
         before = self.rows[max(0, index - 1)][2]
@@ -1227,6 +1296,7 @@ class MatchShow(QWidget):
             wash = QColor(t["paper"])
             wash.setAlphaF(min(1.0, veil))
             p.fillRect(self.rect(), wash)
+        self._draw_signature(p)                                        # it stays while the samples change
 
 
 class EmptyState(QWidget):
@@ -1240,6 +1310,7 @@ class EmptyState(QWidget):
     open_demo = Signal()
     open_library = Signal()
     take_tour = Signal()
+    show_about = Signal()
     MARGIN, GAP = 44, 12
 
     def __init__(self, parent=None):
@@ -1266,6 +1337,7 @@ class EmptyState(QWidget):
         self.demo.clicked.connect(self.open_demo.emit)
         self.library_link.clicked.connect(self.open_library.emit)
         self.show_match = MatchShow()
+        self.show_match.about_requested.connect(self.show_about.emit)
 
         words = QVBoxLayout()
         words.setSpacing(4)

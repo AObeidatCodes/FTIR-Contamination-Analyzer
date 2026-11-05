@@ -942,10 +942,7 @@ class MainWindow(QMainWindow):
         titles.setSpacing(0)
         self.app_title = title = QLabel(__title__)
         title.setObjectName("AppTitle")
-        self.subtitle = subtitle = QLabel(f"Version {__version__} · by {__author__}")
-        subtitle.setObjectName("AppSubtitle")
         titles.addWidget(title)
-        titles.addWidget(subtitle)
         left.addWidget(self.logo)
         left.addLayout(titles)
         left.addStretch()
@@ -1056,6 +1053,7 @@ class MainWindow(QMainWindow):
         self.empty.open_demo.connect(self.open_demo)
         self.empty.open_library.connect(lambda: self.show_page(LIBRARY))
         self.empty.take_tour.connect(self.start_tour)
+        self.empty.show_about.connect(self.show_about)
         self.empty.tour_link.setVisible(self.tour_folder is None)
         self.result_view = ResultView()
         self.result_view.plot.others = lambda: list(self.model.results)   # "another sample over this one"
@@ -1117,7 +1115,6 @@ class MainWindow(QMainWindow):
         bar.addWidget(self.spinner)
         bar.addWidget(self.status, 1)
         bar.addPermanentWidget(self.progress)
-        bar.addPermanentWidget(QLabel(f"Developed by {__author__}"))
 
     # ------------------------------------------------------------------ theme and motion
     def apply_theme(self, name):
@@ -1894,7 +1891,7 @@ class MainWindow(QMainWindow):
     def resizeEvent(self, event):
         """On a narrow window the toolbar makes room in two steps (the tooltips still name everything):
         below 1440 px the buttons show only their icons; below 1180 px the library badge shows only its
-        shield, and the name and version next to the logo are left out (the window title still names it)."""
+        shield, and the name next to the logo is left out (the window title still names it)."""
         super().resizeEvent(event)
         compact = 2 if self.width() < 1180 else 1 if self.width() < 1440 else 0
         if compact != self.compact:
@@ -1902,7 +1899,6 @@ class MainWindow(QMainWindow):
             for key, (button, _, primary) in self.header_buttons.items():
                 button.setText(f" {self.header_texts[key]}" if primary or not compact else "")
             self.badge.set_compact(compact == 2)
-            self.subtitle.setVisible(compact < 2)
             self.app_title.setVisible(compact < 2)
 
     def closeEvent(self, event):

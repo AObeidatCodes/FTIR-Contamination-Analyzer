@@ -25,13 +25,14 @@ pytest.importorskip("PySide6")
 
 from PySide6.QtCore import QEventLoop, QPoint, QPointF, QSettings, Qt  # noqa: E402
 from PySide6.QtGui import QWheelEvent  # noqa: E402
-from PySide6.QtWidgets import QApplication  # noqa: E402
+from PySide6.QtWidgets import QApplication, QLabel  # noqa: E402
 
-from ftir_analyzer import config  # noqa: E402
+from ftir_analyzer import __author__, __version__, config  # noqa: E402
 from ftir_analyzer.analysis import PROBABLE, WEAK  # noqa: E402
 from ftir_analyzer.gui import LIBRARY, MainWindow, load_fonts  # noqa: E402
 from ftir_analyzer.motion import Motion  # noqa: E402
 from ftir_analyzer.plots import setup_fonts  # noqa: E402
+from ftir_analyzer.widgets import MatchShow  # noqa: E402
 
 DEMO = config.EXAMPLES_DIR / "library_demo"
 
@@ -364,6 +365,41 @@ def test_the_tool_entered_at_export_reaches_the_trends_page(app, window, tmp_pat
     window.show_page("analyze")
 
 
+def test_the_name_and_version_sit_on_the_home_screen_alone(app, window, monkeypatch):
+    show = window.empty.show_match
+    assert __author__ in show.signature and __version__ in show.signature
+    words = " ".join(label.text() for label in window.findChildren(QLabel))
+    assert f"by {__author__}" not in words and "Developed by" not in words
+    show = MatchShow()                                                           # its own: the window's opens a real box
+    seen = []
+    show.about_requested.connect(lambda: seen.append(True))
+    show.over_signature = False
+    show.mousePressEvent(None)
+    assert not seen                                                              # only a click on the signature
+    show.over_signature = True
+    show.mousePressEvent(None)
+    show.over_signature = False
+    assert seen == [True]
+
+
+def test_the_light_crosses_the_signature_once_after_the_verdict(app, window, monkeypatch):
+    show = window.empty.show_match
+    monkeypatch.setattr("ftir_analyzer.widgets.Motion.reduced", False)
+    keep = show.seconds
+    show.rows = show.rows or [("PE", 0.9, None)]
+    locked = show.INTRO + (len(show.rows) - 1) * show.STEP + show.SLIDE + show.GLINT_WAIT
+    show.seconds = locked - 0.1
+    assert show._glint() is None
+    show.seconds = locked + show.GLINT / 2
+    assert show._glint() == pytest.approx(0.5) and not show._still()
+    show.seconds = locked + show.GLINT + 0.1
+    assert show._glint() is None
+    monkeypatch.setattr("ftir_analyzer.widgets.Motion.reduced", True)
+    show.seconds = locked + show.GLINT / 2
+    assert show._glint() is None
+    show.seconds = keep
+
+
 def test_the_trends_page_shows_demo_data_as_made_up(app, window):
     window.show_page("trends")
     page = window.trends_page
@@ -540,6 +576,8 @@ def test_the_tour_works_and_keeps_nothing(app, window):
     for _ in tour.steps:
         assert wait(app, lambda: tour.card.isVisible(), 60), f"stuck after {seen}"
         seen.append(tour.card.title.text())
+        for words in (tour.card.title, tour.card.text):                          # no step's words are cut off
+            assert words.height() >= words.heightForWidth(words.width()), seen[-1]
         if tour.at == 5:                                                         # the reference was added
             assert tour_window.current_result().match == "Nylon 6"
         if tour.at < len(tour.steps) - 1:

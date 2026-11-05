@@ -118,7 +118,10 @@ class TourCard(QFrame):
         return False
 
     def place(self):
-        self.adjustSize()
+        """The card's height follows its words at its real width: adjustSize() would measure them at another width."""
+        for label in (self.title, self.text):
+            label.ensurePolished()                                      # the style sheet decides the font size
+        self.setFixedHeight(self.layout().totalHeightForWidth(self.WIDTH))
         parent = self.parentWidget()
         self.move(self.MARGIN, parent.height() - self.height() - self.MARGIN - 28)
         self.raise_()

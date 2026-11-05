@@ -213,7 +213,6 @@ QToolTip {{ background: {t['tooltip']}; color: {t['tooltip_ink']}; border: none;
 #Header {{ background: {t['header']}; border-bottom: 1px solid {t['line']}; }}
 #Header QLabel {{ color: {t['header_ink']}; }}
 #AppTitle {{ font-size: {SIZE['body']}px; font-weight: 600; }}
-#AppSubtitle {{ color: {t['header_muted']}; font-size: {SIZE['small']}px; }}
 #Header QPushButton {{ background: transparent; color: {t['ink_2']}; border: 1px solid transparent;
     border-radius: {r_c}px; padding: 8px 12px; font-weight: 500; }}
 #Header QPushButton:hover {{ background: {t['surface_2']}; color: {t['ink']}; }}
