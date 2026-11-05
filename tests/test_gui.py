@@ -352,7 +352,7 @@ def test_the_tool_entered_at_export_reaches_the_trends_page(app, window, tmp_pat
     panel.set_folder(tmp_path)
     panel.tool.setText("  Etch   3 ")
     panel._submit("html")
-    assert wait(app, lambda: not window.busy and window.tool_log.exists(), 120)
+    assert wait(app, lambda: not window.busy and window.tool_log.exists() and window.unknown_log.exists(), 120)
     assert window.audit_log.read_text(encoding="utf-8").startswith(first)         # the audit log only grew
     window.show_page("trends")
     page = window.trends_page
@@ -400,12 +400,21 @@ def test_the_light_crosses_the_signature_once_after_the_verdict(app, window, mon
     show.seconds = keep
 
 
+def test_an_unknown_group_opens_the_add_reference_sheet(app, window, tmp_path):
+    from ftir_analyzer.unknowns import UnknownGroup
+    sample = type("Sample", (), {"sha": "not this file"})()
+    window.trends_page.add_from_group.emit(UnknownGroup((sample,), sample, str(tmp_path / "gone.csv")))
+    assert window.sheet is not None and window.sheet.content.spectrum is None    # the file is gone: an empty form
+    window.sheet.close_sheet()
+
+
 def test_the_trends_page_shows_demo_data_as_made_up(app, window):
     window.show_page("trends")
     page = window.trends_page
     page.demo_button.setChecked(True)
     assert page.demo_note.isVisible() and page.samples and all(s.sha.startswith("demo") for s in page.samples)
     assert page.repeat_rows.count() >= 1 and page.material_chart.rows and page.tool_chart.rows
+    assert page.group_card.isVisible() and page.group_rows.count() == 2          # two made-up groups
     page.period.set_value("0")
     page.show_samples()
     assert len(page.shown) == len(page.samples)

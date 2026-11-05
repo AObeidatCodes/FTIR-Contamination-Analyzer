@@ -1,8 +1,8 @@
 """
 FTIR Contamination Analyzer - the Trends page
 
-What keeps coming back: repeats of one material on one tool, and the most common materials and tools. The page only
-reads the records, and it reads them again each time it is shown.
+What keeps coming back: repeats of one material on one tool, unknown samples that look alike, and the most common
+materials and tools. The page only reads the records, and it reads them again each time it is shown.
 
     RankChart    a ranking as rows of bars, coloured by verdict, with a cumulative share
     TrendsPage   the page
@@ -24,6 +24,7 @@ from . import config
 from .library_view import section, text_label
 from .motion import FlowLayout, Segmented, SmoothScrollArea
 from .trends import NOT_RECORDED, demo_samples, in_period, ranked, read_samples, repeats
+from .unknowns import read_fingerprints, unknown_groups
 from .widgets import Theme, clear_layout, font, icon, icon_pixmap
 
 ALL_TOOLS = "All tools"
@@ -112,12 +113,13 @@ class TrendsPage(QWidget):
     """Repeats, then the most common materials and tools, for a period and a tool."""
 
     repeat_rule_changed = Signal(int, int)        # samples, days
+    add_from_group = Signal(object)               # an UnknownGroup
 
-    def __init__(self, audit_log, tool_log, count=config.REPEAT_COUNT, days=config.REPEAT_DAYS, parent=None):
+    def __init__(self, audit_log, tool_log, unknown_log, count=config.REPEAT_COUNT, days=config.REPEAT_DAYS, parent=None):
         super().__init__(parent)
         self.setObjectName("LibraryPage")                               # the same background
-        self.audit_log, self.tool_log = audit_log, tool_log
-        self.samples, self.shown = [], []
+        self.audit_log, self.tool_log, self.unknown_log = audit_log, tool_log, unknown_log
+        self.samples, self.shown, self.prints = [], [], {}
         self.demo, self.problem = False, ""
 
         self.scroll = SmoothScrollArea()
@@ -187,6 +189,16 @@ class TrendsPage(QWidget):
         repeat_body.addWidget(self.no_tool)
         column.addWidget(self.repeat_card)
 
+        self.group_card, group_body = section("Unknown groups")
+        group_body.addWidget(text_label("Samples with no probable verdict that look alike. A group does not say what the "
+                                        "material is.", "Body2", wrap=True))
+        self.group_rows = QVBoxLayout()
+        self.group_rows.setSpacing(8)
+        group_body.addLayout(self.group_rows)
+        self.no_print = text_label("", "SectionHint", wrap=True)
+        group_body.addWidget(self.no_print)
+        column.addWidget(self.group_card)
+
         self.material_card, material_body = section("Materials")
         self.material_chart = RankChart()
         material_body.addWidget(self.material_chart)
@@ -225,6 +237,7 @@ class TrendsPage(QWidget):
         self.demo_note.style().polish(self.demo_note)
         if self.shown:
             self._show_repeats(self.shown)                              # their icons take the new colour
+            self._show_groups(self.shown)
         for chart in (self.material_chart, self.tool_chart):
             chart.update()
 
@@ -234,8 +247,9 @@ class TrendsPage(QWidget):
         self.problem = ""
         try:
             self.samples = demo_samples() if self.demo else read_samples(self.audit_log, self.tool_log)
-        except (OSError, ValueError, AttributeError):                  # a damaged log must not stop the window
-            self.samples, self.problem = [], "The audit log could not be read."
+            self.prints = read_fingerprints(config.TRENDS_DEMO_DIR / "unknown_fingerprints.csv" if self.demo else self.unknown_log)
+        except (OSError, ValueError, AttributeError, KeyError):        # a damaged log must not stop the window
+            self.samples, self.prints, self.problem = [], {}, "The records could not be read."
         self._fill_tools()
         self.show_samples()
 
@@ -265,7 +279,7 @@ class TrendsPage(QWidget):
         self.shown = samples
         number = len(samples)
         self.subtitle.setText(f"{number} sample{'' if number == 1 else 's'}. An exported sample counts once.")
-        for widget in (self.repeat_card, self.material_card, self.tool_card):
+        for widget in (self.repeat_card, self.group_card, self.material_card, self.tool_card):
             widget.setVisible(bool(samples))
         self.empty.setVisible(not samples)
         self.empty.setText(self.problem or ("No samples in this period." if self.samples
@@ -275,6 +289,31 @@ class TrendsPage(QWidget):
         self.material_chart.set_rows(ranked(samples, "material"))
         self.tool_chart.set_rows(ranked(samples, "tool"))
         self._show_repeats(samples)
+        self._show_groups(samples)
+
+    def _show_groups(self, samples):
+        clear_layout(self.group_rows)
+        groups, missing = unknown_groups(samples, self.prints)
+        for group in groups:
+            row = QFrame()
+            row.setObjectName("Callout")
+            line = QHBoxLayout(row)
+            line.setContentsMargins(12, 8, 12, 8)
+            where = f" on {', '.join(group.tools)}" if group.tools else ""
+            line.addWidget(text_label(f"{len(group.samples)} samples{where}: {short_date(group.first)} to {short_date(group.last)}",
+                                      "Body", wrap=True), 1)
+            if not self.demo:
+                add = QPushButton(" Add a reference…")
+                add.setCursor(Qt.PointingHandCursor)
+                add.setIcon(icon("plus", Theme.t["ink_2"]))
+                add.clicked.connect(lambda _=False, chosen=group: self.add_from_group.emit(chosen))
+                line.addWidget(add)
+            self.group_rows.addWidget(row)
+        if not groups:
+            self.group_rows.addWidget(text_label("No groups in this period.", "Body2"))
+        self.no_print.setVisible(bool(missing))
+        self.no_print.setText(f"{missing} sample{'' if missing == 1 else 's'} exported before this feature "
+                              f"{'is' if missing == 1 else 'are'} not compared.")
 
     def _show_repeats(self, samples):
         clear_layout(self.repeat_rows)

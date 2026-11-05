@@ -49,8 +49,7 @@ add-reference sheet fills itself in.
 | `Wool_reference_fibre_collection.csv` | Wool fibre from a fibre reference collection (a different sample from demo 20). **Safe to add**: demo 20 goes from weak Nylon 6,6 to **probable Wool** (r 0.99). |
 | `SAN_reference_cover_sample.csv` | SAN (styrene–acrylonitrile), chemically almost the same as ABS. Added **after** ABS, it is **not safe**: SAN and ABS score r 0.98 against each other, so a wrong *probable* would become possible. The program refuses to add it and says why |
 
-`trends_demo/` holds a made-up audit log and tool log for the **Demo data** button on the Trends page. None of it
-is real.
+`trends_demo/` holds made-up records for the **Demo data** button on the Trends page. None of it is real.
 
 Sources: OpenFTIR (MIT), Open Specy (CC BY 4.0), FasTEX-KCL (MIT; Parkar et al. 2025) and a
 public-domain polystyrene film. See

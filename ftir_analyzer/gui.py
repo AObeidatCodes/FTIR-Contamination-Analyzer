@@ -86,6 +86,7 @@ from .theme import FONT_FILES, FONTS, THEMES, VERDICT_LOOK, stylesheet
 from .tour import Tour
 from .trends import known_tools
 from .trends_view import TrendsPage
+from .unknowns import save_fingerprints, usable_file
 from .widgets import (BandButton, ElidedLabel, EmptyState, FlowLayout, ModeDialog, Pill, PlotPanel, ScoreBars, ScoreStrip,
                       SpectrumDelegate, SpectrumListModel, Theme, chip, clear_layout, flag_pill, icon, icon_pixmap,
                       logo_pixmap, verdict_pill)
@@ -139,7 +140,8 @@ left out, so the extended library still passes the impostor test. Switch between
 <b>Extended</b> on the Library page.</p>
 <p><b>Trends</b>: counts each exported sample once, and shows the most common materials and tools and any
 material that keeps coming back on one tool. Enter the tool or area when you export a report: a sample without
-one cannot be checked for repeats.</p>
+one cannot be checked for repeats. <b>Unknown groups</b> shows samples with no probable verdict that look alike; a
+group does not say what the material is.</p>
 <h3>Checking it by eye</h3>
 <p>Switch the figure to <b>Analytical view</b> to see every step on its own panel: the raw data, the
 absorbance, the mode correction, the two fingerprints the score is calculated from, and the checks with
@@ -808,6 +810,7 @@ class MainWindow(QMainWindow):
         self.audit_log = Path(audit_log or config.AUDIT_LOG_FILE)
         self.signature_log = self.audit_log.parent / "signatures.csv"   # next to the audit log
         self.tool_log = self.audit_log.parent / "tool_log.csv"
+        self.unknown_log = self.audit_log.parent / "unknown_fingerprints.csv"
         self.inhouse_dir = Path(inhouse_dir or config.INHOUSE_DIR)
         self.openspecy_dir = Path(openspecy_dir or config.RECORDS_DIR / "openspecy")
         self.extended = self.settings.value("library_mode", "essentials") == EXTENDED and tour_folder is None
@@ -1081,9 +1084,11 @@ class MainWindow(QMainWindow):
         self.library_page.openspecy_requested.connect(self.open_openspecy)
 
         # ---- the Trends page
-        self.trends_page = TrendsPage(self.audit_log, self.tool_log, self.settings.value("repeat_count", config.REPEAT_COUNT, type=int),
+        self.trends_page = TrendsPage(self.audit_log, self.tool_log, self.unknown_log,
+                                      self.settings.value("repeat_count", config.REPEAT_COUNT, type=int),
                                       self.settings.value("repeat_days", config.REPEAT_DAYS, type=int))
         self.trends_page.repeat_rule_changed.connect(self._remember_repeat_rule)
+        self.trends_page.add_from_group.connect(self._add_from_group)
 
         self.pages = FadeStack()
         self.pages.addWidget(self.analyze_page)
@@ -1194,6 +1199,13 @@ class MainWindow(QMainWindow):
         if self.tour_folder is None:
             self.settings.setValue("repeat_count", count)
             self.settings.setValue("repeat_days", days)
+
+    def _add_from_group(self, group):
+        """The sheet for adding a reference, with the group's most typical sample if its file can still be used."""
+        panel = self.open_add_reference(use_current=False)
+        path = usable_file(group)
+        if panel is not None and path is not None:
+            panel.load_file(path)
 
     def _focus_search(self):
         if self.pages.currentWidget() is self.library_page:
@@ -1756,6 +1768,7 @@ class MainWindow(QMainWindow):
             path = write_report(results, self.library, info, out_dir, audit_log=self.audit_log, signoff=signoff,
                                 signature_log=self.signature_log)
             append_tool_log(results, tool, self.tool_log)
+            save_fingerprints(results, self.unknown_log)
             return path
 
         self.set_status("Writing the report…", busy=True)

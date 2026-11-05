@@ -1,53 +1,62 @@
 # Demo data: every sample in this file is made up.
 file_sha256,sample,file,tool,recorded_by,recorded_at
-demo0001,Demo sample 001,Demo sample 001.csv,Litho track 1,demo,2026-01-10
-demo0002,Demo sample 002,Demo sample 002.csv,Litho track 1,demo,2026-01-10
+demo0001,Demo sample 001,Demo sample 001.csv,CMP 1,demo,2026-01-05
+demo0002,Demo sample 002,Demo sample 002.csv,Etch 3,demo,2026-01-06
 demo0003,Demo sample 003,Demo sample 003.csv,CMP 1,demo,2026-01-10
-demo0004,Demo sample 004,Demo sample 004.csv,Wet bench 2,demo,2026-01-10
-demo0005,Demo sample 005,Demo sample 005.csv,Litho track 1,demo,2026-01-10
-demo0006,Demo sample 006,Demo sample 006.csv,Litho track 1,demo,2026-01-11
-demo0008,Demo sample 008,Demo sample 008.csv,Etch 3,demo,2026-01-14
-demo0009,Demo sample 009,Demo sample 009.csv,CMP 1,demo,2026-01-15
-demo0010,Demo sample 010,Demo sample 010.csv,CMP 1,demo,2026-01-16
-demo0011,Demo sample 011,Demo sample 011.csv,CMP 1,demo,2026-01-19
-demo0012,Demo sample 012,Demo sample 012.csv,Litho track 1,demo,2026-01-19
-demo0013,Demo sample 013,Demo sample 013.csv,Wet bench 2,demo,2026-01-20
-demo0014,Demo sample 014,Demo sample 014.csv,Etch 3,demo,2026-01-23
-demo0016,Demo sample 016,Demo sample 016.csv,CMP 1,demo,2026-01-25
-demo0017,Demo sample 017,Demo sample 017.csv,Wet bench 2,demo,2026-01-28
-demo0018,Demo sample 018,Demo sample 018.csv,Wet bench 2,demo,2026-01-30
-demo0019,Demo sample 019,Demo sample 019.csv,Etch 3,demo,2026-02-03
+demo0004,Demo sample 004,Demo sample 004.csv,Etch 3,demo,2026-01-13
+demo0005,Demo sample 005,Demo sample 005.csv,Litho track 1,demo,2026-01-16
+demo0006,Demo sample 006,Demo sample 006.csv,Wet bench 2,demo,2026-01-20
+demo0007,Demo sample 007,Demo sample 007.csv,Etch 3,demo,2026-01-23
+demo0008,Demo sample 008,Demo sample 008.csv,Litho track 1,demo,2026-01-24
+demo0009,Demo sample 009,Demo sample 009.csv,Wet bench 2,demo,2026-01-27
+demo0010,Demo sample 010,Demo sample 010.csv,Etch 3,demo,2026-01-30
+demo0011,Demo sample 011,Demo sample 011.csv,Litho track 1,demo,2026-02-01
+demo0012,Demo sample 012,Demo sample 012.csv,Etch 3,demo,2026-02-01
+demo0013,Demo sample 013,Demo sample 013.csv,Litho track 1,demo,2026-02-02
+demo0014,Demo sample 014,Demo sample 014.csv,Wet bench 2,demo,2026-02-03
+demo0015,Demo sample 015,Demo sample 015.csv,Etch 3,demo,2026-02-04
+demo0016,Demo sample 016,Demo sample 016.csv,Etch 3,demo,2026-02-04
+demo0017,Demo sample 017,Demo sample 017.csv,Etch 3,demo,2026-02-05
+demo0018,Demo sample 018,Demo sample 018.csv,Litho track 1,demo,2026-02-06
+demo0019,Demo sample 019,Demo sample 019.csv,Litho track 1,demo,2026-02-06
 demo0020,Demo sample 020,Demo sample 020.csv,CMP 1,demo,2026-02-08
-demo0021,Demo sample 021,Demo sample 021.csv,CMP 1,demo,2026-02-12
-demo0022,Demo sample 022,Demo sample 022.csv,Etch 3,demo,2026-02-13
-demo0023,Demo sample 023,Demo sample 023.csv,Etch 3,demo,2026-02-13
-demo0024,Demo sample 024,Demo sample 024.csv,Litho track 1,demo,2026-02-14
-demo0025,Demo sample 025,Demo sample 025.csv,CMP 1,demo,2026-02-15
-demo0026,Demo sample 026,Demo sample 026.csv,Etch 3,demo,2026-02-15
-demo0027,Demo sample 027,Demo sample 027.csv,Litho track 1,demo,2026-02-16
-demo0028,Demo sample 028,Demo sample 028.csv,Etch 3,demo,2026-02-16
-demo0029,Demo sample 029,Demo sample 029.csv,CMP 1,demo,2026-02-20
-demo0030,Demo sample 030,Demo sample 030.csv,Etch 3,demo,2026-02-20
-demo0031,Demo sample 031,Demo sample 031.csv,Wet bench 2,demo,2026-02-23
-demo0032,Demo sample 032,Demo sample 032.csv,Etch 3,demo,2026-02-25
-demo0033,Demo sample 033,Demo sample 033.csv,Wet bench 2,demo,2026-02-26
-demo0034,Demo sample 034,Demo sample 034.csv,Litho track 1,demo,2026-02-26
-demo0035,Demo sample 035,Demo sample 035.csv,CMP 1,demo,2026-03-01
-demo0036,Demo sample 036,Demo sample 036.csv,Litho track 1,demo,2026-03-02
-demo0037,Demo sample 037,Demo sample 037.csv,Etch 3,demo,2026-03-04
-demo0038,Demo sample 038,Demo sample 038.csv,Etch 3,demo,2026-03-06
-demo0039,Demo sample 039,Demo sample 039.csv,Etch 3,demo,2026-03-12
-demo0040,Demo sample 040,Demo sample 040.csv,CMP 1,demo,2026-03-15
-demo0041,Demo sample 041,Demo sample 041.csv,Wet bench 2,demo,2026-03-16
-demo0042,Demo sample 042,Demo sample 042.csv,Etch 3,demo,2026-03-17
-demo0043,Demo sample 043,Demo sample 043.csv,Wet bench 2,demo,2026-03-20
-demo0044,Demo sample 044,Demo sample 044.csv,Wet bench 2,demo,2026-03-20
-demo0045,Demo sample 045,Demo sample 045.csv,CMP 1,demo,2026-03-20
-demo0046,Demo sample 046,Demo sample 046.csv,Litho track 1,demo,2026-03-22
-demo0047,Demo sample 047,Demo sample 047.csv,Etch 3,demo,2026-03-22
-demo0048,Demo sample 048,Demo sample 048.csv,Wet bench 2,demo,2026-03-25
-demo0049,Demo sample 049,Demo sample 049.csv,CMP 1,demo,2026-03-25
-demo0050,Demo sample 050,Demo sample 050.csv,Etch 3,demo,2026-03-28
-demo0051,Demo sample 051,Demo sample 051.csv,CMP 1,demo,2026-03-28
-demo0052,Demo sample 052,Demo sample 052.csv,Wet bench 2,demo,2026-03-29
-demo0053,Demo sample 053,Demo sample 053.csv,Etch 3,demo,2026-03-29
+demo0021,Demo sample 021,Demo sample 021.csv,Litho track 1,demo,2026-02-08
+demo0022,Demo sample 022,Demo sample 022.csv,Etch 3,demo,2026-02-09
+demo0023,Demo sample 023,Demo sample 023.csv,Litho track 1,demo,2026-02-10
+demo0024,Demo sample 024,Demo sample 024.csv,CMP 1,demo,2026-02-12
+demo0025,Demo sample 025,Demo sample 025.csv,Etch 3,demo,2026-02-13
+demo0026,Demo sample 026,Demo sample 026.csv,Wet bench 2,demo,2026-02-13
+demo0027,Demo sample 027,Demo sample 027.csv,Wet bench 2,demo,2026-02-18
+demo0028,Demo sample 028,Demo sample 028.csv,Litho track 1,demo,2026-02-25
+demo0029,Demo sample 029,Demo sample 029.csv,CMP 1,demo,2026-03-01
+demo0030,Demo sample 030,Demo sample 030.csv,Etch 3,demo,2026-03-02
+demo0031,Demo sample 031,Demo sample 031.csv,Wet bench 2,demo,2026-03-02
+demo0032,Demo sample 032,Demo sample 032.csv,CMP 1,demo,2026-03-03
+demo0033,Demo sample 033,Demo sample 033.csv,Etch 3,demo,2026-03-04
+demo0034,Demo sample 034,Demo sample 034.csv,CMP 1,demo,2026-03-05
+demo0035,Demo sample 035,Demo sample 035.csv,Etch 3,demo,2026-03-06
+demo0036,Demo sample 036,Demo sample 036.csv,Etch 3,demo,2026-03-06
+demo0037,Demo sample 037,Demo sample 037.csv,CMP 1,demo,2026-03-08
+demo0038,Demo sample 038,Demo sample 038.csv,Etch 3,demo,2026-03-09
+demo0039,Demo sample 039,Demo sample 039.csv,Wet bench 2,demo,2026-03-10
+demo0040,Demo sample 040,Demo sample 040.csv,Etch 3,demo,2026-03-10
+demo0041,Demo sample 041,Demo sample 041.csv,Etch 3,demo,2026-03-12
+demo0042,Demo sample 042,Demo sample 042.csv,Litho track 1,demo,2026-03-12
+demo0043,Demo sample 043,Demo sample 043.csv,Wet bench 2,demo,2026-03-12
+demo0044,Demo sample 044,Demo sample 044.csv,Etch 3,demo,2026-03-13
+demo0045,Demo sample 045,Demo sample 045.csv,Wet bench 2,demo,2026-03-14
+demo0046,Demo sample 046,Demo sample 046.csv,Etch 3,demo,2026-03-15
+demo0047,Demo sample 047,Demo sample 047.csv,CMP 1,demo,2026-03-15
+demo0048,Demo sample 048,Demo sample 048.csv,Wet bench 2,demo,2026-03-16
+demo0049,Demo sample 049,Demo sample 049.csv,Litho track 1,demo,2026-03-16
+demo0050,Demo sample 050,Demo sample 050.csv,Wet bench 2,demo,2026-03-18
+demo0051,Demo sample 051,Demo sample 051.csv,Wet bench 2,demo,2026-03-19
+demo0052,Demo sample 052,Demo sample 052.csv,Wet bench 2,demo,2026-03-20
+demo0053,Demo sample 053,Demo sample 053.csv,CMP 1,demo,2026-03-21
+demo0055,Demo sample 055,Demo sample 055.csv,Wet bench 2,demo,2026-03-23
+demo0056,Demo sample 056,Demo sample 056.csv,Litho track 1,demo,2026-03-24
+demo0057,Demo sample 057,Demo sample 057.csv,Wet bench 2,demo,2026-03-25
+demo0058,Demo sample 058,Demo sample 058.csv,Wet bench 2,demo,2026-03-26
+demo0059,Demo sample 059,Demo sample 059.csv,Etch 3,demo,2026-03-27
+demo0060,Demo sample 060,Demo sample 060.csv,Etch 3,demo,2026-03-28
+demo0061,Demo sample 061,Demo sample 061.csv,Wet bench 2,demo,2026-03-29

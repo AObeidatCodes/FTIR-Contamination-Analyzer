@@ -136,6 +136,6 @@ def test_the_demo_is_marked_made_up_and_never_ages():
     found = demo_samples(today=today)
     assert found and found[-1].day == today
     assert all(s.sha.startswith("demo") for s in found)
-    for name in ("audit_log.csv", "tool_log.csv"):
+    for name in ("audit_log.csv", "tool_log.csv", "unknown_fingerprints.csv"):
         assert (config.TRENDS_DEMO_DIR / name).read_text(encoding="utf-8").startswith("# Demo data")
     assert repeats(in_period(found, 90, today), config.REPEAT_COUNT, config.REPEAT_DAYS)

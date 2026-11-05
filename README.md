@@ -384,6 +384,11 @@ not checked for repeats. **Demo data** shows made-up samples.
 
 The default repeat of 3 samples in 30 days is a starting value, not a measured one. Change it on the page.
 
+**Unknown groups** shows samples with no probable verdict that look alike, so a material without a name can still be
+seen coming back. A group does not say what the material is. **Add a reference…** opens the usual checked form, with
+the group's most typical sample if its file is still there. Fingerprints are kept from export onwards in
+`records/unknown_fingerprints.csv`, so older samples are not compared.
+
 ### The report
 
 One self-contained HTML page that opens in any browser, works offline and prints to PDF. The figures
@@ -471,6 +476,7 @@ Every rule and threshold lives in [`ftir_analyzer/config.py`](ftir_analyzer/conf
 │   ├── tour.py          the guided tour, in a window of its own that keeps nothing
 │   ├── trends.py        counts samples and finds repeats, from the audit log and the tool log
 │   ├── trends_view.py   the Trends page
+│   ├── unknowns.py      groups samples with no probable verdict that look alike
 │   ├── compare_view.py  the closest matches, side by side
 │   ├── library_view.py  the Library page: album, details, similarity map, adding a reference
 │   ├── jobs.py          background work (the window never freezes)
@@ -492,7 +498,7 @@ pip install pytest
 python -m pytest
 ```
 
-279 tests. Those for the analysis cover file reading (read-only data, headerless tab-separated files, unit
+295 tests. Those for the analysis cover file reading (read-only data, headerless tab-separated files, unit
 recognition, clear errors), processing, the verdict rule, the impostor test, the known answer for
 every demo spectrum, the second-component, empty-spot and saturation detection, the CO₂ direction,
 the analytical view (each step reproduced, the score recalculated from step 4), the interactive
@@ -642,6 +648,22 @@ The report alone rebuilds from the saved results at any commit, with no data:
 ```bash
 python -m benchmark --report-only
 ```
+
+### Unknown groups test
+
+Samples of materials with no reference were linked at r of at least 0.95, and groups needed 3 or more. The rules were
+committed first: see the [protocol](benchmark/PROTOCOL_GROUPS.md) and the [report](benchmark/results/groups_report.html).
+
+| | Fibres | Open Specy |
+| --- | --- | --- |
+| Spectra | 70 | 1,146 |
+| Groups holding one material | 6 of 6 | 52 of 57 |
+| In their group's main material | 52 of 52 | 817 of 832 |
+| Spectra in a group | 52 of 70 | 832 of 1,146 |
+| Groups spanning more than one contributor | 0 of 6 | 12 of 57 |
+
+Both sets passed the limits set before the test. Most groups stay within one contributor, so expect groups within one
+lab or instrument, not across labs. A material can also split into several groups.
 
 ### Confidence test
 

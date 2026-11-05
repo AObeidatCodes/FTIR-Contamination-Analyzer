@@ -1,0 +1,218 @@
+{
+ "protocol": "benchmark/PROTOCOL_GROUPS.md, version 3",
+ "locked_commit": "6675e0c",
+ "ran_at_commit": "83a56c7",
+ "ran_on": "2026-11-05 23:17 Jordanien Normalzeit",
+ "link": 0.95,
+ "size": 3,
+ "useful_purity": 0.9,
+ "useful_reach": 0.5,
+ "sets": {
+  "fibres": {
+   "samples": 70,
+   "groups": 6,
+   "pure_groups": 6,
+   "grouped": 52,
+   "majority": 52,
+   "purity": 1.0,
+   "reach": 0.7428571428571429,
+   "sizes": [
+    20,
+    12,
+    7,
+    6,
+    4,
+    3
+   ],
+   "pairs": 233,
+   "different_pairs": 1,
+   "across_sources": 0,
+   "pair_interval": [
+    0.0007580182918740033,
+    0.02390598626957622
+   ],
+   "materials": {
+    "aramid": {
+     "n": 4,
+     "grouped": 0,
+     "groups": 0
+    },
+    "cellulose": {
+     "n": 34,
+     "grouped": 27,
+     "groups": 2
+    },
+    "cellulose acetate": {
+     "n": 4,
+     "grouped": 4,
+     "groups": 1
+    },
+    "protein": {
+     "n": 28,
+     "grouped": 21,
+     "groups": 3
+    }
+   },
+   "useful": true
+  },
+  "open specy": {
+   "samples": 1146,
+   "groups": 57,
+   "pure_groups": 52,
+   "grouped": 832,
+   "majority": 817,
+   "purity": 0.9819711538461539,
+   "reach": 0.7260034904013961,
+   "sizes": [
+    65,
+    55,
+    52,
+    51,
+    50,
+    47,
+    46,
+    45,
+    45,
+    29,
+    28,
+    27,
+    23,
+    20,
+    18,
+    18,
+    14,
+    14,
+    13,
+    13,
+    12,
+    9,
+    7,
+    6,
+    6,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3
+   ],
+   "pairs": 7585,
+   "different_pairs": 56,
+   "across_sources": 12,
+   "pair_interval": [
+    0.005690230105171296,
+    0.009574479198519425
+   ],
+   "materials": {
+    "ABS": {
+     "n": 50,
+     "grouped": 29,
+     "groups": 5
+    },
+    "PEEK": {
+     "n": 56,
+     "grouped": 51,
+     "groups": 2
+    },
+    "POM": {
+     "n": 51,
+     "grouped": 40,
+     "groups": 3
+    },
+    "PVAc": {
+     "n": 96,
+     "grouped": 63,
+     "groups": 3
+    },
+    "SAN": {
+     "n": 84,
+     "grouped": 77,
+     "groups": 7
+    },
+    "aramid": {
+     "n": 27,
+     "grouped": 18,
+     "groups": 1
+    },
+    "cellulose": {
+     "n": 155,
+     "grouped": 55,
+     "groups": 6
+    },
+    "cellulose acetate": {
+     "n": 117,
+     "grouped": 86,
+     "groups": 7
+    },
+    "epoxy": {
+     "n": 58,
+     "grouped": 54,
+     "groups": 4
+    },
+    "fluoropolymer": {
+     "n": 149,
+     "grouped": 119,
+     "groups": 5
+    },
+    "natural rubber": {
+     "n": 66,
+     "grouped": 45,
+     "groups": 6
+    },
+    "nitrile rubber": {
+     "n": 5,
+     "grouped": 0,
+     "groups": 0
+    },
+    "polyimide": {
+     "n": 67,
+     "grouped": 66,
+     "groups": 5
+    },
+    "protein": {
+     "n": 39,
+     "grouped": 12,
+     "groups": 2
+    },
+    "silica": {
+     "n": 8,
+     "grouped": 1,
+     "groups": 1
+    },
+    "silicone": {
+     "n": 118,
+     "grouped": 116,
+     "groups": 5
+    }
+   },
+   "useful": true
+  }
+ },
+ "seconds": 26
+}
