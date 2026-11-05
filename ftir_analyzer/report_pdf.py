@@ -42,7 +42,7 @@ from .peaks import band_label
 from .plots import peak_positions, scaled, setup_fonts
 from .processing import GRID
 from .records import DECISIONS, readable_time, who_text
-from .structures import ELEMENTS, GLOW, groups_at, model_of, still_picture
+from .structures import ELEMENTS, GLOW, NAMES, elements_of, groups_at, model_of, still_picture
 from .theme import FONT_MONO, FONT_SANS, LIGHT
 
 PAGE_W, PAGE_H = 595.0, 842.0                  # A4 in points
@@ -500,8 +500,8 @@ def draw_model(page, x, y, w, h, model, lit):
     for z, (_, kind, n) in enumerate(sorted(items)):
         if kind == 1:
             element = ELEMENTS.get(atoms[n], ELEMENTS["C"])
-            colour = mix_white(element[1], 0.5 * (1 - depth[n]))
-            page.ax.add_artist(Circle((x + sx[n], y + sy[n]), 0.3 * scale * element[2], fc=colour, ec=ground, lw=0.3,
+            colour = mix_white(element[1], 0.22 * (1 - depth[n]))
+            page.ax.add_artist(Circle((x + sx[n], y + sy[n]), 0.33 * scale * element[2], fc=colour, ec=ground, lw=0.4,
                                       zorder=10 + z))
             continue
         a, b, order = model["bonds"][n]
@@ -513,9 +513,9 @@ def draw_model(page, x, y, w, h, model, lit):
             ox, oy = nx * k * 0.75, ny * k * 0.75
             halves = [((sx[a], sy[a]), middle, atoms[a]), (middle, (sx[b], sy[b]), atoms[b])]
             for start, end, element in halves:
-                colour = GLOW["light"] if on else mix_white(ELEMENTS.get(element, ELEMENTS["C"])[1], 0.35)
+                colour = GLOW["light"] if on else mix_white(ELEMENTS.get(element, ELEMENTS["C"])[1], 0.1)
                 page.ax.add_artist(Line2D([x + start[0] + ox, x + end[0] + ox], [y + start[1] + oy, y + end[1] + oy],
-                                          color=colour, lw=1.5 if on else 0.9, solid_capstyle="butt", zorder=10 + z))
+                                          color=colour, lw=1.9 if on else 1.15, solid_capstyle="butt", zorder=10 + z))
 
 
 def mix_white(colour, share):
@@ -528,8 +528,8 @@ def structure_strip(page, y, name, r, library, h):
     """The model of the match in a card: the bonds of the sample's clearest band group are gold."""
     model = model_of(name, library)
     page.box(M, y, WIDTH, h, "white", T["line_strong"], 8)
-    page.line_text(M + 12, y + 10, f"Structure of {name}", 150, 9.4, T["ink"], "medium")
-    page.line_text(M + 12, y + 24, "short model chain", 150, 7.8, T["muted"])
+    page.line_text(M + 12, y + 10, f"Structure of {name}", 136, 9.4, T["ink"], "medium")
+    page.line_text(M + 12, y + 24, "short model chain", 136, 7.8, T["muted"])
     found = [(group, w) for group in model["groups"] for w in (r.evidence.found if r.evidence else [])
              if group in groups_at(model, w)]
     lit = set()
@@ -537,10 +537,15 @@ def structure_strip(page, y, name, r, library, h):
         group, w = found[0]
         lit = set(model["groups"][group]["bonds"])
         page.dot(M + 15, y + 44.5, 2.7, GLOW["light"])
-        page.line_text(M + 22, y + 40, f"{group}, band at {w:.0f} cm⁻¹", 142, 8.2, T["ink"])
+        page.line_text(M + 22, y + 40, f"{group}, band at {w:.0f} cm⁻¹", 126, 8.2, T["ink"])
+    for k, element in enumerate(elements_of(model)):                    # the legend, two to a row, in the card's left part
+        kx, ky = M + 12 + (k % 2) * 66, y + 54 + (k // 2) * 11.5
+        page.dot(kx + 3, ky + 4, 3.0, ELEMENTS[element][1])
+        page.text(kx + 9, ky, NAMES[element], 7.6, T["ink_2"])
     if model["note"]:
-        page.paragraph(M + 12, y + 54, model["note"], 152, 7.2, T["muted"], most=2, lead=1.3)
-    draw_model(page, M + 174, y + 7, WIDTH - 186, h - 14, model, lit)
+        page.paragraph(M + 12, y + 54 + 11.5 * ((len(elements_of(model)) + 1) // 2) + 1, model["note"], 136, 6.8,
+                       T["muted"], most=2, lead=1.25)
+    draw_model(page, M + 156, y + 7, WIDTH - 166, h - 14, model, lit)
 
 
 def spectrum_cards(page, y, r, library, h):
@@ -613,7 +618,7 @@ def spectrum_page(doc, i, n, r, library):
     # what stands under the figure: three cards (122 pt), the source line, the traceability line
     cards_h = 122.0
     has_model = r.has_match and model_of(r.best, library) is not None
-    strip_h = 92.0 if has_model else 0.0
+    strip_h = 102.0 if has_model else 0.0
     chart_h = BOTTOM - y - cards_h - 38 - 14 - (strip_h + 12 if has_model else 0)
     page.box(M, y, WIDTH, chart_h, "white", T["line_strong"], 8)
     draw_chart(page, M + 12, y + 10, WIDTH - 24, chart_h - 18, r, library)

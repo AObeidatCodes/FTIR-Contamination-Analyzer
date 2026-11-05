@@ -29,10 +29,12 @@ from . import config
 STRUCTURES_FILE = config.DATA_DIR / "structures.json"
 NEAR = 10                                                               # cm-1 a band may lie outside a range
 # element: (colour on a dark page, colour on a light page, radius compared with carbon)
-ELEMENTS = {"C": ("#7C8592", "#5B6472", 1.0), "H": ("#E4E6EA", "#C4C9D1", 0.56), "O": ("#F2555A", "#DC3F44", 0.96),
-            "N": ("#4C8DFF", "#2F6FE4", 0.96), "F": ("#7AD07F", "#3FA650", 0.84), "S": ("#F0C24B", "#C99A17", 1.2),
-            "Si": ("#D9A066", "#B97F45", 1.25), "Cl": ("#3DB46D", "#2B9458", 1.2)}
-GLOW = {"dark": "#FFB224", "light": "#E08A00"}                          # the colour of a lit bond
+ELEMENTS = {"C": ("#8E97A5", "#2F3743", 1.0), "H": ("#E9EBEF", "#9AA5B4", 0.56), "O": ("#F2555A", "#D21F2E", 0.96),
+            "N": ("#5B97FF", "#1D5BD8", 0.96), "F": ("#7AD07F", "#23893F", 0.84), "S": ("#F0C24B", "#B98500", 1.2),
+            "Si": ("#D9A066", "#A8652A", 1.25), "Cl": ("#3DB46D", "#14804A", 1.2)}
+NAMES = {"C": "Carbon", "H": "Hydrogen", "O": "Oxygen", "N": "Nitrogen", "F": "Fluorine", "S": "Sulfur", "Si": "Silicon",
+         "Cl": "Chlorine"}
+GLOW = {"dark": "#FFB224", "light": "#E8860C"}                          # the colour of a lit bond
 ALIASES = {"PE": "PE (high density)", "EVA": "EVA (25% VA)", "EVOH": "EVOH (44% ethylene)", "PK": "PK (polyketone)",
            "Nylon": "Nylon 6,6", "cellulose acetate": "Cellulose acetate"}
 
@@ -60,6 +62,12 @@ def model_of(name, library=None):
     """The model of a material, or None."""
     key = key_of(name, library)
     return structures()[key] if key else None
+
+
+def elements_of(model):
+    """The kinds of atom in a model, in the order of ELEMENTS: ["C", "H", "O"]."""
+    present = {atom[0] for atom in model["atoms"]}
+    return [element for element in ELEMENTS if element in present]
 
 
 def ranges_text(group):

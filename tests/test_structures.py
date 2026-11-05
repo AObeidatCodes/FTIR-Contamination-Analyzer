@@ -16,7 +16,9 @@ import pytest
 
 from ftir_analyzer.library import load_library
 from ftir_analyzer.processing import GRID
-from ftir_analyzer.structures import bonds_at, groups_at, key_of, model_of, still_picture, structures
+from ftir_analyzer.report import structure_html
+from ftir_analyzer.structures import (ELEMENTS, NAMES, bonds_at, elements_of, groups_at, key_of, model_of, still_picture,
+                                      structures)
 
 
 @pytest.fixture(scope="module")
@@ -76,6 +78,20 @@ def test_a_model_is_found_by_its_material_group():
         def group_of(_):
             return "PEEK"
     assert key_of("peek - poly(ether ether ketone) (Open Specy)", Group) == "PEEK"
+
+
+def test_the_legend_names_only_the_atoms_of_a_model(library):
+    assert elements_of(model_of("PET", library)) == ["C", "H", "O"]
+    assert elements_of(model_of("Nylon 6,6", library)) == ["C", "H", "O", "N"]
+    assert all(element in ELEMENTS and element in NAMES for model in structures().values() for element in elements_of(model))
+
+
+def test_the_web_report_names_each_model_it_shows(library):
+    class Result:
+        has_match, best = True, "PET"
+    page = structure_html(Result, 0, library)
+    assert 'data-model="PET"' in page and "Oxygen" in page and "Nitrogen" not in page
+    assert page.index("mol-key") < page.index("mol-side")                        # the legend is in the 3D space
 
 
 def test_still_picture_fits_its_rectangle(library):

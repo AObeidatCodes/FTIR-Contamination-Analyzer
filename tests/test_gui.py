@@ -467,6 +467,7 @@ def test_a_band_lights_its_bonds_and_the_structure_follows_the_figure(app, windo
     view = window.result_view
     panel = view.structure
     assert panel.isVisible() and panel.name.text() == "Structure of PET"
+    assert panel.view.key == ["C", "H", "O"]                                     # the legend: only the atoms it has
     carbonyl = next(b for b in view.band_buttons if 1700 <= b.w <= 1765)
     view._pin_band(carbonyl)
     assert panel.view.lit == set(panel.model["groups"]["C=O"]["bonds"])

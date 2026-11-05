@@ -289,6 +289,7 @@ QScrollArea#MapScroller, QScrollArea#MapScroller > QWidget, QScrollArea#MapScrol
 #BandChip[kind="extra"] {{ background: {t['warn_bg']}; border: 1px solid transparent; color: {t['warn']}; font-weight: 600; }}
 #BandChip:hover, #BandChip:focus {{ border: 1px solid {t['accent']}; background: {t['accent_soft']}; color: {t['accent_ink']}; }}
 #BandChip:checked {{ border: 1px solid {t['accent']}; background: {t['accent_soft']}; color: {t['accent_ink']}; font-weight: 600; }}
+#BandChip[kind="group"]:checked {{ font-weight: 400; }}
 
 /* buttons */
 QPushButton {{

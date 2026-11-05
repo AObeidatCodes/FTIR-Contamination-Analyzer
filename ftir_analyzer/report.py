@@ -56,7 +56,7 @@ from .evidence import fab_sources
 from .peaks import band_label, band_names
 from .plots import result_svg
 from .records import DECISIONS, append_audit_log, append_signature, readable_time, who_text
-from .structures import ELEMENTS, GLOW, key_of, ranges_text, structures
+from .structures import ELEMENTS, GLOW, NAMES, elements_of, key_of, ranges_text, structures
 from .theme import ASSETS, DARK, FONTS, ICONS, LIGHT, LOGO_SVG, WEB_FONTS
 
 try:                                         # interactive figures if Plotly is installed, vector images if not
@@ -302,8 +302,20 @@ ol.steps{padding-left:22px}ol.steps li{margin:0 0 8px}
 .structure{display:grid;grid-template-columns:minmax(0,1fr) 270px;gap:16px;margin:16px 0;padding:16px;
   border:1px solid var(--line);border-radius:12px}
 .mol-stage{position:relative;height:300px;min-width:0}
-.mol-canvas{position:absolute;inset:0;cursor:grab;touch-action:pan-y}.mol-canvas.held{cursor:grabbing}
+.mol-canvas{position:absolute;inset:0 0 0 118px;cursor:grab;touch-action:pan-y}.mol-canvas.held{cursor:grabbing}
 .mol-side h4{margin-bottom:2px}.mol-side p{margin:0 0 10px}
+.mol-key{position:absolute;left:6px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:10px;
+  font-size:13px;color:var(--ink-2);pointer-events:none}
+.mol-key span{display:flex;align-items:center;gap:20px;padding-left:10px}
+.mol-key i{position:relative;width:13px;height:13px;border-radius:50%;flex:none;background:radial-gradient(circle at 34% 30%,
+  rgba(255,255,255,.55),rgba(255,255,255,0) 52%),var(--atom)}
+.mol-key i::after{content:"";position:absolute;left:50%;top:50%;width:15px;height:2px;margin-top:-1px;border-radius:2px;
+  background:var(--atom);transform-origin:0 50%;z-index:-1}
+.motion .mol-key i::after{animation:mol-turn 18s linear infinite}
+.mol-key span:nth-child(2) i::after{animation-delay:-3s}.mol-key span:nth-child(3) i::after{animation-delay:-6s}
+.mol-key span:nth-child(4) i::after{animation-delay:-9s}.mol-key span:nth-child(5) i::after{animation-delay:-12s}
+.structure.still .mol-key i::after{animation-play-state:paused}
+@keyframes mol-turn{to{transform:rotate(360deg)}}
 @media(max-width:760px){.structure{grid-template-columns:minmax(0,1fr)}}
 .grid2 .panel{margin:0;min-width:0}
 .grid2.even{align-items:stretch}
@@ -563,25 +575,30 @@ BAND_JS = """
 # or clicking a band group, or a band of the band evidence, lights the bonds of that band.
 MOL_JS = """
 (function(){
-  var models = window.FTIR_MODELS, look = window.FTIR_ELEMENTS, gold = window.FTIR_GOLD;
+  var models = window.FTIR_MODELS, dark = matchMedia('(prefers-color-scheme: dark)');
+  var look = function(){ return window.FTIR_ELEMENTS[dark.matches ? 0 : 1]; };
+  var gold = function(){ return window.FTIR_GOLD[dark.matches ? 0 : 1]; };
   var all = document.querySelectorAll('.structure');
   if (!models || typeof $3Dmol === 'undefined') { all.forEach(function(s){ s.hidden = true; }); return; }
   var holder = document.createElement('div'), viewer = null, shown = null, lit = null, drag = null;
   holder.className = 'mol-canvas';
-  var colour = function(atom){ return look[atom.elem] || '#888888'; };
-  function spin(on){ if (viewer) { viewer.spin(on && window.ftirMotion ? 'x' : false, 0.35); } }
+  var colour = function(atom){ return look()[atom.elem] || '#888888'; };
+  function spin(on){                                     // the legend's sticks turn and stop with the chain
+    if (viewer) { viewer.spin(on && window.ftirMotion ? 'x' : false, 0.35); }
+    if (shown) { shown.classList.toggle('still', !on); }
+  }
   function modelOf(s){ return models[s.getAttribute('data-model')]; }
   function paint(){
     var m = modelOf(shown);
     viewer.removeAllShapes();
     viewer.setStyle({}, lit && lit.length
-      ? {stick: {radius: 0.1, opacity: 0.45, colorfunc: colour}, sphere: {scale: 0.16, opacity: 0.45, colorfunc: colour}}
-      : {stick: {radius: 0.13, singleBonds: false, colorfunc: colour}, sphere: {scale: 0.22, colorfunc: colour}});
+      ? {stick: {radius: 0.11, opacity: 0.4, colorfunc: colour}, sphere: {scale: 0.18, opacity: 0.4, colorfunc: colour}}
+      : {stick: {radius: 0.15, singleBonds: false, colorfunc: colour}, sphere: {scale: 0.25, colorfunc: colour}});
     (lit || []).forEach(function(n){
       var a = m.atoms[m.bonds[n][0]], b = m.atoms[m.bonds[n][1]];
-      viewer.addCylinder({start: {x: a[1], y: a[2], z: a[3]}, end: {x: b[1], y: b[2], z: b[3]}, radius: 0.2, color: gold,
+      viewer.addCylinder({start: {x: a[1], y: a[2], z: a[3]}, end: {x: b[1], y: b[2], z: b[3]}, radius: 0.2, color: gold(),
                           fromCap: 1, toCap: 1});
-      [a, b].forEach(function(p){ viewer.addSphere({center: {x: p[1], y: p[2], z: p[3]}, radius: 0.26, color: gold}); });
+      [a, b].forEach(function(p){ viewer.addSphere({center: {x: p[1], y: p[2], z: p[3]}, radius: 0.27, color: gold()}); });
     });
     viewer.render();
   }
@@ -658,6 +675,7 @@ MOL_JS = """
     all.forEach(function(s){ watch.observe(s); });
   } else if (all.length) { show(all[0]); }
   window.addEventListener('resize', function(){ if (viewer) { viewer.resize(); viewer.render(); } });
+  if (dark.addEventListener) { dark.addEventListener('change', function(){ if (viewer) { paint(); } }); }
 })();
 """
 
@@ -898,7 +916,9 @@ def structure_html(r, i, library):
         f'{g["ranges"][0][0]}–{g["ranges"][0][1]}</button>' for name, g in model["groups"].items())
     formula = model["formula"].translate(str.maketrans("0123456789", "₀₁₂₃₄₅₆₇₈₉"))
     note = f'<p class="small">{h(model["note"])}</p>' if model["note"] else ""
-    return (f'<div class="structure" data-fig="result{i}" data-model="{h(key)}"><div class="mol-stage"></div>'
+    atoms = "".join(f'<span><i class="el-{e}"></i>{NAMES[e]}</span>' for e in elements_of(model))
+    return (f'<div class="structure" data-fig="result{i}" data-model="{h(key)}"><div class="mol-stage">'
+            f'<div class="mol-key">{atoms}</div></div>'
             f'<div class="mol-side"><h4>Structure of {h(r.best)}</h4><p class="small">{formula} · short model chain · '
             f'drag to turn</p><p>{chips}</p>{note}</div></div>')
 
@@ -1094,15 +1114,18 @@ def write_html(results, figures, info, path, analytical=None, library=None, sign
     if used and _asset("3Dmol-min.js"):                                 # BSD-3-Clause, built in so it works offline
         models = {k: {f: structures()[k][f] for f in ("atoms", "bonds", "groups")} for k in sorted(used)}
         data = (f"window.FTIR_MODELS={json.dumps(models, ensure_ascii=False, separators=(',', ':'))};"
-                f"window.FTIR_ELEMENTS={json.dumps({e: c[1] for e, c in ELEMENTS.items()})};"
-                f"window.FTIR_GOLD='{GLOW['dark']}';")
+                f"window.FTIR_ELEMENTS={json.dumps([{e: c[k] for e, c in ELEMENTS.items()} for k in (0, 1)])};"
+                f"window.FTIR_GOLD={json.dumps([GLOW['dark'], GLOW['light']])};")
         mol_js = (f'<script>/*! 3Dmol.js 2.5.5 (BSD-3-Clause, University of Pittsburgh and contributors) */'
                   f'{_asset("3Dmol-min.js")}</script><script>{data}{MOL_JS}</script>')
     theme_js = f"<script>var FIGURE_SWAP = {json.dumps(figure_colour_map())};{THEME_JS}</script>"
     fonts = "".join(_font_face(name, family, weight) for name, family, weight in WEB_FONTS)
     # dark colours only on screen: printed pages always get the light (paper) colours
+    keys = "".join(f".mol-key .el-{e}{{--atom:{c[1]}}}" for e, c in ELEMENTS.items())
+    keys_dark = "".join(f".mol-key .el-{e}{{--atom:{c[0]}}}" for e, c in ELEMENTS.items())
     style = (f"{fonts}:root{{{_tokens(LIGHT)}}}"
-             f"@media screen and (prefers-color-scheme:dark){{:root{{{_tokens(DARK)}}}html{{color-scheme:dark}}}}{CSS}")
+             f"@media screen and (prefers-color-scheme:dark){{:root{{{_tokens(DARK)}}}html{{color-scheme:dark}}}}{CSS}"
+             f"{keys}@media screen and (prefers-color-scheme:dark){{{keys_dark}}}")
     n = len(results)
     analysed_by = who_text(info.get("run_by_name", ""), info["run_by"])
     valid = info["validation"].passed

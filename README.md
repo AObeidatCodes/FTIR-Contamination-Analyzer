@@ -220,7 +220,7 @@ example:
 ### Structure
 
 Under the figure stands a short model chain of the best match, turning slowly; drag it to look around. Each bond
-is half the colour of each of its atoms, so a C=O shows red at once. Click a band in **Band evidence**, or a group
+is half the colour of each of its atoms, so a C=O shows red at once, and a small legend on the left names the atoms; it turns with the chain. Click a band in **Band evidence**, or a group
 beside the model, and the bonds of that band glow gold while the figure zooms to it. It follows **Compare with**
 and the closest matches, and it is on each reference in the Library. The web report has it too, and the PDF shows
 it as a still picture with the bonds of the sample's clearest band.
@@ -461,7 +461,7 @@ pip install pytest
 python -m pytest
 ```
 
-177 tests. Those for the analysis cover file reading (read-only data, headerless tab-separated files, unit
+179 tests. Those for the analysis cover file reading (read-only data, headerless tab-separated files, unit
 recognition, clear errors), processing, the verdict rule, the impostor test, the known answer for
 every demo spectrum, the second-component, empty-spot and saturation detection, the CO₂ direction,
 the analytical view (each step reproduced, the score recalculated from step 4), the interactive

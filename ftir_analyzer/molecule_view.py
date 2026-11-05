@@ -2,6 +2,7 @@
 FTIR Contamination Analyzer - the 3D view of a material
 
     MoleculeView     a short model chain that turns slowly: drag it to look around. The bonds of a band glow.
+                     On its left, a legend of its atoms: each a small atom on a stick that turns with the chain.
     StructurePanel   that view with the material's band groups beside it, as a card
 
 It is drawn with the window's own painter, so it needs no 3D package and shows in every snapshot of a transition.
@@ -24,8 +25,8 @@ from PySide6.QtGui import QColor, QPainter, QPen, QPixmap, QRadialGradient
 from PySide6.QtWidgets import QBoxLayout, QHBoxLayout, QLabel, QSizePolicy, QVBoxLayout, QWidget
 
 from .motion import Card, FlowLayout, Motion, Moving, SmoothScrollArea
-from .structures import ELEMENTS, GLOW, bonds_at, groups_at, model_of, ranges_text
-from .widgets import BandButton, Theme
+from .structures import ELEMENTS, GLOW, NAMES, bonds_at, elements_of, groups_at, model_of, ranges_text
+from .widgets import BandButton, Theme, font
 
 LEVELS, SIZES = 7, 2.0                                                  # steps of depth, and of ball size in pixels
 
@@ -40,7 +41,10 @@ def mix(colour, ground, share):
 class MoleculeView(QWidget):
     """One model chain, turning slowly about its long axis. light() makes some of its bonds glow."""
 
-    SPIN, TILT, MARGIN, FAR = 0.26, -0.24, 18, 0.62                     # radians a second, the lean, pixels, far = paler
+    SPIN, TILT, MARGIN = 0.26, -0.24, 18                                # radians a second, the lean, pixels
+    NEAR_SHADE, PALEST = 0.6, 0.8                                       # the farthest atom's shade, and how pale shade 0 is
+    KEY, KEY_ROW, KEY_MIN, STICK = 118, 30, 420, 13                     # the legend: width, row height, the view it needs,
+                                                                        # and how long its sticks are
 
     def __init__(self, height=300, parent=None):
         super().__init__(parent)
@@ -49,7 +53,7 @@ class MoleculeView(QWidget):
         self.setCursor(Qt.OpenHandCursor)
         self.model, self.xyz, self.elements, self.bonds = None, None, [], []
         self.lit, self.glow, self.angle, self.turn, self.dragging = set(), 0.0, 0.5, self.TILT, None
-        self.long, self.round = 1.0, 1.0
+        self.long, self.round, self.key = 1.0, 1.0, []
         self._frame, self._balls, self._theme, self.scroller = None, {}, "", None
         self.clock = QElapsedTimer()
         self.timer = QTimer(self)
@@ -69,6 +73,7 @@ class MoleculeView(QWidget):
             self.bonds = [(int(i), int(j), order) for i, j, order in model["bonds"]]
             self.long = float(np.abs(self.xyz[:, 0]).max()) + 1.0
             self.round = float(np.hypot(self.xyz[:, 1], self.xyz[:, 2]).max()) + 1.0
+            self.key = elements_of(model)
         self._render()
         self.update()
         self._run()
@@ -161,13 +166,14 @@ class MoleculeView(QWidget):
             pix.fill(Qt.transparent)
             base = self._colour(element, shade)
             c = size + 2
+            dark = t["name"] == "dark"
             p = QPainter(pix)
             p.setRenderHint(QPainter.Antialiasing)
             light = QRadialGradient(QPointF(c - size * 0.35, c - size * 0.4), size * 1.5)
-            light.setColorAt(0.0, base.lighter(150))
-            light.setColorAt(0.4, base)
-            light.setColorAt(1.0, base.darker(150 if t["name"] == "dark" else 125))
-            p.setPen(Qt.NoPen)
+            light.setColorAt(0.0, mix(base, "#FFFFFF", 0.42))
+            light.setColorAt(0.42, base)
+            light.setColorAt(1.0, base.darker(150 if dark else 118))
+            p.setPen(Qt.NoPen if dark else QPen(base.darker(135), 0.8))         # on white, a thin edge keeps a ball crisp
             p.setBrush(light)
             p.drawEllipse(QPointF(c, c), size, size)
             p.end()
@@ -177,7 +183,7 @@ class MoleculeView(QWidget):
     def _colour(self, element, shade):
         look = ELEMENTS.get(element, ELEMENTS["C"])
         t = Theme.t
-        return mix(look[0 if t["name"] == "dark" else 1], t["surface"], self.FAR * (1 - shade / (LEVELS - 1)))
+        return mix(look[0 if t["name"] == "dark" else 1], t["surface"], self.PALEST * (1 - shade / (LEVELS - 1)))
 
     def _render(self):
         """Draw one frame into the picture."""
@@ -197,23 +203,27 @@ class MoleculeView(QWidget):
         x, y, z = self.xyz[:, 0], self.xyz[:, 1], self.xyz[:, 2]
         y, z = y * cos_a - z * sin_a, y * sin_a + z * cos_a               # about the chain's long axis ...
         x, z = x * cos_t + z * sin_t, z * cos_t - x * sin_t               # ... then the lean
-        scale = min((width - 2 * self.MARGIN) / (2 * self.long), (height - 2 * self.MARGIN) / (2 * self.round))
+        left = self.KEY if width >= self.KEY_MIN else 0                 # the legend keeps its own space on the left
+        room = width - left
+        scale = min((room - 2 * self.MARGIN) / (2 * self.long), (height - 2 * self.MARGIN) / (2 * self.round))
         camera = 3.2 * max(self.long, self.round)
         near = camera / (camera - z)
-        sx = (width / 2 + x * scale * near).tolist()
+        sx = (left + room / 2 + x * scale * near).tolist()
         sy = (height / 2 - y * scale * near).tolist()
         reach = max(self.long, self.round)
         depth = np.clip((z + reach) / (2 * reach), 0, 1)
-        near, zs = near.tolist(), depth.tolist()
-        dim = 1 - 0.75 * self.glow
+        near = near.tolist()
+        depth = depth.tolist()
+        zs = [self.NEAR_SHADE + (1 - self.NEAR_SHADE) * z for z in depth]   # far away is only a little paler
+        dim = 1 - 0.8 * self.glow
         lit_atoms = {a for n, (i, j, _) in enumerate(self.bonds) if n in self.lit for a in (i, j)}
-        items = [((zs[i] + zs[j]) / 2 - 0.03, 0, n) for n, (i, j, _) in enumerate(self.bonds)]
-        items += [(zs[i], 1, i) for i in range(len(self.elements))]
+        items = [((depth[i] + depth[j]) / 2 - 0.03, 0, n) for n, (i, j, _) in enumerate(self.bonds)]
+        items += [(depth[i], 1, i) for i in range(len(self.elements))]
         items.sort()
         gold = QColor(GLOW.get(t["name"], GLOW["dark"]))
         halo = QColor(gold)
         halo.setAlphaF(0.42 * self.glow)
-        tube = 0.2 * scale
+        tube = 0.21 * scale
         p = QPainter(self._frame)
         p.setRenderHint(QPainter.Antialiasing)
         for _, kind, n in items:
@@ -249,7 +259,35 @@ class MoleculeView(QWidget):
                                                    (middle, b, self.elements[j], shade_j)):
                     p.setPen(QPen(self._colour(element, shade), thick, Qt.SolidLine, Qt.FlatCap))
                     p.drawLine(QLineF(start + shift, end + shift))
+        if left:
+            self._draw_key(p, t, height)
         p.end()
+
+    def _draw_key(self, p, t, height):
+        """The legend: each kind of atom as a small atom on a stick. The sticks turn at the chain's own angle, so
+        the legend moves when the chain moves, and stands still when it does."""
+        p.setFont(font("small"))
+        top = (height - len(self.key) * self.KEY_ROW) / 2
+        for row, element in enumerate(self.key):
+            y = top + (row + 0.5) * self.KEY_ROW
+            turn = self.angle + row * 1.1                               # each one a little further round
+            lean = self.turn + 0.9
+            tip = QPointF(19 + self.STICK * math.cos(turn) * math.sin(lean), y - self.STICK * math.cos(turn) * math.cos(lean))
+            behind = math.sin(turn) < 0
+            colour = self._colour(element, LEVELS - 1)
+            size = ELEMENTS.get(element, ELEMENTS["C"])[2]
+            ball, c = self._ball(element, 5.0 + size * 2.0, LEVELS - 1)
+            stick = QPen(colour, 2.2, Qt.SolidLine, Qt.RoundCap)
+            if behind:
+                p.setPen(stick)
+                p.drawLine(QPointF(19, y), tip)
+            p.drawPixmap(QPointF(19 - c, y - c), ball)
+            if not behind:
+                p.setPen(stick)
+                p.drawLine(QPointF(19, y), tip)
+            p.setPen(QColor(t["ink_2"]))
+            p.drawText(QRectF(38, y - self.KEY_ROW / 2, self.KEY - 40, self.KEY_ROW), Qt.AlignLeft | Qt.AlignVCenter,
+                       NAMES.get(element, element))
 
     def retheme(self):
         self._render()
