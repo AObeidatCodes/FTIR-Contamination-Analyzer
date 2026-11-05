@@ -442,6 +442,11 @@ def test_two_component_fit(library):
     assert particle.evidence.unexplained and two_component_fit(particle, library) is None
 
 
+def test_the_score_dots_stay_on_their_scores_after_the_motion(library):
+    from ftir_analyzer.report import MOTION_JS
+    assert "clearProps: 'left'" not in MOTION_JS                                 # their left IS the score
+
+
 def test_report_motion_is_built_in_and_optional(tmp_path, library):
     """GSAP and Lenis are inside the page (it works offline), the motion steps aside for 'reduce
     motion' and for printing, and the traceability keeps the impostor test as one line."""

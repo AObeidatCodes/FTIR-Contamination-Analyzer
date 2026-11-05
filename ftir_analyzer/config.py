@@ -77,6 +77,7 @@ PEAK_DISTANCE_CM = 15.0   # two peaks closer than 15 cm-1 count as one (jagged, 
 PROBABLE_R = 0.95   # impostor test: a WRONG material reaches 0.90 (PET <-> PBT); true matches 0.96-0.99
 MIN_GAP = 0.08      # the winner must lead the next material by 0.08, or the two are too close to call
 WEAK_R = 0.60       # below this nothing in the library is similar enough (CO2 gas scores 0.58)
+FAMILY_R = 0.85     # both of the top two must reach this to name their family: below 0.80 that family can be wrong
 
 # --------------------------------------------------------------------------------------
 # Checks on the raw spectrum

@@ -484,6 +484,17 @@ def test_a_band_lights_its_bonds_and_the_structure_follows_the_figure(app, windo
     assert panel.name.text() == "Structure of PET"
 
 
+def test_a_close_call_shows_the_family_and_where_they_differ(app, window):
+    select(app, window, "13_clear_film_on_tool_ATR")
+    view = window.result_view
+    assert view.close_box.isVisible() and "Polyesters" in view.close_text.text()
+    view.close_button.click()
+    assert view.plot.compare == "PBT" and len(view.plot.band_artists) == 2
+    view.plot.set_compare(None)
+    select(app, window, "01_wipe_area_particle_ATR")
+    assert not view.close_box.isVisible()                                        # a probable needs no such box
+
+
 def test_the_tour_works_and_keeps_nothing(app, window):
     sizes = window.library.sha256, len(window.library)
     tour_window = window.start_tour()

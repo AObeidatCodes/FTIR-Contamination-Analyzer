@@ -1,0 +1,21 @@
+# Polymer families: materials of the same chemistry. Chemistry, written by hand; a family is never worked out from a spectrum.
+# 'members' are library names or material groups, separated by ';'. A material that is in no family stands alone.
+family,members
+Polyesters,PET;PBT;PLA;polyesters
+Polyamides,"Nylon 6,6;Nylon 6;PA"
+Polyolefins,PE (high density);PE;PP;polyolefins
+Styrenics,PS;ABS;SAN;polyhalostyrenes;poly(styrene-butadiene) rubber
+Acrylics,PMMA;polymethacrylates;polyacrylates;polyhydroxy(meth)acrylates
+Vinyl esters,EVA (25% VA);EVA;PVAc;polyvinylesters
+Vinyl alcohols,PVOH;EVOH (44% ethylene);EVOH
+Nitrile polymers,PAN;nitrile rubber
+Polyurethanes,PU
+Cellulosics,cellulose;cellulose acetate;Cellulose acetate;Cotton
+Proteins,protein;Wool
+Rubbers,natural rubber;poly(ethylene-propylene-diene) rubber;polydienes
+Polyethers,POM;polyethers
+Aromatic high-performance polymers,PEEK;polyethersulfones;polyphenylene sulfide;polyphenylethers;polyimide
+Epoxies,epoxy;polydiglycidyl ethers
+Halogenated polymers,PVC;polyhaloolefins;fluoropolymer
+Silicones,silicone
+Polycarbonates,PC

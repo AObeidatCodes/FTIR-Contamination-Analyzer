@@ -235,6 +235,20 @@ group has one.
 The shapes come from RDKit (ETKDG and the MMFF94 force field), made once with `tools/make_structures.py` and shipped as
 a small file, so the program does not need RDKit. The window draws them itself, so no 3D package is needed.
 
+### Families, and telling two close materials apart
+
+Some materials are cousins: PET and PBT are both polyesters. When a result is **weak** and its two best matches are
+close to each other, a box under the next step says what can be said:
+
+- **Where they differ**: the place their reference spectra differ most, with the height of the band in each reference
+  and in your sample, and **Show it** zooms there. These are facts to read; the program draws no conclusion from them.
+- **Their family**, if both are in one and both score at least 0.85. It is chemistry from `data/families.csv`, not a
+  verdict, and it changes no score. The Library also shows each material's family.
+
+The limit comes from a test on the 148 Open Specy references, each searched for with its own material hidden. One high
+score alone named the wrong family 3 times in 12 at r ≥ 0.85, so a single match never names one. Two references agreeing
+named the wrong family 10 times in 16 at r ≥ 0.60 and never at r ≥ 0.80, so the limit is 0.85, with a margin.
+
 ### Closest matches
 
 Under the figure, the best four library materials are drawn next to each other, each over the
@@ -439,6 +453,7 @@ Every rule and threshold lives in [`ftir_analyzer/config.py`](ftir_analyzer/conf
 │   │                    row that wraps
 │   ├── widgets.py       building blocks of the window: pills, score bars, list, plot, home screen
 │   ├── structures.py    the 3D model of a material, and which of its bonds belong to a band
+│   ├── families.py      material families, and where two close materials differ
 │   ├── molecule_view.py the 3D view: a model chain that turns, and the bonds of a band that glow
 │   ├── tour.py          the guided tour, in a window of its own that keeps nothing
 │   ├── compare_view.py  the closest matches, side by side
@@ -461,7 +476,7 @@ pip install pytest
 python -m pytest
 ```
 
-179 tests. Those for the analysis cover file reading (read-only data, headerless tab-separated files, unit
+191 tests. Those for the analysis cover file reading (read-only data, headerless tab-separated files, unit
 recognition, clear errors), processing, the verdict rule, the impostor test, the known answer for
 every demo spectrum, the second-component, empty-spot and saturation detection, the CO₂ direction,
 the analytical view (each step reproduced, the score recalculated from step 4), the interactive

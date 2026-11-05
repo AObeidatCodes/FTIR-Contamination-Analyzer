@@ -65,6 +65,7 @@ from .brief import band_height_fn, check_rows
 from .checks import BELOW_ZERO_TEXT
 from .evidence import fab_sources
 from .export_view import ExportPanel
+from .families import close_call
 from .inhouse import InHouseLibrary, changes_between, reanalyse
 from .jobs import Job
 from .library import impostor_test, load_library
@@ -365,6 +366,26 @@ class ResultView(SmoothScrollArea):
         next_row.addWidget(self.add_button, 0, Qt.AlignVCenter)
         col.addWidget(self.next_box)
 
+        # 3b. a weak result between two materials: their family, and where they differ
+        self.close_box = QFrame()
+        self.close_box.setObjectName("NextStep")
+        close_row = QHBoxLayout(self.close_box)
+        close_row.setContentsMargins(16, 12, 16, 12)
+        self.close_icon = QLabel()
+        self.close_text = label("", "Body", wrap=True, rich=True)
+        self.close_button = QPushButton(" Show it")
+        self.close_button.setToolTip("Zoom to the place where the two references differ most, with the second one drawn")
+        self.close_button.setCursor(Qt.PointingHandCursor)
+        self.close_button.clicked.connect(self._show_difference)
+        close_row.addWidget(self.close_icon, 0, Qt.AlignTop)
+        close_row.addSpacing(6)
+        close_row.addWidget(self.close_text, 1)
+        close_row.addSpacing(8)
+        close_row.addWidget(self.close_button, 0, Qt.AlignVCenter)
+        self.close_box.hide()
+        self.close_call = None
+        col.addWidget(self.close_box)
+
         # 4. the figure
         self.plot = PlotPanel()
         self.plot.save_requested.connect(self.save_figure.emit)
@@ -455,7 +476,7 @@ class ResultView(SmoothScrollArea):
 
     def sections(self):
         """The parts of the page, top to bottom (they rise in one after the other)."""
-        parts = [self.head, self.change_box, self.facts, self.next_box, self.plot, self.structure, self.top,
+        parts = [self.head, self.change_box, self.facts, self.next_box, self.close_box, self.plot, self.structure, self.top,
                  self.verdict_panel,
                  self.evidence_panel, self.checks_panel, self.sources_panel, self.trace_panel]
         return [part for part in parts if not part.isHidden()]
@@ -497,6 +518,15 @@ class ResultView(SmoothScrollArea):
         """The mouse on a band: it is marked in the figure and its bonds glow; off it: back to the pinned band."""
         self.plot.mark_band(button.w if on else (self.pinned_band.w if self.pinned_band else None))
         self.structure.preview_band(button.w if on else None)
+
+    def _show_difference(self):
+        """The figure at the place where the two close materials differ most, with the second one drawn."""
+        call = self.close_call
+        if call is not None:
+            self.plot.set_compare(call.second)
+            self.plot.mark_band(call.w)
+            self.plot.zoom_to(call.w)
+            self.ensureWidgetVisible(self.plot, 0, 40)
 
     def _show_compared(self, name=None):
         """The structure follows the figure: the material compared with, or the best match."""
@@ -628,6 +658,16 @@ class ResultView(SmoothScrollArea):
                                f"{r.next_step}")
         self.add_button.setVisible(r.verdict != PROBABLE and not c.no_sample)
         self.add_button.setIcon(icon("circle-plus", t["ink_2"]))
+
+        # a weak result between two materials
+        self.close_call = close_call(r, library)
+        self.close_box.setVisible(self.close_call is not None)
+        if self.close_call is not None:
+            self.close_icon.setPixmap(icon_pixmap("git-compare-arrows", t["accent_ink"], 20, self.devicePixelRatioF()))
+            self.close_text.setText(f"<span style='color:{t['accent_ink']}; font-weight:600'>"
+                                    f"{html.escape(self.close_call.title())}</span>&nbsp;&nbsp;"
+                                    f"{html.escape(self.close_call.text())}")
+            self.close_button.setIcon(icon("zoom-in", t["ink_2"]))
 
         # figure, and the closest matches
         self.plot.show_result(r, library)

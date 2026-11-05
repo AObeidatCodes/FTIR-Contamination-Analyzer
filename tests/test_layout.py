@@ -102,7 +102,7 @@ def problems(root):
                 found.append(f"{type(widget).__name__} cut off at the side by "
                              f"{inner.width() - widget.viewport().width()} px")
         if isinstance(widget, ElidedLabel):
-            continue                                                  # shortened with â€¦ on purpose
+            continue                                                  # shortened with … on purpose
         if isinstance(widget, QLabel) and widget.text() and widget.pixmap().isNull():
             if widget.wordWrap():
                 if widget.heightForWidth(widget.width()) > widget.height() + 2:

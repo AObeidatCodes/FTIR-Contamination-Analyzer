@@ -38,6 +38,7 @@ from matplotlib.patches import Circle, FancyBboxPatch
 from . import __author__, __title__, __version__, config
 from .brief import check_kinds, check_rows, clean_name, short_flag
 from .evidence import fab_sources
+from .families import close_call
 from .peaks import band_label
 from .plots import peak_positions, scaled, setup_fonts
 from .processing import GRID
@@ -355,6 +356,18 @@ def next_box(page, y, r):
     return y + h + 14
 
 
+def close_box(page, y, call):
+    """A weak result between two materials: their family, and where they differ."""
+    title = call.title()
+    left = Ruler.width(title, 8.8, "medium") + 30
+    lines = Ruler.wrap(call.text(), 8.4, WIDTH - left - 14)[:3]
+    h = len(lines) * 12.0 + 16
+    page.box(M, y, WIDTH, h, T["accent_soft"], None, 8)
+    page.text(M + 14, y + 8, title, 8.8, T["accent_ink"], "medium")
+    page.paragraph(M + left, y + 8, call.text(), WIDTH - left - 14, 8.4, T["ink"], most=3, lead=1.43)
+    return y + h + 14
+
+
 def draw_chart(page, x, y, w, h, r, library):
     """The figure of one spectrum, drawn as vectors straight onto the page: the raw data above, the
     compared copy with the library match below, the zones, the key bands and the unexplained ones."""
@@ -614,6 +627,9 @@ def spectrum_page(doc, i, n, r, library):
     y = facts_card(page, y, r)
     y = score_block(page, y + 2, r)
     y = next_box(page, y, r)
+    call = close_call(r, library)
+    if call is not None:
+        y = close_box(page, y - 6, call)
 
     # what stands under the figure: three cards (122 pt), the source line, the traceability line
     cards_h = 122.0

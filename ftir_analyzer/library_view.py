@@ -36,6 +36,7 @@ from PySide6.QtWidgets import (QBoxLayout, QComboBox, QFileDialog, QFrame, QGrid
 from . import config
 from .analysis import NO_MATCH
 from .evidence import fab_sources, key_bands
+from .families import family_of, relatives
 from .inhouse import addition_preview, reference_notes
 from .openspecy import CITATION, LICENCE
 from .jobs import Job
@@ -805,6 +806,13 @@ class MaterialDetail(QWidget):
                            "shield-plus" if info.origin == "in-house" else "badge-check"))
         row.addStretch()
         column.addLayout(row)
+        family = family_of(name, library)
+        if family:
+            others = relatives(name, library)
+            line = text_label(f"<b>{family}</b>" + (f": also {', '.join(others[:6])}" if others else
+                                                    ": the only one in this library"), "Body2", wrap=True)
+            line.setTextFormat(Qt.RichText)
+            column.addWidget(line)
 
         # the spectrum (with the selected sample on top, if there is one)
         chart_card, chart_body = section("Reference spectrum", f"compared in {library.mode} mode, scaled 0–1")

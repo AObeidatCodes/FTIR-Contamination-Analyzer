@@ -53,6 +53,7 @@ from .analytical import analytical_steps
 from .brief import band_height_fn, check_rows
 from .checks import BELOW_ZERO_TEXT
 from .evidence import fab_sources
+from .families import close_call
 from .peaks import band_label, band_names
 from .plots import result_svg
 from .records import DECISIONS, append_audit_log, append_signature, readable_time, who_text
@@ -764,7 +765,7 @@ MOTION_JS = """
             part.querySelectorAll('.stats b, .strip b, .strip u').forEach(function (el) {
               if (el.closest('.mini')) { return; }
               if (el.matches('.strip b, .strip u')) {
-                gsap.from(el, { left: '0%', duration: 1.1, ease: 'power3.out', delay: 0.4, clearProps: 'left' });
+                gsap.from(el, { left: '0%', duration: 1.1, ease: 'power3.out', delay: 0.4 });   // its own left is the score: keep it
               } else {
                 var end = parseInt(el.textContent, 10), counter = { v: 0 };
                 if (isNaN(end)) { return; }
@@ -904,6 +905,14 @@ def sources_html(r, library=None):
             "<p class='small'>A starting point for the root-cause analysis, not proof.</p>")
 
 
+def close_html(r, library):
+    """A weak result between two materials: their family, and where they differ ("" if it is not one)."""
+    call = close_call(r, library)
+    if call is None:
+        return ""
+    return f'<div class="next">{icon("git-compare-arrows")}<p><b>{h(call.title())}</b>&ensp;{h(call.text())}</p></div>'
+
+
 def structure_html(r, i, library):
     """The 3D model of the match, with its band groups as buttons ("" if it has none)."""
     key = key_of(r.best, library) if r.has_match else None
@@ -947,6 +956,7 @@ def section(i, r, figure_svg, analytical="", library=None):
     <div><dt>Compared as</dt><dd>{h(r.compared_as)}</dd></div>
   </dl>
   <div class="next{' alert' if alert else ''}">{icon('circle-alert' if alert else 'arrow-right')}<p><b>Next step</b>&ensp;{h(r.next_step)}</p></div>
+  {close_html(r, library)}
   {figure_svg}
   {structure_html(r, i, library)}
   <div class="boxes">
