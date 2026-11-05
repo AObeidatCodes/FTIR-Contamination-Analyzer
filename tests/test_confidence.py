@@ -126,7 +126,7 @@ def test_the_tool_stops_on_a_changed_data_file(tmp_path):
 def test_the_report_rebuilds_from_the_saved_results_alone(tmp_path):
     from benchmark.confidence_report import build
     page = build(confidence.RESULTS / "confidence_results.json", tmp_path / "report.html").read_text(encoding="utf-8")
-    assert "Can the app say how sure it is?" in page and "Deviations from the protocol" in page
+    assert "Confidence test" in page and "Deviations from the protocol" in page
     assert "promise" not in page.lower()
 
 

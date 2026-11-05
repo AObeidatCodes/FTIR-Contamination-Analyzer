@@ -630,21 +630,18 @@ The report alone rebuilds from the saved results at any commit, with no data:
 python -m benchmark --report-only
 ```
 
-### Can the app say how sure it is?
+### Confidence test
 
-The score r is not a percentage: 0.93 does not mean 93% sure. A second test asked how many materials the app must name
-for the right one to be among them 9 times out of 10. On 482 locked Open Specy spectra we found the minimum score that
-does this, then tested it on 539 others. The rules were committed first: see the
-[protocol](benchmark/PROTOCOL_CONFIDENCE.md) and the [report](benchmark/results/confidence_report.html).
+Split conformal prediction at 90% coverage, calibrated on 482 locked Open Specy spectra and tested on 539 others, with
+the rules committed first: see the [protocol](benchmark/PROTOCOL_CONFIDENCE.md) and the
+[report](benchmark/results/confidence_report.html).
 
 | | All spectra | Compared as ATR |
 | --- | --- | --- |
-| Right material named | 90.9% (83.4 to 96.0%) | 96.9% (90.9 to 99.4%) |
-| Typical number named, of 16 | 10 | 4 |
+| Coverage | 90.9% (83.4 to 96.0%) | 96.9% (90.9 to 99.4%) |
+| Median set size, of 16 | 10 | 4 |
 
-Naming 10 of 16 materials helps nobody, and the limit set before the test was 3, so this is not in the app. On other
-labs' spectra the right material often scores low, so the minimum score has to be very low: 0.09, or 0.43 for ATR. To
-rebuild the report from the saved results:
+The limit set before the test was 3, so this is not in the app. To rebuild the report from the saved results:
 
 ```bash
 python -m benchmark.confidence --report-only
