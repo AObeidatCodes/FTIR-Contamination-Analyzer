@@ -587,11 +587,13 @@ def test_the_tour_works_and_keeps_nothing(app, window):
         seen.append(tour.card.title.text())
         for words in (tour.card.title, tour.card.text):                          # no step's words are cut off
             assert words.height() >= words.heightForWidth(words.width()), seen[-1]
-        if tour.at == 5:                                                         # the reference was added
+        assert tour_window.rect().contains(tour.card.geometry()), seen[-1]       # the whole card is in the window
+        if seen[-1] == "The answer changed":                                     # the reference was added
             assert tour_window.current_result().match == "Nylon 6"
         if tour.at < len(tour.steps) - 1:
             tour.next()
     assert seen[0] == "A tour with real data" and seen[-1] == "That is the app"
+    assert {"Your library", "Trends", "Unknown groups", "Sign and export"} <= set(seen)
     assert "Nylon 6" in tour_window.library.spectra and len(tour_window.library) == 17
     assert (window.library.sha256, len(window.library)) == sizes                 # the real window saw nothing
     assert window.settings.value("library_mode", "essentials") == "essentials"

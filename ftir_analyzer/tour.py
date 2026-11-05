@@ -43,6 +43,7 @@ class Ring(QWidget):
         super().__init__(parent)
         self.setAttribute(Qt.WA_TransparentForMouseEvents)
         self.target = None
+        self.under = None                                               # the widget that stays on top of the outline
         self.timer = QTimer(self)
         self.timer.setInterval(120)
         self.timer.timeout.connect(self._follow)
@@ -67,6 +68,8 @@ class Ring(QWidget):
             self.setGeometry(place)
         self.show()
         self.raise_()
+        if self.under is not None:
+            self.under.raise_()
 
     def paintEvent(self, _):
         p = QPainter(self)
@@ -77,7 +80,7 @@ class Ring(QWidget):
 
 
 class TourCard(QFrame):
-    """The card in the bottom left corner, over the list, so it never covers what a step is about."""
+    """The card in a bottom corner: left, over the list; right on a page with no list. It stays off what a step shows."""
 
     WIDTH, MARGIN = 340, 14
 
@@ -85,6 +88,7 @@ class TourCard(QFrame):
         super().__init__(parent)
         self.setObjectName("TourCard")
         self.setFixedWidth(self.WIDTH)
+        self.on_right = False
         self.title = QLabel()
         self.title.setObjectName("SectionTitle")
         self.title.setWordWrap(True)
@@ -123,7 +127,8 @@ class TourCard(QFrame):
             label.ensurePolished()                                      # the style sheet decides the font size
         self.setFixedHeight(self.layout().totalHeightForWidth(self.WIDTH))
         parent = self.parentWidget()
-        self.move(self.MARGIN, parent.height() - self.height() - self.MARGIN - 28)
+        x = parent.width() - self.WIDTH - self.MARGIN - 12 if self.on_right else self.MARGIN
+        self.move(x, parent.height() - self.height() - self.MARGIN - 28)
         self.raise_()
 
     def say(self, title, text, count, last=False):
@@ -146,13 +151,15 @@ class Step:
 
 
 class Tour(QObject):
-    """Walks through the app in a window of its own. pages: the window's two page names (analyze, library)."""
+    """Walks through the app in a window of its own. analyze, library, trends: the window's page names."""
 
-    def __init__(self, window, analyze, library):
+    def __init__(self, window, analyze, library, trends):
         super().__init__(window)
-        self.w, self.rv, self.analyze, self.library = window, window.result_view, analyze, library
+        self.w, self.rv = window, window.result_view
+        self.analyze, self.library, self.trends = analyze, library, trends
         self.card = TourCard(window)
         self.ring = Ring(window)
+        self.ring.under = self.card
         self.card.hide()
         self.ring.hide()
         self.card.next_button.clicked.connect(self.next)
@@ -164,10 +171,16 @@ class Tour(QObject):
         self.waited = 0
         self.steps = [Step(lambda: None, lambda: True, self._welcome),
                       Step(self._open_sample, self._has_result, self._sample_said),
+                      Step(self._go_to_verdicts, lambda: True, self._verdicts_said),
                       Step(self._go_to_figure, lambda: True, self._figure_said),
                       Step(self._pin_band, lambda: True, self._band_said),
+                      Step(self._go_to_matches, lambda: True, self._matches_said),
+                      Step(self._go_to_evidence, lambda: True, self._evidence_said),
+                      Step(self._open_library, self._on_library, self._library_said),
                       Step(self._open_add, self._add_checked, self._add_said),
                       Step(self._add_it, self._reference_added, self._added_said),
+                      Step(self._open_trends, self._on_trends, self._trends_said),
+                      Step(self._go_to_groups, lambda: True, self._groups_said),
                       Step(self._open_export, lambda: self.w.sheet is not None, self._export_said),
                       Step(self._close_sheet, lambda: self.w.sheet is None, self._done)]
 
@@ -215,6 +228,15 @@ class Tour(QObject):
                 f"A fibre found on a wafer. The closest reference is {r.best} at r {r.r:.2f}: similar, not proven. "
                 f"So the verdict is {r.verdict}, and the app says what to do next.", self.rv.facts)
 
+    def _go_to_verdicts(self):
+        self.rv.ensureWidgetVisible(self.rv.strip, 0, 40)
+
+    def _verdicts_said(self):
+        return ("Three possible verdicts",
+                f"Probable: a score of {config.PROBABLE_R:.2f} or more, clearly ahead of the next material. Weak: similar, "
+                "so read the bands yourself. No reliable match: nothing in the library fits. The score measures similarity; "
+                "it is not a percentage.", self.rv.strip)
+
     def _go_to_figure(self):
         self.rv.ensureWidgetVisible(self.rv.plot, 0, 40)
 
@@ -238,9 +260,33 @@ class Tour(QObject):
                 "the figure zooms to it, and its bonds glow on a short model chain. Drag the model to turn it.",
                 self.rv.structure)
 
-    def _open_add(self):
+    def _go_to_matches(self):
         if self.band is not None:                                       # let go of the band
             self.rv._pin_band(self.band)
+        self.rv.ensureWidgetVisible(self.rv.top, 0, 40)
+
+    def _matches_said(self):
+        return ("The closest matches", "The best references side by side. The shaded area shows where the shapes disagree. "
+                "Click one to draw it in the big figure.", self.rv.top)
+
+    def _go_to_evidence(self):
+        self.rv.ensureWidgetVisible(self.rv.evidence_panel, 0, 40)
+
+    def _evidence_said(self):
+        return ("What backs the verdict", "Here are the key bands that were found. Beside them are the checks on the raw "
+                "spectrum and where the material can come from in a fab.", self.rv.evidence_panel)
+
+    def _open_library(self):
+        self.w.show_page(self.library)
+
+    def _on_library(self):
+        return self.w.pages.currentWidget() is self.w.library_page
+
+    def _library_said(self):
+        return ("Your library", f"{len(self.w.library)} references, each with its source, spectrum and key bands. Click one to "
+                "open it. The similarity map shows which ones could be confused.", self.w.library_page.grid)
+
+    def _open_add(self):
         self.panel = self.w.open_add_reference(use_current=False)
         self.panel.load_file(REFERENCE)
 
@@ -269,7 +315,28 @@ class Tour(QObject):
         return ("The answer changed", f"{text} The library was validated again, every spectrum was analysed again, "
                 "and the change is written down in the library's log.", self.rv.change_box)
 
+    def _open_trends(self):
+        self.card.on_right = True                                       # this page has no list to sit over
+        self.w.show_page(self.trends)
+        self.w.trends_page.demo_button.setChecked(True)
+
+    def _on_trends(self):
+        return self.w.pages.currentWidget() is self.w.trends_page
+
+    def _trends_said(self):
+        return ("Trends", "What keeps coming back. These samples are made up. When one material keeps returning on one tool, "
+                "it shows here, so you can look at the tool and not just one sample.", self.w.trends_page.repeat_card)
+
+    def _go_to_groups(self):
+        page = self.w.trends_page
+        page.scroll.ensureWidgetVisible(page.group_card, 0, 40)
+
+    def _groups_said(self):
+        return ("Unknown groups", "Samples with no name that look alike, so an unknown material can be seen coming back before "
+                "anyone knows what it is. Once you know, add it as a reference.", self.w.trends_page.group_card)
+
     def _open_export(self):
+        self.card.on_right = False
         self.w.show_page(self.analyze)
         panel = self.w.export_report()
         if panel is not None:
@@ -277,13 +344,14 @@ class Tour(QObject):
             self.export = panel
 
     def _export_said(self):
-        return ("Sign and export", "Write the report as a PDF or a web page, and sign it if you like. Try it: in the "
-                "tour it goes to a folder that is deleted at the end.", self.export.export_button)
+        return ("Sign and export", "Write the report as a PDF or a web page, enter the tool or area for Trends, and sign it "
+                "if you like. Try it: in the tour it goes to a folder that is deleted at the end.", self.export.export_button)
 
     def _close_sheet(self):
         if self.w.sheet is not None:
             self.w.sheet.close_sheet()
 
     def _done(self):
-        return ("That is the app", "Open your own spectra in the main window, or drop them anywhere on it. Close this "
-                "window to delete everything the tour made.", None)
+        return ("That is the app", "Open your own spectra in the main window, or drop them anywhere on it. Every export is "
+                "kept in the audit log, which this menu opens. Close this window to delete everything the tour made.",
+                self.w.menu_button)

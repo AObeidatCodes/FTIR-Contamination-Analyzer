@@ -1226,7 +1226,7 @@ class MainWindow(QMainWindow):
         self.set_ready(True)
         self.set_status("Ready. Open spectrum files, open a folder, or drop files on the window.")
         if self.tour_folder is not None and self.tour is None:
-            self.tour = Tour(self, ANALYZE, LIBRARY)
+            self.tour = Tour(self, ANALYZE, LIBRARY, TRENDS)
             self.tour.start()
         if self.files_on_start:
             self.analyse_paths(self.files_on_start)
