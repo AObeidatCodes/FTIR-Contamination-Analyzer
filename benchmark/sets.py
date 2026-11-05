@@ -208,11 +208,11 @@ def read_openftir(path, library_names):
     return items, left_out
 
 
-def cluster_hash(cluster):
-    return hashlib.sha256((SPLIT_SALT + cluster).encode("utf-8")).hexdigest()
+def cluster_hash(cluster, salt=SPLIT_SALT):
+    return hashlib.sha256((salt + cluster).encode("utf-8")).hexdigest()
 
 
-def split_locked(items, share=LOCKED_SHARE):
+def split_locked(items, share=LOCKED_SHARE, salt=SPLIT_SALT):
     """The same items, with the locked set marked. It reads labels only, never a spectrum.
 
     Within each material, clusters are taken in hash order; one goes to the locked set if that keeps the locked share
@@ -224,7 +224,7 @@ def split_locked(items, share=LOCKED_SHARE):
     locked = set()
     for clusters in groups.values():
         limit, taken = share * sum(len(c) for c in clusters.values()), 0
-        for cluster in sorted(clusters, key=cluster_hash):
+        for cluster in sorted(clusters, key=lambda name: cluster_hash(name, salt)):
             size = len(clusters[cluster])
             if taken + size <= limit:
                 taken += size
