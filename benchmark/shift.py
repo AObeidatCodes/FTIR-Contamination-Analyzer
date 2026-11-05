@@ -66,6 +66,14 @@ CHUNK = 24
 WORKERS = max(1, min(10, (os.cpu_count() or 2) - 4))       # leaves the computer usable while it runs
 TODAY, TOLERANT = "today", "tolerant"
 SEARCHES = {TODAY: (), TOLERANT: config.SHIFT_TEST}
+AFTER = ["264 of the tolerant search's 298 false probables, and all 264 of today's, are spectra labelled PS. 300 spectra with "
+         "that label have no polystyrene ring band at 700 cm⁻¹ (median height 0.003, against 0.33 in the spectra called PS) "
+         "and have a polypropylene methyl band at 1376 cm⁻¹ (0.14, against 0.008). Their r is 0.97 to PP and 0.07 to PS. They "
+         "are probably polypropylene with the wrong label. The protocol has no rule for this, so they stay in and rule 1 stands.",
+         "The other 34 false probables are new. They are PVC spectra in the 8 cm⁻¹ table, and today's search gives no false "
+         "probable on PVC. In a sample of 300 PVC spectra the tolerant search called them PS at r 0.95.",
+         "PET lost right answers: 248 today, 188 tolerant. Every other material kept or gained them.",
+         "With a band shift of 2 or 4 cm⁻¹ the tolerant search gave the same answers as at shift 0, in right and not right."]
 
 _library, _without = None, {}
 
@@ -309,10 +317,13 @@ def build(results_path, target):
 <div class="panel"><h4>Per material</h4>{split_table(r['per_material'])}</div>
 <div class="panel"><h4>Per resolution</h4>{split_table({'4 cm⁻¹': r['per_resolution']['c4'], '8 cm⁻¹': r['per_resolution']['c8']})}</div>
 
+<div class="panel"><h4>Looked at after the results</h4>
+<p>No rule or setting depends on these.</p><ul class="plain">{"".join(f"<li>{h(line)}</li>" for line in AFTER)}</ul></div>
+
 <div class="panel"><h4>Limits</h4><ul class="plain">
 <li>All spectra come from one instrument and six common plastics, so this says nothing about other materials or instruments.</li>
 <li>The record does not say whether the 500 sample numbers are 500 physical pieces, and the numbers repeat across the two resolutions. The intervals treat the spectra as independent and may be too narrow.</li>
-<li>The applied shifts are computed, not measured on an instrument that drifted.</li>
+<li>The applied shifts are computed, not measured on an instrument that drifted. Shifts of 2 and 4 cm⁻¹ land exactly on positions the search tries, which flatters it: a shift between two tries would score a little lower.</li>
 <li>False probable has one reference set removed at a time, so it tests these six plastics only.</li>
 <li>These figures say nothing about real fab samples.</li></ul></div>
 <p class="small">Rebuild: <code>python -m benchmark.shift --report-only</code></p>

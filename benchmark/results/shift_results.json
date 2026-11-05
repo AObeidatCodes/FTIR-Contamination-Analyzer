@@ -1,0 +1,413 @@
+{
+ "protocol": "benchmark/PROTOCOL_SHIFT.md, version 4",
+ "locked_commit": "bb86688",
+ "ran_at_commit": "fba0fbf",
+ "ran_on": "2026-11-06 01:35 Jordanien Normalzeit",
+ "seconds": 311,
+ "data_sha256": "c8a5a378efcff70e959cfe7af26d7e7131e2508043ee99675328e582aa7b8dd9",
+ "shifts_tried": [
+  -8,
+  -6,
+  -4,
+  -2,
+  0,
+  2,
+  4,
+  6,
+  8
+ ],
+ "library": {
+  "name": "16 shipped references",
+  "sha256": "310b46cc1294f9effb4d0dc0c24618f31e102181bbd27f0dd674facedb68dd69"
+ },
+ "spectra": 6000,
+ "rules": {
+  "1 false probable": false,
+  "2 not right probable": true,
+  "3 right probable at shift 0": true,
+  "4 right probable at shifts 2 and 4": true
+ },
+ "passed": false,
+ "overall": {
+  "today": {
+   "0": {
+    "spectra": 6000,
+    "right": 3097,
+    "not_right": 264,
+    "false": 264
+   },
+   "2": {
+    "spectra": 6000,
+    "right": 1773,
+    "not_right": 137,
+    "false": 0
+   },
+   "4": {
+    "spectra": 6000,
+    "right": 126,
+    "not_right": 14,
+    "false": 0
+   }
+  },
+  "tolerant": {
+   "0": {
+    "spectra": 6000,
+    "right": 3255,
+    "not_right": 298,
+    "false": 298
+   },
+   "2": {
+    "spectra": 6000,
+    "right": 3255,
+    "not_right": 298,
+    "false": 0
+   },
+   "4": {
+    "spectra": 6000,
+    "right": 3255,
+    "not_right": 298,
+    "false": 0
+   }
+  }
+ },
+ "per_material": {
+  "PET": {
+   "today": {
+    "0": {
+     "spectra": 1000,
+     "right": 248,
+     "not_right": 0,
+     "false": 0
+    },
+    "2": {
+     "spectra": 1000,
+     "right": 76,
+     "not_right": 0,
+     "false": 0
+    },
+    "4": {
+     "spectra": 1000,
+     "right": 0,
+     "not_right": 0,
+     "false": 0
+    }
+   },
+   "tolerant": {
+    "0": {
+     "spectra": 1000,
+     "right": 188,
+     "not_right": 0,
+     "false": 0
+    },
+    "2": {
+     "spectra": 1000,
+     "right": 188,
+     "not_right": 0,
+     "false": 0
+    },
+    "4": {
+     "spectra": 1000,
+     "right": 188,
+     "not_right": 0,
+     "false": 0
+    }
+   }
+  },
+  "HDPE": {
+   "today": {
+    "0": {
+     "spectra": 1000,
+     "right": 762,
+     "not_right": 0,
+     "false": 0
+    },
+    "2": {
+     "spectra": 1000,
+     "right": 368,
+     "not_right": 0,
+     "false": 0
+    },
+    "4": {
+     "spectra": 1000,
+     "right": 28,
+     "not_right": 0,
+     "false": 0
+    }
+   },
+   "tolerant": {
+    "0": {
+     "spectra": 1000,
+     "right": 777,
+     "not_right": 0,
+     "false": 0
+    },
+    "2": {
+     "spectra": 1000,
+     "right": 777,
+     "not_right": 0,
+     "false": 0
+    },
+    "4": {
+     "spectra": 1000,
+     "right": 777,
+     "not_right": 0,
+     "false": 0
+    }
+   }
+  },
+  "LDPE": {
+   "today": {
+    "0": {
+     "spectra": 1000,
+     "right": 1000,
+     "not_right": 0,
+     "false": 0
+    },
+    "2": {
+     "spectra": 1000,
+     "right": 781,
+     "not_right": 0,
+     "false": 0
+    },
+    "4": {
+     "spectra": 1000,
+     "right": 0,
+     "not_right": 0,
+     "false": 0
+    }
+   },
+   "tolerant": {
+    "0": {
+     "spectra": 1000,
+     "right": 1000,
+     "not_right": 0,
+     "false": 0
+    },
+    "2": {
+     "spectra": 1000,
+     "right": 1000,
+     "not_right": 0,
+     "false": 0
+    },
+    "4": {
+     "spectra": 1000,
+     "right": 1000,
+     "not_right": 0,
+     "false": 0
+    }
+   }
+  },
+  "PVC": {
+   "today": {
+    "0": {
+     "spectra": 1000,
+     "right": 0,
+     "not_right": 0,
+     "false": 0
+    },
+    "2": {
+     "spectra": 1000,
+     "right": 0,
+     "not_right": 0,
+     "false": 0
+    },
+    "4": {
+     "spectra": 1000,
+     "right": 0,
+     "not_right": 14,
+     "false": 0
+    }
+   },
+   "tolerant": {
+    "0": {
+     "spectra": 1000,
+     "right": 0,
+     "not_right": 34,
+     "false": 34
+    },
+    "2": {
+     "spectra": 1000,
+     "right": 0,
+     "not_right": 34,
+     "false": 0
+    },
+    "4": {
+     "spectra": 1000,
+     "right": 0,
+     "not_right": 34,
+     "false": 0
+    }
+   }
+  },
+  "PP": {
+   "today": {
+    "0": {
+     "spectra": 1000,
+     "right": 755,
+     "not_right": 0,
+     "false": 0
+    },
+    "2": {
+     "spectra": 1000,
+     "right": 350,
+     "not_right": 0,
+     "false": 0
+    },
+    "4": {
+     "spectra": 1000,
+     "right": 0,
+     "not_right": 0,
+     "false": 0
+    }
+   },
+   "tolerant": {
+    "0": {
+     "spectra": 1000,
+     "right": 755,
+     "not_right": 0,
+     "false": 0
+    },
+    "2": {
+     "spectra": 1000,
+     "right": 755,
+     "not_right": 0,
+     "false": 0
+    },
+    "4": {
+     "spectra": 1000,
+     "right": 755,
+     "not_right": 0,
+     "false": 0
+    }
+   }
+  },
+  "PS": {
+   "today": {
+    "0": {
+     "spectra": 1000,
+     "right": 332,
+     "not_right": 264,
+     "false": 264
+    },
+    "2": {
+     "spectra": 1000,
+     "right": 198,
+     "not_right": 137,
+     "false": 0
+    },
+    "4": {
+     "spectra": 1000,
+     "right": 98,
+     "not_right": 0,
+     "false": 0
+    }
+   },
+   "tolerant": {
+    "0": {
+     "spectra": 1000,
+     "right": 535,
+     "not_right": 264,
+     "false": 264
+    },
+    "2": {
+     "spectra": 1000,
+     "right": 535,
+     "not_right": 264,
+     "false": 0
+    },
+    "4": {
+     "spectra": 1000,
+     "right": 535,
+     "not_right": 264,
+     "false": 0
+    }
+   }
+  }
+ },
+ "per_resolution": {
+  "c4": {
+   "today": {
+    "0": {
+     "spectra": 3000,
+     "right": 1497,
+     "not_right": 144,
+     "false": 144
+    },
+    "2": {
+     "spectra": 3000,
+     "right": 889,
+     "not_right": 79,
+     "false": 0
+    },
+    "4": {
+     "spectra": 3000,
+     "right": 75,
+     "not_right": 0,
+     "false": 0
+    }
+   },
+   "tolerant": {
+    "0": {
+     "spectra": 3000,
+     "right": 1639,
+     "not_right": 144,
+     "false": 144
+    },
+    "2": {
+     "spectra": 3000,
+     "right": 1639,
+     "not_right": 144,
+     "false": 0
+    },
+    "4": {
+     "spectra": 3000,
+     "right": 1639,
+     "not_right": 144,
+     "false": 0
+    }
+   }
+  },
+  "c8": {
+   "today": {
+    "0": {
+     "spectra": 3000,
+     "right": 1600,
+     "not_right": 120,
+     "false": 120
+    },
+    "2": {
+     "spectra": 3000,
+     "right": 884,
+     "not_right": 58,
+     "false": 0
+    },
+    "4": {
+     "spectra": 3000,
+     "right": 51,
+     "not_right": 14,
+     "false": 0
+    }
+   },
+   "tolerant": {
+    "0": {
+     "spectra": 3000,
+     "right": 1616,
+     "not_right": 154,
+     "false": 154
+    },
+    "2": {
+     "spectra": 3000,
+     "right": 1616,
+     "not_right": 154,
+     "false": 0
+    },
+    "4": {
+     "spectra": 3000,
+     "right": 1616,
+     "not_right": 154,
+     "false": 0
+    }
+   }
+  }
+ }
+}

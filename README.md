@@ -561,7 +561,7 @@ pip install pytest
 python -m pytest
 ```
 
-335 tests. Those for the analysis cover file reading (read-only data, headerless tab-separated files, unit
+340 tests. Those for the analysis cover file reading (read-only data, headerless tab-separated files, unit
 recognition, clear errors), processing, the verdict rule, the impostor test, the known answer for
 every demo spectrum, the second-component, empty-spot and saturation detection, the CO₂ direction,
 the analytical view (each step reproduced, the score recalculated from step 4), the interactive
@@ -728,6 +728,28 @@ committed first: see the [protocol](benchmark/PROTOCOL_GROUPS.md) and the [repor
 Both sets passed the limits set before the test. Most groups stay within one contributor, so expect groups within one
 lab or instrument, not across labs. A material can also split into several groups.
 
+### Shift test
+
+A search that also tries band shifts of up to 8 cm⁻¹ was tested on 6,000 spectra of six plastics that no earlier step had
+read (FTIR-Plastics, Villegas Camacho et al. 2024, CC BY 4.0). The rules, the data's checksum and the reader were committed
+before the first run ([protocol](benchmark/PROTOCOL_SHIFT.md), [report](benchmark/results/shift_report.html)).
+
+It failed. The upper end of the false-probable interval had to be at most 5 %, and it came to 5.55 %, so the search stays
+switched off. The other three rules passed.
+
+| Of 6,000 spectra | Today | Tolerant |
+|---|---|---|
+| Right probable | 3,097 | 3,255 |
+| Not right probable | 264 | 298 |
+| False probable | 264 | 298 |
+| Right probable, bands shifted 2 cm⁻¹ | 1,773 | 3,255 |
+| Right probable, bands shifted 4 cm⁻¹ | 126 | 3,255 |
+
+264 of the wrong answers, in both searches, are spectra labelled PS that are probably polypropylene: 300 spectra with that
+label have no polystyrene ring band and have r 0.97 to PP. That was seen after the results, so they stay in and the result
+stands. The other 34 are real new mistakes: PVC called PS, which today's search does not do. The applied shifts land
+exactly on positions the search tries, which flatters it.
+
 ### Confidence test
 
 Split conformal prediction at 90% coverage, calibrated on 482 locked Open Specy spectra and tested on 539 others, with
@@ -761,7 +783,8 @@ python -m benchmark.confidence --report-only
 - The verdict is a suggestion. A person reviews the raw spectrum and signs the report.
 - Mixtures are flagged (unexplained bands). A clean spectrum of the main material can be taken out, as a hint.
 - The search compares each spectrum at one position, so a band shift of 2 cm⁻¹ can lose an answer. A search that tries
-  small shifts is in the code and switched off. It stays off until it passes `benchmark/PROTOCOL_SHIFT.md` on fresh data.
+  small shifts is in the code and switched off, because it failed one rule of its test (see Shift test). A second attempt
+  needs a new protocol and data that have not been read. Until then, use the instrument check.
 
 ## Data
 
