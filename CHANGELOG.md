@@ -23,6 +23,12 @@
 - The demo spectra are part of an installed package.
 - `openpyxl`, `jcamp` and `brukeropus` are now installed with the package.
 
+### Fixed
+
+- The app could not start on Python 3.10 or 3.11.
+- `FTIR_Analyzer.py` and the batch command crashed on Windows when their output went to a file or another program.
+- The batch command crashed when nobody could answer how a file was measured. It now treats the mode as unknown.
+
 ### Not included
 
 - A search that tries small band shifts is in the code and switched off. It failed one rule of its test.

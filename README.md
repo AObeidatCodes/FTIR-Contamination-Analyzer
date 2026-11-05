@@ -567,7 +567,7 @@ pip install pytest
 python -m pytest
 ```
 
-344 tests. Those for the analysis cover file reading (read-only data, headerless tab-separated files, unit
+345 tests. Those for the analysis cover file reading (read-only data, headerless tab-separated files, unit
 recognition, clear errors), processing, the verdict rule, the impostor test, the known answer for
 every demo spectrum, the second-component, empty-spot and saturation detection, the CO₂ direction,
 the analytical view (each step reproduced, the score recalculated from step 4), the interactive

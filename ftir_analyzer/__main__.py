@@ -34,7 +34,10 @@ def ask_in_terminal(paths):
         print(f"   {path.name}")
     choices = {"1": "ATR", "2": "transmission", "3": "unknown"}
     while True:                                                        # keep asking until the answer is valid
-        answer = input("All of them were measured by: 1 = ATR, 2 = transmission, 3 = don't know: ").strip()
+        try:
+            answer = input("All of them were measured by: 1 = ATR, 2 = transmission, 3 = don't know: ").strip()
+        except EOFError:                                               # nobody is there to answer: mode unknown
+            return {}
         if answer in choices:
             return {path: choices[answer] for path in paths}
 
@@ -79,6 +82,8 @@ def make_report(out_dir, items, mode=None):
 
 
 def main(argv=None):
+    if hasattr(sys.stdout, "reconfigure"):                             # a pipe or a file on Windows is not UTF-8 by default
+        sys.stdout.reconfigure(encoding="utf-8")
     parser = argparse.ArgumentParser(
         prog="ftir_analyzer",
         description=f"{__title__}: identify contamination from FTIR spectra. By {__author__}.")

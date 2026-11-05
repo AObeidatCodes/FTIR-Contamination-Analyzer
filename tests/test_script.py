@@ -32,11 +32,27 @@ def run_script(tmp_path, extra=()):
         text = text.replace(old, new)
     copy = tmp_path / "FTIR_Analyzer.py"
     copy.write_text(text, encoding="utf-8")
-    env = dict(os.environ, PYTHONPATH=str(config.PROJECT_DIR), FTIR_ANALYZER_RECORDS=str(tmp_path / "records"))
-    run = subprocess.run([sys.executable, str(copy)], capture_output=True, text=True, env=env, timeout=300,
+    env = plain_environment(tmp_path)
+    run = subprocess.run([sys.executable, str(copy)], capture_output=True, encoding="utf-8", env=env, timeout=300,
                          cwd=tmp_path, stdin=subprocess.DEVNULL)
     assert run.returncode == 0, run.stderr
     return run
+
+
+def plain_environment(tmp_path):
+    """A customer's computer: output to a pipe is not UTF-8 unless the program says so."""
+    env = dict(os.environ, PYTHONPATH=str(config.PROJECT_DIR), FTIR_ANALYZER_RECORDS=str(tmp_path / "records"))
+    for name in ("PYTHONIOENCODING", "PYTHONUTF8"):
+        env.pop(name, None)
+    return env
+
+
+def test_the_batch_command_can_print_to_a_pipe(tmp_path):
+    files = [str(config.EXAMPLES_DIR / name) for name in ("01_wipe_area_particle_ATR.csv", "07_particle_on_filter.csv")]
+    run = subprocess.run([sys.executable, "-m", "ftir_analyzer", "--report", str(tmp_path / "out"), *files], capture_output=True,
+                         encoding="utf-8", env=plain_environment(tmp_path), timeout=300, cwd=tmp_path, stdin=subprocess.DEVNULL)
+    assert run.returncode == 0, run.stderr
+    assert "report ->" in run.stdout and (tmp_path / "out" / "report.html").exists()
 
 
 def test_script_runs_from_start_to_end(tmp_path):

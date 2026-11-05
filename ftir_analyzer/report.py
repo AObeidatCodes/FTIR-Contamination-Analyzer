@@ -1086,7 +1086,7 @@ def summary_html(results):
     rows = "".join(
         f"<tr><td class='name'><a href='#s{i}'>{breakable(r.name)}</a></td><td>{pill(r.verdict)}</td><td>{h(r.match)}</td>"
         f"<td class='num r'>{mini_strip(r)}{r.r:.2f}</td><td class='num lead'>{r.gap:.2f}</td>"
-        f"<td class='how'>{h(r.compared_as)}</td><td class='flags{"" if r.flags else " noflags"}'>{flag_pills(r.flags) or '&ndash;'}</td></tr>"
+        f"<td class='how'>{h(r.compared_as)}</td><td class='flags{'' if r.flags else ' noflags'}'>{flag_pills(r.flags) or '&ndash;'}</td></tr>"
         for i, r in enumerate(results))
     return ('<div class="scroll"><table class="summary"><thead><tr><th>Sample</th><th>Verdict</th><th>Match</th>'
             '<th class="num">Score r</th><th class="num">Lead</th><th>Compared as</th><th>Flags</th></tr></thead>'

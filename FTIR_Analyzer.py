@@ -58,6 +58,9 @@ import webbrowser
 from datetime import datetime
 from pathlib import Path
 
+if hasattr(sys.stdout, "reconfigure"):      # a pipe or a file on Windows is not UTF-8 by default
+    sys.stdout.reconfigure(encoding="utf-8")
+
 try:
     HERE = Path(__file__).resolve().parent          # the folder this script is in
 except NameError:                                   # Jupyter / interactive window: there is no __file__
