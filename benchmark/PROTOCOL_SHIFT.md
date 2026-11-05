@@ -26,6 +26,24 @@ Candidate: FTIR-Plastics (Zenodo record 10736650, `FTIR-PLASTIC.zip`). Its use d
 
 The spectra stay out of the repository, in `benchmark/data/`. If the licence does not allow this use, another set is chosen and named here before it is read.
 
+### The data as found
+
+Added before the first run. Up to this point only the file's labels and headers were read, and no spectrum was compared with the library.
+
+| | |
+|---|---|
+| File | `FTIR-PLASTIC.zip`, 265,006,200 bytes, the MD5 on the record matches |
+| SHA-256 | `c8a5a378efcff70e959cfe7af26d7e7131e2508043ee99675328e582aa7b8dd9` |
+| Licence | CC BY 4.0 on Zenodo record 10736650 and on the newer record 11176740, which holds only a calibration certificate and a notes file. The spectra are only in 10736650 |
+| Citation | Villegas Camacho et al., FTIR-Plastics, Zenodo, 2024, doi:10.5281/zenodo.10736650 |
+| Spectra | 6,000: `FTIR_PLASTIC_c4.csv` at 4 cm⁻¹ and `FTIR_PLASTIC_c8.csv` at 8 cm⁻¹, each with 500 spectra of PET, HDPE, LDPE, PVC, PP and PS |
+| Instrument | every file header says FT/IR ATR-4X, serial A009662111, accessory ATR PRO 4x, 32 scans, %T |
+| NIST or Bosch | no such words in any of the 6,000 file headers or names |
+
+Every spectrum is read as ATR and %T, as its header says. HDPE and LDPE both count as the library's material PE. All 6,000 spectra are used.
+
+The record does not say whether the 500 sample numbers are 500 physical pieces, and the same numbers appear in both tables. The Wilson intervals treat the spectra as independent, so they may be too narrow. The rules stay as written, and the results are also given per resolution and per material.
+
 ## Measures
 
 Each spectrum belongs to one material that has a reference in the library.

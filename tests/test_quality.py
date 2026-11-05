@@ -1,5 +1,7 @@
 """The instrument check, the second-person review, the spectrum quality check, the search in a known material and
 the shift-tolerant search."""
+import io
+import json
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from types import SimpleNamespace
@@ -287,9 +289,58 @@ def test_the_protocol_rules_decide():
     assert shift_tool.verdict(today, same)[0]["4 right probable at shifts 2 and 4"] is False
 
 
-def test_the_tool_will_not_run_before_the_data_is_locked():
+def test_the_tool_will_not_run_on_any_other_data(tmp_path, monkeypatch):
+    monkeypatch.setattr(shift_tool, "DATA_FILE", tmp_path / "gone.zip")
+    with pytest.raises(SystemExit, match="is not in"):
+        shift_tool.locked()
+    other = tmp_path / "other.zip"
+    other.write_text("other data", encoding="utf-8")
+    monkeypatch.setattr(shift_tool, "DATA_FILE", other)
+    with pytest.raises(SystemExit, match="not the one"):
+        shift_tool.locked()
+    monkeypatch.setattr(shift_tool, "DATA_SHA256", "")
     with pytest.raises(SystemExit, match="not filled in"):
         shift_tool.locked()
+
+
+def test_the_table_layout_is_read_into_pairs():
+    text = "IDE,Polymer,Technic,Sample,BR,RST,Data(x),Data(Y),Data(x),Data(Y)\nPETFTIR001,PET,FTIR,1,32,4,400.0,88.0,401.0,89.5\n"
+    item, = shift_tool.read_table(io.BytesIO(text.encode()), "c4")
+    assert (item.key, item.polymer, item.truth) == ("PETFTIR001-c4", "PET", "PET")
+    assert item.wn.tolist() == [400.0, 401.0] and item.y.tolist() == [88.0, 89.5]
+
+
+def test_both_kinds_of_polyethylene_count_as_the_librarys_material(library):
+    assert shift_tool.TRUTH["HDPE"] == shift_tool.TRUTH["LDPE"] == library.group_of("PE (high density)")
+    assert set(shift_tool.TRUTH.values()) <= {library.group_of(name) for name in library.spectra}
+
+
+def test_the_applied_direction_is_fixed_by_the_spectrum():
+    assert shift_tool.direction("PET1") == shift_tool.direction("PET1")
+    assert {shift_tool.direction(f"PET{i}") for i in range(40)} == {-1, 1}
+
+
+def test_the_report_is_built_from_a_results_file(tmp_path):
+    counts = {"spectra": 100, "right": 40, "not_right": 1, "false": 0}
+    part = {search: {shift: counts for shift in ("0", "2", "4")} for search in ("today", "tolerant")}
+    results = {"protocol": "protocol", "locked_commit": "abc", "ran_at_commit": "abc", "ran_on": "today", "spectra": 100,
+               "shifts_tried": [-8, 8], "passed": False, "overall": part,
+               "rules": {"1 false probable": True, "2 not right probable": True, "3 right probable at shift 0": True,
+                         "4 right probable at shifts 2 and 4": False},
+               "per_material": {"PET": part}, "per_resolution": {"c4": part, "c8": part}}
+    source = tmp_path / "results.json"
+    source.write_text(json.dumps(results), encoding="utf-8")
+    page = shift_tool.build(source, tmp_path / "report.html").read_text(encoding="utf-8")
+    assert "stays switched off" in page and "Failed" in page and "40 of 100 (40.0%)" in page
+
+
+def test_one_spectrum_gets_all_three_measures(library):
+    spectrum = read_spectra(config.EXAMPLES_DIR / "01_wipe_area_particle_ATR.csv")[0]
+    item = shift_tool.Item("demo", "PET", "c4", spectrum.wn, 100 * 10 ** (-absorbance(spectrum)))
+    without = shift_tool.without_material(library, "PET")
+    done = shift_tool.answers(item, library, without, config.SHIFT_TEST)
+    assert set(done) == set(shift_tool.SHIFTS) and done[0][0] and not done[0][1]
+    assert done[2][2] is False and done[4][2] is False                           # false probable: at shift 0 only
 
 
 def test_a_material_can_be_left_out_of_the_library(library):
