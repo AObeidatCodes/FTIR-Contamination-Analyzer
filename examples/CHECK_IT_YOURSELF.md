@@ -11,12 +11,12 @@ at the end.
 ## 0. Start
 
 1. Start the program (`run_analyzer.bat`).
-2. Click **Open spectra** and select all twelve files in `examples` (Ctrl+A in the file dialog).
+2. Click **Open spectra** and select all twenty files in `examples` (Ctrl+A in the file dialog).
 3. If it asks how some files were measured: set `07_particle_on_filter` to **ATR** and the others
    to **Don't know**, then OK. (It only asks for files that do not say it themselves and are not in
    the sample log yet.)
 
-**You should see** the twelve results of the table in `examples/README.md`, for example
+**You should see** the twenty results of the table in `examples/README.md`, for example
 `01` probable PET (r 0.97), `05` weak Nylon 6,6 (r 0.88), `10` weak PS (r 0.88). The badge at the top
 says **Library validated**.
 
@@ -39,8 +39,8 @@ MTF_NYL_083), where the collection itself names the polymer.
    **You should see:**
    - Most similar existing reference: **Nylon 6,6, r 0.90** (below the 0.95 line: different enough)
    - Impostor test: now 0.90 → with it **0.90 (Nylon 6,6 → Nylon 6)**, green
-   - 1 of 12 results would change: **05_fibre_on_wafer_ATR  Weak: Nylon 6,6 (r 0.88) → Probable:
-     Nylon 6 (r 0.96)**
+   - 2 of 20 results would change: **05_fibre_on_wafer_ATR  Weak: Nylon 6,6 (r 0.88) → Probable:
+     Nylon 6 (r 0.96)**, and 20 stays weak (Nylon 6 or Nylon 6,6, r 0.68)
    - **Safe to add.**
 4. The measuring mode matters. Under **Measured by**, click **transmission** and wait a second.
    **You should see:** most similar Nylon 6,6 at r 0.86, and 05 now only goes to **Weak: Nylon 6
@@ -110,7 +110,7 @@ transmission sample) and how many did not say (used as measured). The badge must
    *Ali Obeidat*; it is remembered) and, if you like, the **review and signature**: a decision
    (Accept / With changes / Re-measure), a comment (needed unless you accept) and the tick box "I
    have looked at the raw spectra …". The button then says **Sign and export**.
-2. **You should see** in the report: at the top "12 spectra · 20 Oct 2026, 17:05 (UTC+02:00) ·
+2. **You should see** in the report: at the top "20 spectra · 20 Oct 2026, 17:05 (UTC+02:00) ·
    analysed by Ali Obeidat (your login)", the badges **Library validated** and **Signed: Accepted**
    in the bar at the top (it stays there while you scroll), four numbers (probable / weak / no
    reliable match / with a flag), then the summary. Each spectrum has a **score strip**: a filled dot

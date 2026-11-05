@@ -31,6 +31,8 @@ License: MIT (see LICENSE)
 """
 
 import os
+import random
+import re
 
 os.environ.setdefault("QT_API", "pyside6")              # tell matplotlib which Qt binding to use
 
@@ -426,7 +428,7 @@ def chip(text, kind="Chip"):
 
 class BandButton(QPushButton):
     """One band of the band evidence as a button: hovering it marks the band in the figure, a click pins it.
-    kind: 'found', 'missing' or 'extra' (a band the match cannot explain)."""
+    kind: 'found', 'missing', 'extra' (a band the match cannot explain) or 'group' (a band group of a model)."""
 
     hovered = Signal(bool)
 
@@ -1001,6 +1003,12 @@ class PlotPanel(Card):
 
 
 # ------------------------------------------------------------------------------- the home screen
+def sample_title(name):
+    """A demo file's name as a sample's name: 01_wipe_area_particle_ATR -> Wipe area particle."""
+    words = re.sub(r"^\d+_|_(ATR|transmission)$", "", str(name)).replace("_", " ").strip()
+    return words[:1].upper() + words[1:]
+
+
 def _on_scale(y):
     """A spectrum from 0 to 1 with its gaps closed, for a line that moves."""
     y = np.asarray(y, float)
@@ -1029,7 +1037,7 @@ class MatchShow(QWidget):
         super().__init__(parent)
         self.setMinimumHeight(240)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        self.shows, self.at = [], 0                                    # every sample's match, and the one on screen
+        self.shows, self.queue = [], []                                # every sample's match, and the ones still to come
         self.sample, self.rows, self.verdict, self.kind, self.source = None, [], "", "good", ""
         self.seconds = 0.0
         self._xs = (None, None)
@@ -1049,14 +1057,21 @@ class MatchShow(QWidget):
                     for name, r in reversed(result.ranking[:5]) if name in library.spectra]
             if rows:
                 self.shows.append((_on_scale(result.compared), rows, f"{word}: {result.best}" if result.has_match else word,
-                                   kind, result.name))
-        self._use(0)
+                                   kind, sample_title(result.name)))
+        self.queue = []
+        self._next()
         self.restart()
 
-    def _use(self, at):
-        self.at = at
-        if self.shows:
-            self.sample, self.rows, self.verdict, self.kind, self.source = self.shows[at]
+    def _next(self):
+        """The next sample: a random one, and none comes back before all the others have been shown."""
+        if not self.shows:
+            self._picture = None
+            return
+        if not self.queue:
+            self.queue = random.sample(self.shows, len(self.shows))
+            if len(self.queue) > 1 and self.queue[0][4] == self.source:   # never the same one twice in a row
+                self.queue.append(self.queue.pop(0))
+        self.sample, self.rows, self.verdict, self.kind, self.source = self.queue.pop(0)
         self._picture = None
 
     def length(self):
@@ -1090,7 +1105,7 @@ class MatchShow(QWidget):
         self.seconds += step
         if self.seconds >= self.length():                              # hidden by the fade: the next sample
             self.seconds = 0.0
-            self._use((self.at + 1) % len(self.shows))
+            self._next()
         if self._still():
             return
         veiled = self.seconds < self.INTRO or self.seconds > self.length() - self.FADE
@@ -1151,8 +1166,7 @@ class MatchShow(QWidget):
             x = rect.left() + (config.GRID_STOP - value) / (config.GRID_STOP - config.GRID_START) * rect.width()
             p.drawText(QRectF(x, rect.bottom() + 8, 90, 18), Qt.AlignLeft | Qt.AlignVCenter,
                        f"{value} cm⁻¹" if value == 1000 else str(value))
-        p.drawText(QRectF(0, 0, rect.width(), 20), Qt.AlignLeft | Qt.AlignVCenter,
-                   f"Demo sample {self.at + 1} of {len(self.shows)}: {self.source}")
+        p.drawText(QRectF(0, 0, rect.width(), 20), Qt.AlignLeft | Qt.AlignVCenter, self.source)
         p.setPen(QPen(QColor(t["ink"]), 1.3, Qt.SolidLine, Qt.SquareCap))
         p.drawLines(self._segments(self.sample, rect))
         p.end()
@@ -1225,6 +1239,7 @@ class EmptyState(QWidget):
     choose_files = Signal()
     open_demo = Signal()
     open_library = Signal()
+    take_tour = Signal()
     MARGIN, GAP = 44, 12
 
     def __init__(self, parent=None):
@@ -1243,6 +1258,10 @@ class EmptyState(QWidget):
         self.demo = QPushButton(" Open demo")
         self.library_link = QPushButton("Browse the library  ›")
         self.library_link.setObjectName("Link")
+        self.tour_link = QPushButton("Take the tour  ›")
+        self.tour_link.setObjectName("Link")
+        self.tour_link.setToolTip("A guided tour with the demo files; nothing is kept")
+        self.tour_link.clicked.connect(self.take_tour.emit)
         self.choose.clicked.connect(self.choose_files.emit)
         self.demo.clicked.connect(self.open_demo.emit)
         self.library_link.clicked.connect(self.open_library.emit)
@@ -1254,7 +1273,7 @@ class EmptyState(QWidget):
         words.addWidget(self.formats)
         self.buttons = QWidget()
         buttons = FlowLayout(self.buttons, spacing=self.GAP, align="left")
-        for button in (self.library_link, self.demo, self.choose):
+        for button in (self.tour_link, self.library_link, self.demo, self.choose):
             button.setCursor(Qt.PointingHandCursor)
             buttons.addWidget(button)
         self.foot = QWidget()
@@ -1283,7 +1302,7 @@ class EmptyState(QWidget):
         super().resizeEvent(event)
         self.title.ensurePolished()
         inside = self.width() - 2 * self.MARGIN
-        room = sum(b.sizeHint().width() for b in (self.library_link, self.demo, self.choose)) + 2 * self.GAP + 2
+        room = sum(b.sizeHint().width() for b in (self.tour_link, self.library_link, self.demo, self.choose)) + 3 * self.GAP + 2
         words = max(self.title.fontMetrics().horizontalAdvance(self.title.text()),
                     self.formats.fontMetrics().horizontalAdvance(self.formats.text()))
         narrow = words + 16 + room > inside

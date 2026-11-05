@@ -38,6 +38,7 @@ from ftir_analyzer.processing import GRID, fingerprint, on_grid
 from ftir_analyzer.spectrum_io import read_spectra
 
 pytest.importorskip("rdata")
+from ftir_analyzer.openspecy import install_pack  # noqa: E402
 from ftir_analyzer.openspecy import (AWS_LIBRARY, OpenSpecyLibrary, choose_file, curate, download,  # noqa: E402
                                      download_and_import, import_library, list_osf_files, prepare,
                                      read_library_file)
@@ -100,6 +101,15 @@ def test_a_second_reference_of_the_same_material_does_not_weaken_the_verdict(bas
     # the rule itself: the lead is measured to the next DIFFERENT material
     ranking = [("PE a", 0.97), ("PE b", 0.96), ("PP", 0.60)]
     assert decide(ranking, rival=2) == (PROBABLE, "PE a") and decide(ranking, rival=1)[0] == WEAK
+
+
+def test_the_included_references_work_without_a_download(base, tmp_path):
+    summary = install_pack(base, tmp_path)
+    assert summary.kept > 100
+    library = load_library(extended=True, openspecy_dir=tmp_path)
+    assert len(library) == 16 + summary.kept and impostor_test(library).passed
+    assert not [n for n in library.open_specy if n.lower().startswith("other plastic")]   # named after their material
+    assert not [n for n in library.open_specy if "nist" in library.info_of(n).contributor.lower()]   # never in the repository
 
 
 def test_the_derivative_library_is_refused(tmp_path):

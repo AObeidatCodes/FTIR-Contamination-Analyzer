@@ -86,7 +86,7 @@ def test_library_is_validated_on_start(window):
 
 def test_demo_spectra_are_analysed(app, window):
     window.analyse_paths([config.EXAMPLES_DIR], ask=answer_modes)
-    assert wait(app, lambda: not window.busy and len(window.model.results) == 12)
+    assert wait(app, lambda: not window.busy and len(window.model.results) == 20)
     assert window.stack.currentWidget() is window.result_view
     assert window.act_export.isEnabled()
 
@@ -94,7 +94,7 @@ def test_demo_spectra_are_analysed(app, window):
 def test_files_are_not_added_twice(app, window):
     window.analyse_paths([config.EXAMPLES_DIR / "01_wipe_area_particle_ATR.csv"], ask=answer_modes)
     wait(app, lambda: not window.busy, 5)
-    assert len(window.model.results) == 12
+    assert len(window.model.results) == 20
 
 
 def test_selecting_a_result_fills_the_page(app, window):
@@ -109,7 +109,7 @@ def test_filter_box(app, window):
     window.search.setText("PVOH")
     assert window.proxy.rowCount() == 1
     window.search.setText("")
-    assert window.proxy.rowCount() == 12
+    assert window.proxy.rowCount() == 20
 
 
 def test_dark_theme_and_back(window):
@@ -358,7 +358,7 @@ def test_copy_the_result(app, window):
     """Ctrl+C in the list puts a short, traceable summary of the result on the clipboard."""
     if not window.model.results:
         window.analyse_paths([config.EXAMPLES_DIR], ask=answer_modes)
-        assert wait(app, lambda: not window.busy and len(window.model.results) == 12)
+        assert wait(app, lambda: not window.busy and len(window.model.results) == 20)
     window.show_page("analyze")
     select(app, window, "07_particle_on_filter")
     window.copy_result()
@@ -460,6 +460,50 @@ def test_exporting_a_signed_report(app, window, tmp_path, monkeypatch):
     assert "Signed: Re-measure" in re.sub(r"<[^>]+>", "", page) and "06 is saturated" in page
     assert window.settings.value("user_name") == "Ali Obeidat"                  # remembered for next time
     assert "Ali Obeidat" in window.signature_log.read_text(encoding="utf-8")
+
+
+def test_a_band_lights_its_bonds_and_the_structure_follows_the_figure(app, window):
+    select(app, window, "01_wipe_area_particle_ATR")
+    view = window.result_view
+    panel = view.structure
+    assert panel.isVisible() and panel.name.text() == "Structure of PET"
+    carbonyl = next(b for b in view.band_buttons if 1700 <= b.w <= 1765)
+    view._pin_band(carbonyl)
+    assert panel.view.lit == set(panel.model["groups"]["C=O"]["bonds"])
+    assert [b.group for b in panel.buttons if b.isChecked()] == ["C=O"]
+    view._pin_band(carbonyl)                                                     # a second click lets go
+    assert panel.view.lit == set()
+    chip = next(b for b in panel.buttons if b.group == "C=O")                    # the same from the model's side
+    chip.click()
+    assert view.pinned_band is carbonyl and panel.view.lit == set(panel.model["groups"]["C=O"]["bonds"])
+    view._pin_band(carbonyl)
+    view.plot.set_compare("PBT")
+    assert panel.name.text() == "Structure of PBT"
+    view.plot.set_compare(None)
+    assert panel.name.text() == "Structure of PET"
+
+
+def test_the_tour_works_and_keeps_nothing(app, window):
+    sizes = window.library.sha256, len(window.library)
+    tour_window = window.start_tour()
+    folder = tour_window.tour_folder
+    assert wait(app, lambda: tour_window.tour is not None, 60)
+    tour, seen = tour_window.tour, []
+    for _ in tour.steps:
+        assert wait(app, lambda: tour.card.isVisible(), 60), f"stuck after {seen}"
+        seen.append(tour.card.title.text())
+        if tour.at == 5:                                                         # the reference was added
+            assert tour_window.current_result().match == "Nylon 6"
+        if tour.at < len(tour.steps) - 1:
+            tour.next()
+    assert seen[0] == "A tour with real data" and seen[-1] == "That is the app"
+    assert "Nylon 6" in tour_window.library.spectra and len(tour_window.library) > 150
+    assert (window.library.sha256, len(window.library)) == sizes                 # the real window saw nothing
+    assert window.settings.value("library_mode", "essentials") == "essentials"
+    assert "Nylon 6" not in window.library.spectra
+    assert all(str(p).startswith(str(folder)) for p in (tour_window.audit_log, tour_window.inhouse_dir, tour_window.openspecy_dir))
+    tour.card.next_button.click()                                                # Close
+    assert wait(app, lambda: not folder.exists(), 5)
 
 
 def test_sheets_never_leave_a_trace(app, window):

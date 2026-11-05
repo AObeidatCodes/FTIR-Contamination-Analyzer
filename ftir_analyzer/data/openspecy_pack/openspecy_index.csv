@@ -1,0 +1,148 @@
+# Open Specy reference spectra (CC BY 4.0), kept for fab use on 2026-11-05T04:24:19+03:00.
+# Source: medoid_nobaseline.rds. Cite: Cowger, W., Steinmetz, Z., Gray, A., Munno, K., Lynch, J., Hapich, H., Primpke, S., De Frond, H., Rochman, C., Herodotou, O. (2021). Microplastic Spectral Classification Needs an Open Source Community: Open Specy to the Rescue! Analytical Chemistry 93(21), 7543-7548.
+name,group,category,original_name,spectrum_id,contributor,mode
+poly(propylene) (Open Specy),PP,Carriers & handling,pp,240d9c64dc9874b46f6048d02b3f97a8,"adamopoulou et al., 2026 (cnr)",ATR
+poly(propylene) 2 (Open Specy),PP,Carriers & handling,pp,797877a73d2b89ba2f731aa6e0c2025f,"adamopoulou et al., 2026 (cnr)",ATR
+poly(propylene) 3 (Open Specy),PP,Carriers & handling,pp,722692b750602812328145197a270ad7,"adamopoulou et al., 2026 (cnr)",ATR
+poly(ethylene) (Open Specy),PE,Packaging,pe,8637a9149adc0be0c836e18afa86a8ad,"adamopoulou et al., 2026 (cnr)",ATR
+poly(ethylene) 2 (Open Specy),PE,Packaging,pe,6f4469b9969f02e8679c8c297ad91cc4,"adamopoulou et al., 2026 (cnr)",ATR
+poly(ethylene) 3 (Open Specy),PE,Packaging,pe,1ded4a84aa9717dfa5e20de2c3689c16,"adamopoulou et al., 2026 (cnr)",ATR
+cellulose acetate (Open Specy),cellulose acetate,Cleanroom consumables,mffrc001_cellulose diacetate_canadian celanese co,b283fbd4f32a79166448dbf547b9d5a0,elise granek and kellie teague,unknown
+cellulose acetate 2 (Open Specy),cellulose acetate,Cleanroom consumables,mffrc001_cellulose diacetate_canadian celanese co,4a7ccdea0b603d73b73c4c3a3c10c815,elise granek and kellie teague,unknown
+cellulose acetate 3 (Open Specy),cellulose acetate,Cleanroom consumables,mffrc002_cellulose triacetate_calenese,da9e401456bc21fc4f21a5a7563f2384,elise granek and kellie teague,unknown
+poly(acrylonitrile) (Open Specy),PAN,People & clothing,mffrc006_acrylic (pan-ma-aa)_asahi chemical co,1626788218a64d2b2b45dcda387db699,elise granek and kellie teague,unknown
+poly(acrylonitrile) 2 (Open Specy),PAN,People & clothing,mffrc007_acrylic (pan-ma.pan-aa)_asahi chemical co,819067732ee5bbd342b31d199e7686bb,elise granek and kellie teague,unknown
+poly(acrylonitrile) 3 (Open Specy),PAN,People & clothing,mffrc008_acrylic (pan-va)_bayer,9489ecde040a2e97a7285bbe5dbb266f,elise granek and kellie teague,unknown
+polyamides (Open Specy),PA,Cleanroom consumables,mffrc049_aramid (kevlar 29)_du pont,1469da4049acf8459e3305d04842ba6f,elise granek and kellie teague,unknown
+polyamides 2 (Open Specy),PA,Cleanroom consumables,mffrc050_aramid (kevlar 49)_du pont,e2f869a6db6fda4dd7d802fca05b4f03,elise granek and kellie teague,unknown
+polyamides 3 (Open Specy),PA,Cleanroom consumables,mffrc050_aramid (kevlar 49)_du pont,ad55faa429ef84012901275c40241750,elise granek and kellie teague,unknown
+poly(vinyl chloride) (Open Specy),PVC,Cleanroom consumables,mffrc054_chlorofiber_fmc american,033763e5115b269db4ba68707c9bc05a,elise granek and kellie teague,unknown
+poly(vinyl chloride) 2 (Open Specy),PVC,Cleanroom consumables,mffrc054_chlorofiber_fmc american,d5dd4597333657138910fa338acb73af,elise granek and kellie teague,unknown
+rayon (Open Specy),cellulose,Cleanroom consumables,mffrc055_lyocell (tencel)_courtaulds,af804f6fa7669f88b22b4b4e0535e46d,elise granek and kellie teague,unknown
+rayon 2 (Open Specy),cellulose,Cleanroom consumables,mffrc056_lyocell_lenzing,548b7a473b41024fb66373b4d5075efb,elise granek and kellie teague,unknown
+polyacrylates (Open Specy),polyacrylates,"Adhesives, seals & lubricants",mffrc130_polyacrylate (inidex)_courtaulds,537a692e2778558369bf32c7d6006069,elise granek and kellie teague,unknown
+polyacrylates 2 (Open Specy),polyacrylates,"Adhesives, seals & lubricants",mffrc130_polyacrylate (inidex)_courtaulds,ac8596437e82597b0d4f7f540a2e0cfb,elise granek and kellie teague,unknown
+polyacrylates 3 (Open Specy),polyacrylates,"Adhesives, seals & lubricants",mffrc130_polyacrylate (inidex)_courtaulds,ceac3fda37e24358a53df6dd0834c9d8,elise granek and kellie teague,unknown
+polyesters (Open Specy),polyesters,Cleanroom consumables,mffrc133_polyester (pen)_allied signal fibers,f15baa1627efd977b1ced1169aaee0d6,elise granek and kellie teague,unknown
+poly(vinylidene chloride) (Open Specy),polyhaloolefins,Packaging,mffrc134_pvdc (nonbur n90 (mac))_asahi chemical c,c1772084c2748450eeb777443446b305,elise granek and kellie teague,unknown
+poly(vinylidene chloride) 2 (Open Specy),polyhaloolefins,Packaging,mffrc134_pvdc (nonbur n90 (mac))_asahi chemical c,0de971f9822fd646577587c7bf562c3d,elise granek and kellie teague,unknown
+poly(vinylidene chloride) 3 (Open Specy),polyhaloolefins,Packaging,mffrc134_pvdc (nonbur n90 (mac))_asahi chemical c,bb9236fb5df0cc702335cf9701526324,elise granek and kellie teague,unknown
+polyesters 2 (Open Specy),polyesters,Cleanroom consumables,"mffrc135_polyester (pcdt, vestan 16)_bayer",8430ad61008978a2be300cc1dd1d0875,elise granek and kellie teague,unknown
+polyesters 3 (Open Specy),PET,Cleanroom consumables,"mffrc138_polyester (pet, dacron 50t)_du pont",36667e45130ca223fa676bf9f95ff608,elise granek and kellie teague,unknown
+polyesters 5 (Open Specy),PET,Cleanroom consumables,"mffrc151_polyester (pet, trevira 120)_hoechst",78483d20332919e8056f6ba07e800d3e,elise granek and kellie teague,unknown
+polyesters 6 (Open Specy),PET,Cleanroom consumables,"mffrc157_polyester (pet, trevira 561)_hoechst",d18648d12df2ed2799b37b8f1ef4d25b,elise granek and kellie teague,unknown
+polyesters 7 (Open Specy),PBT,Carriers & handling,"mffrc164_polyester (pbt, trevira 810)_hoechst",873bae0ac0a1611dc375cc63101c1c62,elise granek and kellie teague,unknown
+rayon 3 (Open Specy),cellulose,Cleanroom consumables,mffrc186_rayon (danufil f)_acordis fibers,047a778bb017fcb874d7b243c1b47094,elise granek and kellie teague,unknown
+poly(phenylene sulfide) (Open Specy),polyphenylene sulfide,Equipment & fixtures,mffrc200_sulfar (ryton)_amoco,2f6ae9063290eaf21748efc51adcc0b3,elise granek and kellie teague,unknown
+poly(phenylene sulfide) 2 (Open Specy),polyphenylene sulfide,Equipment & fixtures,mffrc200_sulfar (ryton)_amoco,244a684eb8318e884f8d803ab504a4ac,elise granek and kellie teague,unknown
+poly(phenylene sulfide) 3 (Open Specy),polyphenylene sulfide,Equipment & fixtures,mffrc200_sulfar (ryton)_amoco,fea9274070815efa37694f60d982abc5,elise granek and kellie teague,unknown
+poly(vinyl chloride) 3 (Open Specy),PVC,Cleanroom consumables,mffrc201_chlorofiber (thermovyl type l9s)_rhone pou,0f822a153bd476060244f92ad4770f79,elise granek and kellie teague,unknown
+polydienes (Open Specy),polydienes,"Adhesives, seals & lubricants",plc006_safety glasses strap_rubber,d0c7116932d4fe2fb11a1b01d36c53ac,elise granek and kellie teague,unknown
+polydienes 2 (Open Specy),polydienes,"Adhesives, seals & lubricants",plc006_safety glasses strap_rubber,35f561d062cc5d440a6de055bf2d194a,elise granek and kellie teague,unknown
+polydienes 3 (Open Specy),polydienes,"Adhesives, seals & lubricants",plc006_safety glasses strap_rubber,0a7da9eacaa7387197962b381525d213,elise granek and kellie teague,unknown
+"1,4-polyisoprene (cis and trans)(latex) (Open Specy)",natural rubber,Cleanroom consumables,plc011_latex tubing_natural rubber,2c5fb3e68a4de2bbce0ca24b47952bb3,elise granek and kellie teague,unknown
+"1,4-polyisoprene (cis and trans)(latex) 2 (Open Specy)",natural rubber,Cleanroom consumables,plc011_latex tubing_natural rubber,78249c67c032a81c7a6836b7d00ec771,elise granek and kellie teague,unknown
+"1,4-polyisoprene (cis and trans)(latex) 3 (Open Specy)",natural rubber,Cleanroom consumables,plc011_latex tubing_natural rubber,2808febcf3065dc5536781b211f42d1a,elise granek and kellie teague,unknown
+EVA (Open Specy),EVA,"Adhesives, seals & lubricants",plc012_tygon tubing_tpe,55e3ba079861373ae8ef9141da449f0d,elise granek and kellie teague,unknown
+EVA 2 (Open Specy),EVA,"Adhesives, seals & lubricants",plc012_tygon tubing_tpe,fe21aac63a9abf4e13c1ee3be4fb0bc7,elise granek and kellie teague,unknown
+plc015 isopore membrane pc (Open Specy),PC,Carriers & handling,plc015_isopore membrane_pc,98d89cf1e5c5dd3d931b80056e352a1e,elise granek and kellie teague,unknown
+plc015 isopore membrane pc 2 (Open Specy),PC,Carriers & handling,plc015_isopore membrane_pc,df1d8c6e69a5d79d8dfeac02facb18b5,elise granek and kellie teague,unknown
+plc015 isopore membrane pc 3 (Open Specy),PC,Carriers & handling,plc015_isopore membrane_pc,55d277578e36cf834aecb37166003a5a,elise granek and kellie teague,unknown
+polystyrene (Open Specy),PS,Packaging,plc019_petrislide_ps,fa4073737175a1aa6e35d90577ec9e8c,elise granek and kellie teague,unknown
+polystyrene 2 (Open Specy),PS,Packaging,plc019_petrislide_ps,02dec1fa31a738a4f2f4358f6b880b34,elise granek and kellie teague,unknown
+polystyrene 3 (Open Specy),PS,Packaging,plc019_petrislide_ps,e461b0370f41f6f0378bcb92dd1802d2,elise granek and kellie teague,unknown
+EVA 3 (Open Specy),EVA,"Adhesives, seals & lubricants",plc020_jar lid rubber_plastisol,199c92ded14553b86aee34f78808eac3,elise granek and kellie teague,unknown
+plc030 clear o-ring silicone (Open Specy),silicone,"Adhesives, seals & lubricants",plc030_clear o-ring_silicone,6bf2cd1b4259658fa485f654d77de0ce,elise granek and kellie teague,unknown
+plc030 clear o-ring silicone 2 (Open Specy),silicone,"Adhesives, seals & lubricants",plc030_clear o-ring_silicone,5f02f51d3f98b66f66d92f296a4208ad,elise granek and kellie teague,unknown
+plc030 clear o-ring silicone 3 (Open Specy),silicone,"Adhesives, seals & lubricants",plc030_clear o-ring_silicone,c09eef7a120be4a642f3d411bf536ea0,elise granek and kellie teague,unknown
+poly(tetrafluoroethylene) (Open Specy),fluoropolymer,Equipment & fixtures,plc037_thread tape_teflon,0d9cc65db52d8b34f5babac6756a5850,elise granek and kellie teague,unknown
+poly(tetrafluoroethylene) 2 (Open Specy),fluoropolymer,Equipment & fixtures,plc037_thread tape_teflon,80b9d77a13b70717ff4a575cd3160519,elise granek and kellie teague,unknown
+poly(tetrafluoroethylene) 3 (Open Specy),fluoropolymer,Equipment & fixtures,plc037_thread tape_teflon,4f4347cfc8d992476713e2eb6ff4aabd,elise granek and kellie teague,unknown
+protein (Open Specy),protein,People & clothing,plc046_horsehair bristles_keratin,451e0f3f72bed2d6d97b9d59f864ad82,elise granek and kellie teague,unknown
+polyhydroxy(meth)acrylates (Open Specy),polyhydroxy(meth)acrylates,"Adhesives, seals & lubricants",plc054_lab doorframes_paint,d587239c9cfdab65162ed8b92f70274c,elise granek and kellie teague,unknown
+other material (Open Specy),mineral,Minerals & inorganics,plc055_benchtop coating_sealant,0846d096ae44b5a098120e04f7009808,elise granek and kellie teague,unknown
+other material 2 (Open Specy),mineral,Minerals & inorganics,plc055_benchtop coating_sealant,a0062a05222509c5bd09b787a23ce342,elise granek and kellie teague,unknown
+other material 3 (Open Specy),mineral,Minerals & inorganics,plc055_benchtop coating_sealant,fdf9400f72f9131b3c83b524c3a39f16,elise granek and kellie teague,unknown
+protein 2 (Open Specy),protein,People & clothing,plc058_human hair_keratin,3ccd651a884354c8d368dade3a36f4bd,elise granek and kellie teague,unknown
+polymethacrylates (Open Specy),polymethacrylates,"Adhesives, seals & lubricants",scipoly004_butyl methacrylate-isobutyl methacrylate,54c70b0ecb4f8c081e2b7d8ad8be6af0,elise granek and kellie teague,unknown
+polymethacrylates 2 (Open Specy),polymethacrylates,"Adhesives, seals & lubricants",scipoly004_butyl methacrylate-isobutyl methacrylate,4b1a3693a218992133ed9315a256c09d,elise granek and kellie teague,unknown
+polymethacrylates 3 (Open Specy),polymethacrylates,"Adhesives, seals & lubricants",scipoly004_butyl methacrylate-isobutyl methacrylate,9cbda4738cd88552b2985d65d1ec549d,elise granek and kellie teague,unknown
+poly(ethylene) 4 (Open Specy),EVOH,Packaging,scipoly022_ethylene-vinyl alcohol copolymer,5a1be0c66e43834facaf22ef738aa2c3,elise granek and kellie teague,unknown
+poly(ethylene) 5 (Open Specy),EVOH,Packaging,scipoly022_ethylene-vinyl alcohol copolymer,5c444c5f47bf30bfbbd5a05aa196f0ea,elise granek and kellie teague,unknown
+poly(ethylene) 6 (Open Specy),EVOH,Packaging,scipoly022_ethylene-vinyl alcohol copolymer,c63485d7b5bde26dbca459d189d63e33,elise granek and kellie teague,unknown
+polydiglycidyl ethers (Open Specy),epoxy,"Adhesives, seals & lubricants",scipoly034_phenoxy resin,2e6c6232e4151f3ca866c70a580347df,elise granek and kellie teague,unknown
+polydiglycidyl ethers 2 (Open Specy),epoxy,"Adhesives, seals & lubricants",scipoly034_phenoxy resin,64ff83ad568cab4dbf383d129b587b71,elise granek and kellie teague,unknown
+polydiglycidyl ethers 3 (Open Specy),epoxy,"Adhesives, seals & lubricants",scipoly034_phenoxy resin,b362e4cb7e0040250626b7408544bcbc,elise granek and kellie teague,unknown
+polyacetal - polyoxymethylene (Open Specy),POM,Equipment & fixtures,scipoly035_polyacetal,20bd1dddfdb41d899f28ffabe111c832,elise granek and kellie teague,unknown
+polyacetal - polyoxymethylene 2 (Open Specy),POM,Equipment & fixtures,scipoly035_polyacetal,357e6a767891c9dcf50e5792cbd860cb,elise granek and kellie teague,unknown
+polyacetal - polyoxymethylene 3 (Open Specy),POM,Equipment & fixtures,scipoly035_polyacetal,6095f14ad749402b4cfec5022d946528,elise granek and kellie teague,unknown
+poly(acrylamide) (Open Specy),polyacrylamides,CMP & cleaning,scipoly036_polyacrylamide,c160f8ba913a6cd69a16ec7eac301205,elise granek and kellie teague,unknown
+poly(acrylamide) 2 (Open Specy),polyacrylamides,CMP & cleaning,scipoly036_polyacrylamide,8e95b66e8fdebe70afc22453e563879c,elise granek and kellie teague,unknown
+poly(acrylamide) 3 (Open Specy),polyacrylamides,CMP & cleaning,scipoly036_polyacrylamide,3cd42ee2d14ee52787149b383940fb9a,elise granek and kellie teague,unknown
+poly(butylene) (Open Specy),polyolefins,Packaging,"scipoly042_poly(1-butene), isotactic",8fede35da7b338c45ceb071c75e61f45,elise granek and kellie teague,unknown
+poly(butylene) 2 (Open Specy),polyolefins,Packaging,"scipoly042_poly(1-butene), isotactic",a885e023dd378c1d41ac22b5b9138976,elise granek and kellie teague,unknown
+poly(butylene) 3 (Open Specy),polyolefins,Packaging,"scipoly042_poly(1-butene), isotactic",30f8745e7175998807b70d54db04ad67,elise granek and kellie teague,unknown
+poly(butylene terephthalate) (Open Specy),PBT,Carriers & handling,scipoly043_poly(butylene terephthalate),799560bf909e2c374c4a6fa6f7f1a40a,elise granek and kellie teague,unknown
+"poly(2,6-dimethyl-p-phenylene oxide) (Open Specy)",polyphenylethers,Equipment & fixtures,"scipoly048_poly(2,6-dimethyl-p-phenylene oxide)",15fc76d2c5e05956d4425821d8097f8a,elise granek and kellie teague,unknown
+"poly(2,6-dimethyl-p-phenylene oxide) 2 (Open Specy)",polyphenylethers,Equipment & fixtures,"scipoly048_poly(2,6-dimethyl-p-phenylene oxide)",5d9c1ff4c775a2eae7b43c3c224d7e7a,elise granek and kellie teague,unknown
+"poly(2,6-dimethyl-p-phenylene oxide) 3 (Open Specy)",polyphenylethers,Equipment & fixtures,"scipoly048_poly(2,6-dimethyl-p-phenylene oxide)",a9e5f053af9b34e59871916a21eff759,elise granek and kellie teague,unknown
+poly(ethylene glycol) (Open Specy),polyethers,CMP & cleaning,scipoly054_poly(ethylene glycol),988f9d9fafc7cc3260d3061594ea65ee,elise granek and kellie teague,unknown
+poly(ethylene glycol) 2 (Open Specy),polyethers,CMP & cleaning,scipoly054_poly(ethylene glycol),746132016075dd9d00c7defcaf59d9c9,elise granek and kellie teague,unknown
+poly(ethylene glycol) 3 (Open Specy),polyethers,CMP & cleaning,scipoly054_poly(ethylene glycol),8edd755543fab67e03c1cd3deae0aed6,elise granek and kellie teague,unknown
+poly(2-hydroxyethyl methacrylate) (Open Specy),polyhydroxy(meth)acrylates,"Adhesives, seals & lubricants","scipoly058_poly(2-hydroxyethyl methacrylate), mw300k",9ed5f650e78206e301d7740b6b2a2324,elise granek and kellie teague,unknown
+poly(2-hydroxyethyl methacrylate) 2 (Open Specy),polyhydroxy(meth)acrylates,"Adhesives, seals & lubricants","scipoly058_poly(2-hydroxyethyl methacrylate), mw300k",7d06d4c951564779937af261ace92a61,elise granek and kellie teague,unknown
+poly(methyl methacrylate) (Open Specy),PMMA,Litho & process residues,"scipoly062_poly(methyl methacrylate), mw75k",2b4f956a8b70283bea93b6b6b965048c,elise granek and kellie teague,unknown
+poly(methyl methacrylate) 2 (Open Specy),PMMA,Litho & process residues,"scipoly062_poly(methyl methacrylate), mw75k",dbccdc8da57f7d88bc99bbba259078a7,elise granek and kellie teague,unknown
+poly(methyl methacrylate) 3 (Open Specy),PMMA,Litho & process residues,"scipoly062_poly(methyl methacrylate), mw75k",9528162abbae005c8237ac1f1b6ac8c6,elise granek and kellie teague,unknown
+polyethersulfones (Open Specy),polyethersulfones,Equipment & fixtures,scipoly065_poly(p-phenylene-ether-sulphone),eaaa2bd394fbc74ce5f5bb9804a994d7,elise granek and kellie teague,unknown
+polyethersulfones 2 (Open Specy),polyethersulfones,Equipment & fixtures,scipoly065_poly(p-phenylene-ether-sulphone),4b632a95971e7894fe0ecc2b7c436140,elise granek and kellie teague,unknown
+polyethersulfones 3 (Open Specy),polyethersulfones,Equipment & fixtures,scipoly065_poly(p-phenylene-ether-sulphone),ab8bca4a7dc8eca5def8225237cf8f75,elise granek and kellie teague,unknown
+polyhalostyrenes (Open Specy),polyhalostyrenes,Packaging,"scipoly073_poly(2,4,6-tribromostyrene)",04ec40b00c58ec5290ff831c5d2289cb,elise granek and kellie teague,unknown
+polyhalostyrenes 2 (Open Specy),polyhalostyrenes,Packaging,"scipoly073_poly(2,4,6-tribromostyrene)",9ffbdfa2f08b90819290135258e2d6a6,elise granek and kellie teague,unknown
+polyhalostyrenes 3 (Open Specy),polyhalostyrenes,Packaging,"scipoly073_poly(2,4,6-tribromostyrene)",795929c70028c465ae4c84e2051d6853,elise granek and kellie teague,unknown
+poly(vinyl acetate) (Open Specy),PVAc,"Adhesives, seals & lubricants","scipoly074_poly(vinyl acetate), mw150k",5995da9efddf3ba95b7cca1577c84f9b,elise granek and kellie teague,unknown
+poly(vinyl acetate) 2 (Open Specy),PVAc,"Adhesives, seals & lubricants","scipoly074_poly(vinyl acetate), mw150k",e84f9bb46fbb31081cdcd61c2b7f07f5,elise granek and kellie teague,unknown
+poly(vinyl acetate) 3 (Open Specy),PVAc,"Adhesives, seals & lubricants","scipoly074_poly(vinyl acetate), mw150k",bfb1d81a2fbf5cb6d05609e69fff3edc,elise granek and kellie teague,unknown
+poly(vinyl alcohol) (Open Specy),PVOH,CMP & cleaning,"scipoly076_poly(vinyl alcohol), 88p hydrolyzed",ed43720f69f7688eb3d0a6970df6b94f,elise granek and kellie teague,unknown
+poly(vinyl alcohol) 2 (Open Specy),PVOH,CMP & cleaning,"scipoly076_poly(vinyl alcohol), 88p hydrolyzed",b78af711aa9496f42eb9b5eacd92fb6f,elise granek and kellie teague,unknown
+poly(vinyl alcohol) 3 (Open Specy),PVOH,CMP & cleaning,"scipoly076_poly(vinyl alcohol), 88p hydrolyzed",a2abf5ca2efb92fa7f8fc6af8c6af5fc,elise granek and kellie teague,unknown
+SAN (Open Specy),SAN,Equipment & fixtures,scipoly084_poly(4-vinylpyridine-co-styrene),971dc20cf4e22e950c36140118bd790c,elise granek and kellie teague,unknown
+SAN 2 (Open Specy),SAN,Equipment & fixtures,scipoly084_poly(4-vinylpyridine-co-styrene),8c83dcc258e523723d248c1c578a909f,elise granek and kellie teague,unknown
+SAN 3 (Open Specy),SAN,Equipment & fixtures,scipoly084_poly(4-vinylpyridine-co-styrene),cbfa0ea767da49ba08c4ab6f119a3873,elise granek and kellie teague,unknown
+poly(vinyl pyrrolidone) (Open Specy),polyvinylpyrrolidones,CMP & cleaning,scipoly085_polyvinylpyrrolidone,c8bdab1d3dd287e44a6814b7699e35d8,elise granek and kellie teague,unknown
+poly(vinyl pyrrolidone) 2 (Open Specy),polyvinylpyrrolidones,CMP & cleaning,scipoly085_polyvinylpyrrolidone,0d42b379390667acc13aa818e501d353,elise granek and kellie teague,unknown
+poly(vinyl pyrrolidone) 3 (Open Specy),polyvinylpyrrolidones,CMP & cleaning,scipoly085_polyvinylpyrrolidone,df59d1bd0e7c9c169805f81e22d52835,elise granek and kellie teague,unknown
+styrene-butadiene (Open Specy),poly(styrene-butadiene) rubber,"Adhesives, seals & lubricants","scipoly089_styrene-butadiene copolymer, aba block",94dad6205846ef6cbddeecd33b327336,elise granek and kellie teague,unknown
+styrene-butadiene 2 (Open Specy),poly(styrene-butadiene) rubber,"Adhesives, seals & lubricants","scipoly089_styrene-butadiene copolymer, aba block",293a7bca08fce4812d19c3439d3537b0,elise granek and kellie teague,unknown
+styrene-butadiene 3 (Open Specy),poly(styrene-butadiene) rubber,"Adhesives, seals & lubricants","scipoly089_styrene-butadiene copolymer, aba block",da4f0274e9f79ea1eb777db9fbe49967,elise granek and kellie teague,unknown
+protein 3 (Open Specy),protein,People & clothing,tf061_wool felt,f9477b7bc45a8fd25637299760b99d78,elise granek and kellie teague,unknown
+polyimides (Open Specy),polyimide,Equipment & fixtures,polyimide_ref,eeda72a5400c73abe04dc3a343a9726e,gicquel et al. 2024,unknown
+polyimides 2 (Open Specy),polyimide,Equipment & fixtures,polyimide_ref,ee629d7aa9b467c16e2b5cea06def383,gicquel et al. 2024,unknown
+polyimides 3 (Open Specy),polyimide,Equipment & fixtures,polyimide_ref,d0b6a13f02138c23d76716951e2de288,gicquel et al. 2024,unknown
+polylactic acid (Open Specy),PLA,Equipment & fixtures,polylactic acid_ref,89b26e8cfa36e63f73a14985b271aba5,gicquel et al. 2024,unknown
+polylactic acid 2 (Open Specy),PLA,Equipment & fixtures,polylactic acid_ref,414238077a424ad4bead4d6b05ea6244,gicquel et al. 2024,unknown
+polylactic acid 3 (Open Specy),PLA,Equipment & fixtures,polylactic acid_ref,ee4d2e7f2f2d845d51a19609c31bb736,gicquel et al. 2024,unknown
+poly(butylene terephthalate) 2 (Open Specy),PBT,Carriers & handling,polybuthylene terephthalate_ref,c40a791dc7f20a922e9044086461f287,gicquel et al. 2024,unknown
+acrylonitrile butadiene styrene (abs) (Open Specy),ABS,Equipment & fixtures,abs,e10c696ff846076b56b36cd6465ce775,"julia, davidson",ATR
+acrylonitrile butadiene styrene (abs) 2 (Open Specy),ABS,Equipment & fixtures,abs,695c364d00f5a127781bf036c3d51ef0,"julia, davidson",ATR
+acrylonitrile butadiene styrene (abs) 3 (Open Specy),ABS,Equipment & fixtures,abs,824f1d1c2aecfa28dd6ead0a489e91f6,"julia, davidson",ATR
+polyvinylesters (Open Specy),polyvinylesters,"Adhesives, seals & lubricants",vinyl acetate paint,1633b9d7fcb6bea2cbfe897991f8850b,plopp library,unknown
+polyvinylesters 2 (Open Specy),polyvinylesters,"Adhesives, seals & lubricants",vinyl acetate paint,c83af0f02d651bd62f79bf1c4044c1a4,plopp library,unknown
+polyvinylesters 3 (Open Specy),polyvinylesters,"Adhesives, seals & lubricants",vinyl acetate paint,4302c2425fbf5a94acaa1a63c5944c9a,plopp library,unknown
+urethane-alkyd paint (Open Specy),PU,CMP & cleaning,urethane-alkyd paint,85e535d18a21d8a3642a5a72a60d3a03,plopp library,unknown
+urethane-alkyd paint 2 (Open Specy),PU,CMP & cleaning,urethane-alkyd paint,54fe74e1e47ff2651354543fdaa433dc,plopp library,unknown
+urethane-alkyd paint 3 (Open Specy),PU,CMP & cleaning,urethane-alkyd paint,c6f99c44e25cd892728c002d64b45b45,plopp library,unknown
+peek - poly(ether ether ketone) (Open Specy),PEEK,Equipment & fixtures,peek,254305c149c5e5247b6e39a0821a2c85,rachel kozloski,transmission
+peek - poly(ether ether ketone) 2 (Open Specy),PEEK,Equipment & fixtures,peek,b0fa15240726494d8feea111606eb0a5,rachel kozloski,transmission
+peek - poly(ether ether ketone) 3 (Open Specy),PEEK,Equipment & fixtures,peek,a234576d988580539d710f957b3532d7,rachel kozloski,transmission
+silica (Open Specy),silica,Minerals & inorganics,quartz,c7b09f9983ba1a077cb5d8f3befbada2,rruff,unknown
+silica 2 (Open Specy),silica,CMP & cleaning,silica gel lab,06d7ef348d947e1ea94f5940dc641a33,primpke et al. 2018,unknown
+silica 3 (Open Specy),silica,Minerals & inorganics,quartz sand lab,1af6072cf5c1e2e0464d25e1840b5e97,primpke et al. 2018,unknown
+polydiglycidyl ethers 4 (Open Specy),polydiglycidyl ethers,Packaging,styrene ethylene butylene,eb2f365a9afb2e7215c9432249191f54,primpke et al. 2018,ATR
+nitrile rubber (Open Specy),nitrile rubber,"Adhesives, seals & lubricants",mixture of ucar acrylate and acrylonitrile,064458ef986585ca79ff09df23b54422,"suja sukumaran, thermo fisher scientific",unknown
+polydiglycidyl ethers 5 (Open Specy),polydiglycidyl ethers,"Adhesives, seals & lubricants",r 16. black rubber paving,9f65babddf30052235e1ef30da15ccb9,"flopp, de frond et al. 2021",transmission
+nitrile rubber 2 (Open Specy),nitrile rubber,Cleanroom consumables,nitrile,c95eb9375a284ff2b96db4cef8cc61d9,win cowger and sebastian primpke,unknown
+nitrile rubber 3 (Open Specy),nitrile rubber,Cleanroom consumables,nitrile,5ce0fe530b346e7c49618db057beacd4,win cowger and sebastian primpke,unknown
+poly(ethylene-propylene-diene) rubber (Open Specy),poly(ethylene-propylene-diene) rubber,"Adhesives, seals & lubricants",rubber,d404833f02f8aaf1f62ba0d9eb13089c,win cowger and sebastian primpke,unknown
+poly(ethylene-propylene-diene) rubber 2 (Open Specy),poly(ethylene-propylene-diene) rubber,"Adhesives, seals & lubricants",rubber,c9d7aacbeb6a2caf537c1fe6e8854cb4,win cowger and sebastian primpke,unknown
+poly(ethylene-propylene-diene) rubber 3 (Open Specy),poly(ethylene-propylene-diene) rubber,"Adhesives, seals & lubricants",rubber,c94c3ff87919656d35d63e05f2d01db9,win cowger and sebastian primpke,unknown

@@ -40,6 +40,7 @@ from .inhouse import addition_preview, reference_notes
 from .openspecy import CITATION, LICENCE
 from .jobs import Job
 from .library import reference_on_grid, similarity_matrix
+from .molecule_view import StructurePanel
 from .motion import (EASE_OUT, MOTION, Card, FlowLayout, Segmented, SmoothScrollArea, Spinner, alive, animate,
                      fade_through, make_opaque, snapshot, stop, warm_up)
 from .peaks import band_label, band_table
@@ -818,6 +819,11 @@ class MaterialDetail(QWidget):
                                         f"{config.KEY_SHARE:.0%} of the tallest band).", "SectionHint", wrap=True))
         column.addWidget(chart_card)
 
+        # its structure, when there is a model of it
+        self.structure = StructurePanel(240)
+        if self.structure.show_material(name, library):
+            column.addWidget(self.structure)
+
         # key bands
         band_card, band_body = section("Key bands", "height relative to the tallest band")
         band_grid = QGridLayout()
@@ -1563,6 +1569,7 @@ class OpenSpecyPanel(QWidget):
 
     download_requested = Signal()
     import_requested = Signal(str)
+    pack_requested = Signal()
 
     def __init__(self, store, start_dir=""):
         super().__init__()
@@ -1578,8 +1585,8 @@ class OpenSpecyPanel(QWidget):
             "Body2", wrap=True))
         steps, steps_body = section("What happens", "nothing is changed in the original file")
         for number, text in enumerate([
-                "The 'medoid nobaseline' library (baseline-corrected absorbance) is downloaded from where "
-                "Open Specy keeps it (AWS, or osf.io), or you choose a file you downloaded yourself (.rds).",
+                "Use the references included with the program (no internet needed), or get the newest 'medoid "
+                "nobaseline' library from where Open Specy keeps it (AWS, or osf.io), or a file you downloaded (.rds).",
                 "Only FTIR spectra in fab-relevant material classes are kept.",
                 "Every spectrum is compared with every reference. One that could be confused with a different "
                 "material (r ≥ 0.95) is left out, so the extended library still passes the impostor test.",
@@ -1596,19 +1603,22 @@ class OpenSpecyPanel(QWidget):
         else:
             status_body.addWidget(text_label("Not installed yet.", "Body2"))
         column.addWidget(status)
-        buttons = QHBoxLayout()
-        self.download_button = QPushButton(" Download from Open Specy")
-        self.download_button.setObjectName("Primary")
-        self.download_button.setIcon(icon("file-down", t["on_primary"]))
+        button_row = QWidget()
+        buttons = FlowLayout(button_row, spacing=10)                    # they wrap in a narrow sheet
+        self.pack_button = QPushButton(" Use the included references")
+        self.pack_button.setObjectName("Primary")
+        self.pack_button.setIcon(icon("files", t["on_primary"]))
+        self.download_button = QPushButton(" Download the newest")
+        self.download_button.setIcon(icon("file-down", t["ink_2"]))
         self.import_button = QPushButton(" Import a library file…")
         self.import_button.setIcon(icon("upload", t["ink_2"]))
-        for button in (self.download_button, self.import_button):
+        for button in (self.pack_button, self.download_button, self.import_button):
             button.setCursor(Qt.PointingHandCursor)
             buttons.addWidget(button)
-        buttons.addStretch()
-        column.addLayout(buttons)
+        column.addWidget(button_row)
         column.addWidget(text_label(f"Licence {LICENCE}. Please cite: {CITATION}", "SectionHint", wrap=True))
         column.addStretch()
+        self.pack_button.clicked.connect(self.pack_requested.emit)
         self.download_button.clicked.connect(self.download_requested.emit)
         self.import_button.clicked.connect(self._choose)
 

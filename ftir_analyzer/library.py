@@ -305,7 +305,9 @@ def impostor_test(library):
     a wrong material can get, so 'probable' must start above it.
     """
     worst = Validation("", "", 0.0)
-    for name, spectrum in library.spectra.items():
+    for name in library.spectra:                                       # each fingerprint once, not once per round:
+        library.fingerprint_of(name)                                   # the same numbers, and 164 references take
+    for name, spectrum in library.spectra.items():                     # seconds instead of a minute and a half
         group = library.group_of(name)
         ranking = search(spectrum, _without(library, name))
         impostor, r = next(((n, s) for n, s in ranking if library.group_of(n) != group), ("", 0.0))

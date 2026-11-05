@@ -44,7 +44,9 @@ License: MIT (see LICENSE)
 
 import gc
 import html
+import shutil
 import sys
+import tempfile
 import traceback
 from datetime import datetime
 from pathlib import Path
@@ -68,16 +70,19 @@ from .jobs import Job
 from .library import impostor_test, load_library
 from .library_view import (EXTENDED, AddReferencePanel, LibraryPage, MaterialDetail, OpenSpecyPanel, SimilarityPanel,
                            similarity_for)
-from .openspecy import OpenSpecyLibrary, download_and_import, import_library
+from .openspecy import PACK_DIR, OpenSpecyLibrary, download_and_import, import_library, install_pack
 from .compare_view import TopMatches
+from .molecule_view import StructurePanel
 from .motion import (MOTION, Card, FadeStack, Motion, Overlay, Sheet, SmoothScrollArea, Spinner, Tabs, Toast,
-                     animate, count_up, crossfade, fade_through, make_opaque, rise_in, snapshot, zero_like)
+                     alive, animate, count_up, crossfade, fade_through, make_opaque, rise_in, snapshot, zero_like)
 from .peaks import band_label, band_names
 from .plots import save_figure, setup_fonts
 from .records import SampleLog, readable_time, resolve_modes, run_info
 from .report import write_report
 from .spectrum_io import SpectrumFileError, find_spectrum_files, read_mode_note, read_spectra
+from .structures import groups_at
 from .theme import FONT_FILES, FONTS, THEMES, VERDICT_LOOK, stylesheet
+from .tour import Tour
 from .widgets import (BandButton, ElidedLabel, EmptyState, FlowLayout, ModeDialog, Pill, PlotPanel, ScoreBars, ScoreStrip,
                       SpectrumDelegate, SpectrumListModel, Theme, chip, clear_layout, flag_pill, icon, icon_pixmap,
                       logo_pixmap, verdict_pill)
@@ -123,8 +128,8 @@ reference, the impostor test with the new reference, and which of the spectra on
 different answer. A reference that would make two materials impossible to tell apart cannot be added.
 Every addition and removal is kept in <code>records/inhouse_library/library_changes.csv</code>,
 which is only ever appended to.</p>
-<p><b>More references (Open Specy)</b>: <b>Library → Open Specy…</b> downloads the Open Specy library
-(Cowger et al. 2021, CC BY 4.0) on this computer, or imports a file you downloaded. Only FTIR spectra of
+<p><b>More references (Open Specy)</b>: <b>Library → Open Specy…</b> uses the references included with the
+program, downloads the newest Open Specy library (Cowger et al. 2021, CC BY 4.0), or imports a file. Only FTIR spectra of
 materials a fab is likely to see are kept, and every one that could be confused with a different material is
 left out, so the extended library still passes the impostor test. Switch between <b>Fab essentials</b> and
 <b>Extended</b> on the Library page.</p>
@@ -275,6 +280,8 @@ class ResultView(SmoothScrollArea):
         page = QWidget()
         page.setObjectName("ResultPage")
         self.setWidget(page)
+        self.result = self.library = self.pinned_band = self.band_info = None
+        self.band_buttons = []
         make_opaque(page, Theme.t["paper"])                             # opaque: Qt can scroll it by copying pixels
         self.page = page
         col = QVBoxLayout(page)
@@ -363,6 +370,12 @@ class ResultView(SmoothScrollArea):
         self.plot.save_requested.connect(self.save_figure.emit)
         col.addWidget(self.plot)
 
+        # 4b. the structure of the material shown: a band's bonds glow, right under the band in the figure
+        self.structure = StructurePanel()
+        self.structure.picked.connect(self._pin_group)
+        self.plot.compare_changed.connect(self._show_compared)
+        col.addWidget(self.structure)
+
         # 5. the closest matches, side by side (click one: it is drawn in the figure above)
         self.top = TopMatches()
         self.top.chosen.connect(self.plot.set_compare)
@@ -442,7 +455,8 @@ class ResultView(SmoothScrollArea):
 
     def sections(self):
         """The parts of the page, top to bottom (they rise in one after the other)."""
-        parts = [self.head, self.change_box, self.facts, self.next_box, self.plot, self.top, self.verdict_panel,
+        parts = [self.head, self.change_box, self.facts, self.next_box, self.plot, self.structure, self.top,
+                 self.verdict_panel,
                  self.evidence_panel, self.checks_panel, self.sources_panel, self.trace_panel]
         return [part for part in parts if not part.isHidden()]
 
@@ -474,10 +488,22 @@ class ResultView(SmoothScrollArea):
         sample, match = heights(w)
         button.info = {"w": w, "kind": kind, "match": r.best, "name": band_names(w) or "not in the band table",
                        "sample": sample, "ref": match}
-        button.hovered.connect(lambda on, b=button: self.plot.mark_band(
-            b.w if on else (self.pinned_band.w if self.pinned_band else None)))
+        button.hovered.connect(lambda on, b=button: self._hover_band(b, on))
         button.clicked.connect(lambda _=False, b=button: self._pin_band(b))
+        self.band_buttons.append(button)
         return button
+
+    def _hover_band(self, button, on):
+        """The mouse on a band: it is marked in the figure and its bonds glow; off it: back to the pinned band."""
+        self.plot.mark_band(button.w if on else (self.pinned_band.w if self.pinned_band else None))
+        self.structure.preview_band(button.w if on else None)
+
+    def _show_compared(self, name=None):
+        """The structure follows the figure: the material compared with, or the best match."""
+        r = self.result
+        if r is not None:
+            self.structure.show_material(name or (r.best if r.has_match else None), self.library)
+            self.pinned_band = None
 
     def _band_info_row(self):
         """Two short lines about the pinned band, with a button back to the whole spectrum."""
@@ -505,6 +531,7 @@ class ResultView(SmoothScrollArea):
             self.band_info.hide()
             self.plot.mark_band(None)
             self.plot.reset_view()
+            self.structure.show_band(None)
             return
         self.pinned_band = button
         button.setChecked(True)
@@ -521,12 +548,33 @@ class ResultView(SmoothScrollArea):
         self.band_info.show()
         self.plot.mark_band(info["w"])
         self.plot.zoom_to(info["w"])
+        self.structure.show_band(info["w"])
         self.ensureWidgetVisible(self.plot, 0, 40)
+        if not self.structure.isHidden():                                # the band and its bonds on one screen
+            self.ensureWidgetVisible(self.structure, 0, 16)
+
+    def _pin_group(self, w):
+        """A band group of the structure was clicked: go to the sample's band there, or let go (None)."""
+        if w is None:
+            if self.pinned_band is not None:
+                self._pin_band(self.pinned_band)
+            return
+        model = self.structure.model
+        ranges = [r for name in groups_at(model, w) for r in model["groups"][name]["ranges"]]
+        near = [b for b in self.band_buttons if any(low - 10 <= b.w <= high + 10 for low, high in ranges)]
+        if near:
+            if near[0] is not self.pinned_band:
+                self._pin_band(near[0])
+            return
+        self.plot.mark_band(w)                                           # the sample has no band there
+        self.plot.zoom_to(w)
 
     def display(self, r, library, sample_log_path, animated=True):
         """Fill every part of the page with one result."""
         t = Theme.t
         c, ev, s = r.checks, r.evidence, r.spectrum
+        self.result, self.library = r, library
+        self.band_buttons = []
         if animated:
             self.scroll_to_top()
 
@@ -584,6 +632,7 @@ class ResultView(SmoothScrollArea):
         # figure, and the closest matches
         self.plot.show_result(r, library)
         self.top.show_result(r, library, self.plot.compare)
+        self.structure.show_material(self.plot.compare or (r.best if r.has_match else None), library)
 
         # why this verdict
         self.reason.setText(r.reason)
@@ -702,8 +751,9 @@ class MainWindow(QMainWindow):
     """The application window."""
 
     def __init__(self, files=(), ask_for_files=True, sample_log=None, audit_log=None, inhouse_dir=None,
-                 openspecy_dir=None):
+                 openspecy_dir=None, tour_folder=None):
         super().__init__()
+        self.tour_folder, self.tour, self.tour_window = tour_folder, None, None   # a tour's window keeps nothing
         # remembers theme, folder and window size, in a small settings file (Windows: %APPDATA%\\Ali Obeidat)
         self.settings = QSettings(QSettings.IniFormat, QSettings.UserScope, __author__, __title__)
         Motion.reduced = self.settings.value("reduce_motion", Motion.system_prefers_reduced(), type=bool)
@@ -713,7 +763,7 @@ class MainWindow(QMainWindow):
         self.signature_log = self.audit_log.parent / "signatures.csv"   # next to the audit log
         self.inhouse_dir = Path(inhouse_dir or config.INHOUSE_DIR)
         self.openspecy_dir = Path(openspecy_dir or config.RECORDS_DIR / "openspecy")
-        self.extended = self.settings.value("library_mode", "essentials") == EXTENDED
+        self.extended = self.settings.value("library_mode", "essentials") == EXTENDED and tour_folder is None
         self.pool = QThreadPool.globalInstance()
         self.jobs = []                                                     # running jobs (kept alive here)
         self.busy = False
@@ -762,7 +812,7 @@ class MainWindow(QMainWindow):
 
         self.act_open = make("Open spectra…", "Ctrl+O", self.open_files, "Choose one or more spectrum files")
         self.act_folder = make("Open folder…", "Ctrl+Shift+O", self.open_folder, "Analyse every spectrum in a folder")
-        self.act_demo = make("Open demo spectra", "Ctrl+D", self.open_demo, "Twelve example measurements")
+        self.act_demo = make("Open demo spectra", "Ctrl+D", self.open_demo, "Twenty example measurements")
         self.act_export = make("Export report…", "Ctrl+E", self.export_report,
                                "Write the report (web page and Excel table), and sign it if you like")
         self.act_last_pdf = make("Open last PDF report", "", lambda: self.open_last("report.pdf"),
@@ -785,6 +835,7 @@ class MainWindow(QMainWindow):
                             "Add a material the lab identified itself")
         self.act_map = make("Similarity map", "", self.open_similarity)
         self.act_help = make("How it works", "F1", self.show_help)
+        self.act_tour = make("Take the tour", "", self.start_tour, "A guided tour with the demo files; nothing is kept")
         self.act_about = make(f"About {__title__}", "", self.show_about)
 
     def _build_menu(self):
@@ -814,6 +865,7 @@ class MainWindow(QMainWindow):
         records.addAction("Open the records folder", lambda: self.open_record(self.sample_log.path.parent))
         help_menu = bar.addMenu("&Help")
         help_menu.addAction(self.act_help)
+        help_menu.addAction(self.act_tour)
         help_menu.addAction(self.act_about)
 
     def _build_header(self):
@@ -953,6 +1005,8 @@ class MainWindow(QMainWindow):
         self.empty.choose_files.connect(self.open_files)
         self.empty.open_demo.connect(self.open_demo)
         self.empty.open_library.connect(lambda: self.show_page(LIBRARY))
+        self.empty.take_tour.connect(self.start_tour)
+        self.empty.tour_link.setVisible(self.tour_folder is None)
         self.result_view = ResultView()
         self.result_view.plot.others = lambda: list(self.model.results)   # "another sample over this one"
         self.result_view.save_figure.connect(self.save_current_figure)
@@ -1052,6 +1106,7 @@ class MainWindow(QMainWindow):
             self.result_view.display(self.current_result(), self.library, self.sample_log.path, animated=False)
         make_opaque(self.result_view.page, t["paper"])
         self.result_view.top.retheme()
+        self.result_view.structure.view.retheme()
 
     def toggle_motion(self):
         Motion.reduced = self.act_motion.isChecked()
@@ -1096,6 +1151,9 @@ class MainWindow(QMainWindow):
         self._set_library(*payload)
         self.set_ready(True)
         self.set_status("Ready. Open spectrum files, open a folder, or drop files on the window.")
+        if self.tour_folder is not None and self.tour is None:
+            self.tour = Tour(self, ANALYZE, LIBRARY)
+            self.tour.start()
         if self.files_on_start:
             self.analyse_paths(self.files_on_start)
         elif self.ask_on_start:
@@ -1218,6 +1276,20 @@ class MainWindow(QMainWindow):
         if folder:
             self._remember_dir(Path(folder))
             self.analyse_paths([folder])
+
+    def start_tour(self):
+        """The guided tour, in a window of its own whose records live in a temporary folder."""
+        if alive(self.tour_window) and self.tour_window.isVisible():
+            self.tour_window.activateWindow()
+            return self.tour_window
+        folder = Path(tempfile.mkdtemp(prefix="ftir_tour_"))
+        self.tour_window = MainWindow(ask_for_files=False, sample_log=folder / "sample_log.csv",
+                                      audit_log=folder / "audit_log.csv", inhouse_dir=folder / "inhouse_library",
+                                      openspecy_dir=folder / "openspecy", tour_folder=folder)
+        self.tour_window.setWindowTitle(f"{__title__}: tour, nothing here is kept")
+        self.tour_window.setAttribute(Qt.WA_DeleteOnClose)
+        self.tour_window.show()
+        return self.tour_window
 
     def open_demo(self):
         if self.library is None or self.busy:
@@ -1484,18 +1556,20 @@ class MainWindow(QMainWindow):
         content = OpenSpecyPanel(OpenSpecyLibrary(self.openspecy_dir), self.last_dir)
         content.download_requested.connect(lambda: self.get_openspecy(None))
         content.import_requested.connect(self.get_openspecy)
+        content.pack_requested.connect(lambda: self.get_openspecy(PACK_DIR))
         self._open_sheet("More references from Open Specy", content, 640)
         return content
 
     def get_openspecy(self, path=None):
-        """Download (path None) or import an Open Specy library, keep the fab-relevant validated spectra, use them."""
+        """Download (path None), import a file, or use the included references (PACK_DIR); keep the validated ones."""
         if self.sheet is not None:
             self.sheet.close_sheet()
         inhouse_dir, folder, results = self.inhouse_dir, self.openspecy_dir, list(self.model.results)
 
         def work(progress):
             base = load_library(inhouse_dir=inhouse_dir)                   # shipped + in-house, without Open Specy
-            summary = (import_library(path, base, folder, progress) if path else
+            summary = (install_pack(base, folder, progress) if path == PACK_DIR else
+                       import_library(path, base, folder, progress) if path else
                        download_and_import(base, folder, progress))
             payload = change_library(inhouse_dir, results, None, True, folder, progress)
             return payload, summary
@@ -1506,9 +1580,11 @@ class MainWindow(QMainWindow):
     def _openspecy_ready(self, payload):
         payload, summary = payload
         self.extended = True
-        self.settings.setValue("library_mode", EXTENDED)
         self._library_changed(payload, f"Open Specy: {summary.kept} references added")
         self.show_page(LIBRARY)
+        if self.tour_folder is not None:
+            return
+        self.settings.setValue("library_mode", EXTENDED)
         box = QMessageBox(QMessageBox.Information, __title__, "The Open Specy references are ready.", parent=self)
         box.setInformativeText(summary.text())
         box.setAttribute(Qt.WA_DeleteOnClose)
@@ -1591,8 +1667,9 @@ class MainWindow(QMainWindow):
         return content
 
     def _export_chosen(self, choice):
-        self.settings.setValue("user_name", choice["name"])               # remembered for next time
-        self.settings.setValue("report_dir", str(choice["folder"]))
+        if self.tour_folder is None:
+            self.settings.setValue("user_name", choice["name"])           # remembered for next time
+            self.settings.setValue("report_dir", str(choice["folder"]))
         if self.sheet is not None:
             self.sheet.close_sheet()
         self.write_report_to(choice["folder"], name=choice["name"], signoff=choice["signoff"],
@@ -1763,7 +1840,9 @@ class MainWindow(QMainWindow):
             self.app_title.setVisible(compact < 2)
 
     def closeEvent(self, event):
-        if not self.isMaximized():
+        if self.tour_folder is not None:                                 # everything the tour made goes with it
+            shutil.rmtree(self.tour_folder, ignore_errors=True)
+        elif not self.isMaximized():
             self.settings.setValue("size", self.size())
         super().closeEvent(event)
 

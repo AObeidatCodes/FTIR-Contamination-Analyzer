@@ -70,7 +70,7 @@ def demo_results(window):
     """The twelve demo spectra analysed (once), and their names."""
     if not window.model.results:
         window.analyse_paths([config.EXAMPLES_DIR], ask=lambda paths: {p: "ATR" for p in paths})
-        assert wait(QApplication.instance(), lambda: not window.busy and len(window.model.results) == 12, 60)
+        assert wait(QApplication.instance(), lambda: not window.busy and len(window.model.results) == 20, 60)
     return [r.name for r in window.model.results]
 
 
@@ -184,10 +184,14 @@ def test_the_welcome_page_fits_a_laptop_window(tmp_path):
     show = page.show_match
     assert show.isVisible() and show.height() >= show.minimumHeight()
     assert wait(app, lambda: show.rows, 30)
-    assert [name for name, _, _ in show.rows][-2:] == ["PBT", "PET"] and show.verdict == "Probable: PET"  # real
-    assert len(show.shows) == 12 and {kind for *_, kind, _ in show.shows} >= {"good", "warn", "none"}     # all of them
-    show._use(1)
-    assert show.source.startswith("02_") and show._picture is None
+    wipe = next(s for s in show.shows if s[4] == "Wipe area particle")             # the name alone: no number, no mode
+    assert [name for name, _, _ in wipe[1]][-2:] == ["PBT", "PET"] and wipe[2] == "Probable: PET"     # real results
+    assert len(show.shows) == 20 and {s[3] for s in show.shows} >= {"good", "warn", "none"}           # all of them
+    seen = [show.source]
+    for _ in show.shows[1:]:
+        show._next()
+        seen.append(show.source)
+    assert sorted(seen) == sorted(s[4] for s in show.shows)                        # all, before any comes back
     win.resize(700, 720)                                                           # narrow: actions under the headline
     settle()
     assert page.buttons.mapTo(page, QPoint(0, 0)).y() > page.title.mapTo(page, QPoint(0, 0)).y()

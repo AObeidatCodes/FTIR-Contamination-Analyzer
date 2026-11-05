@@ -23,7 +23,8 @@ The shipped files above are never changed by the app.
 
 ## Open Specy references (optional, extended mode)
 
-Not shipped. **Library → Open Specy…** downloads Open Specy's *nobaseline* library (baseline-corrected
+**Library → Open Specy…** can use the 145 references in `openspecy_pack/`, chosen by the steps below and
+validated again against your library, with no internet needed. It also downloads Open Specy's *nobaseline* library (baseline-corrected
 absorbance, CC BY 4.0, Cowger et al. 2021) on your computer, or imports a file you downloaded. Only
 fab-relevant FTIR spectra are kept, every one that could be confused with a different material is left
 out, and the result is saved in `records/openspecy/` with an import report (see

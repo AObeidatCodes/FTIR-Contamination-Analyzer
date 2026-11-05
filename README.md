@@ -113,7 +113,7 @@ python3 run_analyzer.py
 ```python
 SETTINGS = {
     "files": [],                      # empty = a file dialog asks
-    "use_demo_spectra": False,        # True = the twelve demo spectra
+    "use_demo_spectra": False,        # True = the twenty demo spectra
     "default_mode": None,             # "ATR" / "transmission" for files that do not say it; None = ask me
     "show_figures": True,             # interactive figure per spectrum
     "show_analytical_view": False,    # True = also every processing step
@@ -142,7 +142,9 @@ SETTINGS = {
 | Open spectrum files | **Open spectra** or `Ctrl+O`: CSV / TXT / DPT exports (%T or absorbance, with or without a header, any separator), or the instrument's own files: **JCAMP-DX** (`.jdx`, `.dx`) and **Bruker OPUS** (`.0`, `.1`, …). An instrument file that says how it was measured (ATR or transmission) is not asked about |
 | Open a whole folder | **Open folder** or `Ctrl+Shift+O` |
 | Drag and drop | Drop files or a folder anywhere on the window |
-| Try it | **Demo**: twelve real measurements with known answers ([`examples/README.md`](examples/README.md)) |
+| Try it | **Demo**: twenty real measurements with known answers ([`examples/README.md`](examples/README.md)) |
+| Learn it | **Take the tour** on the home screen (or **Help**): the app does real work in a window of its own, with its own temporary records |
+| See the bonds | **Structure** under the figure: a short model chain of the match. Click a band, and its bonds glow |
 | See a result | Click a spectrum in the list. Type in the filter box to find a sample or a material |
 | Trace the curves | Move the mouse over the spectrum: a dot on every curve, their values, and the band's name |
 | Every processing step | Switch **Result → Analytical view** above the figure |
@@ -215,6 +217,24 @@ example:
 
 ![Dark mode, an empty measurement](docs/dark_mode.png)
 
+### Structure
+
+Under the figure stands a short model chain of the best match, turning slowly; drag it to look around. Each bond
+is half the colour of each of its atoms, so a C=O shows red at once. Click a band in **Band evidence**, or a group
+beside the model, and the bonds of that band glow gold while the figure zooms to it. It follows **Compare with**
+and the closest matches, and it is on each reference in the Library. The web report has it too, and the PDF shows
+it as a still picture with the bonds of the sample's clearest band.
+
+These are models: a chain of a few units, one shape of many. PU, EVA, EVOH and a few others vary in real life, so
+theirs is one representative chain, and the card says so. A lit bond says what the band table says, that this group
+absorbs in this range; it is not proof of where a band came from. A range only counts for a shipped material if its
+reference spectrum has a band there, so nothing lights up for a band the material does not show. PVC's C–Cl has no row
+in the band table, so its C–Cl bonds do not light up. An in-house reference has no model unless its name or material
+group has one.
+
+The shapes come from RDKit (ETKDG and the MMFF94 force field), made once with `tools/make_structures.py` and shipped as
+a small file, so the program does not need RDKit. The window draws them itself, so no 3D package is needed.
+
 ### Closest matches
 
 Under the figure, the best four library materials are drawn next to each other, each over the
@@ -270,7 +290,7 @@ reference collection is added, and only to *weak* if that reference is entered w
    is saved:
    - most similar existing reference: PS at r 0.88 (below 0.95: clearly different)
    - impostor test: 0.90 now, 0.90 with ABS (still valid)
-   - your spectra on screen: 2 of 12 would change, among them `10_tool_cover_fragment_ATR`:
+   - your spectra on screen: 2 of 20 would change, among them `10_tool_cover_fragment_ATR`:
      *weak PS* → **probable ABS**
 
    ![The validation before adding](docs/add_reference.png)
@@ -304,7 +324,11 @@ entries stay in `records/inhouse_library/library_changes.csv` (nothing is ever d
 The shipped library holds 16 well-validated polymer references. For samples outside it, **Library →
 Open Specy…** adds references from the Open Specy library (Cowger et al. 2021, CC BY 4.0):
 
-1. **Download from Open Specy** gets the *medoid nobaseline* library (baseline-corrected absorbance)
+0. **Use the included references** needs no internet: 145 references chosen as described below come with
+   the program (`ftir_analyzer/data/openspecy_pack/`), and each is validated again against your library,
+   in-house references included. The library grows from 16 to 161 references, and the best wrong match
+   in the impostor test stays at r 0.90.
+1. **Download the newest** gets the *medoid nobaseline* library (baseline-corrected absorbance)
    on your computer, from where Open Specy's own R package gets it
    (`https://d2jrxerjcsjhs7.cloudfront.net/medoid_nobaseline.rds`), or from the older copy on osf.io.
    Or **Import a library file…** if you downloaded it yourself (`.rds`). Open Specy's current file
@@ -413,7 +437,10 @@ Every rule and threshold lives in [`ftir_analyzer/config.py`](ftir_analyzer/conf
 │   ├── theme.py         design system: colours (light and dark), fonts, sizes, animation times
 │   ├── motion.py        animation, smooth scrolling, cards, segmented control, sheets, toasts, a
 │   │                    row that wraps
-│   ├── widgets.py       building blocks of the window: pills, score bars, list, plot, welcome screen
+│   ├── widgets.py       building blocks of the window: pills, score bars, list, plot, home screen
+│   ├── structures.py    the 3D model of a material, and which of its bonds belong to a band
+│   ├── molecule_view.py the 3D view: a model chain that turns, and the bonds of a band that glow
+│   ├── tour.py          the guided tour, in a window of its own that keeps nothing
 │   ├── compare_view.py  the closest matches, side by side
 │   ├── library_view.py  the Library page: album, details, similarity map, adding a reference
 │   ├── jobs.py          background work (the window never freezes)
@@ -434,7 +461,7 @@ pip install pytest
 python -m pytest
 ```
 
-102 tests. 46 cover the analysis: file reading (read-only data, headerless tab-separated files, unit
+177 tests. Those for the analysis cover file reading (read-only data, headerless tab-separated files, unit
 recognition, clear errors), processing, the verdict rule, the impostor test, the known answer for
 every demo spectrum, the second-component, empty-spot and saturation detection, the CO₂ direction,
 the analytical view (each step reproduced, the score recalculated from step 4), the interactive

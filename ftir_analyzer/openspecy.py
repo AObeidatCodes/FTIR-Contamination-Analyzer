@@ -57,6 +57,8 @@ AWS_LIBRARY = "https://d2jrxerjcsjhs7.cloudfront.net/medoid_nobaseline.rds"   # 
 OSF_NODE = "x7dpz"                                       # Open Specy's older library project on OSF
 OSF_FILES = "https://api.osf.io/v2/nodes/{node}/files/osfstorage/"
 PREFERRED = ["medoid_nobaseline", "mediod_nobaseline", "nobaseline"]   # small and representative first
+PACK_DIR = config.DATA_DIR / "openspecy_pack"            # the kept references, included with the program
+GENERIC = ("other plastic", "other material", "organic matter", "mineral")   # names that say less than the group
 LICENCE = "CC BY 4.0"
 CITATION = ("Cowger, W., Steinmetz, Z., Gray, A., Munno, K., Lynch, J., Hapich, H., Primpke, S., De Frond, H., "
             "Rochman, C., Herodotou, O. (2021). Microplastic Spectral Classification Needs an Open Source "
@@ -284,6 +286,8 @@ def _prepare_one(wn, column, meta, per_group, names, i):
         return None, "more than 3 of one material"
     per_group[group] = per_group.get(group, 0) + 1
     base = _display_name(meta["polymer"] or meta["identity"] or meta["material_class"]) or f"Spectrum {i + 1}"
+    if base.lower() in GENERIC and group not in GENERIC:
+        base = _display_name(group)
     name, k = f"{base} (Open Specy)", 2
     while name in names:
         name, k = f"{base} {k} (Open Specy)", k + 1
@@ -422,6 +426,22 @@ def import_library(path, base_library, folder=None, progress=None):
     wn, X, metadata = read_library_file(path)
     say(0, 1, "Choosing the fab-relevant FTIR spectra")
     entries, skipped = prepare(wn, X, metadata)
+    return _keep(entries, skipped, Path(path).name, base_library, folder, say)
+
+
+def install_pack(base_library, folder=None, progress=None):
+    """Use the Open Specy references included with the program, so no download is needed. They were chosen as
+    import_library does; each is validated again here, because this lab's own references can differ."""
+    say = progress or (lambda *_: None)
+    say(0, 1, "Reading the included references")
+    entries = [{"name": info.name, "group": info.group, "category": info.category, "y": y,
+                "original_name": info.original_name, "spectrum_id": info.notes.removeprefix("Open Specy id "),
+                "contributor": info.contributor, "mode": info.mode} for info, y in OpenSpecyLibrary(PACK_DIR).entries()]
+    return _keep(entries, {}, "the references included with the program", base_library, folder, say)
+
+
+def _keep(entries, skipped, source, base_library, folder, say):
+    """Validate chosen references against the library, save the ones that pass, and return the summary."""
     known = {}                                                          # a material the shipped library has
     for name in base_library.spectra:                                   # keeps that reference's category
         known.setdefault(base_library.group_of(name), base_library.info_of(name).category)
@@ -433,7 +453,7 @@ def import_library(path, base_library, folder=None, progress=None):
     for e in kept:
         by_category[e["category"]] = by_category.get(e["category"], 0) + 1
         modes[e["mode"]] = modes.get(e["mode"], 0) + 1
-    summary = ImportSummary(Path(path).name, len(kept), by_category, skipped, dropped, modes)
+    summary = ImportSummary(source, len(kept), by_category, skipped, dropped, modes)
     OpenSpecyLibrary(folder).save(kept, summary)
     return summary
 

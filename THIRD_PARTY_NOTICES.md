@@ -6,7 +6,7 @@ following open sources. Each file names its source in its header lines.
 ## OpenFTIR (MIT License)
 
 Used in `ftir_analyzer/data/library_openftir_atr.csv` (the 16 reference spectra), in the demo
-files `examples/01_*` to `examples/05_*`, `examples/10_*` and `examples/12_*`, and in
+files `examples/01_*` to `examples/05_*`, `examples/10_*`, `examples/12_*` to `examples/18_*`, and in
 `examples/library_demo/`. These are selected columns of `data/Sample_Spectra.csv` from
 https://github.com/VAMpire29122004/OpenFTIR (some interpolated onto the library's wavenumbers).
 
@@ -45,6 +45,11 @@ Licence: Creative Commons Attribution 4.0, https://creativecommons.org/licenses/
 > Rochman, C., Herodotou, O. (2021). Microplastic Spectral Classification Needs an Open Source
 > Community: Open Specy to the Rescue! *Analytical Chemistry* 93(21), 7543–7548.
 
+`ftir_analyzer/data/openspecy_pack/` holds 145 reference spectra chosen from Open Specy's `medoid_nobaseline`
+library by the program's own import (`ftir_analyzer/openspecy.py`): FTIR spectra of materials a fab is likely to see,
+put on the program's grid and scaled 0-1, with those that could be confused with another material left out. Each
+keeps its Open Specy identity in `openspecy_index.csv`.
+
 The test file `tests/data/openspecy_sample.rds` contains OpenFTIR spectra (MIT, above), stored in the
 structure of an Open Specy library file so that the import can be tested.
 
@@ -62,7 +67,7 @@ Every report that uses them names Open Specy and cites:
 
 ## FasTEX-KCL textile fibre spectra (MIT License)
 
-Used in `examples/library_demo/Nylon6_reference_fibre_collection.csv`: the row of sample
+Used in `examples/19_*`, `examples/20_*`, and in `examples/library_demo/Cotton_reference_fibre_collection.csv`, `Wool_reference_fibre_collection.csv` and `Nylon6_reference_fibre_collection.csv`. The last: the row of sample
 MTF_NYL_083 (Microtrace forensic fibre reference collection, PA 6) of
 `ml_datasets/feature_matrix_raw_transmittance.csv` from https://github.com/reeha-parkar/FasTEX-KCL,
 written as two columns (wavenumber, transmittance). Measured with a PerkinElmer Frontier FT-IR and a
@@ -146,3 +151,14 @@ rdata (MIT, to read Open Specy files), jcamp (MIT, Nathan Hagen, to read JCAMP-D
 project. A report written by the program embeds plotly.js (MIT License, Copyright Plotly, Inc.), so
 that its interactive figures work offline; the licence notice is kept at the top of the embedded
 script.
+
+## 3Dmol.js (BSD-3-Clause)
+
+Built into the web report for the 3D models: `ftir_analyzer/assets/js/3Dmol-min.js`, version 2.5.5, from
+https://github.com/3dmol/3Dmol.js. Please cite: Rego N., Koes D. (2015), 3Dmol.js: molecular visualization with WebGL,
+*Bioinformatics* 31(8), 1322-1324. The full licence is in `ftir_analyzer/assets/js/LICENSE-3Dmol.txt`.
+
+## RDKit (BSD-3-Clause)
+
+Not shipped. `tools/make_structures.py` uses it to work out the shapes in `ftir_analyzer/data/structures.json`
+(ETKDG: Riniker S., Landrum G. A. (2015), *J. Chem. Inf. Model.* 55(12), 2562-2574). https://github.com/rdkit/rdkit

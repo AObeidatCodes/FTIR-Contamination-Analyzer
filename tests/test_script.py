@@ -41,7 +41,7 @@ def run_script(tmp_path, extra=()):
 
 def test_script_runs_from_start_to_end(tmp_path):
     run = run_script(tmp_path)
-    assert "12 spectra analysed" in run.stdout
+    assert "20 spectra analysed" in run.stdout
     assert "07_particle_on_filter: PROBABLE PE (high density)" in run.stdout
     assert list((tmp_path / "reports").glob("*/report.html"))
 

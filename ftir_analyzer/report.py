@@ -56,6 +56,7 @@ from .evidence import fab_sources
 from .peaks import band_label, band_names
 from .plots import result_svg
 from .records import DECISIONS, append_audit_log, append_signature, readable_time, who_text
+from .structures import ELEMENTS, GLOW, key_of, ranges_text, structures
 from .theme import ASSETS, DARK, FONTS, ICONS, LIGHT, LOGO_SVG, WEB_FONTS
 
 try:                                         # interactive figures if Plotly is installed, vector images if not
@@ -298,6 +299,12 @@ ol.steps{padding-left:22px}ol.steps li{margin:0 0 8px}
 
 /* traceability */
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;align-items:start}
+.structure{display:grid;grid-template-columns:minmax(0,1fr) 270px;gap:16px;margin:16px 0;padding:16px;
+  border:1px solid var(--line);border-radius:12px}
+.mol-stage{position:relative;height:300px;min-width:0}
+.mol-canvas{position:absolute;inset:0;cursor:grab;touch-action:pan-y}.mol-canvas.held{cursor:grabbing}
+.mol-side h4{margin-bottom:2px}.mol-side p{margin:0 0 10px}
+@media(max-width:760px){.structure{grid-template-columns:minmax(0,1fr)}}
 .grid2 .panel{margin:0;min-width:0}
 .grid2.even{align-items:stretch}
 h4.sub{margin:20px 0 8px;font-size:14px;color:var(--muted);font-weight:400}
@@ -317,6 +324,7 @@ table.refs td:before{content:attr(data-label);color:var(--muted)}
 ul.plain{margin:0;padding-left:20px}ul.plain li{margin:0 0 6px}
 footer{color:var(--muted);font-size:14px;text-align:center;margin-top:32px}
 
+@media (max-width:1180px){.status .long{display:none}}
 @media (max-width:900px){.bar nav{display:none}.boxes,.grid2{grid-template-columns:1fr}
   /* the summary as short rows: no columns hidden behind a sideways scroll */
   table.summary thead{display:none}
@@ -329,7 +337,7 @@ footer{color:var(--muted);font-size:14px;text-align:center;margin-top:32px}
 }
 @media (max-width:700px){
   .bar-in,main{padding-left:16px;padding-right:16px}.panel{padding:16px}
-  .status .long{display:none}.bar .status{gap:6px}
+  .bar .status{gap:6px}
   .brand span{display:none}
   .stats{grid-template-columns:1fr 1fr}.stats div,.facts div{padding:12px 16px}
   .stats div:nth-child(3){border-left:none}.stats div:nth-child(n+3){border-top:1px solid var(--line)}
@@ -343,7 +351,7 @@ footer{color:var(--muted);font-size:14px;text-align:center;margin-top:32px}
 @media print{
   html{color-scheme:light}
   body{background:#fff;font-size:10pt;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  .bar,.skip,.back,.hint{display:none}main{padding:0;max-width:none}
+  .bar,.skip,.back,.hint,.structure{display:none}main{padding:0;max-width:none}
   /* paper is wide enough for the full layout: undo the narrow-screen rows, keep the tint of pills and strips */
   .panel{break-inside:auto;border-color:#ccc;padding:16px}
   h2,h2.part,h3,h4{break-after:avoid}h2.part{margin:24px 0 12px}
@@ -473,6 +481,7 @@ BAND_JS = """
   var pinned = {}, home = {};
   var accent = function(){ return getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#4C6FBF'; };
   var plotOf = function(chip){ return document.getElementById(chip.getAttribute('data-fig')); };
+  var bonds = function(chip, w, stay){ if (window.ftirMol) { window.ftirMol.band(chip.getAttribute('data-fig'), w, stay); } };
   var bandOf = function(chip){ return Number(chip.getAttribute('data-band')); };
   function mark(p, w){                                   // w = null clears the mark
     if (!p || !p.layout) { return; }
@@ -488,7 +497,8 @@ BAND_JS = """
   function toFigure(chip, w){                            // zoom to the band and bring the figure into view
     var p = plotOf(chip);
     Plotly.relayout(p, {'xaxis2.range': [w + 90, w - 90]});
-    p.scrollIntoView({block: 'center', behavior: 'smooth'});
+    var model = document.querySelector('.structure[data-fig="' + p.id + '"]:not([hidden])');   // the band and its bonds together
+    (model || p).scrollIntoView({block: model ? 'end' : 'center', behavior: 'smooth'});
   }
   function wholeSpectrum(p){ if (home[p.id]) { Plotly.relayout(p, {'xaxis2.range': home[p.id]}); } }
   function add(card, tag, text){
@@ -516,15 +526,20 @@ BAND_JS = """
     var id = chip.getAttribute('data-fig'), card = chip.closest('div').querySelector('.band-card');
     var again = pinned[id] === chip;
     if (pinned[id]) { pinned[id].setAttribute('aria-pressed', 'false'); delete pinned[id]; }
-    if (again) { card.hidden = true; mark(plotOf(chip), null); wholeSpectrum(plotOf(chip)); return; }
+    if (again) { card.hidden = true; mark(plotOf(chip), null); bonds(chip, null, true); wholeSpectrum(plotOf(chip)); return; }
     pinned[id] = chip; chip.setAttribute('aria-pressed', 'true');
     fill(card, JSON.parse(chip.getAttribute('data-info')), chip); card.hidden = false;
     mark(plotOf(chip), bandOf(chip));
+    bonds(chip, bandOf(chip), true);
     toFigure(chip, bandOf(chip));
   }
-  function rest(chip){ var p = pinned[chip.getAttribute('data-fig')]; mark(plotOf(chip), p ? bandOf(p) : null); }
+  function rest(chip){
+    var p = pinned[chip.getAttribute('data-fig')];
+    mark(plotOf(chip), p ? bandOf(p) : null);
+    bonds(chip, p ? bandOf(p) : null, false);
+  }
   document.querySelectorAll('button.chip.band').forEach(function(chip){
-    ['mouseenter', 'focus'].forEach(function(e){ chip.addEventListener(e, function(){ mark(plotOf(chip), bandOf(chip)); }); });
+    ['mouseenter', 'focus'].forEach(function(e){ chip.addEventListener(e, function(){ mark(plotOf(chip), bandOf(chip)); bonds(chip, bandOf(chip), false); }); });
     ['mouseleave', 'blur'].forEach(function(e){ chip.addEventListener(e, function(){ rest(chip); }); });
     chip.addEventListener('click', function(){ pin(chip); });
   });
@@ -542,6 +557,109 @@ BAND_JS = """
 })();
 """
 
+
+# The 3D model of a match. One viewer (browsers allow only a few 3D canvases) goes to the structure that comes
+# into view. It turns about the chain's long axis; a drag turns it, and the mouse wheel stays with the page. Hovering
+# or clicking a band group, or a band of the band evidence, lights the bonds of that band.
+MOL_JS = """
+(function(){
+  var models = window.FTIR_MODELS, look = window.FTIR_ELEMENTS, gold = window.FTIR_GOLD;
+  var all = document.querySelectorAll('.structure');
+  if (!models || typeof $3Dmol === 'undefined') { all.forEach(function(s){ s.hidden = true; }); return; }
+  var holder = document.createElement('div'), viewer = null, shown = null, lit = null, drag = null;
+  holder.className = 'mol-canvas';
+  var colour = function(atom){ return look[atom.elem] || '#888888'; };
+  function spin(on){ if (viewer) { viewer.spin(on && window.ftirMotion ? 'x' : false, 0.35); } }
+  function modelOf(s){ return models[s.getAttribute('data-model')]; }
+  function paint(){
+    var m = modelOf(shown);
+    viewer.removeAllShapes();
+    viewer.setStyle({}, lit && lit.length
+      ? {stick: {radius: 0.1, opacity: 0.45, colorfunc: colour}, sphere: {scale: 0.16, opacity: 0.45, colorfunc: colour}}
+      : {stick: {radius: 0.13, singleBonds: false, colorfunc: colour}, sphere: {scale: 0.22, colorfunc: colour}});
+    (lit || []).forEach(function(n){
+      var a = m.atoms[m.bonds[n][0]], b = m.atoms[m.bonds[n][1]];
+      viewer.addCylinder({start: {x: a[1], y: a[2], z: a[3]}, end: {x: b[1], y: b[2], z: b[3]}, radius: 0.2, color: gold,
+                          fromCap: 1, toCap: 1});
+      [a, b].forEach(function(p){ viewer.addSphere({center: {x: p[1], y: p[2], z: p[3]}, radius: 0.26, color: gold}); });
+    });
+    viewer.render();
+  }
+  function show(s){
+    if (shown === s) { return; }
+    if (shown) { shown.pinned = null; marks(shown, null); }
+    shown = s; lit = null;
+    s.querySelector('.mol-stage').appendChild(holder);
+    if (!viewer) { viewer = $3Dmol.createViewer(holder, {backgroundAlpha: 0, nomouse: true, antialias: true}); }
+    else { viewer.clear(); viewer.resize(); }
+    var m = modelOf(s), atoms = m.atoms.map(function(a){ return {elem: a[0], x: a[1], y: a[2], z: a[3], bonds: [], bondOrder: []}; });
+    m.bonds.forEach(function(b){
+      atoms[b[0]].bonds.push(b[1]); atoms[b[0]].bondOrder.push(b[2]);
+      atoms[b[1]].bonds.push(b[0]); atoms[b[1]].bondOrder.push(b[2]);
+    });
+    viewer.addModel().addAtoms(atoms);
+    paint(); viewer.zoomTo(); viewer.zoom(1.5); viewer.rotate(16, 'y'); viewer.render();
+    spin(true);
+  }
+  function light(s, list){ show(s); lit = list && list.length ? list : null; spin(!lit); paint(); }
+  function bondsAt(s, w){                                // the bonds of every group that absorbs at w
+    var groups = modelOf(s).groups, out = [];
+    Object.keys(groups).forEach(function(name){
+      if (groups[name].ranges.some(function(r){ return r[0] - 10 <= w && w <= r[1] + 10; })) { out = out.concat(groups[name].bonds); }
+    });
+    return out;
+  }
+  function marks(s, w){                                  // the groups of a band are shown as pressed
+    s.querySelectorAll('button.group').forEach(function(b){
+      var at = w !== null && JSON.parse(b.getAttribute('data-ranges')).some(function(r){ return r[0] - 10 <= w && w <= r[1] + 10; });
+      b.setAttribute('aria-pressed', at ? 'true' : 'false');
+    });
+  }
+  window.ftirMol = {band: function(fig, w, stay){
+    var s = document.querySelector('.structure[data-fig="' + fig + '"]:not([hidden])');
+    if (!s) { return; }
+    if (stay) { s.pinned = w; marks(s, w); }
+    var at = w === null ? (s.pinned === null || s.pinned === undefined ? null : s.pinned) : w;
+    if (shown === s || at !== null) { light(s, at === null ? null : bondsAt(s, at)); }
+  }};
+  all.forEach(function(s){
+    s.querySelectorAll('button.group').forEach(function(b){
+      var list = JSON.parse(b.getAttribute('data-bonds')), ranges = JSON.parse(b.getAttribute('data-ranges'));
+      var w = (ranges[0][0] + ranges[0][1]) / 2;
+      ['mouseenter', 'focus'].forEach(function(e){ b.addEventListener(e, function(){ light(s, list); }); });
+      ['mouseleave', 'blur'].forEach(function(e){ b.addEventListener(e, function(){
+        light(s, s.pinned === null || s.pinned === undefined ? null : bondsAt(s, s.pinned)); }); });
+      b.addEventListener('click', function(){
+        var on = b.getAttribute('aria-pressed') !== 'true';
+        var bands = s.closest('.sample').querySelectorAll('button.chip.band'), found = null;
+        bands.forEach(function(c){
+          var at = Number(c.getAttribute('data-band'));
+          if (!found && ranges.some(function(r){ return r[0] - 10 <= at && at <= r[1] + 10; })) { found = c; }
+        });
+        if (found && (found.getAttribute('aria-pressed') === 'true') !== on) { found.click(); return; }
+        s.pinned = on ? w : null; marks(s, on ? w : null); light(s, on ? list : null);
+      });
+    });
+  });
+  holder.addEventListener('pointerdown', function(e){
+    drag = {x: e.clientX, y: e.clientY}; spin(false); holder.setPointerCapture(e.pointerId); holder.classList.add('held');
+  });
+  holder.addEventListener('pointermove', function(e){
+    if (!drag || !viewer) { return; }
+    viewer.rotate((e.clientX - drag.x) * 0.5, 'y'); viewer.rotate((e.clientY - drag.y) * 0.5, 'x');
+    drag = {x: e.clientX, y: e.clientY}; viewer.render();
+  });
+  ['pointerup', 'pointercancel'].forEach(function(e){ holder.addEventListener(e, function(){
+    drag = null; holder.classList.remove('held'); spin(!lit); }); });
+  if ('IntersectionObserver' in window) {
+    var watch = new IntersectionObserver(function(seen){
+      seen.forEach(function(e){ if (e.isIntersecting) { show(e.target); } });
+    }, {threshold: 0.35});
+    all.forEach(function(s){ watch.observe(s); });
+  } else if (all.length) { show(all[0]); }
+  window.addEventListener('resize', function(){ if (viewer) { viewer.resize(); viewer.render(); } });
+})();
+"""
 
 # Small things of the page that need no library: the motion switch in the bar (your choice is kept in this
 # browser; without one the page follows the system's "animation effects" setting) and click-to-copy checksums.
@@ -768,6 +886,23 @@ def sources_html(r, library=None):
             "<p class='small'>A starting point for the root-cause analysis, not proof.</p>")
 
 
+def structure_html(r, i, library):
+    """The 3D model of the match, with its band groups as buttons ("" if it has none)."""
+    key = key_of(r.best, library) if r.has_match else None
+    if key is None:
+        return ""
+    model = structures()[key]
+    chips = "".join(
+        f'<button type="button" class="chip group" aria-pressed="false" title="{h(name + ": " + ranges_text(g))}" '
+        f'data-ranges="{json.dumps(g["ranges"])}" data-bonds="{json.dumps(g["bonds"])}">{h(name)} · '
+        f'{g["ranges"][0][0]}–{g["ranges"][0][1]}</button>' for name, g in model["groups"].items())
+    formula = model["formula"].translate(str.maketrans("0123456789", "₀₁₂₃₄₅₆₇₈₉"))
+    note = f'<p class="small">{h(model["note"])}</p>' if model["note"] else ""
+    return (f'<div class="structure" data-fig="result{i}" data-model="{h(key)}"><div class="mol-stage"></div>'
+            f'<div class="mol-side"><h4>Structure of {h(r.best)}</h4><p class="small">{formula} · short model chain · '
+            f'drag to turn</p><p>{chips}</p>{note}</div></div>')
+
+
 def analytical_html(i, r, library, figure):
     """The closed 'Analytical view' block: every step in words, then the interactive step-by-step figure."""
     steps = "".join(f"<li><b>{h(step.title)}.</b> {h(step.explanation)}</li>" for step in analytical_steps(r, library))
@@ -793,6 +928,7 @@ def section(i, r, figure_svg, analytical="", library=None):
   </dl>
   <div class="next{' alert' if alert else ''}">{icon('circle-alert' if alert else 'arrow-right')}<p><b>Next step</b>&ensp;{h(r.next_step)}</p></div>
   {figure_svg}
+  {structure_html(r, i, library)}
   <div class="boxes">
     <div><h4>Why this verdict</h4><p>{h(r.reason)}</p>{ranking_html(r)}</div>
     <div><h4>Band evidence</h4>{evidence_html(r, i, library)}</div>
@@ -953,6 +1089,15 @@ def write_html(results, figures, info, path, analytical=None, library=None, sign
     sections = "".join(section(i, r, figures[i], analytical[i], library) for i, r in enumerate(results))
     plotly_js = f"<script>{get_plotlyjs()}</script>" if INTERACTIVE else ""
     band_js = f"<script>{BAND_JS}</script>" if INTERACTIVE else ""
+    used = {key_of(r.best, library) for r in results if r.has_match} - {None}
+    mol_js = ""
+    if used and _asset("3Dmol-min.js"):                                 # BSD-3-Clause, built in so it works offline
+        models = {k: {f: structures()[k][f] for f in ("atoms", "bonds", "groups")} for k in sorted(used)}
+        data = (f"window.FTIR_MODELS={json.dumps(models, ensure_ascii=False, separators=(',', ':'))};"
+                f"window.FTIR_ELEMENTS={json.dumps({e: c[1] for e, c in ELEMENTS.items()})};"
+                f"window.FTIR_GOLD='{GLOW['dark']}';")
+        mol_js = (f'<script>/*! 3Dmol.js 2.5.5 (BSD-3-Clause, University of Pittsburgh and contributors) */'
+                  f'{_asset("3Dmol-min.js")}</script><script>{data}{MOL_JS}</script>')
     theme_js = f"<script>var FIGURE_SWAP = {json.dumps(figure_colour_map())};{THEME_JS}</script>"
     fonts = "".join(_font_face(name, family, weight) for name, family, weight in WEB_FONTS)
     # dark colours only on screen: printed pages always get the light (paper) colours
@@ -1007,7 +1152,7 @@ def write_html(results, figures, info, path, analytical=None, library=None, sign
   {library_html(library, info)}
 </div>
 <footer>Generated with {h(__title__)} {__version__}, developed by {h(__author__)}</footer>
-{band_js}<script>{UI_JS}</script></main>{theme_js}{motion_js()}</body></html>"""
+{mol_js}{band_js}<script>{UI_JS}</script></main>{theme_js}{motion_js()}</body></html>"""
     Path(path).write_text(page, encoding="utf-8")
 
 

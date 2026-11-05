@@ -1,6 +1,6 @@
 # Demo spectra
 
-Twelve real measurements with known answers, named after where they were "found". The analyzer
+Twenty real measurements with known answers, named after where they were "found". The analyzer
 must give these results; `tests/test_analyzer.py` checks that it does.
 
 | File | Mode | Expected result | What it shows |
@@ -18,6 +18,15 @@ must give these results; `tests/test_analyzer.py` checks that it does.
 | `11_second_fibre_on_filter.csv` | not in the file | **no reliable match** | A second fibre spot on the same filter as 08. After 08 is added to the library as cellulose acetate, this one is **probable** |
 | `12_shipping_box_film_ATR.csv` | ATR | **probable EVOH** (r 0.96) | A barrier film from a wafer shipping box, a different EVOH grade from the reference |
 
+| `13_clear_film_on_tool_ATR.csv` | ATR | **weak**: PET or PBT (r 0.93, lead 0.01) | Amorphous PET. The score is close, but the lead over PBT is far too small to call it |
+| `14_recycled_bag_scrap_ATR.csv` | ATR | **probable PE** (r 0.98) | A recycled plastic, still a clean match |
+| `15_green_paint_flake_ATR.csv` | ATR | **probable PMMA** (r 1.00) | Acrylic paint: the pigment does not change the answer |
+| `16_mixed_particle_ATR.csv` | ATR | **weak PS** (r 0.94), **second component?** | The two-component fit: about 82 % PS + 18 % PE |
+| `17_biopolymer_fragment_ATR.csv` | ATR | **weak PMMA** (r 0.70) | PHB is **not** in the library. A low weak is a question, not an answer |
+| `18_soft_seal_fragment_ATR.csv` | ATR | **weak EVA** (r 0.92) | EVA with 40 % vinyl acetate against a 25 % reference: same family, not the same recipe |
+| `19_lint_on_a_wafer_ATR.csv` | ATR | **no reliable match** (r 0.40) | Cotton lint. Cotton is **not** in the shipped library; add the reference below |
+| `20_fibre_from_a_sweater_ATR.csv` | ATR | **weak**: Nylon 6,6 (r 0.61), **second component?** | Wool. A protein has amide bands too, so nylon comes closest, but only at r 0.61 |
+
 The mode answers are saved in `records/sample_log.csv`. Rename that file to be asked again. A *don't
 know* answer is not saved: the program then reads the spectrum both ways (as ATR and as transmission)
 and uses the reading that fits better, and says so (07 with *don't know*: compared as ATR, r 0.97
@@ -28,7 +37,7 @@ references below and the measuring-mode checks in the window, with the numbers y
 
 ## `library_demo/`: adding a reference, and the validation that guards it
 
-Two reference files measured on known parts. Their header lines carry everything the program needs
+Reference files measured on known parts and fibres. Their header lines carry everything the program needs
 (`# reference:`, `# category:`, `# fab sources:`, `# check next:`, `# confirmation:`), so the
 add-reference sheet fills itself in.
 
@@ -36,6 +45,8 @@ add-reference sheet fills itself in.
 | --- | --- |
 | `ABS_reference_known_part.csv` | ABS from a known equipment cover (a different ABS sample from demo 10). **Safe to add**: the closest existing reference is PS at r 0.88 and the impostor test stays at 0.90. The preview shows, before saving, that `10_tool_cover_fragment_ATR` will change from *weak PS* to **probable ABS** (r 0.99), and that the saturated PS film (06) shifts from *weak PS* to *weak ABS* |
 | `Nylon6_reference_fibre_collection.csv` | Nylon 6 (PA 6) fibre from a forensic fibre reference collection (Microtrace MTF_NYL_083): a different sample from demo 05, measured on a different instrument (diamond ATR, saved as transmittance). **Safe to add**: the closest existing reference is Nylon 6,6 at r 0.90 and the impostor test stays at 0.90. The preview shows that `05_fibre_on_wafer_ATR` will change from *weak Nylon 6,6* (r 0.88) to **probable Nylon 6** (r 0.96). Entered with the wrong mode (transmission) it only reaches *weak: Nylon 6 or Nylon 6,6*: the measuring mode of a reference matters |
+| `Cotton_reference_fibre_collection.csv` | Cotton fibre from a fibre reference collection (a different sample from demo 19). **Safe to add**: demo 19 goes from no reliable match to **probable Cotton** (r 0.99). |
+| `Wool_reference_fibre_collection.csv` | Wool fibre from a fibre reference collection (a different sample from demo 20). **Safe to add**: demo 20 goes from weak Nylon 6,6 to **probable Wool** (r 0.99). |
 | `SAN_reference_cover_sample.csv` | SAN (styrene–acrylonitrile), chemically almost the same as ABS. Added **after** ABS, it is **not safe**: SAN and ABS score r 0.98 against each other, so a wrong *probable* would become possible. The program refuses to add it and says why |
 
 Sources: OpenFTIR (MIT), Open Specy (CC BY 4.0), FasTEX-KCL (MIT; Parkar et al. 2025) and a

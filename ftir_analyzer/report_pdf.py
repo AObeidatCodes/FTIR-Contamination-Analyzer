@@ -30,7 +30,9 @@ import numpy as np
 from matplotlib import font_manager, ticker
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 from matplotlib.backends.backend_pdf import PdfPages
+from matplotlib.colors import to_rgb
 from matplotlib.figure import Figure
+from matplotlib.lines import Line2D
 from matplotlib.patches import Circle, FancyBboxPatch
 
 from . import __author__, __title__, __version__, config
@@ -40,6 +42,7 @@ from .peaks import band_label
 from .plots import peak_positions, scaled, setup_fonts
 from .processing import GRID
 from .records import DECISIONS, readable_time, who_text
+from .structures import ELEMENTS, GLOW, groups_at, model_of, still_picture
 from .theme import FONT_MONO, FONT_SANS, LIGHT
 
 PAGE_W, PAGE_H = 595.0, 842.0                  # A4 in points
@@ -138,7 +141,7 @@ class Page:
     def box(self, x, y, w, h, fill=None, edge=None, radius=6.0, lw=0.8):
         """A rounded rectangle (radius 0: square corners)."""
         style = f"round,pad=0,rounding_size={radius}" if radius else "square,pad=0"
-        self.ax.add_patch(FancyBboxPatch((x, y), w, h, boxstyle=style, fc=fill or "none", ec=edge or "none", lw=lw))
+        self.ax.add_artist(FancyBboxPatch((x, y), w, h, boxstyle=style, fc=fill or "none", ec=edge or "none", lw=lw))
 
     def pill(self, x, y, word, kind, size=8.5):
         """A status label: a pastel tint with the word in the dark of the same hue. Returns its width."""
@@ -148,7 +151,7 @@ class Page:
         return w
 
     def dot(self, x, y, radius=2.6, fill=None, edge=None, lw=1.0):
-        self.ax.add_patch(Circle((x, y), radius, fc=fill or "none", ec=edge or "none", lw=lw))
+        self.ax.add_artist(Circle((x, y), radius, fc=fill or "none", ec=edge or "none", lw=lw))
 
     def verdict(self, x, y, r, size=9.0, weight="normal"):
         """The verdict: a dot in its colour and the word. Returns the width."""
@@ -487,6 +490,59 @@ def chip_flow(page, x, y, width, items, size=7.8, rows=3):
     return cy + 17
 
 
+def draw_model(page, x, y, w, h, model, lit):
+    """A model chain as a still picture: bonds, atoms in their colours, the bonds in `lit` in gold."""
+    sx, sy, depth, scale = still_picture(model, w, h)
+    atoms = [atom[0] for atom in model["atoms"]]
+    ground = "white"
+    items = [(float(depth[a] + depth[b]) / 2 - 0.02, 0, n) for n, (a, b, _) in enumerate(model["bonds"])]
+    items += [(float(depth[i]), 1, i) for i in range(len(atoms))]
+    for z, (_, kind, n) in enumerate(sorted(items)):
+        if kind == 1:
+            element = ELEMENTS.get(atoms[n], ELEMENTS["C"])
+            colour = mix_white(element[1], 0.5 * (1 - depth[n]))
+            page.ax.add_artist(Circle((x + sx[n], y + sy[n]), 0.3 * scale * element[2], fc=colour, ec=ground, lw=0.3,
+                                      zorder=10 + z))
+            continue
+        a, b, order = model["bonds"][n]
+        on = n in lit
+        middle = ((sx[a] + sx[b]) / 2, (sy[a] + sy[b]) / 2)
+        length = max(np.hypot(sx[b] - sx[a], sy[b] - sy[a]), 1e-6)
+        nx, ny = (sy[b] - sy[a]) / length, (sx[a] - sx[b]) / length
+        for k in ([0.0] if order == 1 else [-1.0, 1.0]):
+            ox, oy = nx * k * 0.75, ny * k * 0.75
+            halves = [((sx[a], sy[a]), middle, atoms[a]), (middle, (sx[b], sy[b]), atoms[b])]
+            for start, end, element in halves:
+                colour = GLOW["light"] if on else mix_white(ELEMENTS.get(element, ELEMENTS["C"])[1], 0.35)
+                page.ax.add_artist(Line2D([x + start[0] + ox, x + end[0] + ox], [y + start[1] + oy, y + end[1] + oy],
+                                          color=colour, lw=1.5 if on else 0.9, solid_capstyle="butt", zorder=10 + z))
+
+
+def mix_white(colour, share):
+    """A colour with this share of white in it (further back in a picture = paler)."""
+    red, green, blue = to_rgb(colour)
+    return (red + (1 - red) * share, green + (1 - green) * share, blue + (1 - blue) * share)
+
+
+def structure_strip(page, y, name, r, library, h):
+    """The model of the match in a card: the bonds of the sample's clearest band group are gold."""
+    model = model_of(name, library)
+    page.box(M, y, WIDTH, h, "white", T["line_strong"], 8)
+    page.line_text(M + 12, y + 10, f"Structure of {name}", 150, 9.4, T["ink"], "medium")
+    page.line_text(M + 12, y + 24, "short model chain", 150, 7.8, T["muted"])
+    found = [(group, w) for group in model["groups"] for w in (r.evidence.found if r.evidence else [])
+             if group in groups_at(model, w)]
+    lit = set()
+    if found:
+        group, w = found[0]
+        lit = set(model["groups"][group]["bonds"])
+        page.dot(M + 15, y + 44.5, 2.7, GLOW["light"])
+        page.line_text(M + 22, y + 40, f"{group}, band at {w:.0f} cm⁻¹", 142, 8.2, T["ink"])
+    if model["note"]:
+        page.paragraph(M + 12, y + 54, model["note"], 152, 7.2, T["muted"], most=2, lead=1.3)
+    draw_model(page, M + 174, y + 7, WIDTH - 186, h - 14, model, lit)
+
+
 def spectrum_cards(page, y, r, library, h):
     """Why / band evidence / checks as three cards. Returns the y below them."""
     gap = 12.0
@@ -556,10 +612,15 @@ def spectrum_page(doc, i, n, r, library):
 
     # what stands under the figure: three cards (122 pt), the source line, the traceability line
     cards_h = 122.0
-    chart_h = BOTTOM - y - cards_h - 38 - 14
+    has_model = r.has_match and model_of(r.best, library) is not None
+    strip_h = 92.0 if has_model else 0.0
+    chart_h = BOTTOM - y - cards_h - 38 - 14 - (strip_h + 12 if has_model else 0)
     page.box(M, y, WIDTH, chart_h, "white", T["line_strong"], 8)
     draw_chart(page, M + 12, y + 10, WIDTH - 24, chart_h - 18, r, library)
     y += chart_h + 14
+    if has_model:
+        structure_strip(page, y, r.best, r, library, strip_h)
+        y += strip_h + 12
     spectrum_cards(page, y, r, library, cards_h)
 
     sources = fab_sources(r.best, library) if r.has_match else None

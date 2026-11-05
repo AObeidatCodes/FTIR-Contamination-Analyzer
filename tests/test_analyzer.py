@@ -125,6 +125,14 @@ def test_impostor_test_passes_on_the_shipped_library(library):
     ("10_tool_cover_fragment_ATR.csv", WEAK, "PS"),                 # ABS is not in the shipped library
     ("11_second_fibre_on_filter.csv", NO_MATCH, "-"),                # nor is cellulose acetate
     ("12_shipping_box_film_ATR.csv", PROBABLE, "EVOH (44% ethylene)"),
+    ("13_clear_film_on_tool_ATR.csv", WEAK, "PET or PBT"),           # the lead is too small to tell them apart
+    ("14_recycled_bag_scrap_ATR.csv", PROBABLE, "PE (high density)"),
+    ("15_green_paint_flake_ATR.csv", PROBABLE, "PMMA"),
+    ("16_mixed_particle_ATR.csv", WEAK, "PS"),                       # with a second component
+    ("17_biopolymer_fragment_ATR.csv", WEAK, "PMMA"),                # PHB is not in the shipped library
+    ("18_soft_seal_fragment_ATR.csv", WEAK, "EVA (25% VA)"),         # more vinyl acetate than the reference
+    ("19_lint_on_a_wafer_ATR.csv", NO_MATCH, "-"),                   # cotton is not in the shipped library
+    ("20_fibre_from_a_sweater_ATR.csv", WEAK, "Nylon 6,6"),          # nor is wool
 ])
 def test_demo_spectra(library, name, verdict, match):
     mode = "transmission" if "transmission" in name else "ATR" if "ATR" in name else None
@@ -157,7 +165,8 @@ def test_analysis_never_changes_the_raw_data(library):
 
 # ---------------------------------------------------------------- ATR and transmission
 KNOWN_MODES = {f.name: ("ATR" if "ATR" in f.name else "transmission") for f in sorted(EXAMPLES.glob("*.csv"))
-               if "ATR" in f.name or "transmission" in f.name}
+               if ("ATR" in f.name or "transmission" in f.name)
+               and not f.name.startswith(("16_", "19_"))}   # a mixture or an unknown material says nothing about its mode
 
 
 def as_transmission(spectrum):

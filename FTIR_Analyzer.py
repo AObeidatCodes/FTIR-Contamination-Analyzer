@@ -34,7 +34,7 @@ License: MIT (see LICENSE)
 SETTINGS = {
     "files": [],                      # leave empty to choose with a file dialog, or list them,
                                       # e.g. ["examples/01_wipe_area_particle_ATR.csv"]
-    "use_demo_spectra": False,        # True = analyse the twelve demo spectra in the examples folder
+    "use_demo_spectra": False,        # True = analyse the twenty demo spectra in the examples folder
     "default_mode": None,             # for files that do not say how they were measured:
                                       # "ATR", "transmission", "unknown", or None = ask me
     "show_figures": True,             # one interactive figure per spectrum
