@@ -26,7 +26,7 @@ The shipped files above are never changed by the app.
 **Library → Open Specy…** downloads Open Specy's *nobaseline* library (baseline-corrected absorbance,
 Cowger et al. 2021) on your computer, or imports a file you downloaded; no Open Specy library spectrum comes with the
 program, and each one kept records the licence its source gives. Only
-fab-relevant FTIR spectra are kept, every one that could be confused with a different material is left
+fab-relevant FTIR spectra are kept, NIST's are left out, every one that could be confused with a different material is left
 out, and the result is saved in `records/openspecy/` with an import report (see
 `ftir_analyzer/openspecy.py`). The *derivative* library is refused: its processed derivative spectra
 cannot be compared with absorbance. (Open Specy's small *test* library, inside its R package, mixes

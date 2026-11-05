@@ -113,6 +113,13 @@ def test_each_reference_keeps_the_licence_its_source_gives(base, tmp_path):
     assert "non-commercial" in summary.text()
 
 
+def test_nist_spectra_are_never_imported():
+    wn, X, metadata = read_library_file(FIXTURE)
+    metadata = metadata.assign(organization=["nist chem web book", "NIST"] + metadata["organization"].astype(str).tolist()[2:])
+    entries, skipped = prepare(wn, X, metadata)
+    assert skipped["NIST"] == 2 and not [e for e in entries if "nist" in e["contributor"].lower()]
+
+
 def test_no_open_specy_library_spectra_come_with_the_program():
     assert not (config.DATA_DIR / "openspecy_pack").exists()
     assert "openspecy_pack" not in (config.DATA_DIR.parents[1] / "pyproject.toml").read_text(encoding="utf-8")

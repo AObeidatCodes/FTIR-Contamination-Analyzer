@@ -14,7 +14,7 @@ extra references, so that more kinds of samples can be identified:
        The "nobaseline" library is used: baseline-corrected absorbance spectra, comparable
        with the program's own references. (The "derivative" library holds processed
        derivative spectra, which cannot be compared with absorbance, so it is refused.)
-    2. keep only what a fab is likely to see: FTIR spectra (no Raman), in the material
+    2. keep only what a fab is likely to see: FTIR spectra (no Raman, no NIST data), in the material
        classes of fab contaminations (gloves, wipes, seals, fluoropolymers, silicones,
        resins, fibres, silica and other minerals ...), at most 3 per material
     3. validate: every reference is compared with every other one; a spectrum that could be
@@ -58,6 +58,7 @@ OSF_NODE = "x7dpz"                                       # Open Specy's older li
 OSF_FILES = "https://api.osf.io/v2/nodes/{node}/files/osfstorage/"
 PREFERRED = ["medoid_nobaseline", "mediod_nobaseline", "nobaseline"]   # small and representative first
 GENERIC = ("other plastic", "other material", "organic matter", "mineral")   # names that say less than the group
+NIST = r"\bNIST\b|NATIONAL INSTITUTE OF STANDARDS"     # how the file marks NIST's spectra, which are never used
 NOT_STATED = "not stated"                                # a spectrum with no licence in the library file
 LICENCE_NOTE = ("Each spectrum keeps the licence Open Specy's file gives it: many are marked CC BY-NC (non-commercial) "
                 "and many state none. The CC BY 4.0 licence is the R package's, so check before using these in a company.")
@@ -260,7 +261,7 @@ def prepare(wn, X, metadata):
             "licence": _column(metadata, "license", "licence"),
             "how": (_column(metadata, "instrument_mode") + " " + _column(metadata, "SpectralCollectionMode")
                     + " " + _column(metadata, "instrument_accessories"))}            # how it was measured
-    skipped = {"Raman": 0, "not likely in a fab": 0, "too little data": 0, "more than 3 of one material": 0,
+    skipped = {"NIST": 0, "Raman": 0, "not likely in a fab": 0, "too little data": 0, "more than 3 of one material": 0,
                "could not be read": 0}
     entries, per_group, names = [], {}, set()
     for i in range(X.shape[1]):
@@ -278,6 +279,8 @@ def prepare(wn, X, metadata):
 def _prepare_one(wn, column, meta, per_group, names, i):
     """One spectrum of the library file -> (entry, None), or (None, why it is left out)."""
     from .library import material_group
+    if re.search(NIST, meta["organisation"], re.IGNORECASE):
+        return None, "NIST"
     if meta["kind"] and "RAMAN" in meta["kind"].upper():
         return None, "Raman"
     described = " ".join(str(meta[k]) for k in ("polymer", "identity", "material_class") if meta[k])

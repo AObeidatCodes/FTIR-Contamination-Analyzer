@@ -348,7 +348,7 @@ Open Specy…** adds references from the Open Specy library (Cowger et al. 2021)
    absorbance.
 2. Only FTIR spectra of materials a fab is likely to see are kept (gloves, wipes, seals,
    fluoropolymers, silicones, resins and adhesives, fibres, silica and other minerals), at most three
-   per material. Raman spectra and environmental samples are left out.
+   per material. Raman spectra, NIST spectra and environmental samples are left out.
 3. Every spectrum is compared with every reference. One that could be confused with a *different*
    material (r ≥ 0.95) is left out and listed in the report, so the extended library still passes
    the impostor test. References of the *same* material (polyethylene from Open Specy and PE from the
@@ -479,7 +479,7 @@ pip install pytest
 python -m pytest
 ```
 
-239 tests. Those for the analysis cover file reading (read-only data, headerless tab-separated files, unit
+240 tests. Those for the analysis cover file reading (read-only data, headerless tab-separated files, unit
 recognition, clear errors), processing, the verdict rule, the impostor test, the known answer for
 every demo spectrum, the second-component, empty-spot and saturation detection, the CO₂ direction,
 the analytical view (each step reproduced, the score recalculated from step 4), the interactive

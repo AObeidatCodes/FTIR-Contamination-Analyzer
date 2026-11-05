@@ -1594,7 +1594,7 @@ class OpenSpecyPanel(QWidget):
         for number, text in enumerate([
                 "Get the newest 'medoid nobaseline' library from where Open Specy keeps it (AWS, or osf.io), "
                 "or use a file you downloaded (.rds).",
-                "Only FTIR spectra in fab-relevant material classes are kept.",
+                "Only FTIR spectra in fab-relevant material classes are kept, and NIST's are left out.",
                 "Every spectrum is compared with every reference. One that could be confused with a different "
                 "material (r ≥ 0.95) is left out, so the extended library still passes the impostor test.",
                 "The result is saved in records/openspecy/ with a report. Switch between 'Fab essentials' and "
