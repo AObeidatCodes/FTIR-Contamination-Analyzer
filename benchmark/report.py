@@ -35,14 +35,14 @@ DEVIATIONS = [
     ("Added after the results were seen, as extra reporting: the lead rule on the extended library, answers by how a "
      "spectrum was compared, and the count of probable answers that were not right in the extended table.",
      "No rule, threshold, label or data choice changed, and no number in the protocol's list moved. The first run with "
-     "results was repeated from the committed tool, with the same outcomes."),
+     "results was repeated from the committed tool, with the same numbers."),
 ]
 
 # The failures, read by hand. They stay counted as failures: without the sample, nobody can say which side is wrong.
 FAILURE_NOTES = [
     "Both EVOH failures come from labels that give two names: <em>ethylene vinyl alcohol</em> as the identity and "
     "<em>polyethylene-vinyl acetate</em> as the class. The program said EVA.",
-    "The cellulose failure is labelled <em>cellulose_like organic matter</em>, from an environmental sample.",
+    "The cellulose failure is labelled <em>cellulose_like organic matter</em>, which is not quite a name for cellulose.",
     "The PS and PET failures, both called PE, come from one contributor.",
 ]
 
@@ -78,9 +78,9 @@ code{font-family:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;font-size
 """
 
 SEGMENTS = (("right", "Right", "var(--good)"), ("family", "Right family", "var(--warn)"), ("wrong", "Wrong material", "var(--bad)"),
-            ("weak_at_truth", "Weak, pointing at the true material", "var(--line-strong)"),
+            ("weak_at_truth", "Weak, pointing at the true material", "var(--accent)"),
             ("weak_elsewhere", "Weak, pointing elsewhere", "var(--muted)"),
-            ("none", "No reliable match", "var(--line)"))
+            ("none", "No reliable match", "var(--line-strong)"))
 NAMES = {FIBRES: "Fibres", OPEN_SPECY: "Open Specy"}
 TESTS = ((NOISE, "Noise"), (DRIFT, "Baseline drift"), (SHIFT, "Shifted bands"), (BLUR, "Lower resolution"))
 FIRST, SECOND = "var(--accent)", "var(--second)"          # checked for colour-blind readers, light and dark
@@ -96,6 +96,11 @@ def pct(value, digits=1):
 
 def count(number):
     return f"{number:,}"
+
+
+def plain(text):
+    """Text that stays on one line in a table."""
+    return h(text).replace(" ", "&nbsp;")
 
 
 def margin_text(s):
@@ -238,11 +243,11 @@ def lead_table(r):
     for dataset in (FIBRES, OPEN_SPECY):
         for label, lead in (("16 references", r["lead_rule"]), (f"{r['extended']['references']} references", r["extended"]["lead_rule"])):
             d = lead[dataset]
-            rows.append(row([NAMES[dataset], label, count(d["probable_with"]), count(d["probable_without"]), d["extra_right"],
-                             d["extra_wrong_material"], d["extra_false_probable"], h(", ".join(f"{k} {v}" for k, v in d["held"].items()) or "-")],
-                            ["", "", *["num"] * 5, ""]))
+            rows.append(row([plain(NAMES[dataset]), plain(label), count(d["probable_with"]), count(d["probable_without"]),
+                             d["extra_right"], d["extra_wrong_material"] + d["extra_false_probable"],
+                             h(", ".join(f"{k} {v}" for k, v in d["held"].items()) or "-")], ["", "", *["num"] * 4, ""]))
     return table(["Set", "Library", "Probable with the rule", "Without it", "Right it held back", "Wrong it stopped",
-                  "False probable it stopped", "True materials held back"], rows, 2)
+                  "True materials held back"], rows, 2)
 
 
 def lead_text(r):
@@ -275,7 +280,7 @@ def extended_table(r):
     for dataset in (FIBRES, OPEN_SPECY):
         for label, line in (("16 references", e["default_same_spectra"][dataset]), (f"{e['references']} references", e["extended"][dataset])):
             probable, bad = not_right(line)
-            rows.append(row([NAMES[dataset], label, count(probable), line["strict_right"]["k"], bad,
+            rows.append(row([plain(NAMES[dataset]), plain(label), count(probable), line["strict_right"]["k"], bad,
                              pct(bad / probable if probable else None), count(line["coverage"]["n"]),
                              count(line["false_probable"]["n"])], ["", "", *["num"] * 6]))
     return table(["Set", "Library", "Probable answers", "Right", "Not right", "Share not right", "Samples with a reference",
@@ -350,7 +355,7 @@ def needs_work(r):
     clean, two, four = fibre_shift(r)
     return ('<ul class="plain">'
             f"<li><b>Small band shifts cost a lot.</b> A shift of 2 cm⁻¹ took the right fibre answers from {clean} to {two}, and "
-            f"4 cm⁻¹ took them to {four}. It fails safe, but an instrument that has drifted slightly would get few answers.</li>"
+            f"4 cm⁻¹ took them to {four}. It fails safe, but spectra with bands shifted that far, for example between instruments, would get few answers.</li>"
             f"<li><b>The lead rule earned nothing here.</b> With 16 references it stopped {stopped} wrong answers and held back "
             f"{lost} right ones.</li>"
             f"<li><b>The extended library did not help.</b> On the same Open Specy spectra, probable answers that were not right "
@@ -434,7 +439,7 @@ def build(results_path, target):
 </section>
 
 <section id="extended"><h2 class="part">Second run: the extended library</h2>
-<div class="panel"><p>The same test with the {r['extended']['kept_from_pack']} included Open Specy references added, {r['extended']['references']} in all. References and everything from their clusters are left out of the test ({r['extended']['pack_clusters_left_out']} clusters), which leaves {count(r['extended']['spectra'])} spectra. Both libraries are scored on that same set, so the rows compare fairly. A material counts as having a reference if the library in that row holds it, so most fibres move from none to with a reference. Those newly covered fibres gained no right answers.</p>{extended_table(r)}</div>
+<div class="panel"><p>The same test with the {r['extended']['kept_from_pack']} included Open Specy references added, {r['extended']['references']} in all. References and everything from their clusters are left out of the test ({r['extended']['pack_clusters_left_out']} clusters), which leaves {count(r['extended']['spectra'])} spectra. Both libraries are scored on that same set, so the rows compare fairly. A material counts as having a reference if the library in that row holds it, so most fibres move from none to with a reference. Those newly covered fibres gained {r['extended']['extended'][FIBRES]['strict_right']['k'] - r['extended']['default_same_spectra'][FIBRES]['strict_right']['k']} right answers.</p>{extended_table(r)}</div>
 </section>
 
 <section id="limits"><h2 class="part">Limits of this benchmark</h2>

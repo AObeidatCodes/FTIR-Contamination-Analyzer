@@ -1,0 +1,2527 @@
+{
+ "protocol": "benchmark/PROTOCOL.md, version 1",
+ "locked_commit": "c432cee",
+ "ran_at_commit": "748ac81",
+ "ran_on": "2026-11-05 17:17 Jordanien Normalzeit",
+ "seconds": 314,
+ "library": {
+  "name": "16 shipped references",
+  "sha256": "310b46cc1294f9effb4d0dc0c24618f31e102181bbd27f0dd674facedb68dd69",
+  "references": 16
+ },
+ "data": {
+  "feature_matrix_raw_transmittance.csv": "2739d901529a0fd97e693068d82cee5b7eee2a616f5e8d6e797a84ad859fa26f",
+  "medoid_nobaseline.rds": "3591eb4b7be780ac12585631216bce5050cb543e9a61b8b482c91d1b4c821ab3",
+  "Sample_Spectra.csv": "edb70bc53378e1c408e9bb29757f1f3a39b9c149a4c2a9dfad161dfb145918c3"
+ },
+ "counts": {
+  "fibre_samples": 137,
+  "fibre_spectra": 160,
+  "open_specy_labelled": 4814,
+  "open_specy_test": 3418,
+  "open_specy_locked": 1396,
+  "open_specy_clusters_test": 590,
+  "openftir": 36,
+  "copies_left_out": 0,
+  "could_not_be_read": 0,
+  "kinds": {
+   "fibres|close relative": 38,
+   "fibres|in library": 29,
+   "fibres|not in library": 70,
+   "open specy|close relative": 157,
+   "open specy|in library": 2423,
+   "open specy|not in library": 838,
+   "openftir|close relative": 1,
+   "openftir|in library": 31,
+   "openftir|not in library": 4
+  }
+ },
+ "left_out": {
+  "open_specy": {
+   "NIST": 67,
+   "no material": 2128,
+   "Raman": 0
+  },
+  "openftir": {
+   "the library itself": 16,
+   "no stated material": 7
+  }
+ },
+ "headline": {
+  "fibres": {
+   "false_probable": {
+    "k": 0,
+    "n": 70,
+    "share": 0.0,
+    "low": 0.0,
+    "high": 0.05202306241026692
+   },
+   "false_probable_same_family": 0,
+   "strict_right": {
+    "k": 18,
+    "n": 18,
+    "share": 1.0,
+    "low": 0.8241207763533425,
+    "high": 1.0
+   },
+   "family_right": {
+    "k": 18,
+    "n": 18,
+    "share": 1.0,
+    "low": 0.8241207763533425,
+    "high": 1.0
+   },
+   "coverage": {
+    "k": 18,
+    "n": 29,
+    "share": 0.6206896551724138,
+    "low": 0.4400254420598852,
+    "high": 0.7731197789919015
+   },
+   "best_match": {
+    "k": 28,
+    "n": 29,
+    "share": 0.9655172413793104,
+    "low": 0.8282447812067973,
+    "high": 0.9938867857072374
+   },
+   "buckets": {
+    "right": 18,
+    "no answer": 11
+   },
+   "no_answer": {
+    "weak_at_truth": 10,
+    "weak_elsewhere": 0,
+    "no_reliable_match": 1
+   }
+  },
+  "open specy": {
+   "false_probable": {
+    "k": 1,
+    "n": 838,
+    "share": 0.0011933174224343676,
+    "low": 0.0,
+    "high": 0.00672822519029468
+   },
+   "false_probable_same_family": 0,
+   "strict_right": {
+    "k": 318,
+    "n": 323,
+    "share": 0.9845201238390093,
+    "low": 0.9613681820075837,
+    "high": 0.9977384383597537
+   },
+   "family_right": {
+    "k": 319,
+    "n": 323,
+    "share": 0.9876160990712074,
+    "low": 0.9666635687732342,
+    "high": 1.0
+   },
+   "coverage": {
+    "k": 323,
+    "n": 2423,
+    "share": 0.13330581923235657,
+    "low": 0.08560496801181401,
+    "high": 0.18625511093356348
+   },
+   "best_match": {
+    "k": 1378,
+    "n": 2423,
+    "share": 0.5687164671894346,
+    "low": 0.48922015720108547,
+    "high": 0.6480181851659976
+   },
+   "buckets": {
+    "no answer": 2100,
+    "right": 318,
+    "wrong": 4,
+    "right family": 1
+   },
+   "no_answer": {
+    "weak_at_truth": 814,
+    "weak_elsewhere": 225,
+    "no_reliable_match": 1061
+   }
+  }
+ },
+ "without_doubtful": {
+  "open specy": {
+   "false_probable": {
+    "k": 1,
+    "n": 837,
+    "share": 0.0011947431302270011,
+    "low": 0.0,
+    "high": 0.006736225779384819
+   },
+   "false_probable_same_family": 0,
+   "strict_right": {
+    "k": 312,
+    "n": 317,
+    "share": 0.9842271293375394,
+    "low": 0.960431654676259,
+    "high": 0.9976421966398381
+   },
+   "family_right": {
+    "k": 313,
+    "n": 317,
+    "share": 0.9873817034700315,
+    "low": 0.9660335501320111,
+    "high": 1.0
+   },
+   "coverage": {
+    "k": 317,
+    "n": 2195,
+    "share": 0.14441913439635534,
+    "low": 0.09257287553081517,
+    "high": 0.20108815439729505
+   },
+   "best_match": {
+    "k": 1334,
+    "n": 2195,
+    "share": 0.607744874715262,
+    "low": 0.5232784879656446,
+    "high": 0.6879108621779397
+   },
+   "buckets": {
+    "no answer": 1878,
+    "right": 312,
+    "wrong": 4,
+    "right family": 1
+   },
+   "no_answer": {
+    "weak_at_truth": 783,
+    "weak_elsewhere": 153,
+    "no_reliable_match": 942
+   }
+  },
+  "doubtful_spectra": 229
+ },
+ "per_material": [
+  {
+   "dataset": "fibres",
+   "kind": "close relative",
+   "truth": "acrylic fibre",
+   "n": 12,
+   "probable": 1,
+   "right": 0,
+   "family": 0,
+   "wrong": 0,
+   "false_probable": 0,
+   "relative_named": 1,
+   "weak": 11,
+   "none": 0,
+   "doubtful": 0,
+   "median_r": 0.798,
+   "named": {
+    "PAN": 1
+   }
+  },
+  {
+   "dataset": "fibres",
+   "kind": "close relative",
+   "truth": "modacrylic fibre",
+   "n": 15,
+   "probable": 0,
+   "right": 0,
+   "family": 0,
+   "wrong": 0,
+   "false_probable": 0,
+   "relative_named": 0,
+   "weak": 8,
+   "none": 7,
+   "doubtful": 0,
+   "median_r": 0.61,
+   "named": {}
+  },
+  {
+   "dataset": "fibres",
+   "kind": "close relative",
+   "truth": "polyamide (not 6,6)",
+   "n": 11,
+   "probable": 0,
+   "right": 0,
+   "family": 0,
+   "wrong": 0,
+   "false_probable": 0,
+   "relative_named": 0,
+   "weak": 11,
+   "none": 0,
+   "doubtful": 0,
+   "median_r": 0.899,
+   "named": {}
+  },
+  {
+   "dataset": "fibres",
+   "kind": "in library",
+   "truth": "PA",
+   "n": 6,
+   "probable": 5,
+   "right": 5,
+   "family": 0,
+   "wrong": 0,
+   "false_probable": 0,
+   "relative_named": 0,
+   "weak": 1,
+   "none": 0,
+   "doubtful": 0,
+   "median_r": 0.959,
+   "named": {
+    "PA": 5
+   }
+  },
+  {
+   "dataset": "fibres",
+   "kind": "in library",
+   "truth": "PE",
+   "n": 1,
+   "probable": 0,
+   "right": 0,
+   "family": 0,
+   "wrong": 0,
+   "false_probable": 0,
+   "relative_named": 0,
+   "weak": 1,
+   "none": 0,
+   "doubtful": 0,
+   "median_r": 0.919,
+   "named": {}
+  },
+  {
+   "dataset": "fibres",
+   "kind": "in library",
+   "truth": "PET",
+   "n": 15,
+   "probable": 6,
+   "right": 6,
+   "family": 0,
+   "wrong": 0,
+   "false_probable": 0,
+   "relative_named": 0,
+   "weak": 8,
+   "none": 1,
+   "doubtful": 0,
+   "median_r": 0.966,
+   "named": {
+    "PET": 6
+   }
+  },
+  {
+   "dataset": "fibres",
+   "kind": "in library",
+   "truth": "PP",
+   "n": 7,
+   "probable": 7,
+   "right": 7,
+   "family": 0,
+   "wrong": 0,
+   "false_probable": 0,
+   "relative_named": 0,
+   "weak": 0,
+   "none": 0,
+   "doubtful": 0,
+   "median_r": 0.981,
+   "named": {
+    "PP": 7
+   }
+  },
+  {
+   "dataset": "fibres",
+   "kind": "not in library",
+   "truth": "aramid",
+   "n": 4,
+   "probable": 0,
+   "right": 0,
+   "family": 0,
+   "wrong": 0,
+   "false_probable": 0,
+   "relative_named": 0,
+   "weak": 0,
+   "none": 4,
+   "doubtful": 0,
+   "median_r": 0.507,
+   "named": {}
+  },
+  {
+   "dataset": "fibres",
+   "kind": "not in library",
+   "truth": "cellulose",
+   "n": 34,
+   "probable": 0,
+   "right": 0,
+   "family": 0,
+   "wrong": 0,
+   "false_probable": 0,
+   "relative_named": 0,
+   "weak": 3,
+   "none": 31,
+   "doubtful": 0,
+   "median_r": 0.38,
+   "named": {}
+  },
+  {
+   "dataset": "fibres",
+   "kind": "not in library",
+   "truth": "cellulose acetate",
+   "n": 4,
+   "probable": 0,
+   "right": 0,
+   "family": 0,
+   "wrong": 0,
+   "false_probable": 0,
+   "relative_named": 0,
+   "weak": 0,
+   "none": 4,
+   "doubtful": 0,
+   "median_r": 0.52,
+   "named": {}
+  },
+  {
+   "dataset": "fibres",
+   "kind": "not in library",
+   "truth": "protein",
+   "n": 28,
+   "probable": 0,
+   "right": 0,
+   "family": 0,
+   "wrong": 0,
+   "false_probable": 0,
+   "relative_named": 0,
+   "weak": 19,
+   "none": 9,
+   "doubtful": 0,
+   "median_r": 0.614,
+   "named": {}
+  },
+  {
+   "dataset": "open specy",
+   "kind": "close relative",
+   "truth": "polyamide (not 6,6)",
+   "n": 157,
+   "probable": 9,
+   "right": 0,
+   "family": 0,
+   "wrong": 0,
+   "false_probable": 0,
+   "relative_named": 9,
+   "weak": 82,
+   "none": 66,
+   "doubtful": 0,
+   "median_r": 0.732,
+   "named": {
+    "PA": 9
+   }
+  },
+  {
+   "dataset": "open specy",
+   "kind": "in library",
+   "truth": "EVA",
+   "n": 138,
+   "probable": 14,
+   "right": 14,
+   "family": 0,
+   "wrong": 0,
+   "false_probable": 0,
+   "relative_named": 0,
+   "weak": 20,
+   "none": 104,
+   "doubtful": 2,
+   "median_r": 0.467,
+   "named": {
+    "EVA": 14
+   }
+  },
+  {
+   "dataset": "open specy",
+   "kind": "in library",
+   "truth": "EVOH",
+   "n": 8,
+   "probable": 3,
+   "right": 1,
+   "family": 0,
+   "wrong": 2,
+   "false_probable": 0,
+   "relative_named": 0,
+   "weak": 5,
+   "none": 0,
+   "doubtful": 0,
+   "median_r": 0.861,
+   "named": {
+    "EVA": 2,
+    "EVOH": 1
+   }
+  },
+  {
+   "dataset": "open specy",
+   "kind": "in library",
+   "truth": "PA",
+   "n": 23,
+   "probable": 3,
+   "right": 3,
+   "family": 0,
+   "wrong": 0,
+   "false_probable": 0,
+   "relative_named": 0,
+   "weak": 2,
+   "none": 18,
+   "doubtful": 0,
+   "median_r": 0.454,
+   "named": {
+    "PA": 3
+   }
+  },
+  {
+   "dataset": "open specy",
+   "kind": "in library",
+   "truth": "PAN",
+   "n": 168,
+   "probable": 2,
+   "right": 2,
+   "family": 0,
+   "wrong": 0,
+   "false_probable": 0,
+   "relative_named": 0,
+   "weak": 73,
+   "none": 93,
+   "doubtful": 45,
+   "median_r": 0.558,
+   "named": {
+    "PAN": 2
+   }
+  },
+  {
+   "dataset": "open specy",
+   "kind": "in library",
+   "truth": "PBT",
+   "n": 12,
+   "probable": 8,
+   "right": 8,
+   "family": 0,
+   "wrong": 0,
+   "false_probable": 0,
+   "relative_named": 0,
+   "weak": 4,
+   "none": 0,
+   "doubtful": 0,
+   "median_r": 0.966,
+   "named": {
+    "PBT": 8
+   }
+  },
+  {
+   "dataset": "open specy",
+   "kind": "in library",
+   "truth": "PC",
+   "n": 110,
+   "probable": 0,
+   "right": 0,
+   "family": 0,
+   "wrong": 0,
+   "false_probable": 0,
+   "relative_named": 0,
+   "weak": 66,
+   "none": 44,
+   "doubtful": 0,
+   "median_r": 0.828,
+   "named": {}
+  },
+  {
+   "dataset": "open specy",
+   "kind": "in library",
+   "truth": "PE",
+   "n": 551,
+   "probable": 178,
+   "right": 178,
+   "family": 0,
+   "wrong": 0,
+   "false_probable": 0,
+   "relative_named": 0,
+   "weak": 162,
+   "none": 211,
+   "doubtful": 50,
+   "median_r": 0.846,
+   "named": {
+    "PE": 178
+   }
+  },
+  {
+   "dataset": "open specy",
+   "kind": "in library",
+   "truth": "PET",
+   "n": 168,
+   "probable": 20,
+   "right": 19,
+   "family": 0,
+   "wrong": 1,
+   "false_probable": 0,
+   "relative_named": 0,
+   "weak": 80,
+   "none": 68,
+   "doubtful": 14,
+   "median_r": 0.773,
+   "named": {
+    "PET": 19,
+    "PE": 1
+   }
+  },
+  {
+   "dataset": "open specy",
+   "kind": "in library",
+   "truth": "PLA",
+   "n": 28,
+   "probable": 0,
+   "right": 0,
+   "family": 0,
+   "wrong": 0,
+   "false_probable": 0,
+   "relative_named": 0,
+   "weak": 24,
+   "none": 4,
+   "doubtful": 0,
+   "median_r": 0.819,
+   "named": {}
+  },
+  {
+   "dataset": "open specy",
+   "kind": "in library",
+   "truth": "PMMA",
+   "n": 61,
+   "probable": 23,
+   "right": 23,
+   "family": 0,
+   "wrong": 0,
+   "false_probable": 0,
+   "relative_named": 0,
+   "weak": 27,
+   "none": 11,
+   "doubtful": 0,
+   "median_r": 0.927,
+   "named": {
+    "PMMA": 23
+   }
+  },
+  {
+   "dataset": "open specy",
+   "kind": "in library",
+   "truth": "PP",
+   "n": 357,
+   "probable": 30,
+   "right": 29,
+   "family": 1,
+   "wrong": 0,
+   "false_probable": 0,
+   "relative_named": 0,
+   "weak": 170,
+   "none": 157,
+   "doubtful": 11,
+   "median_r": 0.688,
+   "named": {
+    "PP": 29,
+    "PE": 1
+   }
+  },
+  {
+   "dataset": "open specy",
+   "kind": "in library",
+   "truth": "PS",
+   "n": 384,
+   "probable": 40,
+   "right": 39,
+   "family": 0,
+   "wrong": 1,
+   "false_probable": 0,
+   "relative_named": 0,
+   "weak": 227,
+   "none": 117,
+   "doubtful": 100,
+   "median_r": 0.704,
+   "named": {
+    "PS": 39,
+    "PE": 1
+   }
+  },
+  {
+   "dataset": "open specy",
+   "kind": "in library",
+   "truth": "PU",
+   "n": 161,
+   "probable": 0,
+   "right": 0,
+   "family": 0,
+   "wrong": 0,
+   "false_probable": 0,
+   "relative_named": 0,
+   "weak": 37,
+   "none": 124,
+   "doubtful": 1,
+   "median_r": 0.457,
+   "named": {}
+  },
+  {
+   "dataset": "open specy",
+   "kind": "in library",
+   "truth": "PVC",
+   "n": 194,
+   "probable": 2,
+   "right": 2,
+   "family": 0,
+   "wrong": 0,
+   "false_probable": 0,
+   "relative_named": 0,
+   "weak": 130,
+   "none": 62,
+   "doubtful": 5,
+   "median_r": 0.649,
+   "named": {
+    "PVC": 2
+   }
+  },
+  {
+   "dataset": "open specy",
+   "kind": "in library",
+   "truth": "PVOH",
+   "n": 60,
+   "probable": 0,
+   "right": 0,
+   "family": 0,
+   "wrong": 0,
+   "false_probable": 0,
+   "relative_named": 0,
+   "weak": 12,
+   "none": 48,
+   "doubtful": 0,
+   "median_r": 0.497,
+   "named": {}
+  },
+  {
+   "dataset": "open specy",
+   "kind": "not in library",
+   "truth": "ABS",
+   "n": 35,
+   "probable": 0,
+   "right": 0,
+   "family": 0,
+   "wrong": 0,
+   "false_probable": 0,
+   "relative_named": 0,
+   "weak": 14,
+   "none": 21,
+   "doubtful": 0,
+   "median_r": 0.473,
+   "named": {}
+  },
+  {
+   "dataset": "open specy",
+   "kind": "not in library",
+   "truth": "PEEK",
+   "n": 48,
+   "probable": 0,
+   "right": 0,
+   "family": 0,
+   "wrong": 0,
+   "false_probable": 0,
+   "relative_named": 0,
+   "weak": 0,
+   "none": 48,
+   "doubtful": 0,
+   "median_r": 0.334,
+   "named": {}
+  },
+  {
+   "dataset": "open specy",
+   "kind": "not in library",
+   "truth": "POM",
+   "n": 40,
+   "probable": 0,
+   "right": 0,
+   "family": 0,
+   "wrong": 0,
+   "false_probable": 0,
+   "relative_named": 0,
+   "weak": 4,
+   "none": 36,
+   "doubtful": 0,
+   "median_r": 0.383,
+   "named": {}
+  },
+  {
+   "dataset": "open specy",
+   "kind": "not in library",
+   "truth": "PVAc",
+   "n": 73,
+   "probable": 0,
+   "right": 0,
+   "family": 0,
+   "wrong": 0,
+   "false_probable": 0,
+   "relative_named": 0,
+   "weak": 45,
+   "none": 28,
+   "doubtful": 0,
+   "median_r": 0.637,
+   "named": {}
+  },
+  {
+   "dataset": "open specy",
+   "kind": "not in library",
+   "truth": "SAN",
+   "n": 62,
+   "probable": 0,
+   "right": 0,
+   "family": 0,
+   "wrong": 0,
+   "false_probable": 0,
+   "relative_named": 0,
+   "weak": 62,
+   "none": 0,
+   "doubtful": 0,
+   "median_r": 0.834,
+   "named": {}
+  },
+  {
+   "dataset": "open specy",
+   "kind": "not in library",
+   "truth": "aramid",
+   "n": 19,
+   "probable": 0,
+   "right": 0,
+   "family": 0,
+   "wrong": 0,
+   "false_probable": 0,
+   "relative_named": 0,
+   "weak": 0,
+   "none": 19,
+   "doubtful": 0,
+   "median_r": 0.535,
+   "named": {}
+  },
+  {
+   "dataset": "open specy",
+   "kind": "not in library",
+   "truth": "cellulose",
+   "n": 109,
+   "probable": 1,
+   "right": 0,
+   "family": 0,
+   "wrong": 0,
+   "false_probable": 1,
+   "relative_named": 0,
+   "weak": 16,
+   "none": 92,
+   "doubtful": 0,
+   "median_r": 0.419,
+   "named": {
+    "PE": 1
+   }
+  },
+  {
+   "dataset": "open specy",
+   "kind": "not in library",
+   "truth": "cellulose acetate",
+   "n": 82,
+   "probable": 0,
+   "right": 0,
+   "family": 0,
+   "wrong": 0,
+   "false_probable": 0,
+   "relative_named": 0,
+   "weak": 2,
+   "none": 80,
+   "doubtful": 0,
+   "median_r": 0.451,
+   "named": {}
+  },
+  {
+   "dataset": "open specy",
+   "kind": "not in library",
+   "truth": "epoxy",
+   "n": 46,
+   "probable": 0,
+   "right": 0,
+   "family": 0,
+   "wrong": 0,
+   "false_probable": 0,
+   "relative_named": 0,
+   "weak": 19,
+   "none": 27,
+   "doubtful": 0,
+   "median_r": 0.465,
+   "named": {}
+  },
+  {
+   "dataset": "open specy",
+   "kind": "not in library",
+   "truth": "fluoropolymer",
+   "n": 105,
+   "probable": 0,
+   "right": 0,
+   "family": 0,
+   "wrong": 0,
+   "false_probable": 0,
+   "relative_named": 0,
+   "weak": 0,
+   "none": 105,
+   "doubtful": 0,
+   "median_r": 0.5,
+   "named": {}
+  },
+  {
+   "dataset": "open specy",
+   "kind": "not in library",
+   "truth": "natural rubber",
+   "n": 48,
+   "probable": 0,
+   "right": 0,
+   "family": 0,
+   "wrong": 0,
+   "false_probable": 0,
+   "relative_named": 0,
+   "weak": 19,
+   "none": 29,
+   "doubtful": 0,
+   "median_r": 0.344,
+   "named": {}
+  },
+  {
+   "dataset": "open specy",
+   "kind": "not in library",
+   "truth": "nitrile rubber",
+   "n": 4,
+   "probable": 0,
+   "right": 0,
+   "family": 0,
+   "wrong": 0,
+   "false_probable": 0,
+   "relative_named": 0,
+   "weak": 0,
+   "none": 4,
+   "doubtful": 0,
+   "median_r": 0.214,
+   "named": {}
+  },
+  {
+   "dataset": "open specy",
+   "kind": "not in library",
+   "truth": "polyimide",
+   "n": 50,
+   "probable": 0,
+   "right": 0,
+   "family": 0,
+   "wrong": 0,
+   "false_probable": 0,
+   "relative_named": 0,
+   "weak": 47,
+   "none": 3,
+   "doubtful": 0,
+   "median_r": 0.634,
+   "named": {}
+  },
+  {
+   "dataset": "open specy",
+   "kind": "not in library",
+   "truth": "protein",
+   "n": 28,
+   "probable": 0,
+   "right": 0,
+   "family": 0,
+   "wrong": 0,
+   "false_probable": 0,
+   "relative_named": 0,
+   "weak": 9,
+   "none": 19,
+   "doubtful": 1,
+   "median_r": 0.551,
+   "named": {}
+  },
+  {
+   "dataset": "open specy",
+   "kind": "not in library",
+   "truth": "silica",
+   "n": 6,
+   "probable": 0,
+   "right": 0,
+   "family": 0,
+   "wrong": 0,
+   "false_probable": 0,
+   "relative_named": 0,
+   "weak": 0,
+   "none": 6,
+   "doubtful": 0,
+   "median_r": 0.334,
+   "named": {}
+  },
+  {
+   "dataset": "open specy",
+   "kind": "not in library",
+   "truth": "silicone",
+   "n": 83,
+   "probable": 0,
+   "right": 0,
+   "family": 0,
+   "wrong": 0,
+   "false_probable": 0,
+   "relative_named": 0,
+   "weak": 0,
+   "none": 83,
+   "doubtful": 0,
+   "median_r": 0.35,
+   "named": {}
+  }
+ ],
+ "per_contributor": [
+  {
+   "contributor": "gicquel et al. 2024",
+   "n": 739,
+   "in_library": 404,
+   "probable": 63,
+   "right": 63,
+   "not_right": 0,
+   "not_in_library": 319,
+   "false_probable": 1
+  },
+  {
+   "contributor": "elise granek and kellie teague",
+   "n": 648,
+   "in_library": 416,
+   "probable": 8,
+   "right": 8,
+   "not_right": 0,
+   "not_in_library": 215,
+   "false_probable": 0
+  },
+  {
+   "contributor": "win cowger and sebastian primpke",
+   "n": 528,
+   "in_library": 405,
+   "probable": 16,
+   "right": 13,
+   "not_right": 3,
+   "not_in_library": 102,
+   "false_probable": 0
+  },
+  {
+   "contributor": "rachel kozloski",
+   "n": 298,
+   "in_library": 150,
+   "probable": 2,
+   "right": 2,
+   "not_right": 0,
+   "not_in_library": 98,
+   "false_probable": 0
+  },
+  {
+   "contributor": "julia, davidson",
+   "n": 236,
+   "in_library": 198,
+   "probable": 79,
+   "right": 79,
+   "not_right": 0,
+   "not_in_library": 10,
+   "false_probable": 0
+  },
+  {
+   "contributor": "microplastix",
+   "n": 199,
+   "in_library": 199,
+   "probable": 32,
+   "right": 32,
+   "not_right": 0,
+   "not_in_library": 0,
+   "false_probable": 0
+  },
+  {
+   "contributor": "flopp, de frond et al. 2021",
+   "n": 146,
+   "in_library": 122,
+   "probable": 5,
+   "right": 5,
+   "not_right": 0,
+   "not_in_library": 15,
+   "false_probable": 0
+  },
+  {
+   "contributor": "moore institute for plastic pollution research",
+   "n": 140,
+   "in_library": 110,
+   "probable": 0,
+   "right": 0,
+   "not_right": 0,
+   "not_in_library": 30,
+   "false_probable": 0
+  },
+  {
+   "contributor": "adamopoulou et al., 2026 (cnr)",
+   "n": 100,
+   "in_library": 100,
+   "probable": 0,
+   "right": 0,
+   "not_right": 0,
+   "not_in_library": 0,
+   "false_probable": 0
+  },
+  {
+   "contributor": "aline carvalho",
+   "n": 100,
+   "in_library": 100,
+   "probable": 34,
+   "right": 34,
+   "not_right": 0,
+   "not_in_library": 0,
+   "false_probable": 0
+  },
+  {
+   "contributor": "primpke et al. 2018",
+   "n": 93,
+   "in_library": 60,
+   "probable": 43,
+   "right": 41,
+   "not_right": 2,
+   "not_in_library": 21,
+   "false_probable": 0
+  },
+  {
+   "contributor": "plopp library",
+   "n": 52,
+   "in_library": 52,
+   "probable": 0,
+   "right": 0,
+   "not_right": 0,
+   "not_in_library": 0,
+   "false_probable": 0
+  },
+  {
+   "contributor": "adamopoulou et al., 2026 (hcmr)",
+   "n": 50,
+   "in_library": 50,
+   "probable": 25,
+   "right": 25,
+   "not_right": 0,
+   "not_in_library": 0,
+   "false_probable": 0
+  },
+  {
+   "contributor": "suja sukumaran, thermo fisher scientific",
+   "n": 24,
+   "in_library": 11,
+   "probable": 1,
+   "right": 1,
+   "not_right": 0,
+   "not_in_library": 13,
+   "false_probable": 0
+  },
+  {
+   "contributor": "national renewable energy laboratory",
+   "n": 22,
+   "in_library": 18,
+   "probable": 0,
+   "right": 0,
+   "not_right": 0,
+   "not_in_library": 0,
+   "false_probable": 0
+  },
+  {
+   "contributor": "adamopoulou et al., 2026 (vliz)",
+   "n": 17,
+   "in_library": 17,
+   "probable": 10,
+   "right": 10,
+   "not_right": 0,
+   "not_in_library": 0,
+   "false_probable": 0
+  },
+  {
+   "contributor": "kimmel_center",
+   "n": 8,
+   "in_library": 2,
+   "probable": 0,
+   "right": 0,
+   "not_right": 0,
+   "not_in_library": 6,
+   "false_probable": 0
+  },
+  {
+   "contributor": "hpu polymer kit 1.0",
+   "n": 6,
+   "in_library": 5,
+   "probable": 5,
+   "right": 5,
+   "not_right": 0,
+   "not_in_library": 1,
+   "false_probable": 0
+  },
+  {
+   "contributor": "swgdrug",
+   "n": 5,
+   "in_library": 0,
+   "probable": 0,
+   "right": 0,
+   "not_right": 0,
+   "not_in_library": 5,
+   "false_probable": 0
+  },
+  {
+   "contributor": "archaeometrielabor",
+   "n": 3,
+   "in_library": 1,
+   "probable": 0,
+   "right": 0,
+   "not_right": 0,
+   "not_in_library": 2,
+   "false_probable": 0
+  },
+  {
+   "contributor": "nicolas coca",
+   "n": 3,
+   "in_library": 3,
+   "probable": 0,
+   "right": 0,
+   "not_right": 0,
+   "not_in_library": 0,
+   "false_probable": 0
+  },
+  {
+   "contributor": "rruff",
+   "n": 1,
+   "in_library": 0,
+   "probable": 0,
+   "right": 0,
+   "not_right": 0,
+   "not_in_library": 1,
+   "false_probable": 0
+  }
+ ],
+ "repeatability": {
+  "samples": 19,
+  "spectra": 42,
+  "same_verdict": 16,
+  "same_verdict_and_material": 12,
+  "median_r_spread": 0.02300000000000002,
+  "largest_r_spread": 0.5264,
+  "different": [
+   {
+    "sample": "MTA_COT_061",
+    "truth": "cellulose",
+    "verdicts": [
+     "weak",
+     "no reliable match"
+    ],
+    "named": [
+     "PET",
+     "PVC"
+    ],
+    "r": [
+     0.908,
+     0.3816
+    ]
+   },
+   {
+    "sample": "MTA_LIN_042",
+    "truth": "cellulose",
+    "verdicts": [
+     "no reliable match",
+     "no reliable match"
+    ],
+    "named": [
+     "PU",
+     "PVC"
+    ],
+    "r": [
+     0.4684,
+     0.4252
+    ]
+   },
+   {
+    "sample": "MTA_WOL_113",
+    "truth": "protein",
+    "verdicts": [
+     "weak",
+     "no reliable match",
+     "weak"
+    ],
+    "named": [
+     "PA",
+     "PA",
+     "PA"
+    ],
+    "r": [
+     0.6051,
+     0.5755,
+     0.6147
+    ]
+   },
+   {
+    "sample": "MTA_WOL_123",
+    "truth": "protein",
+    "verdicts": [
+     "weak",
+     "weak"
+    ],
+    "named": [
+     "PA",
+     "PE"
+    ],
+    "r": [
+     0.6192,
+     0.6868
+    ]
+   },
+   {
+    "sample": "MTF_MAC_058",
+    "truth": "modacrylic fibre",
+    "verdicts": [
+     "no reliable match",
+     "no reliable match"
+    ],
+    "named": [
+     "PA",
+     "PAN"
+    ],
+    "r": [
+     0.4566,
+     0.4796
+    ]
+   },
+   {
+    "sample": "MTF_MAC_061",
+    "truth": "modacrylic fibre",
+    "verdicts": [
+     "no reliable match",
+     "weak"
+    ],
+    "named": [
+     "PAN",
+     "PAN"
+    ],
+    "r": [
+     0.4074,
+     0.8022
+    ]
+   },
+   {
+    "sample": "MTF_MOD_060",
+    "truth": "cellulose",
+    "verdicts": [
+     "no reliable match",
+     "no reliable match"
+    ],
+    "named": [
+     "PVC",
+     "PU"
+    ],
+    "r": [
+     0.3406,
+     0.3387
+    ]
+   }
+  ]
+ },
+ "relatives": [
+  {
+   "dataset": "fibres",
+   "truth": "acrylic fibre",
+   "relative": "PAN",
+   "n": 12,
+   "relative_named": 1,
+   "wrong": 0,
+   "no_answer": 11,
+   "named": {
+    "PAN": 1
+   }
+  },
+  {
+   "dataset": "fibres",
+   "truth": "modacrylic fibre",
+   "relative": "PAN",
+   "n": 15,
+   "relative_named": 0,
+   "wrong": 0,
+   "no_answer": 15,
+   "named": {}
+  },
+  {
+   "dataset": "fibres",
+   "truth": "polyamide (not 6,6)",
+   "relative": "PA",
+   "n": 11,
+   "relative_named": 0,
+   "wrong": 0,
+   "no_answer": 11,
+   "named": {}
+  },
+  {
+   "dataset": "open specy",
+   "truth": "polyamide (not 6,6)",
+   "relative": "PA",
+   "n": 157,
+   "relative_named": 9,
+   "wrong": 0,
+   "no_answer": 148,
+   "named": {
+    "PA": 9
+   }
+  }
+ ],
+ "lead_rule": {
+  "fibres": {
+   "held": {
+    "PET": 7
+   },
+   "probable_with": 19,
+   "probable_without": 26,
+   "extra": 7,
+   "extra_right": 7,
+   "extra_wrong_material": 0,
+   "extra_false_probable": 0,
+   "extra_relative": 0,
+   "false_with": 0,
+   "out_total": 70
+  },
+  "open specy": {
+   "held": {
+    "PET": 4,
+    "PE": 1
+   },
+   "probable_with": 333,
+   "probable_without": 338,
+   "extra": 5,
+   "extra_right": 5,
+   "extra_wrong_material": 0,
+   "extra_false_probable": 0,
+   "extra_relative": 0,
+   "false_with": 1,
+   "out_total": 838
+  }
+ },
+ "by_reading": [
+  {
+   "reading": "ATR",
+   "n": 1117,
+   "probable": 300,
+   "right": 295,
+   "median_r": 0.873
+  },
+  {
+   "reading": "transmission",
+   "n": 652,
+   "probable": 23,
+   "right": 23,
+   "median_r": 0.641
+  },
+  {
+   "reading": "unknown",
+   "n": 654,
+   "probable": 0,
+   "right": 0,
+   "median_r": 0.434
+  }
+ ],
+ "stress": [
+  {
+   "dataset": "fibres",
+   "test": "noise",
+   "level": 0.005,
+   "unit": "share",
+   "n": 137,
+   "same_answer": 133,
+   "n_in": 29,
+   "right": 19,
+   "not_right": 0,
+   "n_out": 70,
+   "false_probable": 0
+  },
+  {
+   "dataset": "open specy",
+   "test": "noise",
+   "level": 0.005,
+   "unit": "share",
+   "n": 500,
+   "same_answer": 486,
+   "n_in": 342,
+   "right": 47,
+   "not_right": 0,
+   "n_out": 140,
+   "false_probable": 1
+  },
+  {
+   "dataset": "fibres",
+   "test": "noise",
+   "level": 0.01,
+   "unit": "share",
+   "n": 137,
+   "same_answer": 125,
+   "n_in": 29,
+   "right": 18,
+   "not_right": 0,
+   "n_out": 70,
+   "false_probable": 0
+  },
+  {
+   "dataset": "open specy",
+   "test": "noise",
+   "level": 0.01,
+   "unit": "share",
+   "n": 500,
+   "same_answer": 476,
+   "n_in": 342,
+   "right": 48,
+   "not_right": 0,
+   "n_out": 140,
+   "false_probable": 1
+  },
+  {
+   "dataset": "fibres",
+   "test": "noise",
+   "level": 0.02,
+   "unit": "share",
+   "n": 137,
+   "same_answer": 101,
+   "n_in": 29,
+   "right": 14,
+   "not_right": 0,
+   "n_out": 70,
+   "false_probable": 0
+  },
+  {
+   "dataset": "open specy",
+   "test": "noise",
+   "level": 0.02,
+   "unit": "share",
+   "n": 500,
+   "same_answer": 460,
+   "n_in": 342,
+   "right": 42,
+   "not_right": 0,
+   "n_out": 140,
+   "false_probable": 1
+  },
+  {
+   "dataset": "fibres",
+   "test": "noise",
+   "level": 0.05,
+   "unit": "share",
+   "n": 137,
+   "same_answer": 76,
+   "n_in": 29,
+   "right": 0,
+   "not_right": 0,
+   "n_out": 70,
+   "false_probable": 0
+  },
+  {
+   "dataset": "open specy",
+   "test": "noise",
+   "level": 0.05,
+   "unit": "share",
+   "n": 500,
+   "same_answer": 347,
+   "n_in": 342,
+   "right": 2,
+   "not_right": 0,
+   "n_out": 140,
+   "false_probable": 0
+  },
+  {
+   "dataset": "fibres",
+   "test": "baseline drift",
+   "level": 0.05,
+   "unit": "share",
+   "n": 137,
+   "same_answer": 137,
+   "n_in": 29,
+   "right": 18,
+   "not_right": 0,
+   "n_out": 70,
+   "false_probable": 0
+  },
+  {
+   "dataset": "open specy",
+   "test": "baseline drift",
+   "level": 0.05,
+   "unit": "share",
+   "n": 500,
+   "same_answer": 499,
+   "n_in": 342,
+   "right": 48,
+   "not_right": 0,
+   "n_out": 140,
+   "false_probable": 1
+  },
+  {
+   "dataset": "fibres",
+   "test": "baseline drift",
+   "level": 0.1,
+   "unit": "share",
+   "n": 137,
+   "same_answer": 136,
+   "n_in": 29,
+   "right": 18,
+   "not_right": 0,
+   "n_out": 70,
+   "false_probable": 0
+  },
+  {
+   "dataset": "open specy",
+   "test": "baseline drift",
+   "level": 0.1,
+   "unit": "share",
+   "n": 500,
+   "same_answer": 496,
+   "n_in": 342,
+   "right": 48,
+   "not_right": 0,
+   "n_out": 140,
+   "false_probable": 1
+  },
+  {
+   "dataset": "fibres",
+   "test": "baseline drift",
+   "level": 0.25,
+   "unit": "share",
+   "n": 137,
+   "same_answer": 133,
+   "n_in": 29,
+   "right": 18,
+   "not_right": 0,
+   "n_out": 70,
+   "false_probable": 0
+  },
+  {
+   "dataset": "open specy",
+   "test": "baseline drift",
+   "level": 0.25,
+   "unit": "share",
+   "n": 500,
+   "same_answer": 486,
+   "n_in": 342,
+   "right": 49,
+   "not_right": 0,
+   "n_out": 140,
+   "false_probable": 1
+  },
+  {
+   "dataset": "fibres",
+   "test": "baseline drift",
+   "level": 0.5,
+   "unit": "share",
+   "n": 137,
+   "same_answer": 133,
+   "n_in": 29,
+   "right": 18,
+   "not_right": 0,
+   "n_out": 70,
+   "false_probable": 0
+  },
+  {
+   "dataset": "open specy",
+   "test": "baseline drift",
+   "level": 0.5,
+   "unit": "share",
+   "n": 500,
+   "same_answer": 479,
+   "n_in": 342,
+   "right": 48,
+   "not_right": 0,
+   "n_out": 140,
+   "false_probable": 1
+  },
+  {
+   "dataset": "fibres",
+   "test": "shifted bands",
+   "level": 1,
+   "unit": "cm-1",
+   "n": 137,
+   "same_answer": 131,
+   "n_in": 29,
+   "right": 17,
+   "not_right": 0,
+   "n_out": 70,
+   "false_probable": 0
+  },
+  {
+   "dataset": "open specy",
+   "test": "shifted bands",
+   "level": 1,
+   "unit": "cm-1",
+   "n": 500,
+   "same_answer": 463,
+   "n_in": 342,
+   "right": 45,
+   "not_right": 0,
+   "n_out": 140,
+   "false_probable": 0
+  },
+  {
+   "dataset": "fibres",
+   "test": "shifted bands",
+   "level": 2,
+   "unit": "cm-1",
+   "n": 137,
+   "same_answer": 119,
+   "n_in": 29,
+   "right": 9,
+   "not_right": 0,
+   "n_out": 70,
+   "false_probable": 0
+  },
+  {
+   "dataset": "open specy",
+   "test": "shifted bands",
+   "level": 2,
+   "unit": "cm-1",
+   "n": 500,
+   "same_answer": 429,
+   "n_in": 342,
+   "right": 34,
+   "not_right": 0,
+   "n_out": 140,
+   "false_probable": 0
+  },
+  {
+   "dataset": "fibres",
+   "test": "shifted bands",
+   "level": 4,
+   "unit": "cm-1",
+   "n": 137,
+   "same_answer": 101,
+   "n_in": 29,
+   "right": 0,
+   "not_right": 0,
+   "n_out": 70,
+   "false_probable": 0
+  },
+  {
+   "dataset": "open specy",
+   "test": "shifted bands",
+   "level": 4,
+   "unit": "cm-1",
+   "n": 500,
+   "same_answer": 365,
+   "n_in": 342,
+   "right": 4,
+   "not_right": 0,
+   "n_out": 140,
+   "false_probable": 0
+  },
+  {
+   "dataset": "fibres",
+   "test": "shifted bands",
+   "level": 8,
+   "unit": "cm-1",
+   "n": 137,
+   "same_answer": 70,
+   "n_in": 29,
+   "right": 0,
+   "not_right": 0,
+   "n_out": 70,
+   "false_probable": 0
+  },
+  {
+   "dataset": "open specy",
+   "test": "shifted bands",
+   "level": 8,
+   "unit": "cm-1",
+   "n": 500,
+   "same_answer": 271,
+   "n_in": 342,
+   "right": 0,
+   "not_right": 0,
+   "n_out": 140,
+   "false_probable": 0
+  },
+  {
+   "dataset": "fibres",
+   "test": "lower resolution",
+   "level": 8,
+   "unit": "cm-1",
+   "n": 137,
+   "same_answer": 133,
+   "n_in": 29,
+   "right": 19,
+   "not_right": 0,
+   "n_out": 70,
+   "false_probable": 0
+  },
+  {
+   "dataset": "open specy",
+   "test": "lower resolution",
+   "level": 8,
+   "unit": "cm-1",
+   "n": 500,
+   "same_answer": 472,
+   "n_in": 342,
+   "right": 45,
+   "not_right": 0,
+   "n_out": 140,
+   "false_probable": 1
+  },
+  {
+   "dataset": "fibres",
+   "test": "lower resolution",
+   "level": 16,
+   "unit": "cm-1",
+   "n": 137,
+   "same_answer": 92,
+   "n_in": 29,
+   "right": 3,
+   "not_right": 0,
+   "n_out": 70,
+   "false_probable": 0
+  },
+  {
+   "dataset": "open specy",
+   "test": "lower resolution",
+   "level": 16,
+   "unit": "cm-1",
+   "n": 500,
+   "same_answer": 409,
+   "n_in": 342,
+   "right": 14,
+   "not_right": 0,
+   "n_out": 140,
+   "false_probable": 0
+  },
+  {
+   "dataset": "fibres",
+   "test": "lower resolution",
+   "level": 32,
+   "unit": "cm-1",
+   "n": 137,
+   "same_answer": 57,
+   "n_in": 29,
+   "right": 0,
+   "not_right": 0,
+   "n_out": 70,
+   "false_probable": 0
+  },
+  {
+   "dataset": "open specy",
+   "test": "lower resolution",
+   "level": 32,
+   "unit": "cm-1",
+   "n": 500,
+   "same_answer": 260,
+   "n_in": 342,
+   "right": 0,
+   "not_right": 0,
+   "n_out": 140,
+   "false_probable": 0
+  },
+  {
+   "dataset": "fibres",
+   "test": "noise",
+   "level": 0,
+   "unit": "share",
+   "n": 137,
+   "same_answer": 137,
+   "n_in": 29,
+   "right": 18,
+   "not_right": 0,
+   "n_out": 70,
+   "false_probable": 0
+  },
+  {
+   "dataset": "open specy",
+   "test": "noise",
+   "level": 0,
+   "unit": "share",
+   "n": 500,
+   "same_answer": 500,
+   "n_in": 342,
+   "right": 48,
+   "not_right": 0,
+   "n_out": 140,
+   "false_probable": 1
+  },
+  {
+   "dataset": "fibres",
+   "test": "baseline drift",
+   "level": 0,
+   "unit": "share",
+   "n": 137,
+   "same_answer": 137,
+   "n_in": 29,
+   "right": 18,
+   "not_right": 0,
+   "n_out": 70,
+   "false_probable": 0
+  },
+  {
+   "dataset": "open specy",
+   "test": "baseline drift",
+   "level": 0,
+   "unit": "share",
+   "n": 500,
+   "same_answer": 500,
+   "n_in": 342,
+   "right": 48,
+   "not_right": 0,
+   "n_out": 140,
+   "false_probable": 1
+  },
+  {
+   "dataset": "fibres",
+   "test": "shifted bands",
+   "level": 0,
+   "unit": "cm-1",
+   "n": 137,
+   "same_answer": 137,
+   "n_in": 29,
+   "right": 18,
+   "not_right": 0,
+   "n_out": 70,
+   "false_probable": 0
+  },
+  {
+   "dataset": "open specy",
+   "test": "shifted bands",
+   "level": 0,
+   "unit": "cm-1",
+   "n": 500,
+   "same_answer": 500,
+   "n_in": 342,
+   "right": 48,
+   "not_right": 0,
+   "n_out": 140,
+   "false_probable": 1
+  },
+  {
+   "dataset": "fibres",
+   "test": "lower resolution",
+   "level": 0,
+   "unit": "cm-1",
+   "n": 137,
+   "same_answer": 137,
+   "n_in": 29,
+   "right": 18,
+   "not_right": 0,
+   "n_out": 70,
+   "false_probable": 0
+  },
+  {
+   "dataset": "open specy",
+   "test": "lower resolution",
+   "level": 0,
+   "unit": "cm-1",
+   "n": 500,
+   "same_answer": 500,
+   "n_in": 342,
+   "right": 48,
+   "not_right": 0,
+   "n_out": 140,
+   "false_probable": 1
+  }
+ ],
+ "extended": {
+  "references": 161,
+  "kept_from_pack": 145,
+  "pack_clusters_left_out": 47,
+  "spectra": 3187,
+  "materials_added": [
+   "ABS",
+   "PEEK",
+   "POM",
+   "PVAc",
+   "SAN",
+   "cellulose",
+   "cellulose acetate",
+   "epoxy",
+   "fluoropolymer",
+   "mineral",
+   "natural rubber",
+   "nitrile rubber",
+   "poly(ethylene-propylene-diene) rubber",
+   "poly(styrene-butadiene) rubber",
+   "polyacrylamides",
+   "polyacrylates",
+   "polydienes",
+   "polydiglycidyl ethers",
+   "polyesters",
+   "polyethers",
+   "polyethersulfones",
+   "polyhaloolefins",
+   "polyhalostyrenes",
+   "polyhydroxy(meth)acrylates",
+   "polyimide",
+   "polymethacrylates",
+   "polyolefins",
+   "polyphenylene sulfide",
+   "polyphenylethers",
+   "polyvinylesters",
+   "polyvinylpyrrolidones",
+   "protein",
+   "silica",
+   "silicone"
+  ],
+  "lead_rule": {
+   "fibres": {
+    "held": {
+     "PET": 7
+    },
+    "probable_with": 19,
+    "probable_without": 26,
+    "extra": 7,
+    "extra_right": 7,
+    "extra_wrong_material": 0,
+    "extra_false_probable": 0,
+    "extra_relative": 0,
+    "false_with": 0,
+    "out_total": 4
+   },
+   "open specy": {
+    "held": {
+     "PE": 41,
+     "PET": 9,
+     "PS": 1
+    },
+    "probable_with": 318,
+    "probable_without": 369,
+    "extra": 51,
+    "extra_right": 50,
+    "extra_wrong_material": 1,
+    "extra_false_probable": 0,
+    "extra_relative": 0,
+    "false_with": 0,
+    "out_total": 19
+   }
+  },
+  "extended": {
+   "fibres": {
+    "false_probable": {
+     "k": 0,
+     "n": 4,
+     "share": 0.0,
+     "low": 0.0,
+     "high": 0.4898908364545973
+    },
+    "false_probable_same_family": 0,
+    "strict_right": {
+     "k": 18,
+     "n": 18,
+     "share": 1.0,
+     "low": 0.8241207763533425,
+     "high": 1.0
+    },
+    "family_right": {
+     "k": 18,
+     "n": 18,
+     "share": 1.0,
+     "low": 0.8241207763533425,
+     "high": 1.0
+    },
+    "coverage": {
+     "k": 18,
+     "n": 95,
+     "share": 0.18947368421052632,
+     "low": 0.12334852229116193,
+     "high": 0.27973596569651077
+    },
+    "best_match": {
+     "k": 27,
+     "n": 95,
+     "share": 0.28421052631578947,
+     "low": 0.20328420162859612,
+     "high": 0.3819101035831764
+    },
+    "buckets": {
+     "no answer": 77,
+     "right": 18
+    },
+    "no_answer": {
+     "weak_at_truth": 10,
+     "weak_elsewhere": 65,
+     "no_reliable_match": 2
+    }
+   },
+   "open specy": {
+    "false_probable": {
+     "k": 0,
+     "n": 19,
+     "share": 0.0,
+     "low": 0.0,
+     "high": 0.16817922405261626
+    },
+    "false_probable_same_family": 0,
+    "strict_right": {
+     "k": 294,
+     "n": 309,
+     "share": 0.9514563106796117,
+     "low": 0.9021244693961386,
+     "high": 0.9847094801223242
+    },
+    "family_right": {
+     "k": 295,
+     "n": 309,
+     "share": 0.9546925566343042,
+     "low": 0.9039683144448446,
+     "high": 0.9870974664266925
+    },
+    "coverage": {
+     "k": 309,
+     "n": 2874,
+     "share": 0.10751565762004175,
+     "low": 0.0746335674035788,
+     "high": 0.1425533959127987
+    },
+    "best_match": {
+     "k": 1213,
+     "n": 2874,
+     "share": 0.4220598469032707,
+     "low": 0.34165626048008463,
+     "high": 0.49855543067054114
+    },
+    "buckets": {
+     "no answer": 2565,
+     "right": 294,
+     "wrong": 14,
+     "right family": 1
+    },
+    "no_answer": {
+     "weak_at_truth": 959,
+     "weak_elsewhere": 1114,
+     "no_reliable_match": 492
+    }
+   }
+  },
+  "default_same_spectra": {
+   "fibres": {
+    "false_probable": {
+     "k": 0,
+     "n": 70,
+     "share": 0.0,
+     "low": 0.0,
+     "high": 0.05202306241026692
+    },
+    "false_probable_same_family": 0,
+    "strict_right": {
+     "k": 18,
+     "n": 18,
+     "share": 1.0,
+     "low": 0.8241207763533425,
+     "high": 1.0
+    },
+    "family_right": {
+     "k": 18,
+     "n": 18,
+     "share": 1.0,
+     "low": 0.8241207763533425,
+     "high": 1.0
+    },
+    "coverage": {
+     "k": 18,
+     "n": 29,
+     "share": 0.6206896551724138,
+     "low": 0.4400254420598852,
+     "high": 0.7731197789919015
+    },
+    "best_match": {
+     "k": 28,
+     "n": 29,
+     "share": 0.9655172413793104,
+     "low": 0.8282447812067973,
+     "high": 0.9938867857072374
+    },
+    "buckets": {
+     "right": 18,
+     "no answer": 11
+    },
+    "no_answer": {
+     "weak_at_truth": 10,
+     "weak_elsewhere": 0,
+     "no_reliable_match": 1
+    }
+   },
+   "open specy": {
+    "false_probable": {
+     "k": 1,
+     "n": 652,
+     "share": 0.0015337423312883436,
+     "low": 0.0,
+     "high": 0.008636020915569836
+    },
+    "false_probable_same_family": 0,
+    "strict_right": {
+     "k": 310,
+     "n": 315,
+     "share": 0.9841269841269841,
+     "low": 0.9609259202075099,
+     "high": 0.9974160206718347
+    },
+    "family_right": {
+     "k": 311,
+     "n": 315,
+     "share": 0.9873015873015873,
+     "low": 0.965076584774037,
+     "high": 1.0
+    },
+    "coverage": {
+     "k": 315,
+     "n": 2241,
+     "share": 0.14056224899598393,
+     "low": 0.08921460647226946,
+     "high": 0.20024798835391758
+    },
+    "best_match": {
+     "k": 1266,
+     "n": 2241,
+     "share": 0.5649263721552878,
+     "low": 0.47965673412147936,
+     "high": 0.6437321978778007
+    },
+    "buckets": {
+     "no answer": 1926,
+     "right": 310,
+     "wrong": 4,
+     "right family": 1
+    },
+    "no_answer": {
+     "weak_at_truth": 772,
+     "weak_elsewhere": 217,
+     "no_reliable_match": 937
+    }
+   }
+  }
+ },
+ "openftir": {
+  "headline": {
+   "false_probable": {
+    "k": 0,
+    "n": 4,
+    "share": 0.0,
+    "low": 0.0,
+    "high": 0.4898908364545973
+   },
+   "false_probable_same_family": 0,
+   "strict_right": {
+    "k": 23,
+    "n": 23,
+    "share": 1.0,
+    "low": 0.8568833815495731,
+    "high": 1.0
+   },
+   "family_right": {
+    "k": 23,
+    "n": 23,
+    "share": 1.0,
+    "low": 0.8568833815495731,
+    "high": 1.0
+   },
+   "coverage": {
+    "k": 23,
+    "n": 31,
+    "share": 0.7419354838709677,
+    "low": 0.5675386419056621,
+    "high": 0.8629829409360625
+   },
+   "best_match": {
+    "k": 29,
+    "n": 31,
+    "share": 0.9354838709677419,
+    "low": 0.7928136326370188,
+    "high": 0.9821252164780854
+   },
+   "buckets": {
+    "right": 23,
+    "no answer": 8
+   },
+   "no_answer": {
+    "weak_at_truth": 6,
+    "weak_elsewhere": 2,
+    "no_reliable_match": 0
+   }
+  },
+  "per_material": [
+   {
+    "dataset": "openftir",
+    "kind": "close relative",
+    "truth": "polyamide (not 6,6)",
+    "n": 1,
+    "probable": 0,
+    "right": 0,
+    "family": 0,
+    "wrong": 0,
+    "false_probable": 0,
+    "relative_named": 0,
+    "weak": 1,
+    "none": 0,
+    "doubtful": 0,
+    "median_r": 0.875,
+    "named": {}
+   },
+   {
+    "dataset": "openftir",
+    "kind": "in library",
+    "truth": "EVA",
+    "n": 2,
+    "probable": 0,
+    "right": 0,
+    "family": 0,
+    "wrong": 0,
+    "false_probable": 0,
+    "relative_named": 0,
+    "weak": 2,
+    "none": 0,
+    "doubtful": 0,
+    "median_r": 0.808,
+    "named": {}
+   },
+   {
+    "dataset": "openftir",
+    "kind": "in library",
+    "truth": "EVOH",
+    "n": 4,
+    "probable": 2,
+    "right": 2,
+    "family": 0,
+    "wrong": 0,
+    "false_probable": 0,
+    "relative_named": 0,
+    "weak": 2,
+    "none": 0,
+    "doubtful": 0,
+    "median_r": 0.951,
+    "named": {
+     "EVOH": 2
+    }
+   },
+   {
+    "dataset": "openftir",
+    "kind": "in library",
+    "truth": "PE",
+    "n": 9,
+    "probable": 9,
+    "right": 9,
+    "family": 0,
+    "wrong": 0,
+    "false_probable": 0,
+    "relative_named": 0,
+    "weak": 0,
+    "none": 0,
+    "doubtful": 0,
+    "median_r": 0.992,
+    "named": {
+     "PE": 9
+    }
+   },
+   {
+    "dataset": "openftir",
+    "kind": "in library",
+    "truth": "PET",
+    "n": 2,
+    "probable": 1,
+    "right": 1,
+    "family": 0,
+    "wrong": 0,
+    "false_probable": 0,
+    "relative_named": 0,
+    "weak": 1,
+    "none": 0,
+    "doubtful": 0,
+    "median_r": 0.95,
+    "named": {
+     "PET": 1
+    }
+   },
+   {
+    "dataset": "openftir",
+    "kind": "in library",
+    "truth": "PMMA",
+    "n": 1,
+    "probable": 1,
+    "right": 1,
+    "family": 0,
+    "wrong": 0,
+    "false_probable": 0,
+    "relative_named": 0,
+    "weak": 0,
+    "none": 0,
+    "doubtful": 0,
+    "median_r": 0.962,
+    "named": {
+     "PMMA": 1
+    }
+   },
+   {
+    "dataset": "openftir",
+    "kind": "in library",
+    "truth": "PP",
+    "n": 6,
+    "probable": 5,
+    "right": 5,
+    "family": 0,
+    "wrong": 0,
+    "false_probable": 0,
+    "relative_named": 0,
+    "weak": 1,
+    "none": 0,
+    "doubtful": 0,
+    "median_r": 0.981,
+    "named": {
+     "PP": 5
+    }
+   },
+   {
+    "dataset": "openftir",
+    "kind": "in library",
+    "truth": "PS",
+    "n": 3,
+    "probable": 3,
+    "right": 3,
+    "family": 0,
+    "wrong": 0,
+    "false_probable": 0,
+    "relative_named": 0,
+    "weak": 0,
+    "none": 0,
+    "doubtful": 0,
+    "median_r": 0.985,
+    "named": {
+     "PS": 3
+    }
+   },
+   {
+    "dataset": "openftir",
+    "kind": "in library",
+    "truth": "PVC",
+    "n": 1,
+    "probable": 0,
+    "right": 0,
+    "family": 0,
+    "wrong": 0,
+    "false_probable": 0,
+    "relative_named": 0,
+    "weak": 1,
+    "none": 0,
+    "doubtful": 0,
+    "median_r": 0.919,
+    "named": {}
+   },
+   {
+    "dataset": "openftir",
+    "kind": "in library",
+    "truth": "PVOH",
+    "n": 3,
+    "probable": 2,
+    "right": 2,
+    "family": 0,
+    "wrong": 0,
+    "false_probable": 0,
+    "relative_named": 0,
+    "weak": 1,
+    "none": 0,
+    "doubtful": 0,
+    "median_r": 0.988,
+    "named": {
+     "PVOH": 2
+    }
+   },
+   {
+    "dataset": "openftir",
+    "kind": "not in library",
+    "truth": "ABS",
+    "n": 2,
+    "probable": 0,
+    "right": 0,
+    "family": 0,
+    "wrong": 0,
+    "false_probable": 0,
+    "relative_named": 0,
+    "weak": 2,
+    "none": 0,
+    "doubtful": 0,
+    "median_r": 0.879,
+    "named": {}
+   },
+   {
+    "dataset": "openftir",
+    "kind": "not in library",
+    "truth": "PHB",
+    "n": 1,
+    "probable": 0,
+    "right": 0,
+    "family": 0,
+    "wrong": 0,
+    "false_probable": 0,
+    "relative_named": 0,
+    "weak": 1,
+    "none": 0,
+    "doubtful": 0,
+    "median_r": 0.695,
+    "named": {}
+   },
+   {
+    "dataset": "openftir",
+    "kind": "not in library",
+    "truth": "SAN",
+    "n": 1,
+    "probable": 0,
+    "right": 0,
+    "family": 0,
+    "wrong": 0,
+    "false_probable": 0,
+    "relative_named": 0,
+    "weak": 1,
+    "none": 0,
+    "doubtful": 0,
+    "median_r": 0.863,
+    "named": {}
+   }
+  ]
+ },
+ "failures": [
+  {
+   "dataset": "open specy",
+   "truth": "EVOH",
+   "kind": "in library",
+   "best_material": "EVA (25% VA)",
+   "r": 0.9772,
+   "gap": 0.2638,
+   "contributor": "primpke et al. 2018",
+   "label": "other plastic ethylene vinyl alcohol polyethylene-vinyl acetate",
+   "doubtful": false
+  },
+  {
+   "dataset": "open specy",
+   "truth": "PS",
+   "kind": "in library",
+   "best_material": "PE (high density)",
+   "r": 0.9772,
+   "gap": 0.406,
+   "contributor": "win cowger and sebastian primpke",
+   "label": "polystyrene eps polystyrenes",
+   "doubtful": false
+  },
+  {
+   "dataset": "open specy",
+   "truth": "EVOH",
+   "kind": "in library",
+   "best_material": "EVA (25% VA)",
+   "r": 0.9764,
+   "gap": 0.2403,
+   "contributor": "primpke et al. 2018",
+   "label": "other plastic ethylene vinyl alcohol polyethylene-vinyl acetate",
+   "doubtful": false
+  },
+  {
+   "dataset": "open specy",
+   "truth": "PET",
+   "kind": "in library",
+   "best_material": "PE (high density)",
+   "r": 0.9736,
+   "gap": 0.3693,
+   "contributor": "win cowger and sebastian primpke",
+   "label": "poly(ethylene terephthalate) pet polyesters",
+   "doubtful": false
+  },
+  {
+   "dataset": "open specy",
+   "truth": "cellulose",
+   "kind": "not in library",
+   "best_material": "PE (high density)",
+   "r": 0.9659,
+   "gap": 0.3916,
+   "contributor": "gicquel et al. 2024",
+   "label": "organic matter cellulose_like organic matter",
+   "doubtful": false
+  }
+ ]
+}

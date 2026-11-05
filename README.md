@@ -465,6 +465,7 @@ Every rule and threshold lives in [`ftir_analyzer/config.py`](ftir_analyzer/conf
 ├── examples/            demo spectra with known answers; library_demo/ for adding a reference;
 │                        CHECK_IT_YOURSELF.md, a walkthrough with the numbers to expect
 ├── records/             sample log, audit log, signatures, in-house library (created when first needed)
+├── benchmark/           the benchmark: PROTOCOL.md, the tool, and results/ with its report (no spectra)
 ├── tests/               known-answer, library, Open Specy, window, layout and script tests (pytest)
 └── docs/                screenshots
 ```
@@ -476,7 +477,7 @@ pip install pytest
 python -m pytest
 ```
 
-191 tests. Those for the analysis cover file reading (read-only data, headerless tab-separated files, unit
+238 tests. Those for the analysis cover file reading (read-only data, headerless tab-separated files, unit
 recognition, clear errors), processing, the verdict rule, the impostor test, the known answer for
 every demo spectrum, the second-component, empty-spot and saturation detection, the CO₂ direction,
 the analytical view (each step reproduced, the score recalculated from step 4), the interactive
@@ -588,6 +589,41 @@ screens at just two sizes, among them the similarity table running off the side)
 | Light ↔ dark | 0.41–0.44 s (restyling every widget) | 16 ms | 17 ms | 7 ms |
 
 At 100 % display scaling every transition stays at 16–18 ms per frame.
+
+## Benchmark
+
+How often is the program wrong? It was tested on spectra it was not built on, with what counts as right and wrong
+committed before anything was scored: see the [protocol](benchmark/PROTOCOL.md) and the
+[full report](benchmark/results/benchmark_report.html).
+
+| | Fibres: 137 physical samples, FasTEX-KCL | Open Specy: 3,261 spectra, many labs |
+| --- | --- | --- |
+| False *probable* on a material with no reference | **0 of 70** (95% margin 0 to 5.2%) | **1 of 838** (0 to 0.7%) |
+| Right, of its *probable* answers | 18 of 18 (82.4 to 100%) | 318 of 323 (96.1 to 99.8%) |
+| Says *probable* at all, on a material with a reference | 18 of 29 | 323 of 2,423 |
+| True material ranked first | 28 of 29 | 1,378 of 2,423 |
+
+So the program is careful more than it is capable: it rarely says *probable* wrongly, and on other labs' processed
+spectra it mostly holds back. What the benchmark found that needs work:
+
+- A band shift of 2 cm⁻¹ halved the right fibre answers, and 4 cm⁻¹ removed them. No fault tested produced a wrong
+  answer on a material with a reference: the program goes quiet.
+- With 16 references the lead rule stopped 0 wrong answers and held back 12 right ones.
+- The extended library did not help: on the same Open Specy spectra, *probable* answers that were not right went from
+  6 of 316 to 15 of 309.
+
+It is not fully blind, and the report says how. About 30% of Open Specy (1,396 spectra) stays locked and unscored, for
+later work. The spectra are not in this repository. With the three data files the protocol names in a folder:
+
+```bash
+python -m benchmark --data path/to/folder
+```
+
+The report alone rebuilds from the saved results, with no data:
+
+```bash
+python -m benchmark --report-only
+```
 
 ## Limits
 
