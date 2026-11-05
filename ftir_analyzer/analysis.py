@@ -11,7 +11,8 @@ Puts every step together for one measured spectrum:
     3. library search    every reference material ranked by Pearson r, best first
     4. verdict           probable / weak / no reliable match, with the reason in numbers
     5. checks            saturation, CO2, C-H, O-H on the raw absorbance; water vapour on the
-                         file's own points
+                         file's own points. A poor spectrum is marked "measure again"; the verdict
+                         stays as the rule gave it
     6. band evidence     key bands found / missing, unexplained bands (second component?)
     7. next step         one sentence a person can act on, in the order of the method card
     8. two-component fit with unexplained bands: is it a mix of the match and one other
@@ -35,9 +36,9 @@ from dataclasses import dataclass, field, replace
 import numpy as np
 
 from . import config
-from .checks import Checks, side_checks, with_vapour
+from .checks import Checks, measure_again, side_checks, with_vapour
 from .evidence import Evidence, band_evidence
-from .library import search
+from .library import search, search_shifted
 from .mixture import two_component_fit
 from .processing import GRID, absorbance, on_grid, to_library_mode
 from .spectrum_io import Spectrum, SpectrumFileError
@@ -73,6 +74,7 @@ class Result:
     reading: str = "unknown"                    # the mode the comparison used ("unknown": as measured)
     other: tuple = ()                           # (the other mode, its best r), for the mode check
     mixture: object = None                      # a two-component fit that clearly helps (mixture.py), else None
+    remainder: object = None                    # what is left after a clean spectrum was taken out (known_material.py)
 
     # Short-cuts used by the window and the report
     @property
@@ -177,16 +179,22 @@ def choose_reading(mode, best):
     return fit if best[fit] >= config.WEAK_R else "unknown"
 
 
-def analyse(spectrum, library, mode="unknown", mode_source="not given", conflict=""):
-    """Run the whole analysis on one spectrum and return a Result. The spectrum is never changed."""
+def analyse(spectrum, library, mode="unknown", mode_source="not given", conflict="", shifts=None):
+    """Run the whole analysis on one spectrum and return a Result. The spectrum is never changed.
+
+    shifts: the band shifts the search tries (default config.SHIFT_TRIES, which is empty: an ordinary search).
+    """
+    shifts = config.SHIFT_TRIES if shifts is None else shifts
     wn = spectrum.wn
     a = absorbance(spectrum)                                                    # 1. a new array, in absorbance
-    readings = {m: on_grid(wn, to_library_mode(wn, a, m, library.mode)) for m in MODES}   # 2. read as ATR and
-    if np.isfinite(readings[library.mode]).sum() < MIN_GRID_POINTS:                       #    as transmission
+    corrected = {m: to_library_mode(wn, a, m, library.mode) for m in MODES}     # 2. read as ATR and as transmission
+    readings = {m: on_grid(wn, y) for m, y in corrected.items()}
+    if np.isfinite(readings[library.mode]).sum() < MIN_GRID_POINTS:
         raise SpectrumFileError(f"{spectrum.name}: the spectrum hardly covers the mid-IR range "
                                 f"{config.GRID_START:.0f}-{config.GRID_STOP:.0f} cm-1, so it cannot be compared.")
 
-    rankings = {m: search(y, library) for m, y in readings.items()}           # 3. every material, best first
+    rankings = ({m: search_shifted(wn, y, library, shifts) for m, y in corrected.items()} if len(shifts) else
+                {m: search(y, library) for m, y in readings.items()})           # 3. every material, best first
     best = {m: ranking[0][1] for m, ranking in rankings.items()}
     reading = choose_reading(mode, best)
     used = reading if reading in MODES else library.mode                        #    'as measured' = no correction
@@ -200,10 +208,11 @@ def analyse(spectrum, library, mode="unknown", mode_source="not given", conflict
     checks = with_vapour(side_checks(GRID[ok], a_grid[ok]), wn, a)
 
     evidence = band_evidence(compared, library.spectra[ranking[0][0]]) if verdict != NO_MATCH else None   # 6.
-    step = advise(verdict, match, checks)                                       # 7.
+    redo = measure_again(checks)
+    step = "Measure again. " + " ".join(redo) if redo else advise(verdict, match, checks)   # 7.
 
     # Flags: short labels for the list and the report, each with a severity
-    flags = []
+    flags = [("measure again", "bad")] if redo else []
     if checks.no_sample:
         flags.append(("CO2 artefact: probably no sample", "bad"))
     if checks.saturated:

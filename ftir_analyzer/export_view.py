@@ -70,7 +70,8 @@ class ExportPanel(QWidget):
         column.addWidget(text_label(
             f"{len(results)} spectr{'um' if len(results) == 1 else 'a'}: {counts[PROBABLE]} probable, "
             f"{counts[WEAK]} weak, {counts[NO_MATCH]} with no reliable match. The report comes as a PDF (A4 "
-            "pages, to read, send or print), as a web page with interactive figures, and as an Excel table.",
+            "pages, to read, send or print), as a web page with interactive figures, and as an Excel table."
+            + (f" {poor} should be measured again." if (poor := sum(("measure again", "bad") in r.flags for r in results)) else ""),
             "Body2", wrap=True))
 
         # 1. where

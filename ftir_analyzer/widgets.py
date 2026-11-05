@@ -561,6 +561,12 @@ class SpectrumListModel(QAbstractListModel):
         self.updated, self.reason = dict(updated), reason
         self.dataChanged.emit(self.index(0), self.index(max(0, len(self.results) - 1)))
 
+    def swap(self, old, new):
+        """One result replaced by a new version of itself."""
+        row = next(i for i, r in enumerate(self.results) if r is old)
+        self.results[row] = new
+        self.dataChanged.emit(self.index(row), self.index(row))
+
     def remove_rows(self, rows):
         for row in sorted(rows, reverse=True):              # from the bottom up, so row numbers stay valid
             self.beginRemoveRows(QModelIndex(), row, row)

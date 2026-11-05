@@ -1,0 +1,7 @@
+# Demo data: every sample in this file is made up.
+exported_at,analysed_by,login,tool,spectra,probable,weak,no_match,report,report_sha256
+2026-02-26T15:00:00+00:00,Sam Lee,sam,Etch 3,4,3,1,0,demo/FTIR_report_052/report.html,demoreport052
+2026-03-04T15:00:00+00:00,Noor Haddad,noor,CMP 1,6,4,1,1,demo/FTIR_report_058/report.html,demoreport058
+2026-03-10T15:00:00+00:00,Sam Lee,sam,Wet bench 2,3,1,1,1,demo/FTIR_report_064/report.html,demoreport064
+2026-03-17T15:00:00+00:00,Noor Haddad,noor,Wet bench 2,5,4,1,0,demo/FTIR_report_071/report.html,demoreport071
+2026-03-21T15:00:00+00:00,Sam Lee,sam,Etch 3,2,2,0,0,demo/FTIR_report_075/report.html,demoreport075

@@ -148,12 +148,13 @@ def test_second_component_is_found(library):
 
 def test_empty_spot_is_recognised(library):
     result = example("09_empty_spot_on_filter.csv", library)
-    assert result.checks.no_sample and result.next_step.startswith("CO2 artefact")
+    assert result.checks.no_sample and result.next_step.startswith("Measure again. CO2 artefact")
 
 
 def test_saturation_is_flagged(library):
     result = example("06_PS_calibration_film_transmission.csv", library, "transmission")
-    assert result.checks.saturated and "WARNING: bands saturated" in result.next_step
+    assert result.checks.saturated and result.next_step.startswith("Measure again. Bands saturated")
+    assert ("measure again", "bad") in result.flags
 
 
 def test_analysis_never_changes_the_raw_data(library):

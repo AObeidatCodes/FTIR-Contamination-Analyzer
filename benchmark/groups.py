@@ -43,6 +43,7 @@ from .sets import FIBRES, OPEN_SPECY, OUT, read_fibres, read_open_specy    # noq
 
 LOCKED_COMMIT = "6675e0c"
 MATCHING = ("ftir_analyzer/analysis.py", "ftir_analyzer/library.py", "ftir_analyzer/processing.py")
+LAST_RUNNABLE = "c4b2f97"                                   # later commits changed the matching code, so check this one out
 USEFUL_PURITY, USEFUL_REACH = 0.90, 0.50
 DEVIATIONS = ["Added after the results were seen: how many groups span more than one contributor, because a group from one contributor may be repeats of one item. No rule or limit changed."]
 
@@ -50,7 +51,8 @@ DEVIATIONS = ["Added after the results were seen: how many groups span more than
 def check_program():
     changed = subprocess.run(["git", "diff", "--quiet", LOCKED_COMMIT, "--", *MATCHING], cwd=REPO).returncode
     if changed:
-        raise SystemExit(f"The matching code differs from {LOCKED_COMMIT}: this step will not run.")
+        raise SystemExit(f"The matching code differs from {LOCKED_COMMIT}: this step will not run. "
+                         f"Check out {LAST_RUNNABLE} to repeat it.")
     return subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=REPO, capture_output=True, text=True).stdout.strip()
 
 

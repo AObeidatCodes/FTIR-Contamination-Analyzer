@@ -46,6 +46,9 @@ AUDIT_LOG_FILE = RECORDS_DIR / "audit_log.csv"            # one row per spectrum
 SIGNATURE_LOG_FILE = RECORDS_DIR / "signatures.csv"       # one row per signed report, append-only
 TOOL_LOG_FILE = RECORDS_DIR / "tool_log.csv"              # which tool or area a sample came from, append-only
 UNKNOWN_LOG_FILE = RECORDS_DIR / "unknown_fingerprints.csv"  # fingerprints of samples with no probable verdict
+INSTRUMENT_LOG_FILE = RECORDS_DIR / "instrument_checks.csv"  # measured polystyrene films, append-only
+REPORT_LOG_FILE = RECORDS_DIR / "reports.csv"             # every exported report, append-only
+REVIEW_LOG_FILE = RECORDS_DIR / "reviews.csv"             # second-person reviews, append-only
 
 # File types the app reads: instrument exports with a wavenumber column and one or more
 # intensity columns (comma, semicolon, tab or space separated, with or without a header).
@@ -88,6 +91,8 @@ PEAK_DISTANCE_CM = 15.0   # two peaks closer than 15 cm-1 count as one (jagged, 
 PROBABLE_R = 0.95   # impostor test: a WRONG material reaches 0.90 (PET <-> PBT); true matches 0.96-0.99
 MIN_GAP = 0.08      # the winner must lead the next material by 0.08, or the two are too close to call
 WEAK_R = 0.60       # below this nothing in the library is similar enough (CO2 gas scores 0.58)
+SHIFT_TRIES = ()    # band shifts the search tries (cm-1). Empty: off, until benchmark/PROTOCOL_SHIFT.md has passed
+SHIFT_TEST = (-8, -6, -4, -2, 0, 2, 4, 6, 8)   # the shifts that protocol tests
 FAMILY_R = 0.85     # both of the top two must reach this to name their family: below 0.80 that family can be wrong
 
 # --------------------------------------------------------------------------------------
@@ -99,6 +104,8 @@ MIN_SN = 3.0          # detection limit as in ICH Q2: a band counts only if it i
 MAJOR = 1 / 3         # a loud band (O-H) at >= 1/3 of the tallest band is part of the material
 MINOR = 1 / 10        # ... between 1/10 and 1/3 it is minor, below 1/10 a trace
 CO2_WARNING = 0.5     # a CO2 artefact half as tall as the tallest band means: probably no sample
+REMEASURE_SN = 20.0   # tallest band / noise below this: measure again. With noise added to 587 spectra, none of 415
+                      # noisy copies below 20 reached a right 'probable' (5 of 109 at 20-30), and none was wrong
 
 # Quiet windows (no sample bands) where the noise is measured. The worst one counts:
 # 3750-3950 is where water-vapour lines appear, and they are noise for our purposes.
@@ -132,6 +139,22 @@ MIX_GAIN = 0.02       # the fit r must rise by at least 0.02 over the match alon
                       # gives 0.05 or more in the tests; noise and a slightly different batch give less)
 MIX_MIN_SHARE = 0.10  # the second reference must make up at least 10 % of the signal: less is noise-sized
 MIX_BAND_SHARE = 0.10 # it "has a band" at an unexplained position if it rises to 10 % of its tallest band there
+KNOWN_ROUNDS = 10     # re-weighting rounds when a known material is taken out (known_material.py)
+KNOWN_MIN_POINTS = 50 # the sample and the clean spectrum must share at least this many grid points
+KNOWN_R = 0.80        # what is left is named only from this score ... (mixes of a fibre and another material, its
+KNOWN_LEAD = 0.20     # ... and this lead: at a 20 % share 42 of 300 right, 2 wrong; nothing added: 16 of 300 named)
+
+# ---------------------------------------------------------------------------
+# Instrument check (instrument_check.py): a polystyrene film in transmission
+# ---------------------------------------------------------------------------
+FILM_BANDS = (3060.0, 2849.5, 1942.9, 1601.2, 1583.0, 1154.5, 1028.3)   # the published band positions (cm-1)
+FILM_LIMIT = 1.0        # cm-1: a band further than this from its published position fails the check
+FILM_WINDOW = 6.0       # cm-1: a band's top is looked for this far either side of its published position
+FILM_MIN_BANDS = 5      # fewer bands found than this: it is not a usable polystyrene film
+FILM_MIN_HEIGHT = 0.01  # a band must rise by 1 % of the spectrum's height, or it is a wiggle
+FILM_MAX_STEP = 2.0     # cm-1 between two data points, at most: further apart, a band's top cannot be placed
+DRIFT_CHECKS = 3        # the last three checks ...
+DRIFT_MOVE = 0.5        # ... moving steadily one way, by at least this much (cm-1), count as a drift
 
 # --------------------------------------------------------------------------------------
 # Measuring mode and ATR correction

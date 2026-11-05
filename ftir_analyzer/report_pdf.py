@@ -630,6 +630,8 @@ def spectrum_page(doc, i, n, r, library):
     call = close_call(r, library)
     if call is not None:
         y = close_box(page, y - 6, call)
+    if r.remainder:
+        y = page.paragraph(M, y, f"Known material. {r.remainder.text()}", WIDTH, 8.6, T["ink"], most=3) + 8
 
     # what stands under the figure: three cards (122 pt), the source line, the traceability line
     cards_h = 122.0
@@ -670,6 +672,7 @@ def run_page(doc, info, library):
             ("By", who_text(info.get("run_by_name", ""), info["run_by"])), ("Program", info["program"]),
             ("Code SHA-256", info["code_sha256"]), ("Software", info["software"]), ("Library", info["library"]),
             ("Library SHA-256", info["library_sha256"]), ("Library validation", check),
+            *([("Instrument check", info["instrument_check"])] if info.get("instrument_check") else []),
             ("Probable when", settings[0].replace("probable: ", "")), ("Saturation, CO₂", settings[1]),
             ("C–H present", settings[2].replace("C–H present: ", "")),
             ("O–H / N–H", settings[3].replace("O–H / N–H: ", ""))]

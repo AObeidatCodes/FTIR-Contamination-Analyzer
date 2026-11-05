@@ -290,6 +290,17 @@ def search(y, library):
     return sorted(scores.items(), key=lambda kv: kv[1], reverse=True)  # sort by the score, highest first
 
 
+def search_shifted(wn, a, library, shifts):
+    """Like search, but every reference keeps its best score over small shifts of the sample's bands.
+
+    wn, a: the sample on its own points, so that each shift is put on the grid afresh. A real band shift (a scale that
+    has moved, a different instrument) then costs less. See benchmark/PROTOCOL_SHIFT.md before using it.
+    """
+    tried = [fingerprint(on_grid(np.asarray(wn) + shift, a)) for shift in shifts]
+    scores = {name: max(pearson(u, library.fingerprint_of(name)) for u in tried) for name in library.spectra}
+    return sorted(scores.items(), key=lambda kv: kv[1], reverse=True)
+
+
 def _without(library, name):
     """The same library with one material left out."""
     others = {k: v for k, v in library.spectra.items() if k != name}

@@ -21,6 +21,7 @@ from PySide6.QtWidgets import (QBoxLayout, QComboBox, QFrame, QHBoxLayout, QLabe
                                QWidget)
 
 from . import config
+from .evidence import fab_sources
 from .library_view import section, text_label
 from .motion import FlowLayout, Segmented, SmoothScrollArea
 from .trends import NOT_RECORDED, demo_samples, in_period, ranked, read_samples, repeats
@@ -126,6 +127,7 @@ class TrendsPage(QWidget):
         self.audit_log, self.tool_log, self.unknown_log = audit_log, tool_log, unknown_log
         self.samples, self.shown, self.prints = [], [], {}
         self.demo, self.problem = False, ""
+        self.library = None
 
         self.scroll = SmoothScrollArea()
         content = QWidget()
@@ -246,6 +248,12 @@ class TrendsPage(QWidget):
         for chart in (self.material_chart, self.tool_chart):
             chart.update()
 
+    def set_library(self, library):
+        """The library that says where a repeated material can come from."""
+        self.library = library
+        if self.shown:
+            self._show_repeats(self.shown)
+
     # ------------------------------------------------------------------
     def refresh(self):
         """Read the records again."""
@@ -331,9 +339,15 @@ class TrendsPage(QWidget):
             line.setContentsMargins(12, 8, 12, 8)
             alert = QLabel()
             alert.setPixmap(icon_pixmap("triangle-alert", Theme.t["warn"], 16, self.devicePixelRatioF()))
-            line.addWidget(alert)
-            line.addWidget(text_label(f"{repeat.material} on {repeat.tool}: {repeat.samples} samples, "
-                                      f"{date_range(repeat.first, repeat.last)}", "Body", wrap=True), 1)
+            line.addWidget(alert, 0, Qt.AlignTop)
+            words = QVBoxLayout()
+            words.setSpacing(2)
+            words.addWidget(text_label(f"{repeat.material} on {repeat.tool}: {repeat.samples} samples, "
+                                       f"{date_range(repeat.first, repeat.last)}", "Body", wrap=True))
+            sources = fab_sources(repeat.material, self.library) if self.library is not None else None
+            if sources:
+                words.addWidget(text_label(f"Possible sources: {sources[0]}. Check next: {sources[1]}.", "Body2", wrap=True))
+            line.addLayout(words, 1)
             self.repeat_rows.addWidget(row)
         if not found:
             self.repeat_rows.addWidget(text_label("No repeats in this period.", "Body2"))

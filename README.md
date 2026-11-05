@@ -158,10 +158,11 @@ SETTINGS = {
 | Browse the library | **Library** in the middle of the toolbar, or `Ctrl+2` (`Ctrl+1` back to Analyze). Click a card for details |
 | More references | **Library → Open Specy…**: download or import; then switch **Fab essentials / Extended** |
 | See what keeps coming back | **Trends** (`Ctrl+3`). Enter the tool or area when you export a report |
+| Check the instrument, review a report | **Quality** (`Ctrl+4`) |
 | Add a reference | **Add to library…** on a result that is not *probable*, or **Library → Add a reference…** (`Ctrl+N`) |
 | Light / dark | The moon / sun button or `Ctrl+T`. **View → Reduce motion** switches the animations off |
 | The menus | The **☰** button at the left of the top bar: File, View, Library, Records, Help. Every shortcut works without opening it |
-| Records | **☰ → Records**: sample log, audit log, signatures, each as a formatted Excel copy. **☰ → Library**: the library change log |
+| Records | **☰ → Records**: sample log, audit log, signatures, tool log, instrument checks, report register and reviews, each as a formatted Excel copy. **☰ → Library**: the library change log |
 | Help | `F1` (how it works), **☰ → Help → About** |
 
 When a file does not say how it was measured (ATR or transmission), the program asks once, then saves
@@ -377,7 +378,8 @@ full details are in `records/error_log.txt`.
 ### Trends
 
 **Trends** (`Ctrl+3`) shows the most common materials and tools, and warns when one material keeps coming back on one
-tool. It counts each exported sample once, however often it was exported, and reads the records without changing them.
+tool, with the places that material can come from in a fab. It counts each exported sample once, however often it was
+exported, and reads the records without changing them.
 
 The tool or area is entered when you export a report and is kept in `records/tool_log.csv`. A sample without one is
 not checked for repeats. **Demo data** shows made-up samples.
@@ -388,6 +390,63 @@ The default repeat of 3 samples in 30 days is a starting value, not a measured o
 seen coming back. A group does not say what the material is. **Add a reference…** opens the usual checked form, with
 the group's most typical sample if its file is still there. Fingerprints are kept from export onwards in
 `records/unknown_fingerprints.csv`, so older samples are not compared.
+
+### Quality
+
+**Quality** (`Ctrl+4`) holds two checks. **Demo data** shows made-up records.
+
+**Instrument check.** Measure a polystyrene film in transmission and choose the file. The app finds seven bands, places
+each top between the data points, and compares it with its published position. A band more than 1 cm⁻¹ away fails the
+check. Each check is added to `records/instrument_checks.csv` and drawn over time, per instrument, and the app warns
+when the last three checks move steadily one way. The newest check is named in every report. The file needs data
+points 2 cm⁻¹ apart or closer. The check covers band positions only, and makes no claim to meet a standard.
+
+| Band (cm⁻¹) | 3060.0 | 2849.5 | 1942.9 | 1601.2 | 1583.0 | 1154.5 | 1028.3 |
+|---|---|---|---|---|---|---|---|
+
+These are the positions in the European Pharmacopoeia's table for a polystyrene film, as reproduced in instrument
+makers' qualification documents. The official text was not read, and the same documents give ±1.5 cm⁻¹ for some bands
+under the Japanese Pharmacopoeia. The 1 cm⁻¹ limit is the stricter value.
+
+**Second-person review.** Every exported report is entered in `records/reports.csv`, with the SHA-256 of its
+`report.html`. A different person from the analyst opens it from the list and records a decision in
+`records/reviews.csv`. The analyst's own name is refused, and so is a report file that changed after export. The report
+itself is not rewritten. A name is typed and a login comes from the computer, so this is a record of who said they
+reviewed, not an electronic signature. When the reviewer is on the analyst's login, the row says so.
+
+### Measure again
+
+A spectrum is marked **Measure again**, in red with what to do, when it is below zero, shows no sample, is saturated, or
+when its tallest band is under 20 times the noise. The verdict is not changed.
+
+The limit of 20 comes from adding noise to 587 spectra: of 415 noisy copies below 20, none reached a right *probable*,
+and at 20 to 30 only 5 of 109 did. No spectrum with a reference gave a wrong *probable* at any noise level: noise
+removes answers.
+
+### Contaminant in a known material
+
+The bands of a main material can hide a small contaminant. Under the result, choose a clean spectrum of the main
+material and press **Search what is left**. The app takes it out, shows what is left, and searches it. A material is
+named only at r ≥ 0.80 with a lead of 0.20. It is a hint for the person reading the spectrum and never a verdict. The
+result goes into the report.
+
+The clean spectrum must be your own measurement: another loaded sample, or an in-house reference. Library references
+are not offered, because they do not take out cleanly: with one, wrong names outnumbered right ones below a 30 % share.
+
+Tested on mixes made on the computer, with no real contaminated sample. Each mix was a fibre spectrum plus a spectrum of
+another material, and a separate repeat of that fibre was taken out (19 fibre samples, 300 mixes at each share). The
+rule was chosen on one draw of mixes, and these numbers are from a new draw:
+
+| Share of the second material | Named right | Named wrong |
+|---|---|---|
+| 5 % | 7 | 2 |
+| 10 % | 17 | 1 |
+| 20 % | 42 | 2 |
+| 30 % | 50 | 2 |
+| Nothing added | | 16 |
+
+Most mixes get no name, so *nothing named* does not mean *nothing there*. With nothing added, about 1 in 20 still gets a
+name, so a named material needs confirming.
 
 ### The report
 
@@ -476,6 +535,10 @@ Every rule and threshold lives in [`ftir_analyzer/config.py`](ftir_analyzer/conf
 │   ├── tour.py          the guided tour, in a window of its own that keeps nothing
 │   ├── trends.py        counts samples and finds repeats, from the audit log and the tool log
 │   ├── trends_view.py   the Trends page
+│   ├── instrument_check.py  the polystyrene band check and its log
+│   ├── review.py        the report register and second-person reviews
+│   ├── quality_view.py  the Quality page
+│   ├── known_material.py    takes a clean spectrum out and searches what is left
 │   ├── unknowns.py      groups samples with no probable verdict that look alike
 │   ├── compare_view.py  the closest matches, side by side
 │   ├── library_view.py  the Library page: album, details, similarity map, adding a reference
@@ -498,7 +561,7 @@ pip install pytest
 python -m pytest
 ```
 
-295 tests. Those for the analysis cover file reading (read-only data, headerless tab-separated files, unit
+335 tests. Those for the analysis cover file reading (read-only data, headerless tab-separated files, unit
 recognition, clear errors), processing, the verdict rule, the impostor test, the known answer for
 every demo spectrum, the second-component, empty-spot and saturation detection, the CO₂ direction,
 the analytical view (each step reproduced, the score recalculated from step 4), the interactive
@@ -696,7 +759,9 @@ python -m benchmark.confidence --report-only
   very strong bands in ATR (a few cm⁻¹, from the change of refractive index across the band) are not
   modelled; the derivative fingerprint and the band tolerance (15 cm⁻¹) absorb them.
 - The verdict is a suggestion. A person reviews the raw spectrum and signs the report.
-- Mixtures are flagged (unexplained bands), not yet separated by spectral subtraction.
+- Mixtures are flagged (unexplained bands). A clean spectrum of the main material can be taken out, as a hint.
+- The search compares each spectrum at one position, so a band shift of 2 cm⁻¹ can lose an answer. A search that tries
+  small shifts is in the code and switched off. It stays off until it passes `benchmark/PROTOCOL_SHIFT.md` on fresh data.
 
 ## Data
 

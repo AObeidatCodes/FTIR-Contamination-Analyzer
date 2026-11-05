@@ -146,6 +146,11 @@ def test_pages_fit_the_window(window, size):
     settle()
     assert problems(window) == [], f"Trends page at {size}"
     window.trends_page.demo_button.setChecked(False)
+    window.show_page("quality")
+    window.quality_page.demo_button.setChecked(True)
+    settle()
+    assert problems(window) == [], f"Quality page at {size}"
+    window.quality_page.demo_button.setChecked(False)
     window.show_page("analyze")
 
 

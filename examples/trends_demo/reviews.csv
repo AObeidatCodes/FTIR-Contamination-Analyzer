@@ -1,0 +1,5 @@
+# Demo data: every sample in this file is made up.
+reviewed_at,reviewed_by,login,decision,comment,analysed_by,analysed_login,same_login,report,report_sha256
+2026-02-27T11:00:00+00:00,Noor Haddad,noor,accept,,Sam Lee,sam,no,demo/FTIR_report_052/report.html,demoreport052
+2026-03-05T11:00:00+00:00,Sam Lee,sam,accept with changes,"Sample 3 is PET, not PBT.",Noor Haddad,noor,no,demo/FTIR_report_058/report.html,demoreport058
+2026-03-11T11:00:00+00:00,Noor Haddad,noor,re-measure,Sample 2 is saturated.,Sam Lee,sam,no,demo/FTIR_report_064/report.html,demoreport064

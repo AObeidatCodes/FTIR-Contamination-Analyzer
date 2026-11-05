@@ -50,6 +50,7 @@ HERE = Path(__file__).resolve().parent
 REPO = HERE.parent
 RESULTS = HERE / "results"
 LOCKED_COMMIT = "6675e0c"
+LAST_RUNNABLE = "f81ab0a"                                   # later commits changed the program, so check this one out
 FIBRE_FILE = ("feature_matrix_raw_transmittance.csv", "2739d901529a0fd97e693068d82cee5b7eee2a616f5e8d6e797a84ad859fa26f")
 SPECY_FILE = ("medoid_nobaseline.rds", "3591eb4b7be780ac12585631216bce5050cb543e9a61b8b482c91d1b4c821ab3")
 SALT = "ftir-confidence-v2|"
@@ -181,7 +182,8 @@ def score_all(items, library, say):
 def check_program():
     changed = subprocess.run(["git", "diff", "--quiet", LOCKED_COMMIT, "--", "ftir_analyzer"], cwd=REPO).returncode
     if changed:
-        raise SystemExit(f"ftir_analyzer/ differs from the locked commit {LOCKED_COMMIT}: this step will not run.")
+        raise SystemExit(f"ftir_analyzer/ differs from the locked commit {LOCKED_COMMIT}: this step will not run. "
+                         f"Check out {LAST_RUNNABLE} to repeat it.")
     return subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=REPO, capture_output=True, text=True).stdout.strip()
 
 

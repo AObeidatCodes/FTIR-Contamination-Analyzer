@@ -151,12 +151,12 @@ class Step:
 
 
 class Tour(QObject):
-    """Walks through the app in a window of its own. analyze, library, trends: the window's page names."""
+    """Walks through the app in a window of its own. analyze, library, trends, quality: the window's page names."""
 
-    def __init__(self, window, analyze, library, trends):
+    def __init__(self, window, analyze, library, trends, quality):
         super().__init__(window)
         self.w, self.rv = window, window.result_view
-        self.analyze, self.library, self.trends = analyze, library, trends
+        self.analyze, self.library, self.trends, self.quality = analyze, library, trends, quality
         self.card = TourCard(window)
         self.ring = Ring(window)
         self.ring.under = self.card
@@ -176,11 +176,14 @@ class Tour(QObject):
                       Step(self._pin_band, lambda: True, self._band_said),
                       Step(self._go_to_matches, lambda: True, self._matches_said),
                       Step(self._go_to_evidence, lambda: True, self._evidence_said),
+                      Step(self._go_to_known, lambda: True, self._known_said),
                       Step(self._open_library, self._on_library, self._library_said),
                       Step(self._open_add, self._add_checked, self._add_said),
                       Step(self._add_it, self._reference_added, self._added_said),
                       Step(self._open_trends, self._on_trends, self._trends_said),
                       Step(self._go_to_groups, lambda: True, self._groups_said),
+                      Step(self._open_quality, self._on_quality, self._quality_said),
+                      Step(self._go_to_review, lambda: True, self._review_said),
                       Step(self._open_export, lambda: self.w.sheet is not None, self._export_said),
                       Step(self._close_sheet, lambda: self.w.sheet is None, self._done)]
 
@@ -334,6 +337,34 @@ class Tour(QObject):
     def _groups_said(self):
         return ("Unknown groups", "Samples with no name that look alike, so an unknown material can be seen coming back before "
                 "anyone knows what it is. Once you know, add it as a reference.", self.w.trends_page.group_card)
+
+    def _go_to_known(self):
+        self.rv.ensureWidgetVisible(self.rv.known_panel, 0, 40)
+
+    def _known_said(self):
+        return ("A contaminant in a known material", "If a sample is mostly a material you know, load a clean spectrum of it "
+                "and choose it here. The app takes it out and searches what is left, so a small contaminant is not "
+                "hidden by the main material's bands.", self.rv.known_panel)
+
+    def _open_quality(self):
+        self.card.on_right = True
+        self.w.show_page(self.quality)
+        self.w.quality_page.demo_button.setChecked(True)
+
+    def _on_quality(self):
+        return self.w.pages.currentWidget() is self.w.quality_page
+
+    def _quality_said(self):
+        return ("Instrument check", "Measure a polystyrene film now and then. The app checks where its bands are, and this "
+                "chart shows if the instrument starts to drift. These checks are made up.", self.w.quality_page.check_card)
+
+    def _go_to_review(self):
+        page = self.w.quality_page
+        page.scroll.ensureWidgetVisible(page.review_card, 0, 40)
+
+    def _review_said(self):
+        return ("Second-person review", "Every exported report waits here. A different person reads it and records a "
+                "decision. The analyst cannot review their own report.", self.w.quality_page.review_card)
 
     def _open_export(self):
         self.card.on_right = False

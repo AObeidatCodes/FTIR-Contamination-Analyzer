@@ -48,13 +48,16 @@ import shutil
 import sys
 import tempfile
 import traceback
+from dataclasses import replace
 from datetime import datetime
 from pathlib import Path
 
-from PySide6.QtCore import (QEasingCurve, QPoint, QRect, QSettings, QSize, QSortFilterProxyModel, Qt, QThreadPool,
-                            QTimer, QUrl, Signal)
-from PySide6.QtGui import QAction, QColor, QDesktopServices, QFontDatabase, QGuiApplication, QIcon, QKeySequence
-from PySide6.QtWidgets import (QAbstractItemView, QApplication, QDialog, QFileDialog, QFrame, QGridLayout,
+import numpy as np
+from PySide6.QtCore import (QEasingCurve, QPoint, QPointF, QRect, QRectF, QSettings, QSize, QSortFilterProxyModel, Qt,
+                            QThreadPool, QTimer, QUrl, Signal)
+from PySide6.QtGui import (QAction, QColor, QDesktopServices, QFontDatabase, QGuiApplication, QIcon, QKeySequence, QPainter,
+                           QPainterPath, QPen)
+from PySide6.QtWidgets import (QAbstractItemView, QApplication, QComboBox, QDialog, QFileDialog, QFrame, QGridLayout,
                                QHBoxLayout, QInputDialog, QLabel, QLineEdit, QListView, QMainWindow, QMenu,
                                QMessageBox, QProgressBar, QPushButton, QSplitter, QStackedWidget, QTextBrowser,
                                QToolButton, QVBoxLayout, QWidget)
@@ -68,6 +71,7 @@ from .export_view import ExportPanel
 from .families import close_call
 from .inhouse import InHouseLibrary, changes_between, reanalyse
 from .jobs import Job
+from .known_material import take_out
 from .library import impostor_test, load_library
 from .library_view import (EXTENDED, AddReferencePanel, LibraryPage, MaterialDetail, OpenSpecyPanel, SimilarityPanel,
                            similarity_for)
@@ -78,6 +82,7 @@ from .motion import (MOTION, Card, FadeStack, Motion, Overlay, Sheet, SmoothScro
                      alive, animate, count_up, crossfade, fade_through, make_opaque, rise_in, snapshot, zero_like)
 from .peaks import band_label, band_names
 from .plots import save_figure, setup_fonts
+from .processing import CO2_MASK, GRID
 from .records import SampleLog, append_tool_log, readable_time, resolve_modes, run_info
 from .report import write_report
 from .spectrum_io import SpectrumFileError, find_spectrum_files, read_mode_note, read_spectra
@@ -85,16 +90,18 @@ from .structures import groups_at
 from .theme import FONT_FILES, FONTS, THEMES, VERDICT_LOOK, stylesheet
 from .tour import Tour
 from .trends import known_tools
+from .quality_view import QualityPage, ReviewPanel
+from .review import append_report, append_review
 from .trends_view import TrendsPage
 from .unknowns import save_fingerprints, usable_file
 from .widgets import (BandButton, ElidedLabel, EmptyState, FlowLayout, ModeDialog, Pill, PlotPanel, ScoreBars, ScoreStrip,
-                      SpectrumDelegate, SpectrumListModel, Theme, chip, clear_layout, flag_pill, icon, icon_pixmap,
+                      SpectrumDelegate, SpectrumListModel, Theme, chip, clear_layout, flag_pill, font, icon, icon_pixmap,
                       logo_pixmap, verdict_pill)
 
 FILE_FILTER = ("Spectrum files (" + " ".join([f"*{ext}" for ext in config.SPECTRUM_FILE_TYPES]
                                             + list(config.INSTRUMENT_FILE_PATTERNS)) + ");;All files (*)")
-ANALYZE, LIBRARY, TRENDS = "analyze", "library", "trends"
-PAGES = (ANALYZE, LIBRARY, TRENDS)
+ANALYZE, LIBRARY, TRENDS, QUALITY = "analyze", "library", "trends", "quality"
+PAGES = (ANALYZE, LIBRARY, TRENDS, QUALITY)
 
 HOW_IT_WORKS = f"""
 <h2>How the analyzer works</h2>
@@ -140,8 +147,18 @@ left out, so the extended library still passes the impostor test. Switch between
 <b>Extended</b> on the Library page.</p>
 <p><b>Trends</b>: counts each exported sample once, and shows the most common materials and tools and any
 material that keeps coming back on one tool. Enter the tool or area when you export a report: a sample without
-one cannot be checked for repeats. <b>Unknown groups</b> shows samples with no probable verdict that look alike; a
-group does not say what the material is.</p>
+one cannot be checked for repeats. A repeat lists where the material can come from. <b>Unknown groups</b> shows
+samples with no probable verdict that look alike; a group does not say what the material is.</p>
+<p><b>Measure again</b>: a spectrum that is saturated, below zero, has no sample, or whose tallest band is under
+20 times the noise is marked in red, with what to do. The verdict stays as the rule gave it, but do not rely on it.</p>
+<p><b>Quality</b>: <b>Instrument check</b> compares the band positions of a polystyrene film, measured in transmission,
+with their published positions, and draws every check, so that a drift can be seen. <b>Second-person review</b> lists
+every exported report. A different person from the analyst reads it and records a decision. A report file that
+changed after export cannot be reviewed. Names are typed and the login comes from the computer: a review is a record,
+not an electronic signature.</p>
+<p><b>Contaminant in a known material</b>: load a clean spectrum of the main material, measured on your own instrument,
+or add it as an in-house reference. Choose it under the result to take it out and search what is left. A material is
+named only when it is clearly ahead, and it is a hint to confirm.</p>
 <h3>Checking it by eye</h3>
 <p>Switch the figure to <b>Analytical view</b> to see every step on its own panel: the raw data, the
 absorbance, the mode correction, the two fingerprints the score is calculated from, and the checks with
@@ -278,11 +295,65 @@ class Fact(QWidget):
 
 
 # ---------------------------------------------------------------------------- the result page
+class LeftChart(QWidget):
+    """What is left after a clean spectrum was taken out, with the library material it looks most like."""
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.left = self.reference = None
+        self.name = ""
+        self.setFixedHeight(150)
+        self.setAccessibleName("What is left of the spectrum")
+
+    def set_data(self, left, reference, name):
+        self.left, self.reference, self.name = left, reference, name
+        self.update()
+
+    def _path(self, values, top, height):
+        """The curve from 4000 cm-1 on the left to 650 on the right, scaled to its own height."""
+        ok = np.isfinite(values) & ~CO2_MASK
+        low, high = values[ok].min(), values[ok].max()
+        path, pen_up = QPainterPath(), True
+        for w, y, use in zip(GRID, values, ok):
+            if not use:
+                pen_up = True
+                continue
+            point = QPointF((4000 - w) / 3350 * self.width(), top + height * (high - y) / (high - low or 1))
+            if pen_up:
+                path.moveTo(point)
+            else:
+                path.lineTo(point)
+            pen_up = False
+        return path
+
+    def paintEvent(self, _):
+        if self.left is None:
+            return
+        t = Theme.t
+        p = QPainter(self)
+        p.setRenderHint(QPainter.Antialiasing)
+        p.setFont(font("small"))
+        height = self.height() - 40
+        p.setBrush(Qt.NoBrush)
+        if self.reference is not None:
+            p.setPen(QPen(QColor(t["chart_reference"]), 1.2))
+            p.drawPath(self._path(self.reference, 20, height))
+        p.setPen(QPen(QColor(t["chart_sample"]), 1.5))
+        p.drawPath(self._path(self.left, 20, height))
+        p.setPen(QColor(t["muted"]))
+        p.drawText(QRectF(0, 0, self.width(), 16), Qt.AlignLeft | Qt.AlignVCenter,
+                   f"What is left, with {self.name}" if self.reference is not None else "What is left")
+        floor = QRectF(0, self.height() - 16, self.width(), 16)
+        p.drawText(floor, Qt.AlignLeft | Qt.AlignVCenter, "4000 cm⁻¹")
+        p.drawText(floor, Qt.AlignRight | Qt.AlignVCenter, "650 cm⁻¹")
+
+
 class ResultView(SmoothScrollArea):
     """Everything about one spectrum, top to bottom. Built once, refilled for each selection."""
 
     save_figure = Signal()
     add_reference = Signal()
+    remainder_found = Signal(object, object)       # the result, its Remainder
 
     def __init__(self):
         super().__init__()
@@ -428,6 +499,27 @@ class ResultView(SmoothScrollArea):
         self._lay_panels(2)
         col.addLayout(grid)
 
+        # 5b. a contaminant in a known material
+        self.others = list                                               # set by the window: every loaded result
+        self.known_panel, known_body = panel("Contaminant in a known material")
+        known_body.addWidget(label("Measure a clean piece of the main material and load it too, or add it as an in-house "
+                                   "reference. Choose it here to take it out and search what is left.", "Body2", wrap=True))
+        known_row = QHBoxLayout()
+        self.known_choice = QComboBox()
+        self.known_choice.setMinimumWidth(220)
+        self.known_choice.setAccessibleName("Clean spectrum of the main material")
+        self.known_button = QPushButton(" Search what is left")
+        self.known_button.setCursor(Qt.PointingHandCursor)
+        self.known_button.clicked.connect(self._take_out)
+        known_row.addWidget(self.known_choice, 1)
+        known_row.addWidget(self.known_button)
+        known_body.addLayout(known_row)
+        self.known_text = label("", "Body", wrap=True)
+        known_body.addWidget(self.known_text)
+        self.left_chart = LeftChart()
+        known_body.addWidget(self.left_chart)
+        col.addWidget(self.known_panel)
+
         # 6. traceability
         self.trace_panel, trace_body = panel("Traceability", "proves which file, code and library made this result")
         self.trace = QGridLayout()
@@ -486,7 +578,7 @@ class ResultView(SmoothScrollArea):
         """The parts of the page, top to bottom (they rise in one after the other)."""
         parts = [self.head, self.change_box, self.facts, self.next_box, self.close_box, self.plot, self.structure, self.top,
                  self.verdict_panel,
-                 self.evidence_panel, self.checks_panel, self.sources_panel, self.trace_panel]
+                 self.evidence_panel, self.checks_panel, self.sources_panel, self.known_panel, self.trace_panel]
         return [part for part in parts if not part.isHidden()]
 
     def bands(self):
@@ -521,6 +613,41 @@ class ResultView(SmoothScrollArea):
         button.clicked.connect(lambda _=False, b=button: self._pin_band(b))
         self.band_buttons.append(button)
         return button
+
+    def _clean_spectra(self):
+        """{name: spectrum on the grid}: the other loaded samples, and the lab's in-house references."""
+        spectra = {r.name: r.compared for r in self.others() if r.spectrum is not self.result.spectrum}
+        spectra.update({name: self.library.spectra[name] for name in self.library.in_house})
+        return spectra
+
+    def _take_out(self):
+        known = self.known_choice.currentText()
+        clean = self._clean_spectra().get(known)
+        if clean is None:
+            return
+        try:
+            self.remainder_found.emit(self.result, take_out(self.result, known, clean, self.library))
+        except ValueError as problem:
+            self.known_text.setText(str(problem))
+            self.known_text.show()
+            self.left_chart.hide()
+
+    def _show_known(self, r, library):
+        names = list(self._clean_spectra())
+        self.known_choice.clear()
+        self.known_choice.addItems(names)
+        self.known_choice.setEnabled(bool(names))
+        self.known_button.setEnabled(bool(names))
+        self.known_button.setIcon(icon("scan-search", Theme.t["ink_2"]))
+        rest = r.remainder
+        self.known_text.setVisible(rest is not None)
+        self.left_chart.setVisible(rest is not None)
+        if rest is not None:
+            if rest.known in names:
+                self.known_choice.setCurrentText(rest.known)
+            self.known_text.setText(rest.text())
+            found = rest.found
+            self.left_chart.set_data(rest.left, library.spectra[found] if found else None, found or "")
 
     def _hover_band(self, button, on):
         """The mouse on a band: it is marked in the figure and its bonds glow; off it: back to the pinned band."""
@@ -768,6 +895,7 @@ class ResultView(SmoothScrollArea):
             self.sources_body.addWidget(label("Only given when there is a match. Read the bands by hand and, "
                                               "for an inorganic, consider SEM-EDX.", "Body2", wrap=True))
         self.sources_body.addStretch()
+        self._show_known(r, library)
 
         # traceability
         clear_layout(self.trace)
@@ -811,6 +939,9 @@ class MainWindow(QMainWindow):
         self.signature_log = self.audit_log.parent / "signatures.csv"   # next to the audit log
         self.tool_log = self.audit_log.parent / "tool_log.csv"
         self.unknown_log = self.audit_log.parent / "unknown_fingerprints.csv"
+        self.instrument_log = self.audit_log.parent / "instrument_checks.csv"
+        self.report_log = self.audit_log.parent / "reports.csv"
+        self.review_log = self.audit_log.parent / "reviews.csv"
         self.inhouse_dir = Path(inhouse_dir or config.INHOUSE_DIR)
         self.openspecy_dir = Path(openspecy_dir or config.RECORDS_DIR / "openspecy")
         self.extended = self.settings.value("library_mode", "essentials") == EXTENDED and tour_folder is None
@@ -882,6 +1013,7 @@ class MainWindow(QMainWindow):
         self.act_analyze = make("Analyze", "Ctrl+1", lambda: self.show_page(ANALYZE))
         self.act_library = make("Library", "Ctrl+2", lambda: self.show_page(LIBRARY))
         self.act_trends = make("Trends", "Ctrl+3", lambda: self.show_page(TRENDS))
+        self.act_quality = make("Quality", "Ctrl+4", lambda: self.show_page(QUALITY))
         self.act_add = make("Add a reference…", "Ctrl+N", lambda: self.open_add_reference(),
                             "Add a material the lab identified itself")
         self.act_map = make("Similarity map", "", self.open_similarity)
@@ -898,7 +1030,8 @@ class MainWindow(QMainWindow):
                        self.act_remove, self.act_clear, None, self.act_quit):
             file_menu.addSeparator() if action is None else file_menu.addAction(action)
         view_menu = bar.addMenu("&View")
-        for action in (self.act_analyze, self.act_library, self.act_trends, None, self.act_theme, self.act_motion, None,
+        for action in (self.act_analyze, self.act_library, self.act_trends, self.act_quality, None, self.act_theme,
+                       self.act_motion, None,
                        self.act_filter):
             view_menu.addSeparator() if action is None else view_menu.addAction(action)
         library_menu = bar.addMenu("&Library")
@@ -913,6 +1046,9 @@ class MainWindow(QMainWindow):
         records.addAction("Audit log (Excel)", lambda: self.open_record(self.audit_log, "Audit log"))
         records.addAction("Signatures (Excel)", lambda: self.open_record(self.signature_log, "Signatures"))
         records.addAction("Tool log (Excel)", lambda: self.open_record(self.tool_log, "Tool log"))
+        records.addAction("Instrument checks (Excel)", lambda: self.open_record(self.instrument_log, "Instrument checks"))
+        records.addAction("Report register (Excel)", lambda: self.open_record(self.report_log, "Report register"))
+        records.addAction("Reviews (Excel)", lambda: self.open_record(self.review_log, "Reviews"))
         records.addSeparator()
         records.addAction("Open the records folder", lambda: self.open_record(self.sample_log.path.parent))
         help_menu = bar.addMenu("&Help")
@@ -951,7 +1087,7 @@ class MainWindow(QMainWindow):
         left.addStretch()
 
         # middle: the pages
-        self.nav = Tabs(ANALYZE, (("Analyze", ANALYZE), ("Library", LIBRARY), ("Trends", TRENDS)))
+        self.nav = Tabs(ANALYZE, (("Analyze", ANALYZE), ("Library", LIBRARY), ("Trends", TRENDS), ("Quality", QUALITY)))
         self.nav.setToolTip("Analyze spectra (Ctrl+1) · Browse and extend the reference library (Ctrl+2) · "
                             "See what keeps coming back (Ctrl+3)")
         self.nav.changed.connect(self.show_page)
@@ -1060,6 +1196,8 @@ class MainWindow(QMainWindow):
         self.empty.tour_link.setVisible(self.tour_folder is None)
         self.result_view = ResultView()
         self.result_view.plot.others = lambda: list(self.model.results)   # "another sample over this one"
+        self.result_view.others = lambda: list(self.model.results)
+        self.result_view.remainder_found.connect(self._keep_remainder)
         self.result_view.save_figure.connect(self.save_current_figure)
         self.result_view.add_reference.connect(lambda: self.open_add_reference())
         self.stack.addWidget(self.empty)
@@ -1090,10 +1228,18 @@ class MainWindow(QMainWindow):
         self.trends_page.repeat_rule_changed.connect(self._remember_repeat_rule)
         self.trends_page.add_from_group.connect(self._add_from_group)
 
+        # ---- the Quality page
+        self.quality_page = QualityPage(self.instrument_log, self.report_log, self.review_log,
+                                        self.settings.value("instrument", ""))
+        self.quality_page.review_requested.connect(self.open_review)
+        self.quality_page.open_requested.connect(self.open_report)
+        self.quality_page.instrument_changed.connect(self._remember_instrument)
+
         self.pages = FadeStack()
         self.pages.addWidget(self.analyze_page)
         self.pages.addWidget(self.library_page)
         self.pages.addWidget(self.trends_page)
+        self.pages.addWidget(self.quality_page)
 
         central = QWidget()
         layout = QVBoxLayout(central)
@@ -1156,6 +1302,7 @@ class MainWindow(QMainWindow):
         self.empty.retheme()
         self.library_page.retheme()
         self.trends_page.retheme()
+        self.quality_page.retheme()
         self.result_view.plot.retheme()
         self.badge.update()
         self.nav.update()
@@ -1181,9 +1328,11 @@ class MainWindow(QMainWindow):
     # ------------------------------------------------------------------ pages
     def show_page(self, page):
         """Show a page (the new page slides in, from the side it sits on in the tabs)."""
-        target = {LIBRARY: self.library_page, TRENDS: self.trends_page}.get(page, self.analyze_page)
+        target = {LIBRARY: self.library_page, TRENDS: self.trends_page, QUALITY: self.quality_page}.get(page, self.analyze_page)
         if page == TRENDS:
             self.trends_page.refresh()                                 # the records may have grown
+        elif page == QUALITY:
+            self.quality_page.refresh()
         before = self.nav.value()
         if self.sheet is not None and self.pages.currentWidget() is not target:
             self.sheet.close_sheet()                                   # a sheet belongs to the page it was opened on
@@ -1194,6 +1343,35 @@ class MainWindow(QMainWindow):
         if self.pages.currentWidget() is target:
             return
         self.pages.slide_to(target, 1 if PAGES.index(page) > PAGES.index(before) else -1)
+
+    def _remember_instrument(self, name):
+        if self.tour_folder is None:
+            self.settings.setValue("instrument", name)
+
+    def open_report(self, report):
+        """Open an exported report: the PDF if it is there, otherwise the web page."""
+        pdf_path = report.path.with_name("report.pdf")
+        QDesktopServices.openUrl(QUrl.fromLocalFile(str(pdf_path if pdf_path.exists() else report.path)))
+
+    def open_review(self, report):
+        """The sheet where a second person reads a report and records a decision."""
+        content = ReviewPanel(report)
+        sheet = self._open_sheet("Review the report", content, 640, "", content.footer)
+        content.cancelled.connect(sheet.close_sheet)
+        content.open_requested.connect(self.open_report)
+        content.submitted.connect(self._review_chosen)
+        return content
+
+    def _review_chosen(self, report, signoff):
+        if self.sheet is not None:
+            self.sheet.close_sheet()
+        try:
+            append_review(report, signoff, self.review_log)
+        except (OSError, ValueError) as problem:
+            self.notify(f"The review was not recorded: {problem}", "triangle-alert")
+            return
+        self.quality_page.refresh()
+        self.notify("The review is recorded.", "circle-check")
 
     def _remember_repeat_rule(self, count, days):
         if self.tour_folder is None:
@@ -1226,7 +1404,7 @@ class MainWindow(QMainWindow):
         self.set_ready(True)
         self.set_status("Ready. Open spectrum files, open a folder, or drop files on the window.")
         if self.tour_folder is not None and self.tour is None:
-            self.tour = Tour(self, ANALYZE, LIBRARY, TRENDS)
+            self.tour = Tour(self, ANALYZE, LIBRARY, TRENDS, QUALITY)
             self.tour.start()
         if self.files_on_start:
             self.analyse_paths(self.files_on_start)
@@ -1267,6 +1445,7 @@ class MainWindow(QMainWindow):
         self.library_page.set_mode("extended" if self.extended else "essentials",
                                    OpenSpecyLibrary(self.openspecy_dir).installed)
         self.library_page.set_library(library, validation)
+        self.trends_page.set_library(library)
 
     def set_ready(self, ready):
         """Enable the actions once the library is loaded (and while no job is running)."""
@@ -1431,6 +1610,11 @@ class MainWindow(QMainWindow):
             return
         self.stack.setCurrentWidget(self.result_view)
         self.result_view.display(r, self.library, self.sample_log.path, animated=False)
+
+    def _keep_remainder(self, result, remainder):
+        """The search of what is left stays with its result, so that the report has it too."""
+        self.model.swap(result, replace(result, remainder=remainder))
+        self.show_current(animated=False)
 
     def _transition_to(self, r):
         if r is not self.current_result():                                # a newer click has come in
@@ -1760,6 +1944,8 @@ class MainWindow(QMainWindow):
         out_dir = Path(folder) / f"FTIR_report_{datetime.now():%Y-%m-%d_%H%M%S}"
         name = self.settings.value("user_name", "") if name is None else name
         info = run_info(self.library, self.validation, name)
+        self.quality_page.refresh()
+        info["instrument_check"] = self.quality_page.last_check_text()
         self._signed_last = signoff is not None
         results = list(self.model.results)
 
@@ -1769,6 +1955,7 @@ class MainWindow(QMainWindow):
                                 signature_log=self.signature_log)
             append_tool_log(results, tool, self.tool_log)
             save_fingerprints(results, self.unknown_log)
+            append_report(results, info, path, tool, self.report_log)
             return path
 
         self.set_status("Writing the report…", busy=True)

@@ -33,7 +33,7 @@ from openpyxl import Workbook
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from openpyxl.utils import get_column_letter
 
-from . import __author__, __title__, __version__
+from . import __author__, __title__, __version__, config
 from .records import DECISIONS, readable_time, who_text
 from .spectrum_io import checksum, read_table
 from .theme import LIGHT
@@ -71,7 +71,15 @@ COLUMN_HELP = {
     "unexplained": "bands the match cannot explain", "next_step": "what to do next",
     "mix_other": "two-component fit: the second reference (empty: no fit clearly helps)",
     "mix_share_other": "its share of the band height (not of the mass)", "mix_fit_r": "r of the two-component fit",
-    "tool": "the tool or area the sample came from",
+    "tool": "the tool or area the sample came from", "checked_at": "when the film was checked",
+    "known_material": "the clean spectrum that was taken out", "left_looks_like": "the material what is left looks like (a hint)",
+    "checked_by": "login name of the person", "instrument": "the instrument", "result": "passed or failed",
+    "bands_measured": "how many of the seven bands were measured", "mean_shift": "average shift of the bands (cm-1)",
+    "largest_shift": "largest shift of one band, without its sign (cm-1)", "exported_at": "when the report was exported",
+    "analysed_by": "the analyst's name", "analysed_login": "the analyst's login name", "probable": "spectra with a probable verdict",
+    "weak": "spectra with a weak verdict", "no_match": "spectra with no reliable match", "reviewed_at": "when it was reviewed",
+    "reviewed_by": "the reviewer's name", "same_login": "yes if the reviewer used the analyst's login",
+    **{f"shift_{x:.0f}": f"position found minus the published {x:.1f} cm-1" for x in config.FILM_BANDS},
 }
 WIDE = {"note", "flags", "fab_sources", "check_next", "confirmation", "notes", "reason", "comment", "next_step",
         "report", "unexplained"}
@@ -85,14 +93,19 @@ ABOUT = {
                   "the report file that was signed. Rows are only ever added.",
     "Library change log": "Every addition to and removal from the in-house library, in order, with who, when, why "
                           "and the checksums of the files. Rows are only ever added; nothing is deleted.",
+    "Instrument checks": "One row per measured polystyrene film: the shift of each band from its published position, "
+                         "and whether the check passed. Rows are only ever added.",
+    "Report register": "One row per exported report, with the SHA-256 of its report.html. Rows are only ever added.",
+    "Reviews": "One row per second-person review of a report: who reviewed it, when, the decision and the comment. "
+               "Rows are only ever added.",
 }
 HEADINGS = {"r": "Score (r)", "gap": "Lead", "max_A": "Highest A", "ch": "C-H", "oh": "O-H / N-H",
             "ch_share": "C-H share", "oh_share": "O-H share", "co2_share": "CO2 share", "water_vapour": "Water vapour"}
-TIMES = {"run_at", "recorded_at", "time", "signed_at"}
+TIMES = {"run_at", "recorded_at", "time", "signed_at", "checked_at", "exported_at", "reviewed_at"}
 VERDICT_COLOURS = {"probable": ("good", "good_bg"), "weak": ("warn", "warn_bg"),
                    "no reliable match": ("none", "none_bg"), "add": ("good", "good_bg"), "remove": ("bad", "bad_bg"),
                    "accept": ("good", "good_bg"), "accept with changes": ("warn", "warn_bg"),
-                   "re-measure": ("bad", "bad_bg")}
+                   "re-measure": ("bad", "bad_bg"), "passed": ("good", "good_bg"), "failed": ("bad", "bad_bg")}
 
 
 def heading(name):
@@ -161,7 +174,7 @@ def _table(ws, frame, top=FIRST_ROW):
                 if len(str(text)) > 24:                                 # the start is enough to recognise it;
                     cell.value = f"{str(text)[:16]}…"                   # the full value is in the record
                 cell.font = _font("muted", 10, mono=True)
-            colours = VERDICT_COLOURS.get(str(text)) if name in ("verdict", "action", "decision") else None
+            colours = VERDICT_COLOURS.get(str(text)) if name in ("verdict", "action", "decision", "result") else None
             if colours:
                 cell.font = _font(colours[0], 11, bold=True)
                 cell.fill = PatternFill("solid", fgColor=t[colours[1]])

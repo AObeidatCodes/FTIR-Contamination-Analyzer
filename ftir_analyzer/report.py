@@ -865,7 +865,7 @@ def evidence_html(r, i=0, library=None):
     ev = r.evidence
     if not ev:
         chips = "".join(f'<span class="chip">{h(b)}</span>' for b in r.checks.tallest_bands) or "none found"
-        return f"<p>No match to explain. The tallest bands, to read by hand:</p><p>{chips}</p>"
+        return f"<p>No match to explain. The tallest bands, to read by hand:</p><p>{chips}</p>" + remainder_html(r)
     heights = band_height_fn(r, library)
 
     found = "".join(band_chip(r, i, w, "found", f"{w:.0f}", heights(w)) for w in ev.found)
@@ -880,7 +880,12 @@ def evidence_html(r, i=0, library=None):
                  "the second material is probably not in the library.") + "</p>")
     else:
         text += "<p class='small'>Every clear band of the sample is explained by the match.</p>"
-    return text + ('<div class="band-card" hidden></div>' if INTERACTIVE else "")
+    return text + remainder_html(r) + ('<div class="band-card" hidden></div>' if INTERACTIVE else "")
+
+
+def remainder_html(r):
+    """What is left after a clean spectrum was taken out, if the analyst did that."""
+    return f"<p><b>Known material.</b> {h(r.remainder.text())}</p>" if r.remainder else ""
 
 
 def checks_html(r):
@@ -1019,7 +1024,8 @@ def library_html(library, info):
     who added it and how it was confirmed."""
     rows = (fact("Library", info["library"].split(",")[0], info["library"]) + fact("Library SHA-256", short_hash(info["library_sha256"]),
             info["library_sha256"], copy=True)
-            + fact("Validation", validation_short(info["validation"]), plain_text(validation_html(info["validation"]))))
+            + fact("Validation", validation_short(info["validation"]), plain_text(validation_html(info["validation"])))
+            + (fact("Instrument check", info["instrument_check"], info["instrument_check"]) if info.get("instrument_check") else ""))
     head = f'<section class="panel"><h3>Library</h3><dl class="kv one">{rows}</dl>'
     if library is None:
         return head + "</section>"
@@ -1203,6 +1209,8 @@ def results_table(results):
         "mix_other": r.mixture.other if r.mixture else "",
         "mix_share_other": round(r.mixture.share_other, 3) if r.mixture else "",
         "mix_fit_r": round(r.mixture.r_fit, 4) if r.mixture else "",
+        "known_material": r.remainder.known if r.remainder else "",
+        "left_looks_like": (r.remainder.found or "") if r.remainder else "",
         "flags": "; ".join(label for label, _ in r.flags), "next_step": r.next_step,
         "file_sha256": r.spectrum.sha256,
     } for r in results])

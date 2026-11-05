@@ -1,0 +1,18 @@
+# Demo data: every sample in this file is made up.
+checked_at,checked_by,instrument,result,bands_measured,mean_shift,largest_shift,shift_3060,shift_2850,shift_1943,shift_1601,shift_1583,shift_1154,shift_1028,file,file_sha256
+2026-01-05T10:00:00+00:00,demo,FTIR 1,passed,7,0.049,0.13,0.13,0.12,-0.05,0.13,0.0,-0.04,0.05,demo_film.csv,demofilm000
+2026-01-12T10:00:00+00:00,demo,FTIR 1,passed,7,-0.02,0.2,0.07,-0.2,0.0,-0.05,-0.01,0.03,0.02,demo_film.csv,demofilm007
+2026-01-19T10:00:00+00:00,demo,FTIR 1,passed,7,0.08,0.19,0.04,0.16,0.05,0.19,0.07,0.1,-0.05,demo_film.csv,demofilm014
+2026-01-26T10:00:00+00:00,demo,FTIR 1,passed,7,0.041,0.14,-0.03,0.14,0.07,-0.05,0.01,0.06,0.09,demo_film.csv,demofilm021
+2026-02-02T10:00:00+00:00,demo,FTIR 1,passed,7,0.101,0.21,0.21,0.05,0.05,0.19,0.05,0.07,0.09,demo_film.csv,demofilm028
+2026-02-09T10:00:00+00:00,demo,FTIR 1,passed,7,0.06,0.17,0.05,-0.1,0.13,-0.0,0.1,0.07,0.17,demo_film.csv,demofilm035
+2026-02-16T10:00:00+00:00,demo,FTIR 1,passed,7,0.121,0.23,0.14,0.23,0.18,0.16,0.02,0.07,0.05,demo_film.csv,demofilm042
+2026-02-23T10:00:00+00:00,demo,FTIR 1,passed,7,0.15,0.24,0.01,0.16,0.2,0.18,0.24,0.07,0.19,demo_film.csv,demofilm049
+2026-03-02T10:00:00+00:00,demo,FTIR 1,passed,7,0.099,0.26,0.21,0.26,0.15,-0.05,0.06,-0.03,0.09,demo_film.csv,demofilm056
+2026-03-09T10:00:00+00:00,demo,FTIR 1,passed,7,0.221,0.33,0.25,0.2,0.28,0.15,0.14,0.2,0.33,demo_film.csv,demofilm063
+2026-03-16T10:00:00+00:00,demo,FTIR 1,passed,7,0.459,0.58,0.44,0.54,0.31,0.58,0.58,0.3,0.46,demo_film.csv,demofilm070
+2026-03-23T10:00:00+00:00,demo,FTIR 1,passed,7,0.779,0.84,0.81,0.76,0.73,0.75,0.78,0.78,0.84,demo_film.csv,demofilm077
+2026-01-10T10:00:00+00:00,demo,FTIR 2,passed,7,-0.1,0.21,0.01,-0.04,0.0,-0.16,-0.13,-0.21,-0.17,demo_film.csv,demofilm005
+2026-02-07T10:00:00+00:00,demo,FTIR 2,passed,7,0.04,0.15,-0.01,-0.05,0.08,0.15,-0.07,0.15,0.03,demo_film.csv,demofilm033
+2026-03-07T10:00:00+00:00,demo,FTIR 2,failed,7,-1.22,1.3,-1.18,-1.26,-1.3,-1.19,-1.22,-1.2,-1.19,demo_film.csv,demofilm061
+2026-03-09T10:00:00+00:00,demo,FTIR 2,passed,7,-0.081,0.15,-0.14,-0.03,-0.09,-0.0,-0.11,-0.05,-0.15,demo_film.csv,demofilm063

@@ -9,6 +9,8 @@ Independent of the library match, these checks describe what was actually measur
     noise        how big is the scatter, so small bands can be judged fairly?
     water vapour are there sharp lines of water vapour from the air in the beam?
 
+measure_again collects what makes a spectrum not worth relying on. It never changes a verdict.
+
 Band heights use the ruler method: a straight line is drawn between the median levels
 of the band's two feet, and the band is measured from that line, so a sloping
 background does not distort the height.
@@ -53,6 +55,12 @@ class Checks:
     co2_signed: float       # CO2 artefact height with its sign: < 0 = points down (less CO2 than in the background)
     tallest_bands: list = field(default_factory=list)   # labels of the 3 tallest bands
     vapour: float = float("nan")    # water-vapour wiggle / quiet wiggle (NaN = not measured: data too coarse)
+    tall: float = float("nan")      # height of the tallest band above the baseline, CO2 left out
+
+    @property
+    def signal_to_noise(self):
+        """How many times the noise the tallest band is."""
+        return self.tall / self.noise if self.noise > 0 else float("inf")
 
     @property
     def vapour_lines(self):
@@ -95,6 +103,22 @@ def describe_vapour(c):
         return "not measured (the data points are too far apart to see the sharp lines)"
     text = f"{c.vapour:.1f}× the wiggle of the quiet windows"
     return text + (" → water-vapour lines" if c.vapour_lines else ", no vapour lines")
+
+
+def measure_again(c):
+    """Why this spectrum should be measured again, each reason with what to do (empty: no reason)."""
+    reasons = []
+    if c.no_sample:                                                    # the first question: is there a sample at all?
+        reasons.append("CO2 artefact as big as the sample bands: probably no sample here. "
+                       "Check the microscope image, take a fresh background.")
+    if c.below_zero:
+        reasons.append("The whole spectrum is below zero: take the background on a comparable spot.")
+    if c.saturated:
+        reasons.append(f"Bands saturated (A up to {c.max_a:.1f}): measure thinner or use ATR.")
+    if c.signal_to_noise < config.REMEASURE_SN:
+        reasons.append(f"The tallest band is only {c.signal_to_noise:.0f} times the noise: "
+                       "use more scans or a better spot.")
+    return reasons
 
 
 def water_vapour(wn, a):
@@ -233,4 +257,4 @@ def side_checks(wn, a):
 
     return Checks(max_a=float(a.max()), co2_share=float(co2 / tall), ch=ch_says, ch_share=float(ch / tall),
                   oh=oh_says, oh_share=float(oh_share), noise=float(noise), co2_signed=float(co2_signed),
-                  tallest_bands=tallest3)
+                  tallest_bands=tallest3, tall=float(tall))

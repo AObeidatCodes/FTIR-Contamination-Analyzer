@@ -17,6 +17,7 @@ License: MIT (see LICENSE)
 import os
 import re
 import time
+from datetime import datetime
 
 import pytest
 
@@ -25,13 +26,14 @@ pytest.importorskip("PySide6")
 
 from PySide6.QtCore import QEventLoop, QPoint, QPointF, QSettings, Qt  # noqa: E402
 from PySide6.QtGui import QWheelEvent  # noqa: E402
-from PySide6.QtWidgets import QApplication, QLabel  # noqa: E402
+from PySide6.QtWidgets import QApplication, QLabel, QPushButton  # noqa: E402
 
 from ftir_analyzer import __author__, __version__, config  # noqa: E402
 from ftir_analyzer.analysis import PROBABLE, WEAK  # noqa: E402
 from ftir_analyzer.gui import LIBRARY, MainWindow, load_fonts  # noqa: E402
 from ftir_analyzer.motion import Motion  # noqa: E402
 from ftir_analyzer.plots import setup_fonts  # noqa: E402
+from ftir_analyzer.review import REVIEWED, WAITING  # noqa: E402
 from ftir_analyzer.widgets import MatchShow  # noqa: E402
 
 DEMO = config.EXAMPLES_DIR / "library_demo"
@@ -425,6 +427,111 @@ def test_the_trends_page_shows_demo_data_as_made_up(app, window):
     window.show_page("analyze")
 
 
+def test_a_repeat_says_where_the_material_can_come_from(app, window):
+    window.show_page("trends")
+    page = window.trends_page
+    page.demo_button.setChecked(True)
+    page.period.set_value("0")
+    page.show_samples()
+    words = " ".join(label.text() for label in page.repeat_card.findChildren(QLabel))
+    assert page.repeat_rows.count() >= 1 and "Possible sources:" in words and "Check next:" in words
+    page.period.set_value("90")
+    page.demo_button.setChecked(False)
+    window.show_page("analyze")
+
+
+def test_a_film_is_checked_and_added_to_the_log(app, window):
+    window.show_page("quality")
+    page = window.quality_page
+    page.instrument.setEditText("FTIR 1")
+    assert page.run_check(config.EXAMPLES_DIR / "12_shipping_box_film_ATR.csv") is None   # the wrong file says why
+    assert "ATR" in page.status_text.text() and not window.instrument_log.exists()
+    assert page.run_check(config.EXAMPLES_DIR / "06_PS_calibration_film_transmission.csv").result == "passed"
+    assert len(page.checks) == 1 and len(page.chart.checks) == 1
+    assert page.status_text.text().startswith("Passed on") and page.status.property("kind") == "good"
+    assert page.instrument.findText("FTIR 1") >= 0
+    assert "passed on" in page.last_check_text() and page.band_grid.count() == 2 * (len(config.FILM_BANDS) + 1)
+    window.show_page("analyze")
+
+
+def test_the_quality_page_shows_demo_data_as_made_up(app, window):
+    window.show_page("quality")
+    page = window.quality_page
+    real, before = len(page.checks), "Instrument 7"
+    page.instrument.setEditText(before)
+    page.demo_button.setChecked(True)
+    assert page.demo_note.isVisible() and page.instrument.currentText() == "FTIR 1"
+    assert "moved" in page.status_text.text() and page.status.property("kind") == "warn"   # the made-up drift
+    assert (datetime.now().astimezone() - page.checks[-1].time).days < 30
+    assert not page.check_button.isEnabled()
+    page.shown.set_value("all")
+    page.show_reports()
+    assert page.report_rows.count() == 5 and not page.review_card.findChildren(QPushButton)   # nothing to act on
+    page.shown.set_value(WAITING)
+    page.demo_button.setChecked(False)
+    assert len(page.checks) == real and page.check_button.isEnabled()
+    assert page.instrument.currentText() == before                               # the made-up name does not stay
+    window.show_page("analyze")
+
+
+def test_a_second_person_reviews_an_exported_report(app, window, tmp_path, monkeypatch):
+    monkeypatch.setattr("ftir_analyzer.gui.QDesktopServices", type("Desktop", (), {"openUrl": staticmethod(lambda url: None)}))
+    panel = window.export_report()
+    panel.set_folder(tmp_path)
+    panel.name.setText("Sam Lee")
+    panel.tool.setText("Etch 3")
+    panel._submit("html")
+    assert wait(app, lambda: not window.busy and window.report_log.exists(), 120)
+    window.show_page("quality")
+    page = window.quality_page
+    report = page.reports[0]
+    assert report.analysed_by == "Sam Lee" and report.state == WAITING and report.tool == "Etch 3"
+    assert page.subtitle.text().endswith("waiting for review.")
+    sheet = window.open_review(report)
+    sheet.name.setText("sam lee")
+    sheet.statement.setChecked(True)
+    assert not sheet.record_button.isEnabled() and "different person" in sheet.problem.text()
+    sheet.name.setText("Noor Haddad")
+    sheet.decision.set_value("re-measure")
+    sheet.decision.changed.emit("re-measure")
+    assert not sheet.record_button.isEnabled() and "comment" in sheet.problem.text()
+    sheet.comment.setText("Sample 2 is saturated")
+    assert sheet.record_button.isEnabled()
+    sheet.record_button.click()
+    assert window.review_log.exists()
+    report = page.reports[0]
+    assert report.state == REVIEWED and report.review.name == "Noor Haddad"
+    assert page.review_card.isVisible() and not any(r.review is None and r is report for r in page.reports)
+    window.show_page("analyze")
+
+
+def test_the_report_names_the_last_instrument_check(app, window, tmp_path):
+    window.write_report_to(tmp_path, ask_to_open=False)
+    assert wait(app, lambda: not window.busy and hasattr(window, "last_report"), 120)
+    html = window.last_report.read_text(encoding="utf-8")
+    assert "Instrument check" in html and "largest band shift" in html
+
+
+def test_a_clean_spectrum_is_taken_out_and_the_report_says_so(app, window, tmp_path):
+    view = window.result_view
+    index = window.proxy.mapFromSource(window.model.index(0))
+    window.list.setCurrentIndex(index)
+    window.show_current(animated=False)
+    before = window.current_result()
+    assert view.known_choice.count() == len(window.model.results) - 1 and view.known_button.isEnabled()
+    assert before.name not in [view.known_choice.itemText(i) for i in range(view.known_choice.count())]
+    view.known_choice.setCurrentIndex(0)
+    view.known_button.click()
+    after = window.current_result()
+    assert after is not before and after.remainder.known == view.known_choice.currentText()
+    assert after.verdict == before.verdict and after.ranking == before.ranking    # the verdict is not touched
+    assert view.known_text.isVisible() and view.known_text.text() == after.remainder.text()
+    assert view.left_chart.isVisible() and view.left_chart.left is not None
+    window.write_report_to(tmp_path, ask_to_open=False)
+    assert wait(app, lambda: not window.busy and tmp_path in window.last_report.parents, 120)
+    assert "Known material." in window.last_report.read_text(encoding="utf-8")
+
+
 def test_the_report_message_offers_the_pdf(app, window, tmp_path):
     window.write_report_to(tmp_path, ask_to_open=False)
     assert wait(app, lambda: not window.busy and hasattr(window, "last_report"), 120)
@@ -593,7 +700,8 @@ def test_the_tour_works_and_keeps_nothing(app, window):
         if tour.at < len(tour.steps) - 1:
             tour.next()
     assert seen[0] == "A tour with real data" and seen[-1] == "That is the app"
-    assert {"Your library", "Trends", "Unknown groups", "Sign and export"} <= set(seen)
+    assert {"Your library", "Trends", "Unknown groups", "A contaminant in a known material", "Instrument check",
+            "Second-person review", "Sign and export"} <= set(seen)
     assert "Nylon 6" in tour_window.library.spectra and len(tour_window.library) == 17
     assert (window.library.sha256, len(window.library)) == sizes                 # the real window saw nothing
     assert window.settings.value("library_mode", "essentials") == "essentials"
