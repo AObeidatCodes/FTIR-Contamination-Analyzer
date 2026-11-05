@@ -45,20 +45,17 @@ Licence: Creative Commons Attribution 4.0, https://creativecommons.org/licenses/
 > Rochman, C., Herodotou, O. (2021). Microplastic Spectral Classification Needs an Open Source
 > Community: Open Specy to the Rescue! *Analytical Chemistry* 93(21), 7543–7548.
 
-`ftir_analyzer/data/openspecy_pack/` holds 145 reference spectra chosen from Open Specy's `medoid_nobaseline`
-library by the program's own import (`ftir_analyzer/openspecy.py`): FTIR spectra of materials a fab is likely to see,
-put on the program's grid and scaled 0-1, with those that could be confused with another material left out. Each
-keeps its Open Specy identity in `openspecy_index.csv`.
-
 The test file `tests/data/openspecy_sample.rds` contains OpenFTIR spectra (MIT, above), stored in the
 structure of an Open Specy library file so that the import can be tested.
 
-## Open Specy library (CC BY 4.0), optional, not distributed
+## Open Specy library, optional, not distributed
 
 In extended mode the program downloads, on the user's computer, the Open Specy reference library
-(the copy Open Specy's R package uses, https://d2jrxerjcsjhs7.cloudfront.net/, or https://osf.io/x7dpz/;
-Creative Commons Attribution 4.0) or imports a copy the user downloaded, and
-keeps a fab-relevant part of it in `records/openspecy/`. These spectra are not part of this project.
+(the copy Open Specy's R package uses, https://d2jrxerjcsjhs7.cloudfront.net/, or https://osf.io/x7dpz/)
+or imports a copy the user downloaded, and keeps a fab-relevant part of it in `records/openspecy/`. These
+spectra are not part of this project. CC BY 4.0 is the licence of the R package. Each spectrum keeps the
+licence Open Specy's file gives it, which the program records: many are marked CC BY-NC (non-commercial),
+many state none, so check before using them in a company.
 Every report that uses them names Open Specy and cites:
 
 > Cowger, W., Steinmetz, Z., Gray, A., Munno, K., Lynch, J., Hapich, H., Primpke, S., De Frond, H.,

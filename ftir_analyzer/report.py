@@ -1029,7 +1029,7 @@ def library_html(library, info):
     text = (f"<p>{shipped} shipped references (OpenFTIR, MIT licence)"
             + (f" and {len(in_house)} in-house reference{'s' if len(in_house) != 1 else ''} added by the lab."
                if in_house else ". No in-house references were used.")
-            + (f" Extended mode: {open_specy} references from the Open Specy library (CC BY 4.0; Cowger et al. 2021, "
+            + (f" Extended mode: {open_specy} references from the Open Specy library (Cowger et al. 2021, "
                "Analytical Chemistry 93(21), 7543-7548), validated against every other reference before use."
                if open_specy else "") + "</p>")
     if not in_house:

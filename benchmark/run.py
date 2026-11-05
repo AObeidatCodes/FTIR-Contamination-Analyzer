@@ -1,7 +1,7 @@
 """
 FTIR Contamination Analyzer - runs the benchmark (PROTOCOL.md) and writes the results
 
-    python -m benchmark --data benchmark/data         the whole benchmark, then the report
+    python -m benchmark --data benchmark/data         the whole benchmark, then the report (locked program only)
     python -m benchmark --report-only                 only the report, from the saved results
 
 The data folder needs feature_matrix_raw_transmittance.csv, medoid_nobaseline.rds and Sample_Spectra.csv. The tool
@@ -40,7 +40,6 @@ import pandas as pd                                                             
 from ftir_analyzer.analysis import PROBABLE, WEAK, analyse                           # noqa: E402
 from ftir_analyzer import config                                                     # noqa: E402
 from ftir_analyzer.library import load_library, pearson                              # noqa: E402
-from ftir_analyzer.openspecy import PACK_DIR, OpenSpecyLibrary, install_pack         # noqa: E402
 from ftir_analyzer.processing import absorbance, on_grid                             # noqa: E402
 from ftir_analyzer.spectrum_io import Spectrum, SpectrumFileError                    # noqa: E402
 
@@ -53,6 +52,7 @@ HERE = Path(__file__).resolve().parent
 REPO = HERE.parent
 RESULTS = HERE / "results"
 LOCKED_COMMIT = "c432cee"
+LAST_RUNNABLE = "ff993fb"                                  # later commits changed the program, so check this one out
 FILES = {"feature_matrix_raw_transmittance.csv": "2739d901529a0fd97e693068d82cee5b7eee2a616f5e8d6e797a84ad859fa26f",
          "medoid_nobaseline.rds": "3591eb4b7be780ac12585631216bce5050cb543e9a61b8b482c91d1b4c821ab3",
          "Sample_Spectra.csv": "edb70bc53378e1c408e9bb29757f1f3a39b9c149a4c2a9dfad161dfb145918c3"}
@@ -69,7 +69,8 @@ def check_program():
     """The locked program, or stop. An uncommitted change counts as a change."""
     changed = subprocess.run(["git", "diff", "--quiet", LOCKED_COMMIT, "--", "ftir_analyzer"], cwd=REPO).returncode
     if changed:
-        raise SystemExit(f"ftir_analyzer/ differs from the locked commit {LOCKED_COMMIT}: the benchmark will not run.")
+        raise SystemExit(f"ftir_analyzer/ differs from the locked commit {LOCKED_COMMIT}: the benchmark will not run. "
+                         f"Check out {LAST_RUNNABLE} to repeat it.")
     return subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=REPO, capture_output=True, text=True).stdout.strip()
 
 
@@ -338,6 +339,7 @@ def run(data_folder, say=print):
     clean = {(i.dataset, i.key): a for i, a in zip(everything, answers)}
 
     say("Extended library")
+    from ftir_analyzer.openspecy import OpenSpecyLibrary, install_pack   # only in the locked program
     with tempfile.TemporaryDirectory() as folder:
         summary = install_pack(library, folder)
         extended = load_library(extended=True, openspecy_dir=folder)

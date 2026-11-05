@@ -691,7 +691,7 @@ def run_page(doc, info, library):
     text = (f"{shipped} shipped references (OpenFTIR, MIT licence)"
             + (f" and {len(in_house)} in-house reference{'s' if len(in_house) != 1 else ''} added by the lab."
                if in_house else ". No in-house references were used.")
-            + (f" Extended mode: {len(library.open_specy)} references from the Open Specy library (CC BY 4.0; Cowger "
+            + (f" Extended mode: {len(library.open_specy)} references from the Open Specy library (Cowger "
                "et al. 2021, Analytical Chemistry 93(21), 7543-7548), validated against every other reference "
                "before use." if library.open_specy else ""))
     y = page.paragraph(M, y, text, WIDTH, 8.6, T["ink_2"]) + 8

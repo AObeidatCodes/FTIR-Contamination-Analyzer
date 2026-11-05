@@ -27,7 +27,6 @@ from PySide6.QtWidgets import QFrame, QHBoxLayout, QLabel, QPushButton, QVBoxLay
 
 from . import config
 from .motion import Moving, alive
-from .openspecy import PACK_DIR
 from .structures import groups_at
 from .widgets import Theme
 
@@ -166,7 +165,6 @@ class Tour(QObject):
                       Step(self._pin_band, lambda: True, self._band_said),
                       Step(self._open_add, self._add_checked, self._add_said),
                       Step(self._add_it, self._reference_added, self._added_said),
-                      Step(self._more_references, self._pack_added, self._more_said),
                       Step(self._open_export, lambda: self.w.sheet is not None, self._export_said),
                       Step(self._close_sheet, lambda: self.w.sheet is None, self._done)]
 
@@ -267,19 +265,6 @@ class Tour(QObject):
         text = f"{change.before} became {change.after}." if change else "The library was validated again."
         return ("The answer changed", f"{text} The library was validated again, every spectrum was analysed again, "
                 "and the change is written down in the library's log.", self.rv.change_box)
-
-    def _more_references(self):
-        self.w.get_openspecy(PACK_DIR)
-
-    def _pack_added(self):
-        return self.w.extended
-
-    def _more_said(self):
-        self.w.show_page(self.library)
-        v = self.w.validation
-        return ("More references, one click", f"Open Specy's references come with the app. This library now has "
-                f"{len(self.w.library)} references, and it still passes the impostor test: the best wrong match stays "
-                f"at r {v.score:.2f}, below the {config.PROBABLE_R:.2f} that a probable needs.", None)
 
     def _open_export(self):
         self.w.show_page(self.analyze)

@@ -71,7 +71,7 @@ from .jobs import Job
 from .library import impostor_test, load_library
 from .library_view import (EXTENDED, AddReferencePanel, LibraryPage, MaterialDetail, OpenSpecyPanel, SimilarityPanel,
                            similarity_for)
-from .openspecy import PACK_DIR, OpenSpecyLibrary, download_and_import, import_library, install_pack
+from .openspecy import OpenSpecyLibrary, download_and_import, import_library
 from .compare_view import TopMatches
 from .molecule_view import StructurePanel
 from .motion import (MOTION, Card, FadeStack, Motion, Overlay, Sheet, SmoothScrollArea, Spinner, Tabs, Toast,
@@ -129,8 +129,8 @@ reference, the impostor test with the new reference, and which of the spectra on
 different answer. A reference that would make two materials impossible to tell apart cannot be added.
 Every addition and removal is kept in <code>records/inhouse_library/library_changes.csv</code>,
 which is only ever appended to.</p>
-<p><b>More references (Open Specy)</b>: <b>Library → Open Specy…</b> uses the references included with the
-program, downloads the newest Open Specy library (Cowger et al. 2021, CC BY 4.0), or imports a file. Only FTIR spectra of
+<p><b>More references (Open Specy)</b>: <b>Library → Open Specy…</b> downloads the newest Open Specy library
+(Cowger et al. 2021) or imports a file, and each spectrum keeps the licence its source gives. Only FTIR spectra of
 materials a fab is likely to see are kept, and every one that could be confused with a different material is
 left out, so the extended library still passes the impostor test. Switch between <b>Fab essentials</b> and
 <b>Extended</b> on the Library page.</p>
@@ -1596,20 +1596,18 @@ class MainWindow(QMainWindow):
         content = OpenSpecyPanel(OpenSpecyLibrary(self.openspecy_dir), self.last_dir)
         content.download_requested.connect(lambda: self.get_openspecy(None))
         content.import_requested.connect(self.get_openspecy)
-        content.pack_requested.connect(lambda: self.get_openspecy(PACK_DIR))
         self._open_sheet("More references from Open Specy", content, 640)
         return content
 
     def get_openspecy(self, path=None):
-        """Download (path None), import a file, or use the included references (PACK_DIR); keep the validated ones."""
+        """Download (path None) or import a file; keep the validated references."""
         if self.sheet is not None:
             self.sheet.close_sheet()
         inhouse_dir, folder, results = self.inhouse_dir, self.openspecy_dir, list(self.model.results)
 
         def work(progress):
             base = load_library(inhouse_dir=inhouse_dir)                   # shipped + in-house, without Open Specy
-            summary = (install_pack(base, folder, progress) if path == PACK_DIR else
-                       import_library(path, base, folder, progress) if path else
+            summary = (import_library(path, base, folder, progress) if path else
                        download_and_import(base, folder, progress))
             payload = change_library(inhouse_dir, results, None, True, folder, progress)
             return payload, summary

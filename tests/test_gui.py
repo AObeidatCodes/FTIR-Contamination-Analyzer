@@ -509,7 +509,7 @@ def test_the_tour_works_and_keeps_nothing(app, window):
         if tour.at < len(tour.steps) - 1:
             tour.next()
     assert seen[0] == "A tour with real data" and seen[-1] == "That is the app"
-    assert "Nylon 6" in tour_window.library.spectra and len(tour_window.library) > 150
+    assert "Nylon 6" in tour_window.library.spectra and len(tour_window.library) == 17
     assert (window.library.sha256, len(window.library)) == sizes                 # the real window saw nothing
     assert window.settings.value("library_mode", "essentials") == "essentials"
     assert "Nylon 6" not in window.library.spectra

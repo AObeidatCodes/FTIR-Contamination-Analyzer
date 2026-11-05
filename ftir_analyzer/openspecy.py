@@ -1,7 +1,7 @@
 """
 FTIR Contamination Analyzer - the Open Specy library (optional, "extended" mode)
 
-Open Specy (Cowger et al. 2021, CC BY 4.0) is a large open library of FTIR and Raman
+Open Specy (Cowger et al. 2021) is a large open library of FTIR and Raman
 spectra of plastics, natural materials and minerals. The program can use part of it as
 extra references, so that more kinds of samples can be identified:
 
@@ -27,7 +27,7 @@ extra references, so that more kinds of samples can be identified:
        shipped library ("Fab essentials") and the extended one.
 
 The original files are never changed. Every reference keeps its Open Specy identity and the
-CC BY 4.0 licence, and the reports cite Open Specy.
+licence its source gives, and the reports cite Open Specy. No spectrum comes with the program.
 
 Short names used in this file:
     wn = wavenumbers    X = spectra (one column per spectrum)    md = metadata (one row per spectrum)
@@ -57,9 +57,10 @@ AWS_LIBRARY = "https://d2jrxerjcsjhs7.cloudfront.net/medoid_nobaseline.rds"   # 
 OSF_NODE = "x7dpz"                                       # Open Specy's older library project on OSF
 OSF_FILES = "https://api.osf.io/v2/nodes/{node}/files/osfstorage/"
 PREFERRED = ["medoid_nobaseline", "mediod_nobaseline", "nobaseline"]   # small and representative first
-PACK_DIR = config.DATA_DIR / "openspecy_pack"            # the kept references, included with the program
 GENERIC = ("other plastic", "other material", "organic matter", "mineral")   # names that say less than the group
-LICENCE = "CC BY 4.0"
+NOT_STATED = "not stated"                                # a spectrum with no licence in the library file
+LICENCE_NOTE = ("Each spectrum keeps the licence Open Specy's file gives it: many are marked CC BY-NC (non-commercial) "
+                "and many state none. The CC BY 4.0 licence is the R package's, so check before using these in a company.")
 CITATION = ("Cowger, W., Steinmetz, Z., Gray, A., Munno, K., Lynch, J., Hapich, H., Primpke, S., De Frond, H., "
             "Rochman, C., Herodotou, O. (2021). Microplastic Spectral Classification Needs an Open Source "
             "Community: Open Specy to the Rescue! Analytical Chemistry 93(21), 7543-7548.")
@@ -91,6 +92,11 @@ def measuring_mode(text):
     if "TRANSMI" in text:
         return "transmission"
     return "unknown"                                    # reflectance, 'absorbance' or nothing at all
+
+
+def licence_of(text):
+    """The licence a library file gives one spectrum, as written there; blank means it states none."""
+    return " ".join(str(text).split()).upper() or NOT_STATED
 
 
 def fab_category(text):
@@ -251,6 +257,7 @@ def prepare(wn, X, metadata):
             "material_class": _column(metadata, "material_class", "polymer_class", "Polymer.Category"),
             "organisation": _column(metadata, "organization", "Organization", "library_name"),
             "sample_id": _column(metadata, "sample_name", "SpectrumID", "file_id"),
+            "licence": _column(metadata, "license", "licence"),
             "how": (_column(metadata, "instrument_mode") + " " + _column(metadata, "SpectralCollectionMode")
                     + " " + _column(metadata, "instrument_accessories"))}            # how it was measured
     skipped = {"Raman": 0, "not likely in a fab": 0, "too little data": 0, "more than 3 of one material": 0,
@@ -295,7 +302,8 @@ def _prepare_one(wn, column, meta, per_group, names, i):
     low, high = np.nanmin(y), np.nanmax(y)
     return {"name": name, "group": group, "category": category, "y": (y - low) / (high - low),
             "original_name": str(meta["identity"] or meta["polymer"] or meta["material_class"]),
-            "spectrum_id": str(meta["sample_id"]), "contributor": str(meta["organisation"]), "mode": mode}, None
+            "spectrum_id": str(meta["sample_id"]), "contributor": str(meta["organisation"]), "mode": mode,
+            "licence": licence_of(meta["licence"])}, None
 
 
 def curate(base_library, entries):
@@ -349,6 +357,7 @@ class ImportSummary:
     skipped: dict = field(default_factory=dict)
     dropped: list = field(default_factory=list)          # [(name, confused with, r)]
     modes: dict = field(default_factory=dict)            # {measuring mode: how many kept}
+    licences: dict = field(default_factory=dict)         # {licence as the file gives it: how many kept}
 
     def text(self):
         lines = [f"Open Specy library imported from {self.source}",
@@ -358,6 +367,9 @@ class ImportSummary:
             said = {"ATR": "ATR", "transmission": f"transmission (put into the {config.LIBRARY_MODE} look)",
                     "unknown": "mode not recorded (used as measured)"}
             lines.append("Measured by: " + ", ".join(f"{n} {said[m]}" for m, n in sorted(self.modes.items())) + ".")
+        if self.licences:
+            lines.append("Licences: " + ", ".join(f"{n} {k}" for k, n in sorted(self.licences.items())) + ". "
+                         + LICENCE_NOTE)
         left_out = {k: v for k, v in self.skipped.items() if v}
         if left_out:
             lines.append("Left out: " + ", ".join(f"{v} {k}" for k, v in left_out.items()) + ".")
@@ -395,7 +407,8 @@ class OpenSpecyLibrary:
         for row in index.itertuples():
             if row.name not in table.columns:
                 continue
-            info = MaterialInfo(name=row.name, category=row.category, source="Open Specy", licence=LICENCE,
+            info = MaterialInfo(name=row.name, category=row.category, source="Open Specy",
+                                licence=getattr(row, "licence", "") or NOT_STATED,
                                 contributor=row.contributor, mode=getattr(row, "mode", "") or "unknown",
                                 original_name=row.original_name,
                                 origin="open specy", notes=f"Open Specy id {row.spectrum_id}",
@@ -409,11 +422,11 @@ class OpenSpecyLibrary:
         """Write the kept references, their index and the import report."""
         self.folder.mkdir(parents=True, exist_ok=True)
         stamp = datetime.now().astimezone().isoformat(timespec="seconds")
-        head = (f"# Open Specy reference spectra ({LICENCE}), kept for fab use on {stamp}.\n"
+        head = (f"# Open Specy reference spectra, kept for fab use on {stamp}. Licence: per spectrum, in the index.\n"
                 f"# Source: {summary.source}. Cite: {CITATION}\n")
         table = pd.DataFrame({"wavenumber": GRID, **{e["name"]: np.round(e["y"], 5) for e in entries}})
         self.spectra_file.write_text(head + table.to_csv(index=False), encoding="utf-8")
-        columns = ["name", "group", "category", "original_name", "spectrum_id", "contributor", "mode"]
+        columns = ["name", "group", "category", "original_name", "spectrum_id", "contributor", "mode", "licence"]
         index = pd.DataFrame([{k: e.get(k, "unknown") for k in columns} for e in entries], columns=columns)
         self.index_file.write_text(head + index.to_csv(index=False), encoding="utf-8")
         self.report_file.write_text(summary.text() + f"\n\nCite: {CITATION}\n", encoding="utf-8")
@@ -429,17 +442,6 @@ def import_library(path, base_library, folder=None, progress=None):
     return _keep(entries, skipped, Path(path).name, base_library, folder, say)
 
 
-def install_pack(base_library, folder=None, progress=None):
-    """Use the Open Specy references included with the program, so no download is needed. They were chosen as
-    import_library does; each is validated again here, because this lab's own references can differ."""
-    say = progress or (lambda *_: None)
-    say(0, 1, "Reading the included references")
-    entries = [{"name": info.name, "group": info.group, "category": info.category, "y": y,
-                "original_name": info.original_name, "spectrum_id": info.notes.removeprefix("Open Specy id "),
-                "contributor": info.contributor, "mode": info.mode} for info, y in OpenSpecyLibrary(PACK_DIR).entries()]
-    return _keep(entries, {}, "the references included with the program", base_library, folder, say)
-
-
 def _keep(entries, skipped, source, base_library, folder, say):
     """Validate chosen references against the library, save the ones that pass, and return the summary."""
     known = {}                                                          # a material the shipped library has
@@ -449,11 +451,12 @@ def _keep(entries, skipped, source, base_library, folder, say):
         e["category"] = known.get(e["group"], e["category"])
     say(0, 1, "Validating them against every other reference")
     kept, dropped = curate(base_library, entries)
-    by_category, modes = {}, {}
+    by_category, modes, licences = {}, {}, {}
     for e in kept:
         by_category[e["category"]] = by_category.get(e["category"], 0) + 1
         modes[e["mode"]] = modes.get(e["mode"], 0) + 1
-    summary = ImportSummary(source, len(kept), by_category, skipped, dropped, modes)
+        licences[e["licence"]] = licences.get(e["licence"], 0) + 1
+    summary = ImportSummary(source, len(kept), by_category, skipped, dropped, modes, licences)
     OpenSpecyLibrary(folder).save(kept, summary)
     return summary
 

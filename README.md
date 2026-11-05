@@ -336,12 +336,8 @@ entries stay in `records/inhouse_library/library_changes.csv` (nothing is ever d
 ### More references: Open Specy (extended mode)
 
 The shipped library holds 16 well-validated polymer references. For samples outside it, **Library →
-Open Specy…** adds references from the Open Specy library (Cowger et al. 2021, CC BY 4.0):
+Open Specy…** adds references from the Open Specy library (Cowger et al. 2021):
 
-0. **Use the included references** needs no internet: 145 references chosen as described below come with
-   the program (`ftir_analyzer/data/openspecy_pack/`), and each is validated again against your library,
-   in-house references included. The library grows from 16 to 161 references, and the best wrong match
-   in the impostor test stays at r 0.90.
 1. **Download the newest** gets the *medoid nobaseline* library (baseline-corrected absorbance)
    on your computer, from where Open Specy's own R package gets it
    (`https://d2jrxerjcsjhs7.cloudfront.net/medoid_nobaseline.rds`), or from the older copy on osf.io.
@@ -359,6 +355,12 @@ Open Specy…** adds references from the Open Specy library (Cowger et al. 2021,
    shipped library) are not rivals: the verdict's lead is measured to the next different material.
 4. The result is kept in `records/openspecy/` with an import report. Switch between **Fab
    essentials** and **Extended** on the Library page; the open results are analysed again at once.
+
+**Check two things first.** Each spectrum keeps the licence Open Specy's file gives it, shown on the reference
+and in the import report: many are marked CC BY-NC (non-commercial) and many state none, so check before using them
+in a company. And the [benchmark](#benchmark) found no gain: references of this kind gave no right answers on the 699
+samples of the 12 materials they added, and more wrong ones on the rest. For a material your lab sees often, a
+reference measured on your own instrument is the better route (**Adding a reference**, above).
 
 The import was tested with a file in Open Specy's older format (`tests/data/openspecy_sample.rds`),
 with one laid out like the current file (FTIR / Raman / NIR parts, R classes, the cut-out CO₂ region)
@@ -477,7 +479,7 @@ pip install pytest
 python -m pytest
 ```
 
-238 tests. Those for the analysis cover file reading (read-only data, headerless tab-separated files, unit
+239 tests. Those for the analysis cover file reading (read-only data, headerless tab-separated files, unit
 recognition, clear errors), processing, the verdict rule, the impostor test, the known answer for
 every demo spectrum, the second-component, empty-spot and saturation detection, the CO₂ direction,
 the analytical view (each step reproduced, the score recalculated from step 4), the interactive
@@ -610,16 +612,19 @@ spectra it mostly holds back. What the benchmark found that needs work:
   answer on a material with a reference: the program goes quiet.
 - With 16 references the lead rule stopped 0 wrong answers and held back 12 right ones.
 - The extended library did not help: on the same Open Specy spectra, *probable* answers that were not right went from
-  6 of 316 to 15 of 309.
+  6 of 316 to 15 of 309. The 699 samples of the 12 materials it added got no right answers. Three more materials could
+  not be tested, because all their test spectra came from the same source as a reference. Those 145 references have
+  since been removed from the program.
 
 It is not fully blind, and the report says how. About 30% of Open Specy (1,396 spectra) stays locked and unscored, for
-later work. The spectra are not in this repository. With the three data files the protocol names in a folder:
+later work. The spectra are not in this repository. To repeat the run, check out `ff993fb`, the last commit with the
+program it tested, and put the three data files the protocol names in a folder:
 
 ```bash
 python -m benchmark --data path/to/folder
 ```
 
-The report alone rebuilds from the saved results, with no data:
+The report alone rebuilds from the saved results at any commit, with no data:
 
 ```bash
 python -m benchmark --report-only
@@ -644,8 +649,8 @@ python -m benchmark --report-only
 ## Data
 
 Reference and demo spectra come from open sources: the 16 shipped references are raw ATR spectra
-from OpenFTIR (MIT). The Open Specy references are not shipped: they are downloaded or imported on
-your computer (CC BY 4.0) and only their *nobaseline* (absorbance) library is used. See
+from OpenFTIR (MIT). The Open Specy library spectra are not shipped: they are downloaded or imported on
+your computer, each keeps the licence its source gives, and only the *nobaseline* (absorbance) library is used. See
 [`ftir_analyzer/data/README.md`](ftir_analyzer/data/README.md) and
 [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).
 

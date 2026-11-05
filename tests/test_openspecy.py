@@ -38,7 +38,7 @@ from ftir_analyzer.processing import GRID, fingerprint, on_grid
 from ftir_analyzer.spectrum_io import read_spectra
 
 pytest.importorskip("rdata")
-from ftir_analyzer.openspecy import install_pack  # noqa: E402
+from ftir_analyzer.openspecy import NOT_STATED, _keep  # noqa: E402
 from ftir_analyzer.openspecy import (AWS_LIBRARY, OpenSpecyLibrary, choose_file, curate, download,  # noqa: E402
                                      download_and_import, import_library, list_osf_files, prepare,
                                      read_library_file)
@@ -84,7 +84,7 @@ def test_import_gives_a_valid_extended_library(base, tmp_path):
     assert len(extended) == 22 and "6 Open Specy" in extended.name and len(extended.open_specy) == 6
     assert impostor_test(extended).passed
     pe = "Poly(ethylene) (Open Specy)"
-    assert extended.group_of(pe) == "PE" and extended.info_of(pe).licence == "CC BY 4.0"
+    assert extended.group_of(pe) == "PE" and extended.info_of(pe).licence == NOT_STATED
     assert extended.info_of(pe).category == "Packaging"                       # the shipped PE's category
     assert fab_sources(pe, extended) == fab_sources("PE (high density)", extended)
     shipped_only = load_library(inhouse_dir=tmp_path / "inhouse", extended=False, openspecy_dir=folder)
@@ -103,13 +103,19 @@ def test_a_second_reference_of_the_same_material_does_not_weaken_the_verdict(bas
     assert decide(ranking, rival=2) == (PROBABLE, "PE a") and decide(ranking, rival=1)[0] == WEAK
 
 
-def test_the_included_references_work_without_a_download(base, tmp_path):
-    summary = install_pack(base, tmp_path)
-    assert summary.kept > 100
-    library = load_library(extended=True, openspecy_dir=tmp_path)
-    assert len(library) == 16 + summary.kept and impostor_test(library).passed
-    assert not [n for n in library.open_specy if n.lower().startswith("other plastic")]   # named after their material
-    assert not [n for n in library.open_specy if "nist" in library.info_of(n).contributor.lower()]   # never in the repository
+def test_each_reference_keeps_the_licence_its_source_gives(base, tmp_path):
+    wn, X, metadata = read_library_file(FIXTURE)
+    metadata = metadata.assign(license=["cc by-nc", ""] * 5)
+    entries, skipped = prepare(wn, X, metadata)
+    summary = _keep(entries, skipped, "a test file", base, tmp_path, lambda *_: None)
+    licences = {info.licence for info, _ in OpenSpecyLibrary(tmp_path).entries()}
+    assert licences == {"CC BY-NC", NOT_STATED} and sum(summary.licences.values()) == summary.kept
+    assert "non-commercial" in summary.text()
+
+
+def test_no_open_specy_library_spectra_come_with_the_program():
+    assert not (config.DATA_DIR / "openspecy_pack").exists()
+    assert "openspecy_pack" not in (config.DATA_DIR.parents[1] / "pyproject.toml").read_text(encoding="utf-8")
 
 
 def test_the_derivative_library_is_refused(tmp_path):

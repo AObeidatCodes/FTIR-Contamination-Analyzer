@@ -38,7 +38,7 @@ from .analysis import NO_MATCH
 from .evidence import fab_sources, key_bands
 from .families import family_of, relatives
 from .inhouse import addition_preview, reference_notes
-from .openspecy import CITATION, LICENCE
+from .openspecy import CITATION, LICENCE_NOTE
 from .jobs import Job
 from .library import reference_on_grid, similarity_matrix
 from .molecule_view import StructurePanel
@@ -1577,7 +1577,6 @@ class OpenSpecyPanel(QWidget):
 
     download_requested = Signal()
     import_requested = Signal(str)
-    pack_requested = Signal()
 
     def __init__(self, store, start_dir=""):
         super().__init__()
@@ -1587,14 +1586,14 @@ class OpenSpecyPanel(QWidget):
         column.setContentsMargins(24, 16, 24, 32)
         column.setSpacing(16)
         column.addWidget(text_label(
-            "Open Specy is a large open library of FTIR and Raman spectra (Cowger et al. 2021, CC BY 4.0). "
+            "Open Specy is a large open library of FTIR and Raman spectra (Cowger et al. 2021). "
             "The program can add the part a fab is likely to see: FTIR spectra of gloves, wipes, seals, "
             "fluoropolymers, silicones, resins, fibres, silica and other minerals, at most three per material.",
             "Body2", wrap=True))
         steps, steps_body = section("What happens", "nothing is changed in the original file")
         for number, text in enumerate([
-                "Use the references included with the program (no internet needed), or get the newest 'medoid "
-                "nobaseline' library from where Open Specy keeps it (AWS, or osf.io), or a file you downloaded (.rds).",
+                "Get the newest 'medoid nobaseline' library from where Open Specy keeps it (AWS, or osf.io), "
+                "or use a file you downloaded (.rds).",
                 "Only FTIR spectra in fab-relevant material classes are kept.",
                 "Every spectrum is compared with every reference. One that could be confused with a different "
                 "material (r ≥ 0.95) is left out, so the extended library still passes the impostor test.",
@@ -1613,20 +1612,17 @@ class OpenSpecyPanel(QWidget):
         column.addWidget(status)
         button_row = QWidget()
         buttons = FlowLayout(button_row, spacing=10)                    # they wrap in a narrow sheet
-        self.pack_button = QPushButton(" Use the included references")
-        self.pack_button.setObjectName("Primary")
-        self.pack_button.setIcon(icon("files", t["on_primary"]))
         self.download_button = QPushButton(" Download the newest")
-        self.download_button.setIcon(icon("file-down", t["ink_2"]))
+        self.download_button.setObjectName("Primary")
+        self.download_button.setIcon(icon("file-down", t["on_primary"]))
         self.import_button = QPushButton(" Import a library file…")
         self.import_button.setIcon(icon("upload", t["ink_2"]))
-        for button in (self.pack_button, self.download_button, self.import_button):
+        for button in (self.download_button, self.import_button):
             button.setCursor(Qt.PointingHandCursor)
             buttons.addWidget(button)
         column.addWidget(button_row)
-        column.addWidget(text_label(f"Licence {LICENCE}. Please cite: {CITATION}", "SectionHint", wrap=True))
+        column.addWidget(text_label(f"{LICENCE_NOTE} Please cite: {CITATION}", "SectionHint", wrap=True))
         column.addStretch()
-        self.pack_button.clicked.connect(self.pack_requested.emit)
         self.download_button.clicked.connect(self.download_requested.emit)
         self.import_button.clicked.connect(self._choose)
 
