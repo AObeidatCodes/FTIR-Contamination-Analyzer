@@ -479,7 +479,7 @@ pip install pytest
 python -m pytest
 ```
 
-240 tests. Those for the analysis cover file reading (read-only data, headerless tab-separated files, unit
+257 tests. Those for the analysis cover file reading (read-only data, headerless tab-separated files, unit
 recognition, clear errors), processing, the verdict rule, the impostor test, the known answer for
 every demo spectrum, the second-component, empty-spot and saturation detection, the CO₂ direction,
 the analytical view (each step reproduced, the score recalculated from step 4), the interactive
@@ -628,6 +628,26 @@ The report alone rebuilds from the saved results at any commit, with no data:
 
 ```bash
 python -m benchmark --report-only
+```
+
+### Calibrated confidence
+
+The score r is not a probability, so a second step tried to measure one: set a bar on spectra of known material so that
+the right material clears it 90% of the time, then list every material that clears it on a new sample. The rules were
+committed first ([protocol](benchmark/PROTOCOL_CONFIDENCE.md), [report](benchmark/results/confidence_report.html)), using
+the locked Open Specy spectra: 482 set the bar and 539 tested it.
+
+| | One bar | Compared as ATR |
+| --- | --- | --- |
+| Right material on the list | 90.9% (83.4 to 96.0%) | 96.9% (90.9 to 99.4%) |
+| Typical list, of 16 materials | 10 | 4 |
+
+The promise held, but the lists are too long to help: the limit set before the run was 3, and the bar had to drop to
+0.09 (0.43 for ATR). So it is not in the app. The result says more about the data than the method: on other labs'
+spectra the right material often scores low. A lab could repeat this with its own spectra:
+
+```bash
+python -m benchmark.confidence --report-only
 ```
 
 ## Limits

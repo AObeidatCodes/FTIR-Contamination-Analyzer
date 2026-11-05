@@ -1,0 +1,1534 @@
+id,part,dataset,truth,kind,contributor,doubtful,compared,verdict,best,true_r
+a56a66bace08,calibration,open specy,PP,in library,adamopoulou et al.; 2026 (hcmr),False,ATR,weak,PP,0.9089
+b6332f606efc,calibration,open specy,PP,in library,adamopoulou et al.; 2026 (hcmr),False,ATR,probable,PP,0.9717
+b9ca3a4acdcd,calibration,open specy,PP,in library,adamopoulou et al.; 2026 (hcmr),False,ATR,probable,PP,0.9588
+a842b23777b6,calibration,open specy,PP,in library,adamopoulou et al.; 2026 (hcmr),False,ATR,probable,PP,0.9651
+09cdd2e25837,calibration,open specy,PP,in library,adamopoulou et al.; 2026 (hcmr),False,ATR,probable,PP,0.9639
+71563ecd8181,calibration,open specy,PP,in library,adamopoulou et al.; 2026 (hcmr),False,ATR,weak,PP,0.9248
+ec1b8e43cdbb,calibration,open specy,PP,in library,adamopoulou et al.; 2026 (hcmr),False,ATR,probable,PP,0.9683
+8d0f84d66a55,calibration,open specy,PP,in library,adamopoulou et al.; 2026 (hcmr),False,ATR,probable,PP,0.9658
+d3c2dc840961,calibration,open specy,PP,in library,adamopoulou et al.; 2026 (hcmr),False,ATR,probable,PP,0.9549
+47b0eb494c82,calibration,open specy,PP,in library,adamopoulou et al.; 2026 (hcmr),False,ATR,probable,PP,0.9653
+b0fc7c1d2bc3,calibration,open specy,PP,in library,adamopoulou et al.; 2026 (hcmr),False,ATR,probable,PP,0.9577
+e576e2843b0a,calibration,open specy,PP,in library,adamopoulou et al.; 2026 (hcmr),False,ATR,probable,PP,0.9523
+fb62c7a62298,calibration,open specy,PP,in library,adamopoulou et al.; 2026 (hcmr),False,ATR,weak,PP,0.9313
+9341a0f1f500,calibration,open specy,PP,in library,adamopoulou et al.; 2026 (hcmr),False,ATR,probable,PP,0.9569
+4cfc0d575a1c,calibration,open specy,PP,in library,adamopoulou et al.; 2026 (hcmr),False,ATR,weak,PP,0.9471
+f23947379e99,calibration,open specy,PP,in library,adamopoulou et al.; 2026 (hcmr),False,ATR,probable,PP,0.9581
+3cc8eb2a0d57,calibration,open specy,PP,in library,adamopoulou et al.; 2026 (hcmr),False,ATR,weak,PP,0.9434
+ae9b59bb40a6,calibration,open specy,PP,in library,adamopoulou et al.; 2026 (hcmr),False,ATR,probable,PP,0.9557
+64df6a5a60f8,calibration,open specy,PP,in library,adamopoulou et al.; 2026 (hcmr),False,ATR,probable,PP,0.9547
+d1755e993afd,calibration,open specy,PP,in library,adamopoulou et al.; 2026 (hcmr),False,ATR,probable,PP,0.9544
+f24904beca58,calibration,open specy,PP,in library,adamopoulou et al.; 2026 (hcmr),False,ATR,probable,PP,0.9673
+4e2de706eb63,calibration,open specy,PP,in library,adamopoulou et al.; 2026 (hcmr),False,ATR,probable,PP,0.9515
+22f7f817d923,calibration,open specy,PP,in library,adamopoulou et al.; 2026 (hcmr),False,ATR,probable,PP,0.9532
+e18c871a288a,calibration,open specy,PP,in library,adamopoulou et al.; 2026 (hcmr),False,ATR,probable,PP,0.9559
+ca51ea924c53,calibration,open specy,PP,in library,adamopoulou et al.; 2026 (hcmr),False,ATR,probable,PP,0.9613
+65699e910f3b,calibration,open specy,PP,in library,adamopoulou et al.; 2026 (hcmr),False,ATR,weak,PP,0.93
+494d8d997384,calibration,open specy,PP,in library,adamopoulou et al.; 2026 (hcmr),False,ATR,probable,PP,0.9639
+7a4668980cdc,calibration,open specy,PP,in library,adamopoulou et al.; 2026 (hcmr),False,ATR,probable,PP,0.9537
+b48ef2808710,calibration,open specy,PP,in library,adamopoulou et al.; 2026 (hcmr),False,ATR,probable,PP,0.9546
+e6f0dc11512b,calibration,open specy,PP,in library,adamopoulou et al.; 2026 (hcmr),False,ATR,probable,PP,0.9607
+110916d5be53,calibration,open specy,PP,in library,adamopoulou et al.; 2026 (hcmr),False,ATR,probable,PP,0.9598
+c9c782f0b8c9,calibration,open specy,PP,in library,adamopoulou et al.; 2026 (hcmr),False,ATR,probable,PP,0.9524
+8692fe80fd5d,calibration,open specy,PP,in library,adamopoulou et al.; 2026 (hcmr),False,ATR,probable,PP,0.9559
+c059d33f36db,calibration,open specy,PP,in library,adamopoulou et al.; 2026 (hcmr),False,ATR,probable,PP,0.9598
+5478035b70aa,calibration,open specy,PP,in library,adamopoulou et al.; 2026 (hcmr),False,ATR,probable,PP,0.9574
+3160eb49cc00,calibration,open specy,PP,in library,adamopoulou et al.; 2026 (hcmr),False,ATR,probable,PP,0.9588
+511b03254119,calibration,open specy,PP,in library,adamopoulou et al.; 2026 (hcmr),False,ATR,probable,PP,0.96
+44a329ddef89,calibration,open specy,PP,in library,adamopoulou et al.; 2026 (hcmr),False,ATR,probable,PP,0.9514
+2e7ddb2d5f9f,calibration,open specy,PP,in library,adamopoulou et al.; 2026 (hcmr),False,ATR,probable,PP,0.9631
+0cb14f3aab07,calibration,open specy,PP,in library,adamopoulou et al.; 2026 (hcmr),False,ATR,probable,PP,0.9558
+fcafa4f11540,calibration,open specy,PP,in library,adamopoulou et al.; 2026 (hcmr),False,ATR,probable,PP,0.957
+94ac5907f184,calibration,open specy,PP,in library,adamopoulou et al.; 2026 (hcmr),False,ATR,weak,PP,0.921
+82091cdb572f,calibration,open specy,PP,in library,adamopoulou et al.; 2026 (hcmr),False,ATR,probable,PP,0.9551
+be22ec28cff6,calibration,open specy,PP,in library,adamopoulou et al.; 2026 (hcmr),False,ATR,probable,PP,0.9581
+9d33e929a4bf,calibration,open specy,PP,in library,adamopoulou et al.; 2026 (hcmr),False,ATR,probable,PP,0.9613
+c13b66464322,calibration,open specy,PP,in library,adamopoulou et al.; 2026 (hcmr),False,ATR,probable,PP,0.9595
+87231cc89d15,calibration,open specy,PP,in library,adamopoulou et al.; 2026 (hcmr),False,ATR,probable,PP,0.9599
+8396d672d551,calibration,open specy,PP,in library,adamopoulou et al.; 2026 (hcmr),False,ATR,probable,PP,0.9566
+d5d6eda3e3b3,calibration,open specy,PP,in library,adamopoulou et al.; 2026 (hcmr),False,ATR,probable,PP,0.9661
+bf0a43df801d,calibration,open specy,PP,in library,adamopoulou et al.; 2026 (hcmr),False,ATR,probable,PP,0.9586
+72d62af9e724,calibration,open specy,PAN,in library,elise granek and kellie teague,False,transmission,weak,PAN,0.6778
+7d861047c1bf,calibration,open specy,PAN,in library,elise granek and kellie teague,False,ATR,weak,PMMA,0.613
+0d674f9a86bf,calibration,open specy,PAN,in library,elise granek and kellie teague,False,transmission,weak,PAN,0.7696
+12a1ea2d3ed8,calibration,open specy,PAN,in library,elise granek and kellie teague,False,transmission,weak,PAN,0.7497
+b7331d648626,calibration,open specy,PAN,in library,elise granek and kellie teague,False,ATR,weak,PMMA,0.5769
+652d781f6523,calibration,open specy,PAN,in library,elise granek and kellie teague,False,transmission,weak,PAN,0.6936
+1a38adecab11,calibration,open specy,PAN,in library,elise granek and kellie teague,False,as measured,no reliable match,PU,0.2179
+9b59bc07df60,calibration,open specy,PAN,in library,elise granek and kellie teague,False,as measured,no reliable match,PU,0.1869
+4541f78bb1ac,calibration,open specy,PAN,in library,elise granek and kellie teague,False,transmission,weak,PAN,0.7713
+d653a0a9e19f,calibration,open specy,PAN,in library,elise granek and kellie teague,False,ATR,weak,PMMA,0.5547
+8828106629fc,calibration,open specy,PET,in library,elise granek and kellie teague,False,ATR,weak,PMMA,0.4814
+7b30688afe51,calibration,open specy,PET,in library,elise granek and kellie teague,False,as measured,no reliable match,PMMA,0.32
+ef42a2448452,calibration,open specy,PET,in library,elise granek and kellie teague,False,ATR,weak,PMMA,0.5824
+68cb0565cb6f,calibration,open specy,PET,in library,elise granek and kellie teague,False,ATR,weak,PMMA,0.6132
+58941ae108de,calibration,open specy,PET,in library,elise granek and kellie teague,True,ATR,weak,PMMA,0.6242
+67dbaae5d7d3,calibration,open specy,PP,in library,elise granek and kellie teague,False,transmission,weak,PP,0.684
+d4ff97c6dd70,calibration,open specy,PP,in library,elise granek and kellie teague,False,transmission,weak,PP,0.6704
+f99e2a797d7e,calibration,open specy,PP,in library,elise granek and kellie teague,False,transmission,weak,PAN,0.6615
+1c0392c2abbe,calibration,open specy,PE,in library,elise granek and kellie teague,False,transmission,weak,PLA,0.2969
+7c9c5a39f3fe,calibration,open specy,PET,in library,elise granek and kellie teague,False,ATR,weak,PMMA,0.6876
+539a2cc11943,calibration,open specy,PP,in library,elise granek and kellie teague,False,as measured,no reliable match,PP,0.5785
+c426c9a9e80f,calibration,open specy,PP,in library,elise granek and kellie teague,False,as measured,no reliable match,PP,0.4356
+677e394eec52,calibration,open specy,PP,in library,elise granek and kellie teague,False,as measured,no reliable match,PP,0.4822
+7e1621bf4b83,calibration,open specy,PAN,in library,elise granek and kellie teague,True,transmission,weak,PAN,0.6623
+401d06ce3467,calibration,open specy,PAN,in library,elise granek and kellie teague,True,transmission,weak,PAN,0.6652
+74c4f5d35c17,calibration,open specy,PAN,in library,elise granek and kellie teague,True,transmission,weak,PAN,0.6648
+0026b1e57273,calibration,open specy,PAN,in library,elise granek and kellie teague,True,transmission,weak,PAN,0.6766
+479dee84d356,calibration,open specy,PAN,in library,elise granek and kellie teague,True,transmission,weak,PAN,0.6678
+10f8ef2c8820,calibration,open specy,PAN,in library,elise granek and kellie teague,True,transmission,weak,PAN,0.6657
+bcbc018d8032,calibration,open specy,PE,in library,elise granek and kellie teague,False,as measured,no reliable match,PU,0.3657
+a33a3ecad4d1,calibration,open specy,PE,in library,elise granek and kellie teague,False,as measured,no reliable match,PU,0.2965
+a4dde82cc335,calibration,open specy,PE,in library,elise granek and kellie teague,False,as measured,no reliable match,PK,0.3128
+4b716ff0bae9,calibration,open specy,PE,in library,elise granek and kellie teague,False,as measured,no reliable match,PU,0.3034
+d631f80d51ae,calibration,open specy,PE,in library,elise granek and kellie teague,False,as measured,no reliable match,PU,0.4416
+cee938088c99,calibration,open specy,PE,in library,elise granek and kellie teague,False,as measured,no reliable match,PK,0.1983
+86fac2f981c2,calibration,open specy,EVA,in library,elise granek and kellie teague,False,as measured,no reliable match,PVOH,0.3148
+60f48f50cddc,calibration,open specy,EVA,in library,elise granek and kellie teague,False,as measured,no reliable match,PK,0.1966
+b0a24979eb97,calibration,open specy,EVA,in library,elise granek and kellie teague,False,as measured,no reliable match,PVOH,0.344
+76f144de939c,calibration,open specy,EVA,in library,elise granek and kellie teague,False,as measured,no reliable match,PLA,0.2198
+c324857f3413,calibration,open specy,EVA,in library,elise granek and kellie teague,False,as measured,no reliable match,PLA,0.1934
+ec1897df7ed2,calibration,open specy,EVA,in library,elise granek and kellie teague,False,as measured,no reliable match,PLA,0.3626
+8f70cd7b79f1,calibration,open specy,EVA,in library,elise granek and kellie teague,False,as measured,no reliable match,EVOH,0.3964
+337a20e2d039,calibration,open specy,PC,in library,elise granek and kellie teague,False,transmission,weak,PC,0.7384
+6fe120ae96c5,calibration,open specy,PC,in library,elise granek and kellie teague,False,transmission,weak,PC,0.7411
+354a956a2d14,calibration,open specy,PC,in library,elise granek and kellie teague,False,transmission,weak,PC,0.8372
+7b2aa030f486,calibration,open specy,PC,in library,elise granek and kellie teague,False,transmission,weak,PC,0.853
+2e01fd656d33,calibration,open specy,PC,in library,elise granek and kellie teague,False,transmission,weak,PC,0.8251
+cf56f7283ca4,calibration,open specy,PC,in library,elise granek and kellie teague,False,transmission,weak,PC,0.7734
+793ea96b17bc,calibration,open specy,PC,in library,elise granek and kellie teague,False,transmission,weak,PC,0.7333
+4050bfcc0faa,calibration,open specy,PC,in library,elise granek and kellie teague,False,ATR,weak,PC,0.8686
+9a5d9cca2132,calibration,open specy,PC,in library,elise granek and kellie teague,False,transmission,weak,PC,0.8054
+f35c58addc97,calibration,open specy,PC,in library,elise granek and kellie teague,False,transmission,weak,PC,0.8122
+b6851cf03a6b,calibration,open specy,PC,in library,elise granek and kellie teague,False,transmission,weak,PC,0.8184
+b99a89d776d7,calibration,open specy,PC,in library,elise granek and kellie teague,False,transmission,weak,PC,0.8632
+c1fc8586df95,calibration,open specy,PC,in library,elise granek and kellie teague,False,transmission,weak,PC,0.8578
+f321f242432f,calibration,open specy,PC,in library,elise granek and kellie teague,False,ATR,weak,PC,0.8812
+7a9b67014645,calibration,open specy,PC,in library,elise granek and kellie teague,False,transmission,weak,PC,0.8073
+d960df550d53,calibration,open specy,PC,in library,elise granek and kellie teague,False,transmission,weak,PC,0.8411
+6b9cbff0a1cb,calibration,open specy,PC,in library,elise granek and kellie teague,False,transmission,weak,PC,0.8384
+9f4999e36072,calibration,open specy,PE,in library,elise granek and kellie teague,False,as measured,no reliable match,PP,0.4117
+c0d72bd8d047,calibration,open specy,PE,in library,elise granek and kellie teague,False,ATR,weak,EVOH,0.7698
+83fa33b6b63e,calibration,open specy,PE,in library,elise granek and kellie teague,False,ATR,weak,EVOH,0.6898
+809ebbcfcd5b,calibration,open specy,PE,in library,elise granek and kellie teague,False,ATR,weak,EVOH,0.5103
+56aca94158fc,calibration,open specy,PVC,in library,elise granek and kellie teague,False,transmission,weak,PVC,0.7841
+8dbc9885d13b,calibration,open specy,PVC,in library,elise granek and kellie teague,False,transmission,weak,PVC,0.8294
+b9af71dff5eb,calibration,open specy,PVC,in library,elise granek and kellie teague,False,transmission,weak,PVC,0.8404
+f4aa547289df,calibration,open specy,PVC,in library,elise granek and kellie teague,False,transmission,weak,PVC,0.809
+e1064f27f117,calibration,open specy,PVC,in library,elise granek and kellie teague,False,transmission,weak,PVC,0.9335
+2a617c0ed5bf,calibration,open specy,PVC,in library,elise granek and kellie teague,False,transmission,weak,PVC,0.7869
+6a0cb5d8cd9c,calibration,open specy,PVC,in library,elise granek and kellie teague,False,transmission,weak,PVC,0.7226
+97d311a05182,calibration,open specy,PVC,in library,elise granek and kellie teague,False,transmission,weak,PVC,0.7597
+25ef75899b59,calibration,open specy,PVC,in library,elise granek and kellie teague,False,transmission,weak,PVC,0.8069
+36b315f1d380,calibration,open specy,PVC,in library,elise granek and kellie teague,False,transmission,weak,PVC,0.7536
+547ee27ae7e4,calibration,open specy,PVC,in library,elise granek and kellie teague,False,transmission,weak,PVC,0.7494
+cc0cd2f155ae,calibration,open specy,PVC,in library,elise granek and kellie teague,False,transmission,weak,PVC,0.8018
+39a4a60d5c2c,calibration,open specy,PVC,in library,elise granek and kellie teague,False,transmission,weak,PVC,0.7619
+72583931675f,calibration,open specy,PVC,in library,elise granek and kellie teague,False,transmission,weak,PVC,0.7766
+c3b465fba120,calibration,open specy,PVC,in library,elise granek and kellie teague,False,transmission,weak,PVC,0.8876
+0e2b817b4db1,calibration,open specy,PS,in library,elise granek and kellie teague,True,as measured,no reliable match,PS,0.4813
+f0297f4b4d3e,calibration,open specy,PS,in library,elise granek and kellie teague,True,as measured,no reliable match,PS,0.3222
+9420c0f07921,calibration,open specy,PS,in library,elise granek and kellie teague,True,as measured,no reliable match,PS,0.3258
+efb0473482a7,calibration,open specy,PS,in library,elise granek and kellie teague,True,as measured,no reliable match,PAN,0.3748
+17e4ae23bcd5,calibration,open specy,PS,in library,elise granek and kellie teague,True,as measured,no reliable match,PS,0.4153
+c53bf4c6f1b9,calibration,open specy,PS,in library,elise granek and kellie teague,True,as measured,no reliable match,PAN,0.4255
+c4e46c53c2a3,calibration,open specy,PS,in library,elise granek and kellie teague,True,as measured,no reliable match,PS,0.4181
+3e2ff8338685,calibration,open specy,PS,in library,elise granek and kellie teague,True,as measured,no reliable match,PS,0.3633
+e35815e8a21d,calibration,open specy,PS,in library,elise granek and kellie teague,True,as measured,no reliable match,PAN,0.4471
+eef3437df21f,calibration,open specy,PS,in library,elise granek and kellie teague,True,as measured,no reliable match,PS,0.4228
+16cc398c3273,calibration,open specy,PS,in library,elise granek and kellie teague,True,as measured,no reliable match,PAN,0.382
+d2c8a2c63de3,calibration,open specy,PS,in library,elise granek and kellie teague,True,as measured,no reliable match,PAN,0.422
+26a1ccb787de,calibration,open specy,PS,in library,elise granek and kellie teague,True,as measured,no reliable match,PS,0.411
+b338ff4f68fa,calibration,open specy,PS,in library,elise granek and kellie teague,True,as measured,no reliable match,PS,0.4098
+7a33653d70f9,calibration,open specy,PS,in library,elise granek and kellie teague,True,as measured,no reliable match,PAN,0.4387
+a5a80ab5f3db,calibration,open specy,PS,in library,elise granek and kellie teague,True,as measured,no reliable match,PAN,0.411
+eed2e0036557,calibration,open specy,PS,in library,elise granek and kellie teague,True,as measured,no reliable match,PS,0.4964
+a240dc4d74eb,calibration,open specy,PS,in library,elise granek and kellie teague,True,as measured,no reliable match,PS,0.4252
+dd675b5acc91,calibration,open specy,PS,in library,elise granek and kellie teague,True,as measured,no reliable match,PAN,0.352
+b981f3062c0b,calibration,open specy,PS,in library,elise granek and kellie teague,True,as measured,no reliable match,PS,0.483
+78b8ce88b608,calibration,open specy,PS,in library,elise granek and kellie teague,True,as measured,no reliable match,PAN,0.3702
+77011b6df22d,calibration,open specy,PS,in library,elise granek and kellie teague,True,as measured,no reliable match,PS,0.4812
+52302f80a9c5,calibration,open specy,PVC,in library,elise granek and kellie teague,True,transmission,weak,PVC,0.7899
+66f27f303c67,calibration,open specy,EVA,in library,gicquel et al. 2024,False,ATR,weak,PE,0.7565
+ac8220b33534,calibration,open specy,EVA,in library,gicquel et al. 2024,False,ATR,weak,PE,0.7575
+ffa78abafe11,calibration,open specy,PE,in library,gicquel et al. 2024,False,ATR,weak,EVA,0.46
+dee954900926,calibration,open specy,EVA,in library,gicquel et al. 2024,False,as measured,no reliable match,PE,0.518
+bb8c241a2df7,calibration,open specy,PE,in library,gicquel et al. 2024,False,as measured,no reliable match,PMMA,0.1352
+75c5973be87f,calibration,open specy,PU,in library,gicquel et al. 2024,False,as measured,no reliable match,PU,0.5896
+1a5931f2bfe2,calibration,open specy,PU,in library,gicquel et al. 2024,False,as measured,no reliable match,PU,0.5126
+e709bd58d9f8,calibration,open specy,PE,in library,gicquel et al. 2024,False,as measured,no reliable match,PMMA,0.1038
+929ef3ec1ec2,calibration,open specy,PVC,in library,gicquel et al. 2024,False,transmission,weak,PVC,0.747
+b23a22527a48,calibration,open specy,PE,in library,gicquel et al. 2024,False,as measured,no reliable match,PU,0.2551
+a6f9b727a390,calibration,open specy,PE,in library,gicquel et al. 2024,False,ATR,weak,EVA,0.5656
+a003b5b01987,calibration,open specy,EVA,in library,gicquel et al. 2024,False,ATR,weak,PE,0.7206
+cfb4a1c2880a,calibration,open specy,PE,in library,moore institute for plastic pollution research,False,as measured,no reliable match,PS,0.2538
+63d0dee109bf,calibration,open specy,PE,in library,moore institute for plastic pollution research,False,as measured,no reliable match,PS,0.2011
+5f09a45fbb6b,calibration,open specy,PE,in library,moore institute for plastic pollution research,False,as measured,no reliable match,PS,0.0887
+a384e59452bb,calibration,open specy,PE,in library,moore institute for plastic pollution research,False,as measured,no reliable match,PP,0.4247
+980643b44019,calibration,open specy,PE,in library,moore institute for plastic pollution research,False,as measured,no reliable match,PP,0.4352
+4227c95e826a,calibration,open specy,PE,in library,moore institute for plastic pollution research,False,as measured,no reliable match,PP,0.3423
+2573eaca92d8,calibration,open specy,PE,in library,moore institute for plastic pollution research,False,as measured,no reliable match,PP,0.1985
+20c809060276,calibration,open specy,PMMA,in library,national renewable energy laboratory,False,transmission,no reliable match,EVOH,-0.025
+89778afcada9,calibration,open specy,PMMA,in library,national renewable energy laboratory,False,transmission,no reliable match,EVOH,0.0344
+f75aea8491cd,calibration,open specy,PU,in library,national renewable energy laboratory,False,transmission,no reliable match,PMMA,0.1942
+80c6f5652f93,calibration,open specy,PS,in library,national renewable energy laboratory,False,transmission,weak,PS,0.834
+24f3f62c2f29,calibration,open specy,PS,in library,national renewable energy laboratory,False,transmission,weak,PS,0.8344
+f3809c2a7110,calibration,open specy,PVC,in library,plopp library,False,ATR,weak,EVA,0.3333
+cb10d4cc8173,calibration,open specy,PVC,in library,plopp library,False,ATR,weak,EVA,0.3197
+1bc5a94ffa6a,calibration,open specy,PU,in library,plopp library,False,ATR,weak,PMMA,0.2623
+57c6424c7b87,calibration,open specy,PU,in library,plopp library,False,ATR,weak,PMMA,0.2588
+9d9e6d05bf14,calibration,open specy,PU,in library,plopp library,False,ATR,weak,PMMA,0.2617
+f619fa8bbdd9,calibration,open specy,PVC,in library,plopp library,False,as measured,no reliable match,PVOH,0.3202
+e7edb8f17fc8,calibration,open specy,PVC,in library,plopp library,False,as measured,no reliable match,PVOH,0.3276
+6ccad3d4a819,calibration,open specy,PVC,in library,plopp library,False,as measured,no reliable match,PVOH,0.3255
+ae17cf6ee0eb,calibration,open specy,PVC,in library,plopp library,False,as measured,no reliable match,PVOH,0.2917
+6278846e88f0,calibration,open specy,PVC,in library,plopp library,False,ATR,weak,EVA,0.3512
+c2459cd68e9c,calibration,open specy,PU,in library,plopp library,False,ATR,weak,PMMA,0.4374
+c5d9c014712f,calibration,open specy,PU,in library,plopp library,False,ATR,weak,PMMA,0.4825
+fc533ac185e8,calibration,open specy,PU,in library,plopp library,False,ATR,weak,PMMA,0.4298
+22f50451430b,calibration,open specy,PE,in library,chabuka et al. 2020,False,transmission,no reliable match,PE,0.4939
+0b1e7d2f9ada,calibration,open specy,PE,in library,chabuka et al. 2020,False,transmission,no reliable match,PP,0.0176
+1f651875439d,calibration,open specy,PE,in library,chabuka et al. 2020,False,transmission,no reliable match,PE,0.3656
+12d0aead8078,calibration,open specy,PE,in library,chabuka et al. 2020,False,transmission,no reliable match,PP,0.1604
+c384075c2eda,calibration,open specy,PE,in library,chabuka et al. 2020,False,transmission,no reliable match,EVOH,0.192
+85791d67c7da,calibration,open specy,PE,in library,chabuka et al. 2020,False,transmission,no reliable match,EVOH,0.1545
+18516ac3264c,calibration,open specy,PE,in library,chabuka et al. 2020,False,transmission,no reliable match,PE,0.4862
+363a3f3d0c17,calibration,open specy,PE,in library,chabuka et al. 2020,False,transmission,no reliable match,PC,0.0922
+7033c2d59d0d,calibration,open specy,PE,in library,chabuka et al. 2020,False,transmission,no reliable match,EVOH,0.2708
+eec6836d0824,calibration,open specy,PE,in library,chabuka et al. 2020,False,transmission,no reliable match,PVC,0.1711
+ddc866fbfa96,calibration,open specy,PE,in library,chabuka et al. 2020,False,transmission,no reliable match,PVC,0.0189
+1e088030ccf1,calibration,open specy,PE,in library,chabuka et al. 2020,False,transmission,no reliable match,PVC,0.106
+75cf7c2c0d18,calibration,open specy,PE,in library,chabuka et al. 2020,False,transmission,no reliable match,EVA,0.4235
+0063ae704db3,calibration,open specy,PE,in library,chabuka et al. 2020,False,transmission,no reliable match,EVA,0.2983
+3e8f8c114740,calibration,open specy,PE,in library,chabuka et al. 2020,False,transmission,no reliable match,EVA,0.2993
+5812b90d5c6e,calibration,open specy,PE,in library,chabuka et al. 2020,False,transmission,no reliable match,PVOH,-0.085
+8bb7843814a8,calibration,open specy,PE,in library,chabuka et al. 2020,False,transmission,no reliable match,PVOH,-0.0865
+aabb6e5f1327,calibration,open specy,PE,in library,chabuka et al. 2020,False,transmission,no reliable match,PVOH,-0.0925
+c6ab663e86a3,calibration,open specy,PE,in library,chabuka et al. 2020,False,transmission,no reliable match,PVOH,-0.0868
+c123d2262ca5,calibration,open specy,PE,in library,chabuka et al. 2020,False,transmission,no reliable match,EVA,0.2243
+0220ee95f60a,calibration,open specy,PE,in library,chabuka et al. 2020,False,transmission,no reliable match,PVC,-0.0605
+140b71427ea5,calibration,open specy,PE,in library,chabuka et al. 2020,False,transmission,no reliable match,PVC,-0.0554
+167e8010130f,calibration,open specy,PE,in library,chabuka et al. 2020,False,transmission,no reliable match,PVC,-0.0639
+1f99409ab05f,calibration,open specy,PE,in library,chabuka et al. 2020,False,transmission,no reliable match,PVC,-0.0681
+ad04fdc0d086,calibration,open specy,PE,in library,chabuka et al. 2020,False,transmission,no reliable match,PVC,-0.0632
+a83397586d4a,calibration,open specy,PE,in library,chabuka et al. 2020,False,transmission,no reliable match,EVA,0.3128
+ff655a8a89fa,calibration,open specy,PE,in library,chabuka et al. 2020,False,transmission,no reliable match,PVC,-0.0588
+45c8feeb8f77,calibration,open specy,PE,in library,chabuka et al. 2020,False,transmission,no reliable match,PVC,-0.0791
+918a08b22a80,calibration,open specy,PE,in library,chabuka et al. 2020,False,transmission,no reliable match,PVC,-0.0649
+f8074d40d526,calibration,open specy,PE,in library,chabuka et al. 2020,False,transmission,no reliable match,PVC,-0.0732
+82d2f5f29773,calibration,open specy,PE,in library,chabuka et al. 2020,False,transmission,no reliable match,PVC,-0.0996
+adfe230644e6,calibration,open specy,PE,in library,chabuka et al. 2020,False,transmission,no reliable match,PE,0.5283
+b535b106507e,calibration,open specy,PE,in library,chabuka et al. 2020,False,transmission,no reliable match,PS,0.3337
+1474f7e19241,calibration,open specy,PE,in library,chabuka et al. 2020,False,transmission,no reliable match,PS,0.1904
+3a8b85729e76,calibration,open specy,PE,in library,chabuka et al. 2020,False,transmission,weak,PS,0.1484
+7384d67f706f,calibration,open specy,PE,in library,chabuka et al. 2020,False,transmission,no reliable match,PS,0.208
+3e472066cd33,calibration,open specy,PE,in library,chabuka et al. 2020,False,transmission,no reliable match,PE,0.4912
+169b0de94ecf,calibration,open specy,PE,in library,chabuka et al. 2020,False,transmission,no reliable match,PS,0.2454
+66cd42a47afd,calibration,open specy,PE,in library,chabuka et al. 2020,False,transmission,weak,PS,0.1876
+ba3f74c774dd,calibration,open specy,PE,in library,chabuka et al. 2020,False,transmission,no reliable match,PS,0.2046
+6178a399d50d,calibration,open specy,PE,in library,chabuka et al. 2020,False,transmission,no reliable match,PA,0.0306
+3a416c6a308d,calibration,open specy,PE,in library,chabuka et al. 2020,False,transmission,no reliable match,PS,0.2235
+e4b658673ab2,calibration,open specy,PE,in library,chabuka et al. 2020,False,transmission,no reliable match,PS,0.2829
+782ec4094c2f,calibration,open specy,PE,in library,chabuka et al. 2020,False,transmission,no reliable match,PS,0.1586
+1c7e9ac79388,calibration,open specy,PE,in library,chabuka et al. 2020,False,transmission,no reliable match,PS,0.3116
+c33ef6de5e98,calibration,open specy,PE,in library,chabuka et al. 2020,False,transmission,no reliable match,PVC,-0.0548
+d74b64e63dfa,calibration,open specy,PE,in library,chabuka et al. 2020,False,transmission,no reliable match,PVC,-0.0253
+0026cabee36c,calibration,open specy,PE,in library,chabuka et al. 2020,False,transmission,no reliable match,PP,0.0388
+6e7713d92090,calibration,open specy,PE,in library,chabuka et al. 2020,False,transmission,no reliable match,PS,0.1169
+a80eadacbb20,calibration,open specy,PE,in library,chabuka et al. 2020,False,transmission,no reliable match,EVOH,0.3152
+a2d2a94ff2de,calibration,open specy,PE,in library,primpke et al. 2018,False,ATR,no reliable match,PE,0.5994
+399541fc618d,calibration,open specy,PET,in library,primpke et al. 2018,False,ATR,weak,PET,0.9662
+3f378abe19de,calibration,open specy,PET,in library,primpke et al. 2018,False,ATR,weak,PET,0.966
+8ec88bd78ffe,calibration,open specy,PP,in library,primpke et al. 2018,False,ATR,probable,PP,0.9858
+1850f16e143d,calibration,open specy,PET,in library,primpke et al. 2018,False,ATR,weak,PET,0.9539
+621cec33ef0f,calibration,open specy,PP,in library,primpke et al. 2018,False,ATR,probable,PP,0.9774
+a2e67b3c4ebc,calibration,open specy,PAN,in library,primpke et al. 2018,False,ATR,no reliable match,PVC,0.3233
+0524b92965f9,calibration,open specy,PA,in library,primpke et al. 2018,False,ATR,weak,PA,0.9459
+012e9c4ec21a,calibration,open specy,PET,in library,primpke et al. 2018,False,ATR,probable,PET,0.9725
+8d7b1dbb2740,calibration,open specy,PET,in library,primpke et al. 2018,False,ATR,weak,PET,0.9471
+ac11b628b8f0,calibration,open specy,PMMA,in library,primpke et al. 2018,False,ATR,probable,PMMA,0.9902
+128ed29b2782,calibration,open specy,PVC,in library,primpke et al. 2018,False,ATR,probable,PVC,0.9714
+2ce34e957324,calibration,open specy,PVC,in library,primpke et al. 2018,False,ATR,probable,PVC,0.9522
+6ed1b419b58c,calibration,open specy,PET,in library,primpke et al. 2018,True,ATR,weak,PET,0.9485
+43c3b80ec360,calibration,open specy,PP,in library,primpke et al. 2018,False,ATR,probable,PP,0.9854
+db0e94b8743a,calibration,open specy,PP,in library,primpke et al. 2018,False,ATR,probable,PP,0.9895
+b64f929b5bd4,calibration,open specy,PU,in library,primpke et al. 2018,False,ATR,weak,PMMA,0.4116
+f3baf72fd639,calibration,open specy,PU,in library,primpke et al. 2018,False,ATR,weak,PMMA,0.3966
+468781b62713,calibration,open specy,PU,in library,primpke et al. 2018,False,ATR,weak,PMMA,0.4522
+96e0d128c092,calibration,open specy,PU,in library,primpke et al. 2018,False,ATR,weak,PMMA,0.4469
+33404aec032d,calibration,open specy,PVOH,in library,primpke et al. 2018,False,ATR,weak,PVOH,0.657
+e0ee049ff04c,calibration,open specy,PP,in library,primpke et al. 2018,False,ATR,probable,PP,0.9784
+b5f3de872d03,calibration,open specy,PP,in library,primpke et al. 2018,False,ATR,probable,PP,0.982
+76920582484b,calibration,open specy,PP,in library,primpke et al. 2018,False,ATR,probable,PP,0.9834
+e89323bd14fa,calibration,open specy,PP,in library,primpke et al. 2018,False,ATR,probable,PP,0.9546
+0c3f80462d45,calibration,open specy,PP,in library,primpke et al. 2018,False,ATR,probable,PP,0.9829
+cbdceb90eeea,calibration,open specy,PU,in library,primpke et al. 2018,False,ATR,weak,PMMA,0.4385
+da4254eaa53c,calibration,open specy,PVC,in library,primpke et al. 2018,False,ATR,weak,PVC,0.8923
+39cd77aa0aff,calibration,open specy,PU,in library,primpke et al. 2018,False,ATR,no reliable match,PMMA,0.5831
+60a8f3fc3f23,calibration,open specy,PU,in library,primpke et al. 2018,False,ATR,no reliable match,PU,0.587
+db1b2e34f1aa,calibration,open specy,PU,in library,primpke et al. 2018,False,ATR,no reliable match,PU,0.5913
+95d23e349727,calibration,open specy,PET,in library,primpke et al. 2018,True,ATR,weak,PET,0.9344
+bea52f59bda8,calibration,open specy,PMMA,in library,primpke et al. 2018,False,ATR,probable,PMMA,0.9853
+99360e6b82ca,calibration,open specy,PP,in library,primpke et al. 2018,False,ATR,probable,PP,0.9831
+041ff435c050,calibration,open specy,PE,in library,suja sukumaran; thermo fisher scientific,False,ATR,probable,PE,0.9746
+a15906897549,calibration,open specy,PE,in library,suja sukumaran; thermo fisher scientific,False,ATR,probable,PE,0.9953
+64f2010902f6,calibration,open specy,PE,in library,suja sukumaran; thermo fisher scientific,False,ATR,probable,PE,0.9817
+5da3cb71f2f5,calibration,open specy,PE,in library,suja sukumaran; thermo fisher scientific,True,ATR,weak,PE,0.9315
+761234f69428,calibration,open specy,PE,in library,suja sukumaran; thermo fisher scientific,True,ATR,weak,PE,0.9304
+7c1609f2bf22,calibration,open specy,PE,in library,suja sukumaran; thermo fisher scientific,False,ATR,probable,PE,0.9793
+ad36f8963b9b,calibration,open specy,PE,in library,hpu polymer kit 1.0,False,ATR,probable,PE,0.9872
+5b4132def052,calibration,open specy,PE,in library,hpu polymer kit 1.0,False,ATR,probable,PE,0.9892
+7e484949614c,calibration,open specy,PE,in library,hpu polymer kit 1.0,False,ATR,probable,PE,0.9874
+c58202f31f33,calibration,open specy,PET,in library,hpu polymer kit 1.0,False,ATR,weak,PET,0.942
+3bf768e35958,calibration,open specy,PE,in library,hpu polymer kit 1.0,False,ATR,probable,PE,0.9931
+919fefcf6c6c,calibration,open specy,PE,in library,flopp; de frond et al. 2021,False,transmission,weak,PE,0.6351
+6247b0c55c5f,calibration,open specy,PC,in library,flopp; de frond et al. 2021,False,transmission,weak,PC,0.8677
+44b308f0a52f,calibration,open specy,PE,in library,flopp; de frond et al. 2021,False,transmission,weak,PE,0.9095
+38412d837805,calibration,open specy,PE,in library,flopp; de frond et al. 2021,False,transmission,weak,PE,0.9086
+b04db83a4770,calibration,open specy,PE,in library,flopp; de frond et al. 2021,False,transmission,weak,PE,0.8676
+8f2792cf65c7,calibration,open specy,PE,in library,flopp; de frond et al. 2021,False,transmission,weak,PE,0.9419
+b031c08ae498,calibration,open specy,PE,in library,flopp; de frond et al. 2021,False,transmission,weak,PE,0.9443
+b0e8994dfa61,calibration,open specy,PE,in library,flopp; de frond et al. 2021,False,transmission,weak,PE,0.8916
+5cf9dc15e0c3,calibration,open specy,PE,in library,flopp; de frond et al. 2021,False,transmission,weak,PE,0.9255
+6b6a9c584f4a,calibration,open specy,PE,in library,flopp; de frond et al. 2021,False,transmission,weak,PE,0.9411
+fc4749cbca81,calibration,open specy,PE,in library,flopp; de frond et al. 2021,False,transmission,weak,PE,0.9072
+a7e18da6a67c,calibration,open specy,PE,in library,flopp; de frond et al. 2021,False,transmission,weak,PE,0.9215
+bce221185e3b,calibration,open specy,PE,in library,flopp; de frond et al. 2021,False,transmission,probable,PE,0.951
+96f10ea79d6a,calibration,open specy,PET,in library,flopp; de frond et al. 2021,False,transmission,weak,PET,0.9218
+62b58ae7b0d4,calibration,open specy,PET,in library,flopp; de frond et al. 2021,False,transmission,weak,PET,0.8968
+4cbc46d6aea4,calibration,open specy,PET,in library,flopp; de frond et al. 2021,False,transmission,weak,PET,0.9349
+f589c85704e4,calibration,open specy,PET,in library,flopp; de frond et al. 2021,False,transmission,weak,PET,0.9141
+1562e3cb177e,calibration,open specy,PET,in library,flopp; de frond et al. 2021,False,transmission,weak,PET,0.9359
+9701605af32f,calibration,open specy,PET,in library,flopp; de frond et al. 2021,False,transmission,weak,PET,0.9133
+6a9acd2de1ce,calibration,open specy,PET,in library,flopp; de frond et al. 2021,False,transmission,weak,PET,0.9107
+8ec1c8ca59bf,calibration,open specy,PET,in library,flopp; de frond et al. 2021,False,transmission,weak,PET,0.9023
+cb3292c916bd,calibration,open specy,PET,in library,flopp; de frond et al. 2021,False,transmission,weak,PET,0.8941
+310aaa5364e2,calibration,open specy,PET,in library,flopp; de frond et al. 2021,False,transmission,weak,PBT,0.8402
+b63c00e6c870,calibration,open specy,PET,in library,flopp; de frond et al. 2021,False,transmission,weak,PET,0.859
+dd6659aa3556,calibration,open specy,PET,in library,flopp; de frond et al. 2021,False,transmission,weak,PET,0.8682
+095ec6239f7e,calibration,open specy,PET,in library,flopp; de frond et al. 2021,False,transmission,weak,PET,0.9207
+8fb1af804551,calibration,open specy,PET,in library,flopp; de frond et al. 2021,False,transmission,weak,PET,0.9045
+e11a0c048cc3,calibration,open specy,PET,in library,flopp; de frond et al. 2021,False,transmission,weak,PET,0.9089
+914b4ddb75ab,calibration,open specy,PMMA,in library,flopp; de frond et al. 2021,False,transmission,weak,PMMA,0.921
+81020e0d8e62,calibration,open specy,PP,in library,flopp; de frond et al. 2021,False,transmission,weak,PP,0.8407
+63138c3949a8,calibration,open specy,PP,in library,flopp; de frond et al. 2021,False,transmission,weak,PP,0.8491
+01095b1dc676,calibration,open specy,PP,in library,flopp; de frond et al. 2021,False,transmission,weak,PP,0.6642
+933f78a46d9e,calibration,open specy,PP,in library,flopp; de frond et al. 2021,False,transmission,weak,PP,0.775
+e671c6d0be9a,calibration,open specy,PP,in library,flopp; de frond et al. 2021,False,transmission,weak,PP,0.8389
+23c5dffe1862,calibration,open specy,PP,in library,flopp; de frond et al. 2021,False,transmission,weak,PP,0.846
+ff67c6440c4d,calibration,open specy,PS,in library,flopp; de frond et al. 2021,False,transmission,weak,PS,0.8926
+265d9327a5f4,calibration,open specy,PU,in library,flopp; de frond et al. 2021,False,transmission,no reliable match,PK,0.3845
+63a90d9d74df,calibration,open specy,PU,in library,flopp; de frond et al. 2021,False,transmission,no reliable match,PET,0.4597
+d0ecc9f42738,calibration,open specy,PU,in library,flopp; de frond et al. 2021,False,transmission,no reliable match,PA,0.3923
+9bc94c9446da,calibration,open specy,PU,in library,flopp; de frond et al. 2021,False,transmission,no reliable match,PU,0.5277
+14ad228be67c,calibration,open specy,PVC,in library,flopp; de frond et al. 2021,False,transmission,weak,PET,0.6183
+b07c95c3e020,calibration,open specy,PVC,in library,flopp; de frond et al. 2021,False,transmission,weak,PET,0.5892
+665dd4815b77,calibration,open specy,PVC,in library,flopp; de frond et al. 2021,False,transmission,weak,PVC,0.9224
+4e014a3df9c5,calibration,open specy,PVC,in library,flopp; de frond et al. 2021,False,transmission,weak,PMMA,0.4822
+e83bb5148528,calibration,open specy,PVC,in library,flopp; de frond et al. 2021,False,transmission,weak,PVC,0.9219
+a16b7cdda7cb,calibration,open specy,PAN,in library,flopp; de frond et al. 2021,False,transmission,weak,PAN,0.8064
+5d1a536f759f,calibration,open specy,PC,in library,flopp; de frond et al. 2021,False,transmission,weak,PC,0.8832
+18db12920af4,calibration,open specy,PC,in library,flopp; de frond et al. 2021,False,transmission,weak,PC,0.888
+6512dd465fc8,calibration,open specy,PC,in library,flopp; de frond et al. 2021,True,transmission,weak,PC,0.8855
+959592d42872,calibration,open specy,PC,in library,flopp; de frond et al. 2021,True,transmission,weak,PC,0.8838
+fd688cfebd88,calibration,open specy,PC,in library,flopp; de frond et al. 2021,False,transmission,weak,PC,0.8781
+18021f724ba0,calibration,open specy,PE,in library,flopp; de frond et al. 2021,False,transmission,weak,PE,0.9443
+8f1c6937baef,calibration,open specy,PET,in library,flopp; de frond et al. 2021,True,transmission,weak,PET,0.9016
+408d20749c58,calibration,open specy,PET,in library,flopp; de frond et al. 2021,False,transmission,weak,PET,0.9099
+e0db40f86c69,calibration,open specy,PET,in library,flopp; de frond et al. 2021,False,transmission,weak,PET,0.8929
+e1bc6de13b65,calibration,open specy,PET,in library,flopp; de frond et al. 2021,False,transmission,weak,PET,0.8873
+68ad121a071f,calibration,open specy,EVA,in library,flopp; de frond et al. 2021,False,transmission,weak,EVA,0.6357
+d1138245b29b,calibration,open specy,PLA,in library,flopp; de frond et al. 2021,False,transmission,weak,PLA,0.8813
+d06d59c7acb6,calibration,open specy,PP,in library,flopp; de frond et al. 2021,False,transmission,weak,PP,0.9092
+ddb3149546e7,calibration,open specy,PS,in library,flopp; de frond et al. 2021,False,transmission,weak,PS,0.8813
+099055b89110,calibration,open specy,PS,in library,flopp; de frond et al. 2021,False,transmission,probable,PS,0.9676
+f85d19b1f96c,calibration,open specy,PU,in library,flopp; de frond et al. 2021,False,transmission,no reliable match,PU,0.5751
+c67022108b8d,calibration,open specy,PU,in library,flopp; de frond et al. 2021,False,transmission,weak,PMMA,0.4681
+06f81203a833,calibration,open specy,PU,in library,flopp; de frond et al. 2021,True,transmission,no reliable match,PU,0.5177
+d0d0ff21c147,calibration,open specy,PU,in library,flopp; de frond et al. 2021,False,transmission,weak,PMMA,0.3799
+4c580ac75fc5,calibration,open specy,PU,in library,flopp; de frond et al. 2021,False,transmission,weak,PMMA,0.4998
+825ee747362e,calibration,open specy,PU,in library,flopp; de frond et al. 2021,False,transmission,no reliable match,PET,0.5051
+712bcafd35c0,calibration,open specy,PU,in library,flopp; de frond et al. 2021,False,transmission,no reliable match,PU,0.525
+01a4773cd092,calibration,open specy,PVC,in library,flopp; de frond et al. 2021,False,transmission,weak,PVC,0.9016
+b050bad5e002,calibration,open specy,PVC,in library,flopp; de frond et al. 2021,False,transmission,weak,PVC,0.6959
+ba6aad09072f,calibration,open specy,PVC,in library,flopp; de frond et al. 2021,False,transmission,weak,PET,0.5349
+35f5a6af1775,calibration,open specy,PVC,in library,flopp; de frond et al. 2021,False,transmission,weak,PVC,0.8567
+6df9ebd589a0,calibration,open specy,PS,in library,aline carvalho,False,ATR,no reliable match,PS,0.4315
+856912e5e4bf,calibration,open specy,PS,in library,aline carvalho,False,ATR,weak,PS,0.7298
+4b5130a18c58,calibration,open specy,PS,in library,aline carvalho,False,ATR,no reliable match,PS,0.4826
+2bc23ca0ac87,calibration,open specy,PS,in library,aline carvalho,False,ATR,weak,PS,0.7941
+662170964905,calibration,open specy,PS,in library,aline carvalho,False,ATR,no reliable match,PA,0.502
+a1d6b4001b17,calibration,open specy,PS,in library,aline carvalho,False,ATR,no reliable match,PU,0.3318
+15bc83117cd4,calibration,open specy,PS,in library,aline carvalho,False,ATR,weak,PS,0.6371
+34ce0133fd68,calibration,open specy,PS,in library,aline carvalho,False,ATR,weak,PE,0.5392
+2519d4a3c0e3,calibration,open specy,PS,in library,aline carvalho,False,ATR,weak,PS,0.7824
+3da1556666f4,calibration,open specy,PS,in library,aline carvalho,False,ATR,weak,PE,0.4886
+4d096b0a2c24,calibration,open specy,PS,in library,aline carvalho,False,ATR,weak,PS,0.7759
+1786f5c3c27c,calibration,open specy,PS,in library,aline carvalho,False,ATR,no reliable match,PE,0.4842
+d04fece5e46e,calibration,open specy,PS,in library,aline carvalho,False,ATR,weak,PS,0.741
+c92ff1870365,calibration,open specy,PS,in library,aline carvalho,False,ATR,weak,PE,0.5838
+b65ee78fa5a7,calibration,open specy,PS,in library,aline carvalho,False,ATR,no reliable match,PU,0.358
+b680e2beaad6,calibration,open specy,PS,in library,aline carvalho,False,ATR,weak,PS,0.7277
+f183a0f2124d,calibration,open specy,PS,in library,aline carvalho,False,ATR,no reliable match,PE,0.5051
+19c64bcdcaad,calibration,open specy,PS,in library,aline carvalho,False,ATR,weak,PE,0.5726
+9fd697c2df5e,calibration,open specy,PS,in library,aline carvalho,False,ATR,no reliable match,PE,0.495
+cf6fd2e285c0,calibration,open specy,PS,in library,aline carvalho,False,ATR,weak,PS,0.6709
+5a75e82f8924,calibration,open specy,PS,in library,aline carvalho,False,ATR,weak,PS,0.6524
+0eb4d804cdc9,calibration,open specy,PS,in library,aline carvalho,False,ATR,no reliable match,PU,0.5305
+6d7727b1d7ab,calibration,open specy,PS,in library,aline carvalho,False,ATR,no reliable match,PU,0.406
+5f2c7bd32f5d,calibration,open specy,PS,in library,aline carvalho,False,ATR,weak,PE,0.5677
+2c0c17bbb25e,calibration,open specy,PS,in library,aline carvalho,False,ATR,no reliable match,PS,0.4946
+3417338b31ac,calibration,open specy,PS,in library,aline carvalho,False,ATR,weak,PE,0.53
+f8383266b25a,calibration,open specy,PS,in library,aline carvalho,False,ATR,weak,PS,0.8301
+709c1397fd31,calibration,open specy,PS,in library,aline carvalho,False,ATR,weak,PE,0.4898
+95e2eeb424c6,calibration,open specy,PS,in library,aline carvalho,False,ATR,weak,PE,0.5452
+8c475e2892bb,calibration,open specy,PS,in library,aline carvalho,False,ATR,weak,PE,0.525
+9b9737ef007e,calibration,open specy,PS,in library,aline carvalho,False,ATR,weak,PS,0.8302
+da040723dea9,calibration,open specy,PS,in library,aline carvalho,False,ATR,weak,PE,0.4067
+3fbb3195d164,calibration,open specy,PS,in library,aline carvalho,False,ATR,weak,PS,0.6311
+f273be158878,calibration,open specy,PS,in library,aline carvalho,False,ATR,weak,PS,0.687
+51936062441c,calibration,open specy,PS,in library,aline carvalho,False,ATR,no reliable match,PU,0.4507
+3a666cb3c31d,calibration,open specy,PS,in library,aline carvalho,False,ATR,weak,PS,0.8473
+23fdf63a5eac,calibration,open specy,PS,in library,aline carvalho,False,ATR,weak,PS,0.7061
+df71cfd04bc1,calibration,open specy,PS,in library,aline carvalho,False,ATR,weak,PS,0.6319
+e859af17dbf6,calibration,open specy,PS,in library,aline carvalho,False,ATR,weak,PS,0.8141
+28345281d4d1,calibration,open specy,PS,in library,aline carvalho,False,ATR,weak,PS,0.6906
+cb482ca2bf54,calibration,open specy,PS,in library,aline carvalho,False,ATR,no reliable match,PS,0.5364
+ca8dd387ff4a,calibration,open specy,PS,in library,aline carvalho,False,ATR,weak,PS,0.7895
+690862f4f3f9,calibration,open specy,PS,in library,aline carvalho,False,ATR,weak,PS,0.811
+969f72100d2a,calibration,open specy,PS,in library,aline carvalho,False,ATR,no reliable match,PU,0.1449
+fcdf8b00740d,calibration,open specy,PS,in library,aline carvalho,False,ATR,no reliable match,PS,0.4895
+2c84741160a4,calibration,open specy,PS,in library,aline carvalho,False,ATR,weak,PE,0.5273
+e9dae48c1a10,calibration,open specy,PS,in library,aline carvalho,False,ATR,weak,PS,0.745
+c8250d658c3c,calibration,open specy,PS,in library,aline carvalho,False,ATR,no reliable match,PU,0.5066
+57067340c73b,calibration,open specy,PS,in library,aline carvalho,False,ATR,weak,PS,0.76
+dd40cf7ee3bb,calibration,open specy,PS,in library,aline carvalho,False,ATR,no reliable match,PU,0.2886
+b49b18633a13,calibration,open specy,EVA,in library,win cowger and sebastian primpke,False,ATR,no reliable match,EVA,0.5006
+f52b9439c616,calibration,open specy,EVA,in library,win cowger and sebastian primpke,False,ATR,no reliable match,EVA,0.4232
+8d11683588df,calibration,open specy,EVA,in library,win cowger and sebastian primpke,False,as measured,no reliable match,PVC,0.2443
+3cefe438efb5,calibration,open specy,EVA,in library,win cowger and sebastian primpke,False,transmission,no reliable match,EVOH,-0.0395
+31590f57e8c7,calibration,open specy,EVA,in library,win cowger and sebastian primpke,False,transmission,no reliable match,EVOH,-0.0192
+b52ec54af376,calibration,open specy,EVA,in library,win cowger and sebastian primpke,False,transmission,no reliable match,EVOH,-0.0463
+133b18ab0135,calibration,open specy,EVA,in library,win cowger and sebastian primpke,False,transmission,no reliable match,EVOH,-0.017
+1c6e6f55d1d4,calibration,open specy,EVA,in library,win cowger and sebastian primpke,False,ATR,probable,EVA,0.9884
+3bf8abb12dfb,calibration,open specy,EVA,in library,win cowger and sebastian primpke,False,as measured,no reliable match,EVA,0.5167
+7d6d2b2eb078,calibration,open specy,EVA,in library,win cowger and sebastian primpke,False,as measured,no reliable match,EVA,0.5082
+345b461a5be8,calibration,open specy,EVA,in library,win cowger and sebastian primpke,False,as measured,no reliable match,EVA,0.4763
+cf43dce596d2,calibration,open specy,EVA,in library,win cowger and sebastian primpke,False,as measured,no reliable match,EVA,0.513
+d9a0a10539be,calibration,open specy,EVA,in library,win cowger and sebastian primpke,False,transmission,no reliable match,PP,-0.1032
+283941f14d27,calibration,open specy,PS,in library,win cowger and sebastian primpke,True,as measured,no reliable match,PA,0.2426
+9413aa15e3e0,calibration,open specy,PS,in library,win cowger and sebastian primpke,True,as measured,no reliable match,PA,0.2396
+35f79faa9fd0,calibration,open specy,PS,in library,win cowger and sebastian primpke,True,as measured,no reliable match,PA,0.2376
+85ee3dd1f05c,calibration,open specy,PS,in library,win cowger and sebastian primpke,True,as measured,no reliable match,PA,0.2401
+d5f308d3371e,calibration,open specy,PA,in library,win cowger and sebastian primpke,False,as measured,no reliable match,PE,0.4049
+2c4c6a935266,calibration,open specy,PA,in library,win cowger and sebastian primpke,False,transmission,no reliable match,PK,0.2165
+f174f3fa4e67,calibration,open specy,PMMA,in library,win cowger and sebastian primpke,False,as measured,no reliable match,PLA,0.4778
+5ef1e0799e59,calibration,open specy,PMMA,in library,win cowger and sebastian primpke,False,as measured,no reliable match,PLA,0.4603
+75937ef0398a,calibration,open specy,PMMA,in library,win cowger and sebastian primpke,False,as measured,no reliable match,PLA,0.4628
+998b6268d080,calibration,open specy,PMMA,in library,win cowger and sebastian primpke,False,as measured,no reliable match,PLA,0.4503
+a477e50a39cf,calibration,open specy,PMMA,in library,win cowger and sebastian primpke,False,transmission,no reliable match,PE,-0.143
+190217e9f070,calibration,open specy,PMMA,in library,win cowger and sebastian primpke,False,transmission,no reliable match,PE,-0.1356
+aed0bde61e9a,calibration,open specy,PMMA,in library,win cowger and sebastian primpke,False,transmission,no reliable match,PE,-0.1368
+7fa925a2544e,calibration,open specy,PMMA,in library,win cowger and sebastian primpke,False,transmission,no reliable match,PE,-0.1347
+de1fc1ab58ab,calibration,open specy,PE,in library,win cowger and sebastian primpke,False,transmission,no reliable match,PLA,0.1032
+54f634783331,calibration,open specy,PP,in library,win cowger and sebastian primpke,False,as measured,no reliable match,PP,0.5345
+f1320591f9c9,calibration,open specy,PLA,in library,win cowger and sebastian primpke,False,as measured,no reliable match,PC,0.4566
+f609fef4b55c,calibration,open specy,PVC,in library,win cowger and sebastian primpke,False,as measured,no reliable match,PVOH,0.0796
+e1cca8ecee33,calibration,open specy,PVC,in library,win cowger and sebastian primpke,False,transmission,weak,PVC,0.87
+7b3a26eb3375,calibration,open specy,PVC,in library,win cowger and sebastian primpke,False,transmission,weak,PVC,0.8379
+61246570338f,calibration,open specy,PVC,in library,win cowger and sebastian primpke,False,transmission,weak,PVC,0.8648
+8281e3f7f51b,calibration,open specy,PVC,in library,win cowger and sebastian primpke,False,transmission,weak,PVC,0.8096
+7160ffccec66,calibration,open specy,PS,in library,win cowger and sebastian primpke,False,as measured,no reliable match,PS,0.46
+5fc4971cb4f3,calibration,open specy,PLA,in library,win cowger and sebastian primpke,False,transmission,no reliable match,PVOH,0.1111
+fb0826a29167,calibration,open specy,PLA,in library,win cowger and sebastian primpke,False,as measured,no reliable match,EVOH,0.0795
+f1bb3f728250,calibration,open specy,PU,in library,win cowger and sebastian primpke,False,as measured,no reliable match,PET,0.1881
+daf7a5431ef5,calibration,open specy,PU,in library,win cowger and sebastian primpke,False,as measured,no reliable match,PLA,0.2534
+e7d3369d42c4,calibration,open specy,PU,in library,win cowger and sebastian primpke,False,as measured,no reliable match,PLA,0.2241
+29f4969f7787,calibration,open specy,PU,in library,win cowger and sebastian primpke,False,as measured,no reliable match,PLA,0.2252
+1439fe9cb850,calibration,open specy,PU,in library,win cowger and sebastian primpke,False,transmission,no reliable match,PVC,0.007
+1b3d676f2d7f,calibration,open specy,PLA,in library,win cowger and sebastian primpke,False,as measured,no reliable match,PS,0.0471
+07cf891d1ee9,calibration,open specy,PLA,in library,win cowger and sebastian primpke,False,transmission,no reliable match,PE,-0.123
+2a4523ccb67a,calibration,open specy,PBT,in library,win cowger and sebastian primpke,False,transmission,no reliable match,PVOH,-0.0116
+9f527928b067,calibration,open specy,PAN,in library,win cowger and sebastian primpke,False,as measured,no reliable match,PLA,0.3323
+d98c889b70d4,calibration,open specy,PAN,in library,win cowger and sebastian primpke,False,as measured,no reliable match,PLA,0.3258
+bca71a6f4f2c,calibration,open specy,PAN,in library,win cowger and sebastian primpke,False,as measured,no reliable match,PLA,0.3315
+4405d2b25fea,calibration,open specy,PAN,in library,win cowger and sebastian primpke,False,as measured,no reliable match,PLA,0.3255
+95c370fc91f3,calibration,open specy,PBT,in library,win cowger and sebastian primpke,False,as measured,no reliable match,PMMA,0.3989
+dab92ec19df0,calibration,open specy,PP,in library,win cowger and sebastian primpke,False,transmission,no reliable match,PP,0.4678
+d17440c71b3d,calibration,open specy,PVOH,in library,win cowger and sebastian primpke,True,as measured,no reliable match,PLA,0.1025
+f8675a839c36,calibration,open specy,PVOH,in library,win cowger and sebastian primpke,True,as measured,no reliable match,PLA,0.1003
+570b62843e46,calibration,open specy,PVOH,in library,win cowger and sebastian primpke,True,as measured,no reliable match,PLA,0.0997
+53008eb8d85c,calibration,open specy,PVOH,in library,win cowger and sebastian primpke,True,as measured,no reliable match,PLA,0.0993
+30d92ebca820,calibration,open specy,PVOH,in library,win cowger and sebastian primpke,True,transmission,no reliable match,PLA,0.3622
+2c028e9bbfb5,calibration,open specy,PVOH,in library,win cowger and sebastian primpke,True,transmission,no reliable match,PLA,0.3607
+0bf81ee554c1,calibration,open specy,PP,in library,win cowger and sebastian primpke,False,as measured,no reliable match,PVOH,0.0355
+bfb54c3bc45b,calibration,open specy,PE,in library,moore institute for plastic pollution research,False,as measured,no reliable match,PS,0.4402
+8b005c4b054e,calibration,open specy,PE,in library,moore institute for plastic pollution research,False,as measured,no reliable match,PVC,0.0795
+ea4712cdb4ff,calibration,open specy,PE,in library,moore institute for plastic pollution research,False,as measured,no reliable match,PVC,-0.0393
+658cdb57608a,calibration,open specy,PE,in library,moore institute for plastic pollution research,False,as measured,no reliable match,PMMA,0.1008
+74dd0dd425c8,calibration,open specy,PE,in library,moore institute for plastic pollution research,False,transmission,weak,EVA,0.3488
+c773dcb72339,calibration,open specy,PE,in library,moore institute for plastic pollution research,False,as measured,no reliable match,PP,0.1568
+42d5bb9dfe8f,calibration,open specy,PE,in library,moore institute for plastic pollution research,False,ATR,weak,PE,0.6735
+86f70cb2d156,calibration,open specy,PE,in library,moore institute for plastic pollution research,False,as measured,no reliable match,PS,0.0468
+8f48a80a7107,calibration,open specy,PE,in library,moore institute for plastic pollution research,False,as measured,no reliable match,PAN,0.2429
+66f2633b6f50,calibration,open specy,PE,in library,moore institute for plastic pollution research,False,as measured,no reliable match,PE,0.5758
+709690b33f9d,calibration,open specy,PE,in library,moore institute for plastic pollution research,False,ATR,weak,PE,0.7085
+59d6e0d67cab,calibration,open specy,PE,in library,moore institute for plastic pollution research,False,as measured,no reliable match,PP,0.1477
+231c34301afa,calibration,open specy,PE,in library,moore institute for plastic pollution research,False,as measured,no reliable match,PVOH,-0.1022
+8305d2e6b2df,calibration,open specy,PE,in library,moore institute for plastic pollution research,False,as measured,no reliable match,PVOH,-0.1038
+6ce51d354b02,calibration,open specy,PE,in library,moore institute for plastic pollution research,False,as measured,no reliable match,PVOH,-0.1042
+7be23d61c280,calibration,open specy,PE,in library,moore institute for plastic pollution research,False,as measured,no reliable match,PVOH,-0.1068
+c4098019b4b2,calibration,open specy,PE,in library,moore institute for plastic pollution research,False,as measured,no reliable match,PVOH,-0.1117
+7ac2dd77e67a,calibration,open specy,PE,in library,moore institute for plastic pollution research,False,as measured,no reliable match,PVOH,-0.0632
+95d5ac2dcf2a,test,open specy,PE,in library,adamopoulou et al.; 2026 (vliz),False,ATR,probable,PE,0.9845
+8a3616c599ad,test,open specy,PE,in library,adamopoulou et al.; 2026 (vliz),False,ATR,probable,PE,0.9874
+40bdf5922d1c,test,open specy,PE,in library,adamopoulou et al.; 2026 (vliz),False,ATR,probable,PE,0.989
+fe72341aeb3c,test,open specy,PE,in library,adamopoulou et al.; 2026 (vliz),False,ATR,probable,PE,0.9861
+0edebb2a4bf9,test,open specy,PE,in library,adamopoulou et al.; 2026 (vliz),False,ATR,probable,PE,0.9778
+ef9da63a5780,test,open specy,PE,in library,adamopoulou et al.; 2026 (vliz),False,ATR,weak,PE,0.8593
+079219899bf3,test,open specy,PE,in library,adamopoulou et al.; 2026 (vliz),False,ATR,probable,PE,0.9895
+504fe10eaea6,test,open specy,PE,in library,adamopoulou et al.; 2026 (vliz),False,ATR,probable,PE,0.9696
+4be9a2eb004f,test,open specy,PE,in library,adamopoulou et al.; 2026 (vliz),False,ATR,probable,PE,0.9804
+13c804bc6f6d,test,open specy,PE,in library,adamopoulou et al.; 2026 (vliz),False,ATR,probable,PE,0.973
+ba43ea0ff878,test,open specy,PE,in library,adamopoulou et al.; 2026 (vliz),False,ATR,probable,PE,0.9763
+09652f017be2,test,open specy,PE,in library,adamopoulou et al.; 2026 (vliz),False,ATR,probable,PE,0.9932
+26400ad2066e,test,open specy,PE,in library,adamopoulou et al.; 2026 (vliz),False,ATR,probable,PE,0.9934
+9ffcd819558e,test,open specy,PE,in library,adamopoulou et al.; 2026 (vliz),False,ATR,probable,PE,0.98
+cda4c8c5ad35,test,open specy,PE,in library,adamopoulou et al.; 2026 (vliz),False,ATR,probable,PE,0.9874
+47b7528c62e0,test,open specy,PE,in library,adamopoulou et al.; 2026 (vliz),False,ATR,probable,PE,0.9867
+2363d9cd6936,test,open specy,PE,in library,adamopoulou et al.; 2026 (vliz),False,ATR,probable,PE,0.9874
+5a6908fc2cae,test,open specy,PE,in library,adamopoulou et al.; 2026 (vliz),False,ATR,probable,PE,0.9897
+42e62fe06fe8,test,open specy,PE,in library,adamopoulou et al.; 2026 (vliz),False,ATR,probable,PE,0.9842
+64b2f32c7be7,test,open specy,PE,in library,adamopoulou et al.; 2026 (vliz),False,ATR,probable,PE,0.9765
+270f06ae3db3,test,open specy,PE,in library,adamopoulou et al.; 2026 (vliz),False,ATR,probable,PE,0.9871
+3ea2e0768fc9,test,open specy,PE,in library,adamopoulou et al.; 2026 (vliz),False,ATR,probable,PE,0.9753
+976f4fa72f28,test,open specy,PE,in library,adamopoulou et al.; 2026 (vliz),False,ATR,probable,PE,0.994
+d5142434f648,test,open specy,PE,in library,adamopoulou et al.; 2026 (vliz),False,ATR,probable,PE,0.9694
+f94f6150cfaa,test,open specy,PE,in library,adamopoulou et al.; 2026 (vliz),False,ATR,probable,PE,0.9959
+8a1530476424,test,open specy,PE,in library,adamopoulou et al.; 2026 (vliz),False,ATR,probable,PE,0.9909
+518acc64f48a,test,open specy,PE,in library,adamopoulou et al.; 2026 (vliz),False,ATR,probable,PE,0.97
+df06388b9115,test,open specy,PE,in library,adamopoulou et al.; 2026 (vliz),False,ATR,probable,PE,0.976
+ea56ff73b63d,test,open specy,PE,in library,adamopoulou et al.; 2026 (vliz),False,ATR,probable,PE,0.9974
+fc44443e04dd,test,open specy,PE,in library,adamopoulou et al.; 2026 (vliz),False,ATR,probable,PE,0.9834
+ddca70205acb,test,open specy,PE,in library,adamopoulou et al.; 2026 (vliz),False,ATR,probable,PE,0.9807
+2e743565ead6,test,open specy,PE,in library,adamopoulou et al.; 2026 (vliz),False,ATR,weak,PE,0.8063
+470f9cbb1ef0,test,open specy,PE,in library,adamopoulou et al.; 2026 (vliz),False,ATR,probable,PE,0.9963
+3db1aaea7301,test,open specy,PE,in library,adamopoulou et al.; 2026 (vliz),False,ATR,probable,PE,0.9905
+f9556be908e1,test,open specy,PE,in library,adamopoulou et al.; 2026 (vliz),False,ATR,probable,PE,0.9768
+a38ecf22d99a,test,open specy,PE,in library,adamopoulou et al.; 2026 (vliz),False,ATR,probable,PE,0.9778
+59774fb40def,test,open specy,PE,in library,adamopoulou et al.; 2026 (vliz),False,ATR,probable,PE,0.9801
+011575431837,test,open specy,PE,in library,adamopoulou et al.; 2026 (vliz),False,ATR,probable,PE,0.9907
+e07a501f6b53,test,open specy,PE,in library,adamopoulou et al.; 2026 (vliz),False,ATR,probable,PE,0.9832
+7a1aeb559afb,test,open specy,PE,in library,adamopoulou et al.; 2026 (vliz),False,ATR,probable,PE,0.9925
+3c4a9ef55e48,test,open specy,PE,in library,adamopoulou et al.; 2026 (vliz),False,ATR,probable,PE,0.9922
+5c69413b6f70,test,open specy,PE,in library,adamopoulou et al.; 2026 (vliz),False,ATR,probable,PE,0.9884
+8250879269d3,test,open specy,PE,in library,adamopoulou et al.; 2026 (vliz),False,ATR,probable,PE,0.9897
+abc065e0f8e6,test,open specy,PE,in library,adamopoulou et al.; 2026 (vliz),False,ATR,probable,PE,0.966
+11fd526b4b52,test,open specy,PE,in library,adamopoulou et al.; 2026 (vliz),False,ATR,probable,PE,0.9812
+6607ef1b11c7,test,open specy,PE,in library,adamopoulou et al.; 2026 (vliz),False,ATR,probable,PE,0.9713
+626d2cff8b0e,test,open specy,PE,in library,adamopoulou et al.; 2026 (vliz),False,ATR,probable,PE,0.9735
+a1339622817b,test,open specy,PE,in library,adamopoulou et al.; 2026 (vliz),False,ATR,probable,PE,0.9751
+ec84516bb535,test,open specy,PE,in library,adamopoulou et al.; 2026 (vliz),False,ATR,probable,PE,0.9628
+511f133c4aa6,test,open specy,PA,in library,elise granek and kellie teague,False,as measured,no reliable match,PU,0.5007
+0a40730ee8aa,test,open specy,PA,in library,elise granek and kellie teague,False,as measured,no reliable match,PU,0.436
+7a7c652bea42,test,open specy,PA,in library,elise granek and kellie teague,False,as measured,no reliable match,PU,0.2107
+617b05c30731,test,open specy,PA,in library,elise granek and kellie teague,False,as measured,no reliable match,PU,0.2208
+3ccfb3888b41,test,open specy,PP,in library,elise granek and kellie teague,False,as measured,no reliable match,PP,0.5107
+737d66e530de,test,open specy,PP,in library,elise granek and kellie teague,False,as measured,no reliable match,PP,0.4997
+fc0e79a877ae,test,open specy,PP,in library,elise granek and kellie teague,False,as measured,no reliable match,PP,0.5556
+13567e9e9905,test,open specy,PP,in library,elise granek and kellie teague,False,as measured,no reliable match,PP,0.5002
+dd182469e343,test,open specy,PP,in library,elise granek and kellie teague,False,as measured,no reliable match,PP,0.5201
+bffd1545392d,test,open specy,PBT,in library,elise granek and kellie teague,False,transmission,weak,PVOH,0.3142
+a9daa7970771,test,open specy,PP,in library,elise granek and kellie teague,False,transmission,weak,PP,0.7424
+1fc62ed78c23,test,open specy,PP,in library,elise granek and kellie teague,False,transmission,weak,PAN,0.6354
+c6a28f6d6021,test,open specy,PP,in library,elise granek and kellie teague,False,transmission,weak,PAN,0.7015
+62042d9f7dda,test,open specy,PP,in library,elise granek and kellie teague,False,transmission,weak,PP,0.7331
+8f23b73628d3,test,open specy,PP,in library,elise granek and kellie teague,False,transmission,weak,PP,0.7039
+bfeb35ff31fb,test,open specy,PP,in library,elise granek and kellie teague,False,ATR,weak,PP,0.7181
+d052864e5c27,test,open specy,PP,in library,elise granek and kellie teague,False,ATR,weak,PP,0.6944
+872f4eb51591,test,open specy,PP,in library,elise granek and kellie teague,False,ATR,weak,PP,0.7642
+9cb3a0d487a1,test,open specy,PP,in library,elise granek and kellie teague,False,ATR,weak,PP,0.7509
+bf493ee41b23,test,open specy,PP,in library,elise granek and kellie teague,False,transmission,weak,PP,0.6937
+718a4fd56ac4,test,open specy,PP,in library,elise granek and kellie teague,False,transmission,weak,PP,0.7387
+5166a9865d64,test,open specy,PP,in library,elise granek and kellie teague,False,ATR,weak,PP,0.7565
+3f0f1a17b6b6,test,open specy,PP,in library,elise granek and kellie teague,False,transmission,weak,PP,0.6941
+5d74a7e4402d,test,open specy,PS,in library,elise granek and kellie teague,False,transmission,probable,PS,0.9651
+0385fc1915e9,test,open specy,PS,in library,elise granek and kellie teague,False,transmission,probable,PS,0.9601
+a4effc1410f5,test,open specy,PS,in library,elise granek and kellie teague,False,transmission,probable,PS,0.9673
+bb5eb145b2cc,test,open specy,PS,in library,elise granek and kellie teague,False,transmission,probable,PS,0.9737
+3457db0a0dd6,test,open specy,PS,in library,elise granek and kellie teague,False,transmission,probable,PS,0.958
+3666d72108a1,test,open specy,PS,in library,elise granek and kellie teague,False,transmission,probable,PS,0.9753
+bf128c97353a,test,open specy,PS,in library,elise granek and kellie teague,False,transmission,probable,PS,0.9753
+c352104ec80e,test,open specy,PS,in library,elise granek and kellie teague,False,transmission,probable,PS,0.9723
+02229a582c5f,test,open specy,PS,in library,elise granek and kellie teague,False,transmission,probable,PS,0.9811
+f8e04b743b7a,test,open specy,PS,in library,elise granek and kellie teague,False,transmission,probable,PS,0.9673
+57fb7921f685,test,open specy,PS,in library,elise granek and kellie teague,False,transmission,probable,PS,0.9652
+df21ebf57890,test,open specy,PS,in library,elise granek and kellie teague,False,transmission,probable,PS,0.9677
+0fa52e645465,test,open specy,PP,in library,elise granek and kellie teague,False,transmission,weak,PAN,0.6542
+534188cb5ecb,test,open specy,PP,in library,elise granek and kellie teague,False,transmission,weak,PP,0.68
+a7001232a1fe,test,open specy,PP,in library,elise granek and kellie teague,False,transmission,weak,PAN,0.6465
+8066258aef74,test,open specy,PP,in library,elise granek and kellie teague,False,transmission,weak,PAN,0.6573
+3a8462ed2eb5,test,open specy,PA,in library,elise granek and kellie teague,False,as measured,no reliable match,PU,0.2077
+040c0fcfe5c0,test,open specy,PA,in library,elise granek and kellie teague,False,as measured,no reliable match,PU,0.233
+af9b68ddac23,test,open specy,PBT,in library,elise granek and kellie teague,False,transmission,weak,PVOH,0.5658
+5fab09dee5dc,test,open specy,PMMA,in library,elise granek and kellie teague,False,as measured,no reliable match,PS,0.0433
+a146923f4c77,test,open specy,PMMA,in library,elise granek and kellie teague,False,as measured,no reliable match,PU,0.1149
+b684ec6df1ef,test,open specy,PMMA,in library,elise granek and kellie teague,False,as measured,no reliable match,PC,0.0983
+0ed6bf52c888,test,open specy,PVOH,in library,elise granek and kellie teague,False,as measured,no reliable match,PU,0.2095
+55e4d8545f5b,test,open specy,PVOH,in library,elise granek and kellie teague,False,as measured,no reliable match,EVOH,0.2941
+29322e614e40,test,open specy,PVOH,in library,elise granek and kellie teague,False,as measured,no reliable match,EVOH,0.1907
+f09414515bcd,test,open specy,PVOH,in library,elise granek and kellie teague,False,as measured,no reliable match,PU,0.2726
+9ba43f1b6ac7,test,open specy,PVOH,in library,elise granek and kellie teague,False,as measured,no reliable match,PU,0.211
+0e325eebdec1,test,open specy,PVOH,in library,elise granek and kellie teague,False,as measured,no reliable match,EVA,0.15
+e001d35e34d3,test,open specy,PE,in library,gicquel et al. 2024,False,ATR,weak,PE,0.7213
+9f1b0903f835,test,open specy,PE,in library,gicquel et al. 2024,False,ATR,weak,PE,0.8262
+020ffa1d31c2,test,open specy,PE,in library,gicquel et al. 2024,False,ATR,weak,PE,0.7143
+513edf8be914,test,open specy,PE,in library,gicquel et al. 2024,False,ATR,weak,PE,0.7799
+0e4066281af8,test,open specy,PE,in library,gicquel et al. 2024,False,ATR,weak,PE,0.7428
+91b2bede3a07,test,open specy,PE,in library,gicquel et al. 2024,False,ATR,weak,PE,0.7027
+331c2270e912,test,open specy,PE,in library,gicquel et al. 2024,False,ATR,weak,PE,0.8381
+b4b892076214,test,open specy,PE,in library,gicquel et al. 2024,False,ATR,weak,PE,0.7941
+074f1086cc85,test,open specy,PE,in library,gicquel et al. 2024,False,ATR,weak,PE,0.7614
+9675bfc49dd8,test,open specy,PE,in library,gicquel et al. 2024,False,ATR,weak,PE,0.7952
+3ef21b201b27,test,open specy,PE,in library,gicquel et al. 2024,False,ATR,weak,PE,0.7695
+5f0b059788fb,test,open specy,PE,in library,gicquel et al. 2024,False,ATR,weak,PE,0.7384
+e70e544925df,test,open specy,PE,in library,gicquel et al. 2024,False,ATR,weak,PE,0.7033
+603273df7971,test,open specy,PE,in library,gicquel et al. 2024,False,ATR,weak,PE,0.7658
+f41328e7c07a,test,open specy,PE,in library,gicquel et al. 2024,False,ATR,weak,PE,0.7113
+5bd747b8d11e,test,open specy,PE,in library,gicquel et al. 2024,False,ATR,weak,PE,0.6431
+734eaf69108c,test,open specy,PE,in library,gicquel et al. 2024,False,ATR,weak,PE,0.7644
+62f400375485,test,open specy,PE,in library,gicquel et al. 2024,False,ATR,weak,PE,0.7529
+647bc65ca3de,test,open specy,PE,in library,gicquel et al. 2024,False,ATR,weak,PE,0.7337
+b8f2eed0a607,test,open specy,PE,in library,gicquel et al. 2024,False,ATR,weak,PE,0.6517
+d911a7183845,test,open specy,PE,in library,gicquel et al. 2024,False,ATR,weak,PE,0.6183
+1a6eaf35a496,test,open specy,PS,in library,gicquel et al. 2024,False,ATR,weak,PS,0.8645
+72a4df5430ec,test,open specy,PS,in library,gicquel et al. 2024,False,as measured,no reliable match,PS,0.578
+6ae5c838e020,test,open specy,PS,in library,gicquel et al. 2024,False,ATR,weak,PS,0.8428
+09e78fb8df75,test,open specy,PS,in library,gicquel et al. 2024,False,ATR,weak,PS,0.764
+b93bb3bad64d,test,open specy,PS,in library,gicquel et al. 2024,False,as measured,no reliable match,PS,0.5524
+ed1bb431a016,test,open specy,PS,in library,gicquel et al. 2024,False,as measured,no reliable match,PS,0.5198
+43b3a262da9a,test,open specy,PS,in library,gicquel et al. 2024,False,as measured,no reliable match,PU,0.3696
+8049029706bd,test,open specy,PAN,in library,gicquel et al. 2024,False,as measured,no reliable match,PVC,0.2211
+22c1b75732b5,test,open specy,PAN,in library,gicquel et al. 2024,False,as measured,no reliable match,PVC,0.2214
+d35e4a288c92,test,open specy,PAN,in library,gicquel et al. 2024,False,as measured,no reliable match,PVC,0.2204
+18bbef61a3d1,test,open specy,PAN,in library,gicquel et al. 2024,False,as measured,no reliable match,PVC,0.2186
+16b89dd9550b,test,open specy,PAN,in library,gicquel et al. 2024,False,as measured,no reliable match,PVC,0.2157
+81bf9aa2fc93,test,open specy,PAN,in library,gicquel et al. 2024,False,as measured,no reliable match,PVC,0.2121
+9ced30bb3ee1,test,open specy,PAN,in library,gicquel et al. 2024,False,as measured,no reliable match,PVC,0.2044
+974218ff6516,test,open specy,PAN,in library,gicquel et al. 2024,False,as measured,no reliable match,PVC,0.1944
+023855b3edd5,test,open specy,PAN,in library,gicquel et al. 2024,False,as measured,no reliable match,PVC,0.2245
+502eabe2ce6b,test,open specy,PAN,in library,gicquel et al. 2024,False,as measured,no reliable match,PVC,0.2238
+fb43f7c5c4b4,test,open specy,PAN,in library,gicquel et al. 2024,False,as measured,no reliable match,PVC,0.2221
+77bc0935bf78,test,open specy,PAN,in library,gicquel et al. 2024,False,as measured,no reliable match,PVC,0.2198
+39db279aa76a,test,open specy,PAN,in library,gicquel et al. 2024,False,as measured,no reliable match,PVC,0.2173
+13f5d48d4bc1,test,open specy,PAN,in library,gicquel et al. 2024,False,as measured,no reliable match,PVC,0.2096
+27fccb94c82f,test,open specy,PAN,in library,gicquel et al. 2024,False,as measured,no reliable match,PVC,0.2004
+d86ede3e41f4,test,open specy,PAN,in library,gicquel et al. 2024,False,as measured,no reliable match,PVC,0.2276
+d921b5e1f0fc,test,open specy,PAN,in library,gicquel et al. 2024,False,as measured,no reliable match,PVC,0.2267
+c90dea3fd2ce,test,open specy,PAN,in library,gicquel et al. 2024,False,as measured,no reliable match,PVC,0.2252
+0fbe9ff54be5,test,open specy,PAN,in library,gicquel et al. 2024,False,as measured,no reliable match,PVC,0.2229
+b9c125fa8538,test,open specy,PAN,in library,gicquel et al. 2024,False,as measured,no reliable match,PVC,0.2197
+5c0729b574b0,test,open specy,PAN,in library,gicquel et al. 2024,False,as measured,no reliable match,PVC,0.2106
+361dbb16eeba,test,open specy,PAN,in library,gicquel et al. 2024,False,as measured,no reliable match,PVC,0.2015
+6bc163f417f1,test,open specy,PAN,in library,gicquel et al. 2024,False,as measured,no reliable match,PVC,0.232
+13f732763f0a,test,open specy,PAN,in library,gicquel et al. 2024,False,as measured,no reliable match,PVC,0.23
+47cafae06b92,test,open specy,PAN,in library,gicquel et al. 2024,False,as measured,no reliable match,PVC,0.2281
+81d9f554af9b,test,open specy,PAN,in library,gicquel et al. 2024,False,as measured,no reliable match,PVC,0.2248
+178e67e34f32,test,open specy,PAN,in library,gicquel et al. 2024,False,as measured,no reliable match,PVC,0.2181
+118cd8b75046,test,open specy,PAN,in library,gicquel et al. 2024,False,as measured,no reliable match,PVC,0.204
+33eb9b593b77,test,open specy,PAN,in library,gicquel et al. 2024,False,as measured,no reliable match,PVC,0.2349
+db95421baaa8,test,open specy,PAN,in library,gicquel et al. 2024,False,as measured,no reliable match,PVC,0.2322
+41deb867c3c0,test,open specy,PAN,in library,gicquel et al. 2024,False,as measured,no reliable match,PVC,0.2292
+dca96702f936,test,open specy,PAN,in library,gicquel et al. 2024,False,as measured,no reliable match,PVC,0.2265
+5e6c8590ee02,test,open specy,PAN,in library,gicquel et al. 2024,False,as measured,no reliable match,PVC,0.2194
+fd5a3d1aa155,test,open specy,PAN,in library,gicquel et al. 2024,False,as measured,no reliable match,PVC,0.2051
+0f5691c16b20,test,open specy,PAN,in library,gicquel et al. 2024,False,as measured,no reliable match,PVC,0.237
+fd1ef2b22170,test,open specy,PAN,in library,gicquel et al. 2024,False,as measured,no reliable match,PVC,0.2343
+d68fc86c22ca,test,open specy,PAN,in library,gicquel et al. 2024,False,as measured,no reliable match,PVC,0.2308
+d2bd80422aa7,test,open specy,PAN,in library,gicquel et al. 2024,False,as measured,no reliable match,PVC,0.2203
+42cec8025e2b,test,open specy,PAN,in library,gicquel et al. 2024,False,as measured,no reliable match,PVC,0.2054
+752e23fcbf9b,test,open specy,PAN,in library,gicquel et al. 2024,False,as measured,no reliable match,PVC,0.2375
+686dc9f0436c,test,open specy,PAN,in library,gicquel et al. 2024,False,as measured,no reliable match,PVC,0.2351
+3e633a20cc29,test,open specy,PAN,in library,gicquel et al. 2024,False,as measured,no reliable match,PVC,0.2243
+0cd5860d260c,test,open specy,PAN,in library,gicquel et al. 2024,False,as measured,no reliable match,PU,0.2043
+6dc536e87649,test,open specy,PAN,in library,gicquel et al. 2024,False,as measured,no reliable match,PVC,0.2267
+ca6a7ac22122,test,open specy,PAN,in library,gicquel et al. 2024,False,as measured,no reliable match,PU,0.2135
+fa354e565e58,test,open specy,PAN,in library,gicquel et al. 2024,False,as measured,no reliable match,PU,0.2374
+22881a9e2610,test,open specy,PAN,in library,gicquel et al. 2024,False,as measured,no reliable match,PU,0.2335
+ef176f50fc4d,test,open specy,PAN,in library,gicquel et al. 2024,False,as measured,no reliable match,PU,0.2033
+e5f72494d0f7,test,open specy,PAN,in library,gicquel et al. 2024,False,as measured,no reliable match,PU,0.2272
+32f3c4add5ac,test,open specy,PAN,in library,gicquel et al. 2024,False,as measured,no reliable match,PU,0.2136
+a06233eb2a91,test,open specy,PE,in library,gicquel et al. 2024,False,ATR,weak,PE,0.8415
+dd4a2fa1e844,test,open specy,PE,in library,gicquel et al. 2024,False,ATR,weak,PE,0.8786
+e6f51e5bd079,test,open specy,PE,in library,gicquel et al. 2024,False,ATR,weak,PE,0.8746
+8e7818389d44,test,open specy,PE,in library,gicquel et al. 2024,False,ATR,weak,PE,0.8669
+fa4379d325f1,test,open specy,PE,in library,gicquel et al. 2024,False,ATR,weak,PE,0.8548
+458a50fc9743,test,open specy,PE,in library,gicquel et al. 2024,False,ATR,weak,PE,0.8386
+a0f86bd96afe,test,open specy,PE,in library,gicquel et al. 2024,False,ATR,weak,PE,0.8229
+64d0bb0b9762,test,open specy,PE,in library,gicquel et al. 2024,False,ATR,weak,PE,0.8035
+b7caad752870,test,open specy,PE,in library,gicquel et al. 2024,False,ATR,weak,PE,0.8565
+a63967282757,test,open specy,PE,in library,gicquel et al. 2024,False,ATR,weak,PE,0.8267
+42b621b15447,test,open specy,PE,in library,gicquel et al. 2024,False,ATR,weak,PE,0.8104
+f7244861c6ff,test,open specy,PE,in library,gicquel et al. 2024,False,ATR,weak,PE,0.8119
+efd19256ab67,test,open specy,PE,in library,gicquel et al. 2024,False,ATR,weak,PE,0.6801
+40cfab9f256b,test,open specy,PE,in library,gicquel et al. 2024,False,ATR,weak,PE,0.7018
+a671265683a0,test,open specy,PE,in library,gicquel et al. 2024,False,ATR,weak,PE,0.8753
+7fd2fa96ea1c,test,open specy,PE,in library,gicquel et al. 2024,False,ATR,weak,PE,0.8627
+ea2695627dd4,test,open specy,PE,in library,gicquel et al. 2024,False,ATR,weak,PE,0.7543
+4e40281a6390,test,open specy,PE,in library,gicquel et al. 2024,False,ATR,weak,PE,0.7819
+a437ddcfc1a9,test,open specy,PE,in library,gicquel et al. 2024,False,ATR,weak,PE,0.748
+bf969b43aaab,test,open specy,PE,in library,gicquel et al. 2024,False,ATR,weak,PE,0.8633
+32baf7d9be79,test,open specy,PE,in library,gicquel et al. 2024,False,ATR,weak,PE,0.848
+3bf7e8f61074,test,open specy,PE,in library,gicquel et al. 2024,False,ATR,weak,PE,0.7248
+a67d42c675f3,test,open specy,PE,in library,gicquel et al. 2024,False,ATR,weak,PE,0.6902
+d3f3b117826d,test,open specy,PE,in library,gicquel et al. 2024,False,ATR,weak,PE,0.8073
+65f714863151,test,open specy,PE,in library,gicquel et al. 2024,False,ATR,weak,PE,0.7914
+82ea5ab6bf83,test,open specy,PE,in library,gicquel et al. 2024,False,ATR,weak,PE,0.7816
+76870edeaacb,test,open specy,PE,in library,gicquel et al. 2024,False,ATR,weak,PE,0.7456
+88fbb6e98856,test,open specy,PE,in library,gicquel et al. 2024,False,ATR,weak,PE,0.6659
+8e46ec3761be,test,open specy,PE,in library,gicquel et al. 2024,False,ATR,weak,PE,0.7176
+30bc9e513b07,test,open specy,PP,in library,gicquel et al. 2024,False,as measured,no reliable match,PE,0.3443
+2065f14657e5,test,open specy,EVA,in library,gicquel et al. 2024,False,ATR,weak,EVA,0.7079
+e90c864f63d8,test,open specy,EVA,in library,gicquel et al. 2024,False,ATR,weak,PE,0.8273
+f08bb18e657e,test,open specy,EVA,in library,gicquel et al. 2024,False,transmission,weak,EVA,0.8981
+5c797b6f1736,test,open specy,PE,in library,gicquel et al. 2024,False,ATR,weak,PE,0.6219
+00b679bfbb67,test,open specy,EVA,in library,gicquel et al. 2024,False,ATR,weak,PE,0.6886
+f02c92c778a2,test,open specy,EVA,in library,gicquel et al. 2024,False,ATR,weak,PE,0.7132
+9b6cf637e0e5,test,open specy,EVA,in library,gicquel et al. 2024,False,ATR,weak,EVA,0.6389
+799d3c07d3a3,test,open specy,EVA,in library,gicquel et al. 2024,False,ATR,weak,PMMA,0.4695
+0b27f551ecaa,test,open specy,EVA,in library,gicquel et al. 2024,False,transmission,weak,EVA,0.8909
+7963a9d047e5,test,open specy,PP,in library,gicquel et al. 2024,False,ATR,weak,PE,0.5097
+cb070802ef3a,test,open specy,EVA,in library,gicquel et al. 2024,False,transmission,weak,PET,0.3509
+ff29d18c3afb,test,open specy,EVA,in library,gicquel et al. 2024,False,ATR,weak,PE,0.839
+b44e4b02493d,test,open specy,EVA,in library,gicquel et al. 2024,False,transmission,weak,PET,0.3741
+253ae987019c,test,open specy,EVA,in library,gicquel et al. 2024,False,ATR,weak,PMMA,0.4861
+10853822c405,test,open specy,EVA,in library,gicquel et al. 2024,False,ATR,weak,PE,0.8302
+a1b38f584edd,test,open specy,EVA,in library,gicquel et al. 2024,False,ATR,weak,PE,0.7682
+3d92edd5da1d,test,open specy,EVA,in library,gicquel et al. 2024,False,ATR,probable,PE,0.5868
+ee99d62ec92e,test,open specy,EVA,in library,gicquel et al. 2024,False,transmission,weak,PBT,0.3443
+48ad93729a82,test,open specy,EVA,in library,gicquel et al. 2024,False,transmission,weak,PET,0.3728
+cd31d7b21fe3,test,open specy,EVA,in library,gicquel et al. 2024,False,transmission,weak,EVA,0.906
+511cb6d4b22c,test,open specy,EVA,in library,gicquel et al. 2024,False,as measured,no reliable match,PMMA,0.4979
+487b47c980d6,test,open specy,EVA,in library,gicquel et al. 2024,False,ATR,weak,EVA,0.9058
+855b3452ca7e,test,open specy,EVA,in library,gicquel et al. 2024,False,ATR,probable,PE,0.5911
+7640cbf99c55,test,open specy,EVA,in library,gicquel et al. 2024,False,ATR,weak,PE,0.6904
+61415ca52e55,test,open specy,EVA,in library,gicquel et al. 2024,False,transmission,weak,EVA,0.9093
+edb7021076b8,test,open specy,EVA,in library,gicquel et al. 2024,False,transmission,weak,EVA,0.8691
+7ff286abe8fb,test,open specy,EVA,in library,gicquel et al. 2024,False,transmission,weak,EVA,0.9031
+a8c3b0b31840,test,open specy,PMMA,in library,gicquel et al. 2024,False,ATR,weak,PMMA,0.679
+904f09f93887,test,open specy,PP,in library,gicquel et al. 2024,False,ATR,weak,PP,0.7309
+acec6fd704c7,test,open specy,PMMA,in library,gicquel et al. 2024,False,ATR,weak,PMMA,0.7438
+86ba32c4e8c2,test,open specy,EVA,in library,gicquel et al. 2024,False,transmission,probable,EVA,0.9512
+5194449b040c,test,open specy,PE,in library,gicquel et al. 2024,False,ATR,weak,PE,0.7568
+fc2c68c65337,test,open specy,PP,in library,gicquel et al. 2024,False,ATR,weak,PP,0.7054
+307535452bef,test,open specy,EVA,in library,gicquel et al. 2024,False,ATR,weak,PE,0.7046
+6d103e6cfd8b,test,open specy,EVA,in library,gicquel et al. 2024,False,ATR,probable,PE,0.5829
+5ee64c080cc6,test,open specy,PE,in library,gicquel et al. 2024,False,ATR,probable,PE,0.9596
+ba389acea20c,test,open specy,PE,in library,gicquel et al. 2024,False,ATR,weak,PE,0.8365
+eb399e33bb13,test,open specy,EVA,in library,gicquel et al. 2024,False,ATR,weak,PE,0.8363
+9af43ac1deae,test,open specy,EVA,in library,gicquel et al. 2024,False,ATR,weak,PE,0.6946
+67a50922e4fc,test,open specy,EVA,in library,gicquel et al. 2024,False,transmission,weak,EVA,0.8785
+e8a846c2270b,test,open specy,EVA,in library,gicquel et al. 2024,False,transmission,weak,EVA,0.9323
+561d4afda696,test,open specy,EVA,in library,gicquel et al. 2024,False,transmission,weak,EVA,0.8995
+8c0b68e1c7d1,test,open specy,PMMA,in library,gicquel et al. 2024,False,ATR,weak,PMMA,0.8309
+4cf00e703a7f,test,open specy,PE,in library,gicquel et al. 2024,False,ATR,probable,PE,0.9683
+e10038846c1b,test,open specy,PE,in library,gicquel et al. 2024,False,ATR,probable,PE,0.9768
+52d5d40dc265,test,open specy,PE,in library,gicquel et al. 2024,False,ATR,weak,PE,0.819
+d5dfd7fbd424,test,open specy,PE,in library,gicquel et al. 2024,False,as measured,no reliable match,PU,0.2484
+fd7850b39649,test,open specy,PE,in library,gicquel et al. 2024,False,as measured,no reliable match,PU,0.0857
+2474b3a5115c,test,open specy,PE,in library,gicquel et al. 2024,False,ATR,probable,PE,0.975
+ae07855b5f83,test,open specy,PE,in library,gicquel et al. 2024,False,ATR,weak,PE,0.9203
+b5ac0af33f45,test,open specy,PE,in library,gicquel et al. 2024,False,ATR,probable,PE,0.9647
+4df9486fed38,test,open specy,PE,in library,gicquel et al. 2024,False,ATR,weak,PE,0.9173
+7d20e67b4867,test,open specy,PE,in library,gicquel et al. 2024,False,ATR,probable,PE,0.9709
+28a0eca13924,test,open specy,PS,in library,gicquel et al. 2024,False,ATR,weak,PS,0.8622
+96126d8a1900,test,open specy,PS,in library,gicquel et al. 2024,False,transmission,weak,PS,0.887
+5f90d0300af5,test,open specy,PS,in library,gicquel et al. 2024,False,ATR,weak,EVA,0.2976
+33c055e13e1f,test,open specy,PS,in library,gicquel et al. 2024,False,ATR,probable,PS,0.9609
+f6475f838bcf,test,open specy,PS,in library,gicquel et al. 2024,False,ATR,weak,PS,0.8713
+048670151d37,test,open specy,PS,in library,gicquel et al. 2024,False,ATR,weak,PS,0.8858
+935aac0bb6f7,test,open specy,PS,in library,gicquel et al. 2024,False,ATR,weak,PE,0.6293
+d3b206a4dc1d,test,open specy,PS,in library,gicquel et al. 2024,False,ATR,weak,PS,0.8924
+26dc6c2a5184,test,open specy,PS,in library,gicquel et al. 2024,False,ATR,weak,PS,0.6382
+11cec0f5aee9,test,open specy,PS,in library,gicquel et al. 2024,False,ATR,weak,PS,0.9012
+70bbc75e8cdd,test,open specy,PS,in library,gicquel et al. 2024,False,ATR,weak,PE,0.6325
+9248fe7d9116,test,open specy,PS,in library,gicquel et al. 2024,False,ATR,weak,PE,0.446
+a79d5323f013,test,open specy,PS,in library,gicquel et al. 2024,False,transmission,weak,PS,0.8735
+b68a66e2fae8,test,open specy,PP,in library,julia; davidson,False,ATR,probable,PP,0.979
+ea3573843db7,test,open specy,PP,in library,julia; davidson,False,ATR,probable,PP,0.9834
+c9a705c96253,test,open specy,PP,in library,julia; davidson,False,ATR,weak,PP,0.9055
+24776283936d,test,open specy,PP,in library,julia; davidson,False,ATR,probable,PP,0.96
+837a55dde4eb,test,open specy,PP,in library,julia; davidson,False,ATR,probable,PP,0.9706
+e0aa4475ae5d,test,open specy,PP,in library,julia; davidson,False,ATR,weak,PP,0.9449
+939666b61449,test,open specy,PP,in library,julia; davidson,False,ATR,probable,PP,0.9644
+9ffadd5c29b4,test,open specy,PP,in library,julia; davidson,False,ATR,probable,PP,0.976
+2b12b864b6d0,test,open specy,PP,in library,julia; davidson,False,ATR,probable,PP,0.9637
+b3e58a29d7cb,test,open specy,PP,in library,julia; davidson,False,ATR,probable,PP,0.9564
+102adff484fb,test,open specy,PP,in library,julia; davidson,False,ATR,probable,PP,0.961
+621dd4bb5221,test,open specy,PP,in library,julia; davidson,False,ATR,probable,PP,0.9659
+befa537e3ef7,test,open specy,PP,in library,julia; davidson,False,ATR,probable,PP,0.9516
+3e7d57a280f2,test,open specy,PP,in library,julia; davidson,False,ATR,probable,PP,0.9745
+79953ea0c22d,test,open specy,PP,in library,julia; davidson,False,ATR,weak,PP,0.9248
+73364a7b0fd4,test,open specy,PP,in library,julia; davidson,False,ATR,probable,PP,0.977
+1288dc7a226b,test,open specy,PP,in library,julia; davidson,False,ATR,weak,PP,0.9291
+dee31f4bf3a9,test,open specy,PP,in library,julia; davidson,False,ATR,probable,PP,0.9827
+e31c9735f78f,test,open specy,PP,in library,julia; davidson,False,ATR,probable,PP,0.9591
+b3b088098275,test,open specy,PP,in library,julia; davidson,False,ATR,probable,PP,0.9887
+978c98b83e8e,test,open specy,PP,in library,julia; davidson,False,ATR,weak,PP,0.9398
+085d7ce4fd00,test,open specy,PP,in library,julia; davidson,False,ATR,probable,PP,0.9819
+fddaeb4efdbe,test,open specy,PP,in library,julia; davidson,False,ATR,weak,PP,0.939
+2f7f70ba0a5c,test,open specy,PP,in library,julia; davidson,False,ATR,probable,PP,0.9812
+b9f00d70e4be,test,open specy,PP,in library,julia; davidson,False,ATR,probable,PP,0.9631
+0e18438a74bf,test,open specy,PP,in library,julia; davidson,False,ATR,probable,PP,0.989
+0dc778a5bb58,test,open specy,PP,in library,julia; davidson,False,ATR,probable,PP,0.9548
+646651f07872,test,open specy,PP,in library,julia; davidson,False,ATR,probable,PP,0.9723
+23e44abb040b,test,open specy,PP,in library,julia; davidson,False,ATR,weak,PP,0.9424
+db543e084717,test,open specy,PVC,in library,moore institute for plastic pollution research,False,as measured,no reliable match,PMMA,-0.1021
+3e62b9b5c143,test,open specy,PVC,in library,moore institute for plastic pollution research,False,as measured,no reliable match,PMMA,0.3097
+823615fd7502,test,open specy,PVC,in library,moore institute for plastic pollution research,False,transmission,weak,PVC,0.7273
+affefc9ba486,test,open specy,PVC,in library,moore institute for plastic pollution research,False,as measured,no reliable match,PMMA,0.1272
+77ad8cf9f018,test,open specy,PVC,in library,moore institute for plastic pollution research,False,as measured,no reliable match,PE,-0.0565
+9fbb8d960790,test,open specy,PVC,in library,moore institute for plastic pollution research,False,as measured,no reliable match,PMMA,-0.0561
+1c134e3b1365,test,open specy,PVC,in library,moore institute for plastic pollution research,False,as measured,no reliable match,PMMA,0.1923
+6963cb36d891,test,open specy,PVC,in library,moore institute for plastic pollution research,False,as measured,no reliable match,PK,-0.0584
+9016e6259b29,test,open specy,PVC,in library,moore institute for plastic pollution research,False,as measured,no reliable match,PK,-0.0894
+ccbec35ca8bf,test,open specy,PVC,in library,moore institute for plastic pollution research,False,as measured,no reliable match,PMMA,-0.0874
+6cd84a5c1cbb,test,open specy,PVC,in library,moore institute for plastic pollution research,False,as measured,no reliable match,PMMA,-0.0049
+6b37deba4d6e,test,open specy,PVC,in library,moore institute for plastic pollution research,False,as measured,no reliable match,PMMA,-0.0454
+4992abd1c138,test,open specy,PVC,in library,moore institute for plastic pollution research,False,as measured,no reliable match,PMMA,-0.0659
+5344d2ae3564,test,open specy,PVC,in library,moore institute for plastic pollution research,False,as measured,no reliable match,PMMA,-0.0399
+1513ce4a8f55,test,open specy,PVC,in library,moore institute for plastic pollution research,False,as measured,no reliable match,PK,-0.0838
+1bcafb6ea9b0,test,open specy,PVC,in library,moore institute for plastic pollution research,False,transmission,weak,PVC,0.78
+9568b63be689,test,open specy,PVC,in library,moore institute for plastic pollution research,False,as measured,no reliable match,PMMA,0.0415
+c0e9c351e4f8,test,open specy,PVC,in library,moore institute for plastic pollution research,False,transmission,weak,PVC,0.6248
+9807a2e62537,test,open specy,PVC,in library,moore institute for plastic pollution research,False,as measured,no reliable match,PMMA,0.027
+7b0abc526b34,test,open specy,PVC,in library,moore institute for plastic pollution research,False,as measured,no reliable match,PMMA,0.0777
+1f25827fe0f3,test,open specy,PVC,in library,moore institute for plastic pollution research,False,as measured,no reliable match,PMMA,0.1198
+c994e15b6b47,test,open specy,PVC,in library,moore institute for plastic pollution research,False,as measured,no reliable match,PMMA,0.2406
+ea02f14aba22,test,open specy,PVC,in library,moore institute for plastic pollution research,False,as measured,no reliable match,PMMA,0.0214
+1220ffa842ff,test,open specy,PVC,in library,moore institute for plastic pollution research,False,as measured,no reliable match,PMMA,0.3439
+4ac6b24d0990,test,open specy,PMMA,in library,national renewable energy laboratory,False,transmission,no reliable match,PLA,0.2176
+78cb1d822c71,test,open specy,PMMA,in library,national renewable energy laboratory,False,transmission,no reliable match,PVC,-0.0112
+eec21b7629ef,test,open specy,PMMA,in library,national renewable energy laboratory,False,transmission,no reliable match,EVOH,0.0861
+fff6f363bc15,test,open specy,PMMA,in library,national renewable energy laboratory,False,transmission,no reliable match,PS,0.001
+93659961da2e,test,open specy,PMMA,in library,national renewable energy laboratory,False,transmission,no reliable match,PC,-0.0077
+72874d7bd85a,test,open specy,PVC,in library,national renewable energy laboratory,False,transmission,no reliable match,PMMA,0.0781
+39d9195c6ae7,test,open specy,PS,in library,national renewable energy laboratory,False,transmission,no reliable match,PS,0.5958
+b2307290f695,test,open specy,PS,in library,national renewable energy laboratory,False,transmission,no reliable match,PS,0.2299
+b15f84f94f97,test,open specy,PU,in library,plopp library,False,transmission,weak,PET,0.2675
+0d6a8ad31401,test,open specy,PU,in library,plopp library,False,as measured,no reliable match,PMMA,0.2952
+f2c0a0e7a116,test,open specy,PU,in library,plopp library,False,ATR,weak,PMMA,0.245
+323f66c7b1af,test,open specy,PU,in library,plopp library,False,ATR,weak,PMMA,0.2769
+9d24e400f355,test,open specy,PU,in library,plopp library,False,transmission,weak,PMMA,0.2874
+1e9caecf3f37,test,open specy,PU,in library,plopp library,False,ATR,weak,PMMA,0.2647
+a5d7552514a3,test,open specy,PU,in library,plopp library,False,transmission,weak,PET,0.2646
+a4994f9deca8,test,open specy,PP,in library,microplastix,False,as measured,no reliable match,PLA,-0.0705
+debdd5414699,test,open specy,PET,in library,chabuka et al. 2020,False,transmission,no reliable match,PVC,0.2083
+b3d42382121b,test,open specy,PET,in library,chabuka et al. 2020,False,transmission,no reliable match,PC,0.3006
+e07c4c3dc140,test,open specy,PET,in library,chabuka et al. 2020,False,transmission,no reliable match,PVC,0.2611
+58424d18ee37,test,open specy,PET,in library,chabuka et al. 2020,False,transmission,no reliable match,PVC,0.2561
+644719486a6f,test,open specy,PET,in library,chabuka et al. 2020,False,transmission,no reliable match,PVC,0.1493
+85a16af15b86,test,open specy,PET,in library,chabuka et al. 2020,False,transmission,no reliable match,PVC,0.2057
+1852d90eca3c,test,open specy,PET,in library,chabuka et al. 2020,False,transmission,no reliable match,PVC,0.2035
+117c52f2fe0b,test,open specy,PET,in library,chabuka et al. 2020,False,transmission,no reliable match,PVC,0.1983
+7396853f6245,test,open specy,PET,in library,chabuka et al. 2020,False,transmission,no reliable match,PVC,0.2794
+5f18b07ed053,test,open specy,PET,in library,chabuka et al. 2020,False,transmission,no reliable match,PVC,0.1873
+5efe88ef97b1,test,open specy,PET,in library,chabuka et al. 2020,False,transmission,no reliable match,PVC,0.287
+907458e30e42,test,open specy,PET,in library,chabuka et al. 2020,False,transmission,no reliable match,PVC,0.1589
+8d95facdcca4,test,open specy,PET,in library,chabuka et al. 2020,False,transmission,no reliable match,PVC,0.2236
+f0c856c7bed5,test,open specy,PET,in library,chabuka et al. 2020,False,transmission,no reliable match,PVC,0.2206
+7c644ef8c002,test,open specy,PET,in library,chabuka et al. 2020,False,transmission,no reliable match,PVC,0.4168
+27460a016e0b,test,open specy,PET,in library,chabuka et al. 2020,False,transmission,no reliable match,PVC,0.2212
+dfb32fb41bd8,test,open specy,PET,in library,chabuka et al. 2020,False,transmission,no reliable match,PVC,0.3199
+5c3cff4580a8,test,open specy,PET,in library,chabuka et al. 2020,False,transmission,no reliable match,PVC,0.1234
+916e21e02d0a,test,open specy,PET,in library,chabuka et al. 2020,False,transmission,no reliable match,PVC,0.225
+0ab1560a8ed0,test,open specy,PET,in library,chabuka et al. 2020,False,transmission,no reliable match,PVC,0.2495
+93b549f637ba,test,open specy,PET,in library,chabuka et al. 2020,False,transmission,no reliable match,PVC,0.3237
+3d159e1e055e,test,open specy,PET,in library,chabuka et al. 2020,False,transmission,no reliable match,PVC,0.3259
+f08d65fc453a,test,open specy,PET,in library,chabuka et al. 2020,False,transmission,no reliable match,PC,0.1408
+1dc1ce7e3197,test,open specy,PET,in library,chabuka et al. 2020,False,transmission,no reliable match,PVC,0.3612
+8a333290aa0d,test,open specy,PET,in library,chabuka et al. 2020,False,transmission,no reliable match,PVC,0.2893
+f67a15433d4f,test,open specy,PET,in library,chabuka et al. 2020,False,transmission,no reliable match,PVC,0.287
+bcdb63050743,test,open specy,PET,in library,chabuka et al. 2020,False,transmission,no reliable match,PVC,0.1653
+e2a174e20b1c,test,open specy,PET,in library,chabuka et al. 2020,False,transmission,no reliable match,PVC,0.1942
+211b58b0b743,test,open specy,PET,in library,chabuka et al. 2020,False,transmission,no reliable match,PVC,0.3335
+e46a1b023dc7,test,open specy,PET,in library,chabuka et al. 2020,False,transmission,no reliable match,PVC,0.3365
+ce2154e1a250,test,open specy,PET,in library,chabuka et al. 2020,False,transmission,no reliable match,PVC,0.1613
+c563f10476f2,test,open specy,PET,in library,chabuka et al. 2020,False,transmission,no reliable match,PET,0.3752
+b6b713a447c2,test,open specy,PET,in library,chabuka et al. 2020,False,transmission,no reliable match,PVC,0.3897
+03f242cf3237,test,open specy,PET,in library,chabuka et al. 2020,False,transmission,no reliable match,PET,0.3636
+99c09811e319,test,open specy,PET,in library,chabuka et al. 2020,False,transmission,no reliable match,PC,0.2456
+1717dec59988,test,open specy,PET,in library,chabuka et al. 2020,False,transmission,no reliable match,PC,0.2345
+ad76b2ca6abe,test,open specy,PET,in library,chabuka et al. 2020,False,transmission,no reliable match,PC,0.2145
+dfa84a7c2706,test,open specy,PET,in library,chabuka et al. 2020,False,transmission,no reliable match,PC,0.266
+8ca09751380d,test,open specy,PET,in library,chabuka et al. 2020,False,transmission,no reliable match,PC,0.265
+2c5c751f4545,test,open specy,PS,in library,primpke et al. 2018,False,ATR,probable,PS,0.9841
+054cb4b97937,test,open specy,PS,in library,primpke et al. 2018,False,ATR,probable,PS,0.9844
+1ed0e8385373,test,open specy,PC,in library,primpke et al. 2018,False,ATR,weak,PC,0.9333
+b5706ece4fb8,test,open specy,PC,in library,primpke et al. 2018,False,ATR,probable,PC,0.9747
+da1aeba65449,test,open specy,PC,in library,primpke et al. 2018,False,ATR,weak,PC,0.8763
+2daac5f5487c,test,open specy,PU,in library,primpke et al. 2018,False,ATR,weak,PMMA,0.5626
+fb94594d6f0e,test,open specy,PBT,in library,primpke et al. 2018,False,ATR,probable,PBT,0.9526
+22da12490fe3,test,open specy,PVOH,in library,primpke et al. 2018,False,ATR,weak,PVOH,0.6635
+ffb5d8daee04,test,open specy,PVOH,in library,primpke et al. 2018,False,ATR,weak,PVOH,0.6671
+e49f4681b4b8,test,open specy,PC,in library,primpke et al. 2018,False,ATR,weak,PC,0.8789
+3c4a5fc1b317,test,open specy,PC,in library,primpke et al. 2018,False,ATR,weak,PC,0.8994
+b6ee41e131fb,test,open specy,PS,in library,primpke et al. 2018,False,ATR,probable,PS,0.9868
+bd0b73eb9249,test,open specy,PS,in library,primpke et al. 2018,False,ATR,probable,PS,0.9851
+6c61f06ab3b8,test,open specy,PS,in library,primpke et al. 2018,False,ATR,probable,PS,0.9849
+e170f89bf2e0,test,open specy,PS,in library,primpke et al. 2018,False,ATR,weak,PS,0.949
+db70369bbac5,test,open specy,PU,in library,primpke et al. 2018,False,ATR,no reliable match,PU,0.5416
+9b73fc2d1cf9,test,open specy,PU,in library,primpke et al. 2018,False,ATR,weak,PMMA,0.5292
+0ae3308c0609,test,open specy,PU,in library,primpke et al. 2018,False,ATR,weak,PU,0.647
+1bdf92afb737,test,open specy,PU,in library,primpke et al. 2018,False,ATR,weak,PU,0.6467
+7df110eaf050,test,open specy,PS,in library,primpke et al. 2018,False,ATR,no reliable match,PC,0.0927
+4ffeba3100af,test,open specy,PC,in library,primpke et al. 2018,False,ATR,weak,PC,0.8782
+4b297dc360e8,test,open specy,PS,in library,primpke et al. 2018,False,ATR,probable,PS,0.9879
+4d1a1924680b,test,open specy,PMMA,in library,suja sukumaran; thermo fisher scientific,False,ATR,probable,PMMA,0.9712
+531d1bc3348e,test,open specy,PP,in library,hpu polymer kit 1.0,False,as measured,no reliable match,PVC,0.2577
+00562775c5ba,test,open specy,PP,in library,hpu polymer kit 1.0,False,ATR,probable,PP,0.9779
+77d5c8605c4c,test,open specy,PP,in library,hpu polymer kit 1.0,False,ATR,probable,PP,0.9812
+45bc668ca924,test,open specy,PS,in library,hpu polymer kit 1.0,False,ATR,probable,PS,0.9845
+232d4d0b8040,test,open specy,PVC,in library,hpu polymer kit 1.0,False,transmission,weak,PET,0.3302
+71e205e4fadb,test,open specy,PMMA,in library,pslc_database,False,transmission,no reliable match,PVOH,0.3697
+497fe09a8160,test,open specy,PP,in library,flopp; de frond et al. 2021,False,transmission,weak,PP,0.8615
+5adff8ee7ae3,test,open specy,PP,in library,flopp; de frond et al. 2021,False,transmission,weak,PP,0.7944
+fca8f8b0c763,test,open specy,PP,in library,flopp; de frond et al. 2021,False,transmission,weak,PP,0.8939
+9e8e0d7c8fa5,test,open specy,PP,in library,flopp; de frond et al. 2021,False,transmission,no reliable match,PP,0.5261
+8e333fe2e301,test,open specy,PP,in library,flopp; de frond et al. 2021,False,transmission,weak,PP,0.8707
+00cdb9f16a0d,test,open specy,PP,in library,flopp; de frond et al. 2021,False,transmission,weak,PP,0.8815
+be1f40e7033b,test,open specy,PP,in library,flopp; de frond et al. 2021,False,transmission,weak,PP,0.8804
+494a8775481c,test,open specy,PP,in library,flopp; de frond et al. 2021,False,transmission,weak,PP,0.8623
+e0ce60d348d8,test,open specy,PP,in library,flopp; de frond et al. 2021,False,transmission,weak,PP,0.8823
+09d44fc5aaa6,test,open specy,PP,in library,flopp; de frond et al. 2021,False,transmission,weak,PP,0.8403
+009797c55b32,test,open specy,PP,in library,flopp; de frond et al. 2021,False,transmission,weak,PP,0.8406
+89d76472b879,test,open specy,PP,in library,flopp; de frond et al. 2021,False,transmission,weak,PP,0.7607
+56ac2e8bf598,test,open specy,PP,in library,flopp; de frond et al. 2021,False,transmission,weak,PP,0.7846
+39a14127e8cb,test,open specy,PP,in library,flopp; de frond et al. 2021,False,transmission,weak,PP,0.8499
+912d4242843f,test,open specy,PP,in library,flopp; de frond et al. 2021,False,transmission,weak,PP,0.8857
+164ba213d7bc,test,open specy,PS,in library,flopp; de frond et al. 2021,False,transmission,probable,PS,0.9573
+6ca1e58ddc93,test,open specy,PS,in library,flopp; de frond et al. 2021,False,transmission,weak,PS,0.7548
+4e33612423ef,test,open specy,PS,in library,flopp; de frond et al. 2021,False,transmission,weak,PS,0.7224
+dafe8aaa76a9,test,open specy,PC,in library,flopp; de frond et al. 2021,False,transmission,weak,PC,0.8626
+4790f0a23a62,test,open specy,PLA,in library,flopp; de frond et al. 2021,False,transmission,weak,PLA,0.8195
+0ba980c2ec61,test,open specy,PLA,in library,flopp; de frond et al. 2021,False,transmission,weak,PLA,0.9153
+fc7dd692176f,test,open specy,PLA,in library,flopp; de frond et al. 2021,False,transmission,weak,PLA,0.91
+ccba69d0500e,test,open specy,PP,in library,flopp; de frond et al. 2021,False,transmission,weak,PP,0.8281
+578d6f8012d7,test,open specy,PP,in library,flopp; de frond et al. 2021,False,transmission,no reliable match,PP,0.4445
+38e743abba15,test,open specy,PS,in library,flopp; de frond et al. 2021,False,transmission,probable,PS,0.9619
+30b0b743d815,test,open specy,PS,in library,flopp; de frond et al. 2021,False,transmission,probable,PS,0.9711
+3ea2fc329b3f,test,open specy,PVC,in library,flopp; de frond et al. 2021,False,transmission,weak,PET,0.3213
+6fc202db6b6d,test,open specy,PS,in library,win cowger and sebastian primpke,False,ATR,weak,EVA,0.4311
+9c6c57db4ac0,test,open specy,PS,in library,win cowger and sebastian primpke,False,ATR,weak,PS,0.8611
+cd5e8d622684,test,open specy,PS,in library,win cowger and sebastian primpke,False,as measured,no reliable match,PS,0.1189
+77ce7c3bef60,test,open specy,PS,in library,win cowger and sebastian primpke,False,transmission,weak,PS,0.6582
+41d34481d8cd,test,open specy,PS,in library,win cowger and sebastian primpke,False,transmission,no reliable match,PS,0.3214
+6674ac76725c,test,open specy,PS,in library,win cowger and sebastian primpke,False,transmission,weak,PS,0.9376
+d47d5eb5a1e9,test,open specy,PS,in library,win cowger and sebastian primpke,False,as measured,no reliable match,PS,0.3198
+dbcf2fa1bf39,test,open specy,PS,in library,win cowger and sebastian primpke,False,ATR,probable,PS,0.9502
+650cf522f2bf,test,open specy,PS,in library,win cowger and sebastian primpke,False,transmission,no reliable match,PS,0.1269
+72b8588e06dd,test,open specy,PS,in library,win cowger and sebastian primpke,False,as measured,no reliable match,PS,0.1535
+cbe520d4dc32,test,open specy,PE,in library,win cowger and sebastian primpke,False,ATR,probable,PE,0.9559
+14c3c342104e,test,open specy,PE,in library,win cowger and sebastian primpke,False,transmission,no reliable match,EVOH,0.4924
+80202b4ed75a,test,open specy,PE,in library,win cowger and sebastian primpke,False,as measured,no reliable match,PP,0.4986
+3963e18115bf,test,open specy,PE,in library,win cowger and sebastian primpke,False,transmission,weak,PE,0.7247
+b57f2ffb9496,test,open specy,PE,in library,win cowger and sebastian primpke,False,as measured,no reliable match,EVA,0.0365
+e84946bce40c,test,open specy,PE,in library,win cowger and sebastian primpke,False,as measured,no reliable match,PP,0.4148
+5bea7b6a4e40,test,open specy,PE,in library,win cowger and sebastian primpke,False,transmission,weak,PE,0.7902
+be8e7dc44cb0,test,open specy,PC,in library,win cowger and sebastian primpke,False,ATR,weak,PC,0.8451
+ad9312670677,test,open specy,PC,in library,win cowger and sebastian primpke,False,ATR,weak,PC,0.8637
+9549daf79e92,test,open specy,PC,in library,win cowger and sebastian primpke,False,ATR,weak,PC,0.876
+d498a8aa0dfb,test,open specy,PC,in library,win cowger and sebastian primpke,False,as measured,no reliable match,PET,0.2521
+4f31e2a4d789,test,open specy,PC,in library,win cowger and sebastian primpke,False,as measured,no reliable match,PET,0.2593
+85bec81df09a,test,open specy,PC,in library,win cowger and sebastian primpke,False,as measured,no reliable match,PET,0.2538
+f5f0bff6997a,test,open specy,PC,in library,win cowger and sebastian primpke,False,as measured,no reliable match,PET,0.2515
+6759d7862d16,test,open specy,PC,in library,win cowger and sebastian primpke,False,transmission,no reliable match,PE,-0.0888
+043bf1f06c54,test,open specy,PC,in library,win cowger and sebastian primpke,False,transmission,no reliable match,PE,-0.089
+256179f46e2f,test,open specy,PC,in library,win cowger and sebastian primpke,False,transmission,no reliable match,EVOH,-0.0932
+8964801e1d6d,test,open specy,PS,in library,win cowger and sebastian primpke,False,transmission,no reliable match,PS,0.5601
+c9ce6e1e860c,test,open specy,PS,in library,win cowger and sebastian primpke,False,as measured,no reliable match,PLA,-0.093
+81eab7d449aa,test,open specy,PVC,in library,win cowger and sebastian primpke,False,ATR,weak,PVC,0.8229
+9a7450c1a5ee,test,open specy,PVC,in library,win cowger and sebastian primpke,False,ATR,weak,PVC,0.7569
+07496e76bb7b,test,open specy,PVC,in library,win cowger and sebastian primpke,False,ATR,weak,PVC,0.8399
+8ef4a832dd98,test,open specy,PVC,in library,win cowger and sebastian primpke,False,as measured,no reliable match,PMMA,-0.0937
+e24d8fb3ccc1,test,open specy,PVC,in library,win cowger and sebastian primpke,False,as measured,no reliable match,PMMA,-0.1024
+4711f5dec1ab,test,open specy,PVC,in library,win cowger and sebastian primpke,False,transmission,no reliable match,PA,-0.2093
+4f5d13ee622b,test,open specy,PVC,in library,win cowger and sebastian primpke,False,transmission,no reliable match,PA,-0.1856
+b1913445bd08,test,open specy,PVC,in library,win cowger and sebastian primpke,False,ATR,weak,PMMA,0.2929
+4caaebfe04bd,test,open specy,PVC,in library,win cowger and sebastian primpke,False,as measured,no reliable match,PMMA,0.147
+7b37bd51e358,test,open specy,PVC,in library,win cowger and sebastian primpke,False,as measured,no reliable match,PBT,0.1331
+7e5cb3f3e78c,test,open specy,PVC,in library,win cowger and sebastian primpke,False,as measured,no reliable match,PBT,0.1605
+bc9f14188563,test,open specy,PVC,in library,win cowger and sebastian primpke,False,transmission,no reliable match,PU,0.1019
+1035083e429f,test,open specy,PVC,in library,win cowger and sebastian primpke,False,transmission,no reliable match,PU,0.0856
+812a3946f705,test,open specy,PVC,in library,win cowger and sebastian primpke,False,transmission,no reliable match,PU,0.0941
+b1d1bea9cff2,test,open specy,PVC,in library,win cowger and sebastian primpke,False,transmission,no reliable match,PU,0.1059
+600344dd7a6c,test,open specy,PLA,in library,win cowger and sebastian primpke,False,as measured,no reliable match,EVA,0.3086
+8ac8f4367fe3,test,open specy,PLA,in library,win cowger and sebastian primpke,False,transmission,no reliable match,PC,0.3701
+4a8cee8fbef0,test,open specy,PP,in library,win cowger and sebastian primpke,False,as measured,no reliable match,PP,0.5081
+aba35e19b1a1,test,open specy,PS,in library,win cowger and sebastian primpke,False,transmission,no reliable match,PBT,-0.1181
+0ff07b780f34,test,open specy,PU,in library,win cowger and sebastian primpke,False,as measured,no reliable match,EVA,0.2722
+72bdaa2c3b96,test,open specy,PU,in library,win cowger and sebastian primpke,False,as measured,no reliable match,PLA,0.2714
+e74aee9aa36c,test,open specy,PU,in library,win cowger and sebastian primpke,False,as measured,no reliable match,EVA,0.2737
+26e7a1fffccd,test,open specy,PU,in library,win cowger and sebastian primpke,False,as measured,no reliable match,PLA,0.2734
+a4053fa34a57,test,open specy,PU,in library,win cowger and sebastian primpke,False,transmission,no reliable match,PK,-0.0604
+752b3eeaec26,test,open specy,PU,in library,win cowger and sebastian primpke,False,transmission,no reliable match,PK,-0.0448
+bb1d69a1aea0,test,open specy,PU,in library,win cowger and sebastian primpke,False,transmission,no reliable match,PK,-0.0863
+8d28ff8d87e0,test,open specy,PU,in library,win cowger and sebastian primpke,False,transmission,no reliable match,PK,-0.0386
+626d445d7016,test,open specy,PS,in library,win cowger and sebastian primpke,False,as measured,no reliable match,PS,0.1231
+d6a525a3420e,test,open specy,PS,in library,win cowger and sebastian primpke,False,as measured,no reliable match,PS,0.1238
+f2a3f7e75d7d,test,open specy,PS,in library,win cowger and sebastian primpke,False,as measured,no reliable match,PS,0.1253
+6233373284a8,test,open specy,PS,in library,win cowger and sebastian primpke,False,as measured,no reliable match,PS,0.126
+05664b210b3c,test,open specy,PS,in library,win cowger and sebastian primpke,False,transmission,no reliable match,PAN,-0.2011
+d9b7007e1437,test,open specy,PC,in library,win cowger and sebastian primpke,False,as measured,no reliable match,PET,0.2379
+18b5cdec77ad,test,open specy,PC,in library,win cowger and sebastian primpke,False,as measured,no reliable match,PET,0.221
+0358cf25bda7,test,open specy,PC,in library,win cowger and sebastian primpke,False,as measured,no reliable match,PET,0.293
+0683b7971f2b,test,open specy,PC,in library,win cowger and sebastian primpke,False,as measured,no reliable match,PET,0.2654
+048bf66099ca,test,open specy,PC,in library,win cowger and sebastian primpke,False,transmission,no reliable match,PET,0.241
+aa95dec542e2,test,open specy,PC,in library,win cowger and sebastian primpke,False,transmission,no reliable match,PET,0.2401
+16cbbc4f681a,test,open specy,PC,in library,win cowger and sebastian primpke,False,transmission,no reliable match,PET,0.256
+510005733a3e,test,open specy,PS,in library,win cowger and sebastian primpke,False,transmission,no reliable match,PK,-0.1377
+0df8eb96da5d,test,open specy,PLA,in library,win cowger and sebastian primpke,False,as measured,no reliable match,PC,0.3545
+59e54eee5150,test,open specy,PU,in library,win cowger and sebastian primpke,False,as measured,no reliable match,PA,-0.1288
+37be79a67f11,test,open specy,PU,in library,win cowger and sebastian primpke,False,as measured,no reliable match,PA,-0.1295
+83789da71c84,test,open specy,PU,in library,win cowger and sebastian primpke,False,as measured,no reliable match,PA,-0.1295
+32974b03fa30,test,open specy,PU,in library,win cowger and sebastian primpke,False,as measured,no reliable match,PBT,0.3029
+4daa2050e12a,test,open specy,PU,in library,win cowger and sebastian primpke,False,as measured,no reliable match,PBT,0.3144
+e1620d6c61db,test,open specy,PU,in library,win cowger and sebastian primpke,False,as measured,no reliable match,PBT,0.2988
+9b1335f96278,test,open specy,PU,in library,win cowger and sebastian primpke,False,as measured,no reliable match,PBT,0.2946
+bea5b2f08877,test,open specy,PU,in library,win cowger and sebastian primpke,False,transmission,no reliable match,PU,0.4053
+4cb347d52726,test,open specy,PU,in library,win cowger and sebastian primpke,False,transmission,no reliable match,PU,0.3906
+af47608ff765,test,open specy,PU,in library,win cowger and sebastian primpke,False,transmission,no reliable match,PU,0.407
+648f6047c884,test,open specy,PU,in library,win cowger and sebastian primpke,False,transmission,no reliable match,PU,0.4124
+773352ba8124,test,open specy,PU,in library,win cowger and sebastian primpke,False,as measured,no reliable match,PMMA,0.2152
+e155147c5d7b,test,open specy,PU,in library,win cowger and sebastian primpke,False,as measured,no reliable match,PMMA,0.2193
+6948b3d835c5,test,open specy,PU,in library,win cowger and sebastian primpke,False,transmission,no reliable match,PA,0.3492
+fe835dd33955,test,open specy,PU,in library,win cowger and sebastian primpke,False,transmission,no reliable match,PA,0.3413
+6be4cc325928,test,open specy,PU,in library,win cowger and sebastian primpke,False,transmission,no reliable match,PA,0.3443
+7404fb092910,test,open specy,PS,in library,win cowger and sebastian primpke,False,ATR,probable,PP,0.3885
+bc0a02ac5b32,test,open specy,PS,in library,win cowger and sebastian primpke,False,transmission,no reliable match,PU,-0.0197
+c286bc2f239f,test,open specy,PS,in library,win cowger and sebastian primpke,False,as measured,no reliable match,PVC,0.1166
+f08aea0f885f,test,open specy,PS,in library,win cowger and sebastian primpke,False,transmission,no reliable match,PS,0.4992
+72d0ca14a0fd,test,open specy,PS,in library,win cowger and sebastian primpke,False,as measured,no reliable match,PMMA,-0.0381
+293be9e06a4d,test,open specy,PS,in library,win cowger and sebastian primpke,False,transmission,weak,PS,0.7863
+665036d65c09,test,open specy,PS,in library,win cowger and sebastian primpke,False,transmission,no reliable match,PS,0.261
+190298945cb8,test,open specy,PS,in library,win cowger and sebastian primpke,False,as measured,no reliable match,PS,0.3015
+8635daf3ebc2,test,open specy,PS,in library,win cowger and sebastian primpke,False,as measured,no reliable match,PE,0.2752
+25007c399523,test,open specy,PS,in library,win cowger and sebastian primpke,False,transmission,no reliable match,PU,0.2864
+91b46e33e99c,test,open specy,PS,in library,win cowger and sebastian primpke,False,as measured,no reliable match,PE,0.0858
+d24c32283a1d,test,open specy,PS,in library,win cowger and sebastian primpke,False,transmission,weak,PS,0.6232
+2352dc10baae,test,open specy,PS,in library,moore institute for plastic pollution research,False,as measured,no reliable match,PVOH,0.0675
+8e7745f33aaf,test,open specy,PS,in library,moore institute for plastic pollution research,False,as measured,no reliable match,PA,0.0467
+68a11dbd8013,test,open specy,PS,in library,moore institute for plastic pollution research,False,as measured,no reliable match,PVOH,0.0701
+f51023dd553a,no reference,open specy,cellulose acetate,not in library,elise granek and kellie teague,False,as measured,no reliable match,PLA,-1.0
+873225919086,no reference,open specy,cellulose acetate,not in library,elise granek and kellie teague,False,as measured,no reliable match,PLA,-1.0
+2d532ae267ac,no reference,open specy,cellulose acetate,not in library,elise granek and kellie teague,False,as measured,no reliable match,PC,-1.0
+82eeb7ec3702,no reference,open specy,cellulose acetate,not in library,elise granek and kellie teague,False,as measured,no reliable match,PLA,-1.0
+e85cfc71f5ef,no reference,open specy,aramid,not in library,elise granek and kellie teague,False,as measured,no reliable match,PK,-1.0
+22d47326e0e7,no reference,open specy,aramid,not in library,elise granek and kellie teague,False,as measured,no reliable match,PK,-1.0
+ff9f2b95e82d,no reference,open specy,aramid,not in library,elise granek and kellie teague,False,as measured,no reliable match,PA,-1.0
+dc7887a17e58,no reference,open specy,aramid,not in library,elise granek and kellie teague,False,as measured,no reliable match,PBT,-1.0
+73bc64d1df5c,no reference,open specy,aramid,not in library,elise granek and kellie teague,False,as measured,no reliable match,PK,-1.0
+32b532392314,no reference,open specy,aramid,not in library,elise granek and kellie teague,False,as measured,no reliable match,PK,-1.0
+819ce8631699,no reference,open specy,cellulose,not in library,elise granek and kellie teague,False,as measured,no reliable match,EVOH,-1.0
+ca753e096b9a,no reference,open specy,cellulose,not in library,elise granek and kellie teague,False,as measured,no reliable match,PK,-1.0
+cc3d7debc68e,no reference,open specy,cellulose,not in library,elise granek and kellie teague,False,as measured,no reliable match,PP,-1.0
+7ea29aff0053,no reference,open specy,cellulose,not in library,elise granek and kellie teague,False,as measured,no reliable match,PP,-1.0
+fe7016fd8acc,no reference,open specy,cellulose,not in library,elise granek and kellie teague,False,as measured,no reliable match,EVOH,-1.0
+3d946c14ad37,no reference,open specy,cellulose,not in library,elise granek and kellie teague,False,as measured,no reliable match,EVOH,-1.0
+519c127adc04,no reference,open specy,cellulose,not in library,elise granek and kellie teague,False,as measured,no reliable match,PP,-1.0
+f15080fb36b6,no reference,open specy,cellulose,not in library,elise granek and kellie teague,False,as measured,no reliable match,EVOH,-1.0
+3ee72c5b5f54,no reference,open specy,cellulose,not in library,elise granek and kellie teague,False,as measured,no reliable match,PK,-1.0
+5e10bde79ba8,no reference,open specy,natural rubber,not in library,elise granek and kellie teague,False,transmission,weak,PAN,-1.0
+e1d4d01a957d,no reference,open specy,natural rubber,not in library,elise granek and kellie teague,False,transmission,weak,PAN,-1.0
+708b63e42cde,no reference,open specy,natural rubber,not in library,elise granek and kellie teague,False,transmission,weak,PAN,-1.0
+d99cd04f0e2a,no reference,open specy,natural rubber,not in library,elise granek and kellie teague,False,transmission,weak,PAN,-1.0
+95750aecdf9a,no reference,open specy,natural rubber,not in library,elise granek and kellie teague,False,transmission,weak,PP,-1.0
+99283d19dc07,no reference,open specy,natural rubber,not in library,elise granek and kellie teague,False,transmission,weak,PAN,-1.0
+f1780260d428,no reference,open specy,natural rubber,not in library,elise granek and kellie teague,False,transmission,weak,PAN,-1.0
+99f9c208a10e,no reference,open specy,natural rubber,not in library,elise granek and kellie teague,False,transmission,weak,PAN,-1.0
+265a6f7e2784,no reference,open specy,natural rubber,not in library,elise granek and kellie teague,False,transmission,weak,PAN,-1.0
+4b67dee8a157,no reference,open specy,natural rubber,not in library,elise granek and kellie teague,False,transmission,weak,PAN,-1.0
+69d347c5cdb7,no reference,open specy,natural rubber,not in library,elise granek and kellie teague,False,transmission,weak,PAN,-1.0
+2c97c4c52535,no reference,open specy,natural rubber,not in library,elise granek and kellie teague,False,transmission,weak,PAN,-1.0
+2f217a65d397,no reference,open specy,cellulose,not in library,elise granek and kellie teague,False,as measured,no reliable match,EVOH,-1.0
+d0f3b99ef43f,no reference,open specy,fluoropolymer,not in library,elise granek and kellie teague,False,as measured,no reliable match,EVOH,-1.0
+17e79cd60189,no reference,open specy,fluoropolymer,not in library,elise granek and kellie teague,False,as measured,no reliable match,EVA,-1.0
+81f39f58ab03,no reference,open specy,fluoropolymer,not in library,elise granek and kellie teague,False,ATR,weak,EVA,-1.0
+95be0a2e16d8,no reference,open specy,fluoropolymer,not in library,elise granek and kellie teague,False,as measured,no reliable match,EVA,-1.0
+cdceff45a7e7,no reference,open specy,fluoropolymer,not in library,elise granek and kellie teague,False,ATR,weak,EVA,-1.0
+ee7458b7f508,no reference,open specy,fluoropolymer,not in library,elise granek and kellie teague,False,as measured,no reliable match,EVOH,-1.0
+39ba05a10959,no reference,open specy,fluoropolymer,not in library,elise granek and kellie teague,False,as measured,no reliable match,EVOH,-1.0
+93ac9cb6b889,no reference,open specy,fluoropolymer,not in library,elise granek and kellie teague,False,as measured,no reliable match,EVOH,-1.0
+5f95ed323419,no reference,open specy,fluoropolymer,not in library,elise granek and kellie teague,False,as measured,no reliable match,EVOH,-1.0
+f11d24f6b6be,no reference,open specy,fluoropolymer,not in library,elise granek and kellie teague,False,as measured,no reliable match,EVOH,-1.0
+10d4ebae1fb0,no reference,open specy,fluoropolymer,not in library,elise granek and kellie teague,False,as measured,no reliable match,EVA,-1.0
+c449f57dc66b,no reference,open specy,fluoropolymer,not in library,elise granek and kellie teague,False,as measured,no reliable match,EVA,-1.0
+b39454035986,no reference,open specy,fluoropolymer,not in library,elise granek and kellie teague,False,as measured,no reliable match,EVA,-1.0
+092426754b4b,no reference,open specy,fluoropolymer,not in library,elise granek and kellie teague,False,ATR,weak,EVA,-1.0
+768f2500f303,no reference,open specy,protein,not in library,elise granek and kellie teague,False,as measured,no reliable match,PLA,-1.0
+ade26008f4a1,no reference,open specy,cellulose,not in library,elise granek and kellie teague,False,as measured,no reliable match,PLA,-1.0
+dbe856694a75,no reference,open specy,silicone,not in library,elise granek and kellie teague,False,as measured,no reliable match,EVOH,-1.0
+d8733b951207,no reference,open specy,silicone,not in library,elise granek and kellie teague,False,as measured,no reliable match,EVOH,-1.0
+c91e8e130922,no reference,open specy,silicone,not in library,elise granek and kellie teague,False,as measured,no reliable match,PVC,-1.0
+ed1e1459077b,no reference,open specy,silicone,not in library,elise granek and kellie teague,False,as measured,no reliable match,EVOH,-1.0
+8fe86e6a0d27,no reference,open specy,silicone,not in library,elise granek and kellie teague,False,as measured,no reliable match,PVOH,-1.0
+2a93056040b6,no reference,open specy,silicone,not in library,elise granek and kellie teague,False,as measured,no reliable match,EVOH,-1.0
+6986ad6d3f2d,no reference,open specy,silicone,not in library,elise granek and kellie teague,False,as measured,no reliable match,PVOH,-1.0
+bddeac2fa1f5,no reference,open specy,silicone,not in library,elise granek and kellie teague,False,as measured,no reliable match,EVOH,-1.0
+66b45477ab05,no reference,open specy,silicone,not in library,elise granek and kellie teague,False,as measured,no reliable match,EVOH,-1.0
+db6c25196c0a,no reference,open specy,silicone,not in library,elise granek and kellie teague,False,as measured,no reliable match,EVOH,-1.0
+bf50cc47bce6,no reference,open specy,silicone,not in library,elise granek and kellie teague,False,as measured,no reliable match,EVOH,-1.0
+00e28e12ac5f,no reference,open specy,silicone,not in library,elise granek and kellie teague,False,as measured,no reliable match,EVOH,-1.0
+28a2c02ef2c9,no reference,open specy,silicone,not in library,elise granek and kellie teague,False,as measured,no reliable match,EVOH,-1.0
+b8ea563bd7f2,no reference,open specy,silicone,not in library,elise granek and kellie teague,False,as measured,no reliable match,EVOH,-1.0
+52d74e1aafb9,no reference,open specy,silicone,not in library,elise granek and kellie teague,False,as measured,no reliable match,EVOH,-1.0
+efa5a55dea0a,no reference,open specy,silicone,not in library,elise granek and kellie teague,False,as measured,no reliable match,EVOH,-1.0
+9da014844225,no reference,open specy,silicone,not in library,elise granek and kellie teague,False,as measured,no reliable match,EVOH,-1.0
+4df47e972c56,no reference,open specy,silicone,not in library,elise granek and kellie teague,False,as measured,no reliable match,EVOH,-1.0
+876d24ccf9e6,no reference,open specy,silicone,not in library,elise granek and kellie teague,False,as measured,no reliable match,EVOH,-1.0
+c19238b78366,no reference,open specy,silicone,not in library,elise granek and kellie teague,False,as measured,no reliable match,EVOH,-1.0
+b1b05aa550af,no reference,open specy,silicone,not in library,elise granek and kellie teague,False,as measured,no reliable match,EVOH,-1.0
+e74eb968e8ec,no reference,open specy,silicone,not in library,elise granek and kellie teague,False,as measured,no reliable match,PVOH,-1.0
+2315f4f49c94,no reference,open specy,silicone,not in library,elise granek and kellie teague,False,as measured,no reliable match,PVC,-1.0
+a15facc4ebb4,no reference,open specy,silicone,not in library,elise granek and kellie teague,False,as measured,no reliable match,EVOH,-1.0
+927e4531002f,no reference,open specy,silicone,not in library,elise granek and kellie teague,False,as measured,no reliable match,PVC,-1.0
+f9ac6f064ef4,no reference,open specy,cellulose acetate,not in library,elise granek and kellie teague,False,as measured,no reliable match,PLA,-1.0
+9d674748eb86,no reference,open specy,cellulose acetate,not in library,elise granek and kellie teague,False,ATR,weak,PLA,-1.0
+0e1c8fa7c3e6,no reference,open specy,cellulose acetate,not in library,elise granek and kellie teague,False,ATR,weak,PLA,-1.0
+e2a298453a34,no reference,open specy,cellulose,not in library,elise granek and kellie teague,False,as measured,no reliable match,PC,-1.0
+5f1ee038baa1,no reference,open specy,cellulose,not in library,elise granek and kellie teague,False,as measured,no reliable match,PP,-1.0
+fbf041a1102d,no reference,open specy,fluoropolymer,not in library,elise granek and kellie teague,False,as measured,no reliable match,PVC,-1.0
+4e9f8bad25dd,no reference,open specy,fluoropolymer,not in library,elise granek and kellie teague,False,as measured,no reliable match,PVOH,-1.0
+57123042e72f,no reference,open specy,fluoropolymer,not in library,elise granek and kellie teague,False,as measured,no reliable match,PVOH,-1.0
+7db4926afbb7,no reference,open specy,fluoropolymer,not in library,elise granek and kellie teague,False,as measured,no reliable match,PVOH,-1.0
+23a68511b6d8,no reference,open specy,fluoropolymer,not in library,elise granek and kellie teague,False,as measured,no reliable match,PVOH,-1.0
+ff235d20a719,no reference,open specy,fluoropolymer,not in library,elise granek and kellie teague,False,as measured,no reliable match,PS,-1.0
+19d93cd0aec8,no reference,open specy,fluoropolymer,not in library,elise granek and kellie teague,False,as measured,no reliable match,PA,-1.0
+93d33e6e8aea,no reference,open specy,fluoropolymer,not in library,elise granek and kellie teague,False,as measured,no reliable match,PS,-1.0
+0e3d48b252d3,no reference,open specy,fluoropolymer,not in library,elise granek and kellie teague,False,as measured,no reliable match,PA,-1.0
+89eb201a53f7,no reference,open specy,fluoropolymer,not in library,elise granek and kellie teague,False,as measured,no reliable match,PBT,-1.0
+83803107c9e7,no reference,open specy,fluoropolymer,not in library,elise granek and kellie teague,False,as measured,no reliable match,PBT,-1.0
+790892ef925b,no reference,open specy,fluoropolymer,not in library,elise granek and kellie teague,False,as measured,no reliable match,PA,-1.0
+57508ed2b996,no reference,open specy,fluoropolymer,not in library,elise granek and kellie teague,False,as measured,no reliable match,PVOH,-1.0
+88ba964763bf,no reference,open specy,fluoropolymer,not in library,elise granek and kellie teague,False,as measured,no reliable match,PVOH,-1.0
+065c2e6fa8a5,no reference,open specy,fluoropolymer,not in library,elise granek and kellie teague,False,as measured,no reliable match,PVOH,-1.0
+ceb1fa045368,no reference,open specy,fluoropolymer,not in library,elise granek and kellie teague,False,as measured,no reliable match,PVOH,-1.0
+55cb4bba08a5,no reference,open specy,fluoropolymer,not in library,elise granek and kellie teague,False,as measured,no reliable match,EVOH,-1.0
+ee46f7976431,no reference,open specy,PVAc,not in library,elise granek and kellie teague,False,as measured,no reliable match,PLA,-1.0
+6586046e963c,no reference,open specy,PVAc,not in library,elise granek and kellie teague,False,as measured,no reliable match,PVOH,-1.0
+d933634864ee,no reference,open specy,PVAc,not in library,elise granek and kellie teague,False,as measured,no reliable match,PLA,-1.0
+74d4f6797cb5,no reference,open specy,PVAc,not in library,elise granek and kellie teague,False,as measured,no reliable match,PLA,-1.0
+85c3d7fde7e1,no reference,open specy,PVAc,not in library,elise granek and kellie teague,False,ATR,weak,PVOH,-1.0
+2596d3cc93cf,no reference,open specy,PVAc,not in library,elise granek and kellie teague,False,as measured,no reliable match,PVOH,-1.0
+acdd150deeab,no reference,open specy,PVAc,not in library,elise granek and kellie teague,False,as measured,no reliable match,PVOH,-1.0
+a90fe576cd07,no reference,open specy,PVAc,not in library,elise granek and kellie teague,False,as measured,no reliable match,PLA,-1.0
+680c2d9565e5,no reference,open specy,PVAc,not in library,elise granek and kellie teague,False,ATR,weak,PVOH,-1.0
+6d9310b8fec2,no reference,open specy,PVAc,not in library,elise granek and kellie teague,False,as measured,no reliable match,PLA,-1.0
+7c37cb06d86b,no reference,open specy,PVAc,not in library,elise granek and kellie teague,False,as measured,no reliable match,PLA,-1.0
+eedacc2a1cf2,no reference,open specy,PVAc,not in library,elise granek and kellie teague,False,as measured,no reliable match,PLA,-1.0
+0bb297f0e3b8,no reference,open specy,PVAc,not in library,elise granek and kellie teague,False,as measured,no reliable match,PVC,-1.0
+f200f4c2de56,no reference,open specy,PVAc,not in library,elise granek and kellie teague,False,ATR,weak,PLA,-1.0
+cc47f95180ac,no reference,open specy,SAN,not in library,elise granek and kellie teague,False,as measured,no reliable match,PS,-1.0
+3ae4ef240bc7,no reference,open specy,SAN,not in library,elise granek and kellie teague,False,as measured,no reliable match,EVOH,-1.0
+b3bd2ab2ad1e,no reference,open specy,SAN,not in library,elise granek and kellie teague,False,as measured,no reliable match,PS,-1.0
+7b077587e61d,no reference,open specy,cellulose acetate,not in library,elise granek and kellie teague,False,as measured,no reliable match,PLA,-1.0
+6bc14282bf2b,no reference,open specy,cellulose,not in library,elise granek and kellie teague,False,as measured,no reliable match,PU,-1.0
+3bf68e6eea3e,no reference,open specy,cellulose,not in library,elise granek and kellie teague,False,as measured,no reliable match,PMMA,-1.0
+50a4dfaa09fa,no reference,open specy,protein,not in library,elise granek and kellie teague,False,transmission,weak,PMMA,-1.0
+e67053e72a83,no reference,open specy,protein,not in library,elise granek and kellie teague,False,transmission,weak,PBT,-1.0
+6785d4054e5b,no reference,open specy,protein,not in library,elise granek and kellie teague,False,transmission,weak,PET,-1.0
+fe6bc6ec1e9d,no reference,open specy,fluoropolymer,not in library,gicquel et al. 2024,False,as measured,no reliable match,PC,-1.0
+3084b0cd15e0,no reference,open specy,cellulose,not in library,plopp library,False,as measured,no reliable match,PVOH,-1.0
+f23cc33bb936,no reference,open specy,cellulose,not in library,plopp library,False,as measured,no reliable match,PVOH,-1.0
+b452edd5ab99,no reference,open specy,cellulose,not in library,plopp library,False,as measured,no reliable match,PVOH,-1.0
+055918dc9a2a,no reference,open specy,cellulose,not in library,plopp library,False,as measured,no reliable match,PVOH,-1.0
+76d8a61d1ba5,no reference,open specy,cellulose,not in library,plopp library,False,as measured,no reliable match,PVOH,-1.0
+d86b4eb522d0,no reference,open specy,cellulose,not in library,plopp library,False,as measured,no reliable match,PET,-1.0
+718667451f5b,no reference,open specy,cellulose,not in library,plopp library,False,as measured,no reliable match,PVOH,-1.0
+aadbf9f77d82,no reference,open specy,cellulose,not in library,plopp library,False,as measured,no reliable match,PVOH,-1.0
+2362a62a3798,no reference,open specy,epoxy,not in library,plopp library,False,as measured,no reliable match,PC,-1.0
+f5cfa019fb24,no reference,open specy,epoxy,not in library,plopp library,False,as measured,no reliable match,PC,-1.0
+8e9622ddc018,no reference,open specy,epoxy,not in library,plopp library,False,as measured,no reliable match,PC,-1.0
+decc2f8c434d,no reference,open specy,cellulose,not in library,plopp library,False,as measured,no reliable match,PVOH,-1.0
+772aed2b7953,no reference,open specy,cellulose,not in library,plopp library,False,as measured,no reliable match,PVOH,-1.0
+a73564b59b96,no reference,open specy,cellulose,not in library,plopp library,False,as measured,no reliable match,PVOH,-1.0
+4cc63effb0d8,no reference,open specy,cellulose,not in library,plopp library,False,as measured,no reliable match,PVOH,-1.0
+70606b9dfaa9,no reference,open specy,cellulose,not in library,plopp library,False,as measured,no reliable match,PVOH,-1.0
+cfc12fd88f37,no reference,open specy,cellulose,not in library,plopp library,False,as measured,no reliable match,PVOH,-1.0
+c81302e09b4c,no reference,open specy,cellulose,not in library,plopp library,False,as measured,no reliable match,PVOH,-1.0
+18d5a9fc1c32,no reference,open specy,cellulose,not in library,plopp library,False,as measured,no reliable match,PVOH,-1.0
+302b8bd4b0b6,no reference,open specy,cellulose,not in library,plopp library,False,as measured,no reliable match,PVOH,-1.0
+c0a6a6364efc,no reference,open specy,cellulose,not in library,plopp library,False,as measured,no reliable match,PVOH,-1.0
+5d9869023748,no reference,open specy,cellulose,not in library,plopp library,False,as measured,no reliable match,PVOH,-1.0
+d29be47edacd,no reference,open specy,cellulose,not in library,plopp library,False,as measured,no reliable match,PVOH,-1.0
+60e2a983ae06,no reference,open specy,epoxy,not in library,primpke et al. 2018,False,ATR,weak,PET,-1.0
+a0d2c973856b,no reference,open specy,protein,not in library,primpke et al. 2018,False,ATR,weak,PA,-1.0
+9ad4014441d3,no reference,open specy,cellulose acetate,not in library,primpke et al. 2018,False,ATR,no reliable match,PET,-1.0
+00fb485e9c19,no reference,open specy,silicone,not in library,primpke et al. 2018,False,ATR,no reliable match,PVOH,-1.0
+0c49592d7a85,no reference,open specy,cellulose,not in library,primpke et al. 2018,False,ATR,no reliable match,PC,-1.0
+f984fe4615cb,no reference,open specy,silica,not in library,primpke et al. 2018,False,as measured,no reliable match,PET,-1.0
+3b7c43c939c1,no reference,open specy,protein,not in library,primpke et al. 2018,False,ATR,weak,PA,-1.0
+c7c18c756071,no reference,open specy,polyimide,not in library,primpke et al. 2018,False,ATR,weak,PET,-1.0
+bf57a8ddef63,no reference,open specy,aramid,not in library,primpke et al. 2018,False,ATR,no reliable match,PA,-1.0
+c3cfe0af37f7,no reference,open specy,aramid,not in library,primpke et al. 2018,False,ATR,no reliable match,PA,-1.0
+cb2c1a338652,no reference,open specy,epoxy,not in library,primpke et al. 2018,False,ATR,no reliable match,PC,-1.0
+ad5c31d50eb8,no reference,open specy,fluoropolymer,not in library,primpke et al. 2018,False,ATR,no reliable match,PC,-1.0
+a9873e6b49ce,no reference,open specy,PVAc,not in library,primpke et al. 2018,False,ATR,weak,PMMA,-1.0
+bcdb85365825,no reference,open specy,POM,not in library,primpke et al. 2018,False,ATR,no reliable match,PVOH,-1.0
+5eb616db7c24,no reference,open specy,PEEK,not in library,primpke et al. 2018,False,ATR,no reliable match,PS,-1.0
+782d7e4cb1d1,no reference,open specy,fluoropolymer,not in library,primpke et al. 2018,False,ATR,no reliable match,PC,-1.0
+382bca2ea04a,no reference,open specy,POM,not in library,primpke et al. 2018,False,ATR,no reliable match,PVOH,-1.0
+c378ad294fff,no reference,open specy,SAN,not in library,primpke et al. 2018,False,ATR,weak,PS,-1.0
+0c4fbbdfb003,no reference,open specy,protein,not in library,primpke et al. 2018,False,ATR,weak,PA,-1.0
+053c38b75a2c,no reference,open specy,protein,not in library,primpke et al. 2018,False,ATR,weak,PA,-1.0
+c8924069778c,no reference,open specy,SAN,not in library,primpke et al. 2018,False,ATR,weak,PS,-1.0
+2bea68421529,no reference,open specy,protein,not in library,primpke et al. 2018,False,ATR,weak,PA,-1.0
+58e62ee30696,no reference,open specy,protein,not in library,primpke et al. 2018,False,ATR,weak,PA,-1.0
+d177249b53c8,no reference,open specy,nitrile rubber,not in library,suja sukumaran; thermo fisher scientific,True,ATR,weak,PMMA,-1.0
+772ce86ea35a,no reference,open specy,cellulose,not in library,suja sukumaran; thermo fisher scientific,False,as measured,no reliable match,PVOH,-1.0
+75b39fa961e4,no reference,open specy,silicone,not in library,suja sukumaran; thermo fisher scientific,False,as measured,no reliable match,PVOH,-1.0
+905cfb0a2d95,no reference,open specy,ABS,not in library,hpu polymer kit 1.0,False,ATR,weak,PS,-1.0
+86f351cd4bbb,no reference,open specy,cellulose,not in library,archaeometrielabor,False,transmission,no reliable match,PLA,-1.0
+bd6a865180d9,no reference,open specy,epoxy,not in library,kimmel_center,False,as measured,no reliable match,PC,-1.0
+fbeacf71ad33,no reference,open specy,protein,not in library,kimmel_center,False,as measured,no reliable match,PA,-1.0
+ca53fe1b944b,no reference,open specy,PVAc,not in library,pslc_database,False,ATR,weak,EVA,-1.0
+d8c1d3697fa9,no reference,open specy,fluoropolymer,not in library,swgdrug,False,ATR,weak,PMMA,-1.0
+9fdaa596fefc,no reference,open specy,fluoropolymer,not in library,swgdrug,False,as measured,no reliable match,PA,-1.0
+ee6984aae697,no reference,open specy,ABS,not in library,flopp; de frond et al. 2021,False,transmission,weak,PS,-1.0
+d346f1f3baac,no reference,open specy,cellulose acetate,not in library,flopp; de frond et al. 2021,False,transmission,no reliable match,PET,-1.0
+9a527571ab3e,no reference,open specy,cellulose acetate,not in library,flopp; de frond et al. 2021,False,transmission,no reliable match,PET,-1.0
+c971c9d7b7a3,no reference,open specy,ABS,not in library,flopp; de frond et al. 2021,False,transmission,weak,PS,-1.0
+9cf9ed9aedbf,no reference,open specy,ABS,not in library,flopp; de frond et al. 2021,False,transmission,weak,PS,-1.0
+93fc37e89b45,no reference,open specy,ABS,not in library,flopp; de frond et al. 2021,False,transmission,weak,PS,-1.0
+7837cc8be26e,no reference,open specy,ABS,not in library,flopp; de frond et al. 2021,False,transmission,weak,PS,-1.0
+b3dd0f925e4e,no reference,open specy,ABS,not in library,flopp; de frond et al. 2021,False,transmission,weak,PAN,-1.0
+3ca8b8b97852,no reference,open specy,ABS,not in library,flopp; de frond et al. 2021,False,transmission,no reliable match,PS,-1.0
+04cf5f7bc2d9,no reference,open specy,ABS,not in library,flopp; de frond et al. 2021,False,transmission,weak,PS,-1.0
+f4cd2bab0535,no reference,open specy,ABS,not in library,flopp; de frond et al. 2021,False,transmission,weak,PS,-1.0
+f3c8b8130a54,no reference,open specy,ABS,not in library,flopp; de frond et al. 2021,False,transmission,weak,PS,-1.0
+09d6a6ca4d33,no reference,open specy,ABS,not in library,flopp; de frond et al. 2021,False,transmission,no reliable match,PS,-1.0
+9f655c56e156,no reference,open specy,ABS,not in library,flopp; de frond et al. 2021,False,transmission,weak,PS,-1.0
+b79f9096d14f,no reference,open specy,ABS,not in library,flopp; de frond et al. 2021,False,transmission,no reliable match,EVA,-1.0
+70432570b145,no reference,open specy,ABS,not in library,flopp; de frond et al. 2021,False,transmission,weak,PS,-1.0
+1252fc96c2ce,no reference,open specy,cellulose,not in library,flopp; de frond et al. 2021,False,transmission,no reliable match,PVC,-1.0
+de7345cbabf9,no reference,open specy,cellulose,not in library,flopp; de frond et al. 2021,False,transmission,no reliable match,PMMA,-1.0
+90ec7cdafff7,no reference,open specy,cellulose,not in library,flopp; de frond et al. 2021,False,transmission,no reliable match,PMMA,-1.0
+f655a50a86d9,no reference,open specy,SAN,not in library,win cowger and sebastian primpke,False,ATR,weak,PS,-1.0
+de77b5399efe,no reference,open specy,SAN,not in library,win cowger and sebastian primpke,False,ATR,weak,PS,-1.0
+a7d52d9e94b3,no reference,open specy,SAN,not in library,win cowger and sebastian primpke,False,transmission,weak,PS,-1.0
+4608222495fe,no reference,open specy,SAN,not in library,win cowger and sebastian primpke,False,transmission,weak,PS,-1.0
+79499a9e925d,no reference,open specy,SAN,not in library,win cowger and sebastian primpke,False,transmission,weak,PS,-1.0
+ecb64d34630e,no reference,open specy,cellulose,not in library,win cowger and sebastian primpke,False,transmission,no reliable match,EVOH,-1.0
+1e7d0d7b5980,no reference,open specy,cellulose,not in library,win cowger and sebastian primpke,False,transmission,no reliable match,EVOH,-1.0
+11027cdd1187,no reference,open specy,cellulose acetate,not in library,win cowger and sebastian primpke,False,as measured,no reliable match,PC,-1.0
+b8ceb12f6c11,no reference,open specy,cellulose acetate,not in library,win cowger and sebastian primpke,False,as measured,no reliable match,PET,-1.0
+b4c106feea16,no reference,open specy,cellulose acetate,not in library,win cowger and sebastian primpke,False,as measured,no reliable match,PET,-1.0
+17f722bcffe1,no reference,open specy,cellulose acetate,not in library,win cowger and sebastian primpke,False,as measured,no reliable match,PC,-1.0
+6d1e7b680d75,no reference,open specy,cellulose acetate,not in library,win cowger and sebastian primpke,False,transmission,no reliable match,PE,-1.0
+1a9372936ab5,no reference,open specy,cellulose acetate,not in library,win cowger and sebastian primpke,False,transmission,no reliable match,PE,-1.0
+122a9a9837df,no reference,open specy,cellulose acetate,not in library,win cowger and sebastian primpke,False,transmission,no reliable match,PE,-1.0
+935458d0dcb6,no reference,open specy,cellulose acetate,not in library,win cowger and sebastian primpke,False,transmission,no reliable match,PE,-1.0
+a1a31b46cdcd,no reference,open specy,epoxy,not in library,win cowger and sebastian primpke,False,transmission,no reliable match,EVOH,-1.0
+d62cbf8b3cd4,no reference,open specy,epoxy,not in library,win cowger and sebastian primpke,False,transmission,no reliable match,EVOH,-1.0
+0fb49d89bf0c,no reference,open specy,PVAc,not in library,win cowger and sebastian primpke,False,as measured,no reliable match,PVOH,-1.0
+6b988ac3297e,no reference,open specy,PVAc,not in library,win cowger and sebastian primpke,False,as measured,no reliable match,PVOH,-1.0
+ab037f518c86,no reference,open specy,PVAc,not in library,win cowger and sebastian primpke,False,as measured,no reliable match,PVOH,-1.0
+dcded50a8a56,no reference,open specy,PVAc,not in library,win cowger and sebastian primpke,False,as measured,no reliable match,PVOH,-1.0
+33a3a5590cbf,no reference,open specy,PVAc,not in library,win cowger and sebastian primpke,False,transmission,no reliable match,PVC,-1.0
+6a2757df8409,no reference,open specy,PVAc,not in library,win cowger and sebastian primpke,False,transmission,no reliable match,PVC,-1.0
+c0b735f20dfa,no reference,open specy,PVAc,not in library,win cowger and sebastian primpke,False,transmission,no reliable match,EVOH,-1.0
+eb31477342dd,no reference,open specy,SAN,not in library,win cowger and sebastian primpke,False,as measured,no reliable match,PAN,-1.0
+2ae9799afbaa,no reference,open specy,SAN,not in library,win cowger and sebastian primpke,False,as measured,no reliable match,PS,-1.0
+bfb2028ff263,no reference,open specy,SAN,not in library,win cowger and sebastian primpke,False,transmission,no reliable match,PBT,-1.0
+8c125b18dc82,no reference,open specy,SAN,not in library,win cowger and sebastian primpke,False,transmission,no reliable match,PBT,-1.0
+2306c019ce76,no reference,open specy,cellulose,not in library,win cowger and sebastian primpke,False,transmission,no reliable match,PMMA,-1.0
+1095b1267290,no reference,open specy,natural rubber,not in library,win cowger and sebastian primpke,False,as measured,no reliable match,PC,-1.0
+c8856f214c97,no reference,open specy,natural rubber,not in library,win cowger and sebastian primpke,False,transmission,no reliable match,PET,-1.0
+3b3f613b68e5,no reference,open specy,natural rubber,not in library,win cowger and sebastian primpke,False,transmission,no reliable match,EVOH,-1.0
+eb2aeb216d48,no reference,open specy,natural rubber,not in library,win cowger and sebastian primpke,False,transmission,no reliable match,EVOH,-1.0
+81019e9d6d95,no reference,open specy,natural rubber,not in library,win cowger and sebastian primpke,False,transmission,no reliable match,EVOH,-1.0
+5ee3be000440,no reference,open specy,natural rubber,not in library,win cowger and sebastian primpke,False,transmission,no reliable match,PVOH,-1.0
+3b7e9dfa8b1f,no reference,open specy,silicone,not in library,win cowger and sebastian primpke,False,as measured,no reliable match,PC,-1.0
+16b7bd30e629,no reference,open specy,silicone,not in library,win cowger and sebastian primpke,False,as measured,no reliable match,PC,-1.0
+d76f6690dfb2,no reference,open specy,silicone,not in library,win cowger and sebastian primpke,False,as measured,no reliable match,PVC,-1.0
+71b1a0d34d63,no reference,open specy,silicone,not in library,win cowger and sebastian primpke,False,as measured,no reliable match,PVC,-1.0
+f9edbb8211e9,no reference,open specy,silicone,not in library,win cowger and sebastian primpke,False,transmission,no reliable match,PP,-1.0
+d15481a3953e,no reference,open specy,silicone,not in library,win cowger and sebastian primpke,False,transmission,no reliable match,PP,-1.0
+0606f8cedc6b,no reference,open specy,silicone,not in library,win cowger and sebastian primpke,False,transmission,no reliable match,PP,-1.0
+4babe277316e,no reference,open specy,silicone,not in library,win cowger and sebastian primpke,False,transmission,no reliable match,PP,-1.0
+70aa29af0983,no reference,open specy,cellulose acetate,not in library,win cowger and sebastian primpke,False,as measured,no reliable match,EVA,-1.0
+438415708ecb,no reference,open specy,cellulose acetate,not in library,win cowger and sebastian primpke,False,as measured,no reliable match,EVA,-1.0
+ace9b9d5e335,no reference,open specy,cellulose acetate,not in library,win cowger and sebastian primpke,False,as measured,no reliable match,EVA,-1.0
+9463db3e0380,no reference,open specy,cellulose acetate,not in library,win cowger and sebastian primpke,False,as measured,no reliable match,EVA,-1.0
+efdd1103964b,no reference,open specy,cellulose acetate,not in library,win cowger and sebastian primpke,False,transmission,no reliable match,PK,-1.0
+c93368e39ace,no reference,open specy,cellulose acetate,not in library,win cowger and sebastian primpke,False,transmission,no reliable match,PK,-1.0
+728b878006cd,no reference,open specy,cellulose acetate,not in library,win cowger and sebastian primpke,False,transmission,no reliable match,PK,-1.0
+0036d2db1a0d,no reference,open specy,cellulose acetate,not in library,win cowger and sebastian primpke,False,transmission,no reliable match,PK,-1.0
+492e27548258,no reference,open specy,fluoropolymer,not in library,win cowger and sebastian primpke,False,as measured,no reliable match,PBT,-1.0
+0f4727398071,no reference,open specy,fluoropolymer,not in library,win cowger and sebastian primpke,False,as measured,no reliable match,PBT,-1.0
+211145bf6b73,no reference,open specy,fluoropolymer,not in library,win cowger and sebastian primpke,False,as measured,no reliable match,PBT,-1.0
+f8a926e041da,no reference,open specy,fluoropolymer,not in library,win cowger and sebastian primpke,False,as measured,no reliable match,PBT,-1.0
+1afe54f7207f,no reference,open specy,fluoropolymer,not in library,win cowger and sebastian primpke,False,transmission,no reliable match,PU,-1.0
+93146ba23af6,no reference,open specy,fluoropolymer,not in library,win cowger and sebastian primpke,False,transmission,no reliable match,PU,-1.0
+75a780fc57f4,no reference,open specy,fluoropolymer,not in library,win cowger and sebastian primpke,False,transmission,no reliable match,PU,-1.0
+316b79e133de,no reference,open specy,fluoropolymer,not in library,win cowger and sebastian primpke,False,transmission,no reliable match,PU,-1.0
+6c19b02b08de,no reference,open specy,epoxy,not in library,win cowger and sebastian primpke,False,as measured,no reliable match,EVA,-1.0
+1a0c3f600f78,no reference,open specy,epoxy,not in library,win cowger and sebastian primpke,False,as measured,no reliable match,PLA,-1.0
+8011643bd714,no reference,open specy,epoxy,not in library,win cowger and sebastian primpke,False,as measured,no reliable match,PLA,-1.0
+11609aef5c85,no reference,open specy,epoxy,not in library,win cowger and sebastian primpke,False,as measured,no reliable match,PLA,-1.0
+d95835c1351f,no reference,open specy,polyimide,not in library,win cowger and sebastian primpke,False,as measured,no reliable match,PMMA,-1.0
+5a2ef70bb4dd,no reference,open specy,polyimide,not in library,win cowger and sebastian primpke,False,as measured,no reliable match,PMMA,-1.0
+c6f70b4b1bcc,no reference,open specy,polyimide,not in library,win cowger and sebastian primpke,False,as measured,no reliable match,PMMA,-1.0
+4f744126c114,no reference,open specy,polyimide,not in library,win cowger and sebastian primpke,False,as measured,no reliable match,PMMA,-1.0
+db67674e28fc,no reference,open specy,polyimide,not in library,win cowger and sebastian primpke,False,transmission,no reliable match,PBT,-1.0
+e11cabb56bea,no reference,open specy,polyimide,not in library,win cowger and sebastian primpke,False,transmission,no reliable match,PU,-1.0
+fec9418d48de,no reference,open specy,polyimide,not in library,win cowger and sebastian primpke,False,transmission,no reliable match,PU,-1.0
+18afb79e442f,no reference,open specy,polyimide,not in library,win cowger and sebastian primpke,False,transmission,no reliable match,EVOH,-1.0
+2539af983424,no reference,open specy,POM,not in library,win cowger and sebastian primpke,False,as measured,no reliable match,PC,-1.0
+d35d5f0eb897,no reference,open specy,POM,not in library,win cowger and sebastian primpke,False,transmission,no reliable match,PLA,-1.0
+53410f5c48a8,no reference,open specy,POM,not in library,win cowger and sebastian primpke,False,transmission,no reliable match,EVOH,-1.0
+98684b1cf7d6,no reference,open specy,POM,not in library,win cowger and sebastian primpke,False,transmission,no reliable match,PC,-1.0
+ab9b951f744c,no reference,open specy,cellulose,not in library,win cowger and sebastian primpke,False,as measured,no reliable match,EVOH,-1.0
+8a1942721e60,no reference,open specy,cellulose,not in library,win cowger and sebastian primpke,False,transmission,no reliable match,PVC,-1.0
+41e117d7c5e3,no reference,open specy,cellulose acetate,not in library,win cowger and sebastian primpke,False,as measured,no reliable match,PK,-1.0
+76fe87878631,no reference,open specy,cellulose acetate,not in library,win cowger and sebastian primpke,False,as measured,no reliable match,PK,-1.0
+4a430a573fde,no reference,open specy,cellulose acetate,not in library,win cowger and sebastian primpke,False,as measured,no reliable match,PK,-1.0
+fb5040ad7c7e,no reference,open specy,cellulose acetate,not in library,win cowger and sebastian primpke,False,as measured,no reliable match,PK,-1.0
+0409c987c927,no reference,open specy,cellulose acetate,not in library,win cowger and sebastian primpke,False,transmission,no reliable match,PK,-1.0
+eb609dc0fb78,no reference,open specy,cellulose acetate,not in library,win cowger and sebastian primpke,False,transmission,no reliable match,PK,-1.0
+d6ab527f3f75,no reference,open specy,cellulose acetate,not in library,win cowger and sebastian primpke,False,transmission,no reliable match,PLA,-1.0
+40ea4694ec76,no reference,open specy,cellulose acetate,not in library,win cowger and sebastian primpke,False,transmission,no reliable match,PLA,-1.0
+b391a29fc458,no reference,open specy,PEEK,not in library,win cowger and sebastian primpke,False,as measured,no reliable match,PA,-1.0
+4c03bb96a242,no reference,open specy,PEEK,not in library,win cowger and sebastian primpke,False,as measured,no reliable match,PA,-1.0
+585dcbfd1d19,no reference,open specy,PEEK,not in library,win cowger and sebastian primpke,False,as measured,no reliable match,PA,-1.0
+99732da3e8aa,no reference,open specy,PEEK,not in library,win cowger and sebastian primpke,False,as measured,no reliable match,PA,-1.0
+3debef090566,no reference,open specy,PEEK,not in library,win cowger and sebastian primpke,False,transmission,no reliable match,PC,-1.0
+405cf5076dd1,no reference,open specy,PEEK,not in library,win cowger and sebastian primpke,False,transmission,no reliable match,PA,-1.0
+c2fb1dcc4908,no reference,open specy,PEEK,not in library,win cowger and sebastian primpke,False,transmission,no reliable match,PVOH,-1.0
+b4b2db5b0d4b,no reference,open specy,polyimide,not in library,win cowger and sebastian primpke,False,as measured,no reliable match,PC,-1.0
+e305928f0b42,no reference,open specy,polyimide,not in library,win cowger and sebastian primpke,False,as measured,no reliable match,PC,-1.0
+9183e90b16a5,no reference,open specy,polyimide,not in library,win cowger and sebastian primpke,False,as measured,no reliable match,PC,-1.0
+0a4acb375b81,no reference,open specy,polyimide,not in library,win cowger and sebastian primpke,False,as measured,no reliable match,PC,-1.0
+0f0917d0ce49,no reference,open specy,polyimide,not in library,win cowger and sebastian primpke,False,transmission,no reliable match,PC,-1.0
+72779a99dc00,no reference,open specy,polyimide,not in library,win cowger and sebastian primpke,False,transmission,no reliable match,PC,-1.0
+f6adb21dc5ab,no reference,open specy,polyimide,not in library,win cowger and sebastian primpke,False,transmission,no reliable match,PC,-1.0
+a3d3bca679d2,no reference,open specy,polyimide,not in library,win cowger and sebastian primpke,False,transmission,no reliable match,PC,-1.0
+23b3e1c9809e,no reference,open specy,POM,not in library,win cowger and sebastian primpke,False,ATR,weak,PC,-1.0
+eba98a1565a7,no reference,open specy,POM,not in library,win cowger and sebastian primpke,False,transmission,no reliable match,PK,-1.0
+7457a1433bac,no reference,open specy,POM,not in library,win cowger and sebastian primpke,False,transmission,no reliable match,PLA,-1.0
+c6ac2ac3215e,no reference,open specy,POM,not in library,win cowger and sebastian primpke,False,transmission,no reliable match,PAN,-1.0
+e23744315880,no reference,open specy,POM,not in library,win cowger and sebastian primpke,False,transmission,no reliable match,PE,-1.0
+260716ac47c0,no reference,open specy,SAN,not in library,win cowger and sebastian primpke,False,as measured,no reliable match,PS,-1.0
+6707ae80c2d9,no reference,open specy,SAN,not in library,win cowger and sebastian primpke,False,as measured,no reliable match,PS,-1.0
+37b7024dabee,no reference,open specy,SAN,not in library,win cowger and sebastian primpke,False,as measured,no reliable match,PS,-1.0
+bc2aef27ec8b,no reference,open specy,SAN,not in library,win cowger and sebastian primpke,False,as measured,no reliable match,PS,-1.0
+4d2534acfa22,no reference,open specy,SAN,not in library,win cowger and sebastian primpke,False,transmission,weak,PS,-1.0
+9c387f4a6c89,no reference,open specy,SAN,not in library,win cowger and sebastian primpke,False,transmission,weak,PS,-1.0
+1df49155b22b,no reference,open specy,SAN,not in library,win cowger and sebastian primpke,False,transmission,weak,PS,-1.0
+1bbfe6019f49,no reference,open specy,SAN,not in library,win cowger and sebastian primpke,False,transmission,weak,PS,-1.0
+2dadb90467db,no reference,open specy,silica,not in library,moore institute for plastic pollution research,False,as measured,no reliable match,PET,-1.0
+cc81fb522c20,relative,open specy,polyamide (not 6;6),close relative,elise granek and kellie teague,False,as measured,no reliable match,PU,-1.0
+f571de689fd6,relative,open specy,polyamide (not 6;6),close relative,elise granek and kellie teague,False,as measured,no reliable match,PU,-1.0
+f3815e4cb19e,relative,open specy,polyamide (not 6;6),close relative,elise granek and kellie teague,False,as measured,no reliable match,PU,-1.0
+4bb3accdb98f,relative,open specy,polyamide (not 6;6),close relative,elise granek and kellie teague,False,as measured,no reliable match,PU,-1.0
+1abb96cb50b1,relative,open specy,polyamide (not 6;6),close relative,elise granek and kellie teague,True,as measured,no reliable match,EVA,-1.0
+1649b31bec1e,relative,open specy,polyamide (not 6;6),close relative,elise granek and kellie teague,False,as measured,no reliable match,PU,-1.0
+b78633f44f7d,relative,open specy,polyamide (not 6;6),close relative,elise granek and kellie teague,False,as measured,no reliable match,PU,-1.0
+10f8b1d9fe61,relative,open specy,polyamide (not 6;6),close relative,elise granek and kellie teague,False,ATR,weak,PU,-1.0
+d75a32d3354b,relative,open specy,polyamide (not 6;6),close relative,elise granek and kellie teague,False,transmission,weak,PU,-1.0
+df7613311a3f,relative,open specy,polyamide (not 6;6),close relative,elise granek and kellie teague,False,as measured,no reliable match,PU,-1.0
+86dc77e8eb56,relative,open specy,polyamide (not 6;6),close relative,elise granek and kellie teague,False,as measured,no reliable match,PU,-1.0
+6317d7f15cb5,relative,open specy,polyamide (not 6;6),close relative,gicquel et al. 2024,False,transmission,weak,PA,-1.0
+cfd498e506de,relative,open specy,polyamide (not 6;6),close relative,gicquel et al. 2024,False,transmission,weak,PA,-1.0
+31058e027252,relative,open specy,polyamide (not 6;6),close relative,gicquel et al. 2024,False,ATR,weak,PE,-1.0
+cada21b6bb30,relative,open specy,polyamide (not 6;6),close relative,gicquel et al. 2024,False,transmission,weak,PA,-1.0
+1d225aa77083,relative,open specy,polyamide (not 6;6),close relative,gicquel et al. 2024,False,ATR,weak,PE,-1.0
+ae2c3b2ec51c,relative,open specy,polyamide (not 6;6),close relative,gicquel et al. 2024,False,ATR,weak,PE,-1.0
+a546f192944d,relative,open specy,polyamide (not 6;6),close relative,gicquel et al. 2024,False,transmission,weak,PA,-1.0
+dc68259d2fde,relative,open specy,polyamide (not 6;6),close relative,gicquel et al. 2024,False,as measured,no reliable match,PA,-1.0
+758b045996bb,relative,open specy,polyamide (not 6;6),close relative,gicquel et al. 2024,False,ATR,weak,PE,-1.0
+c3cb722515c2,relative,open specy,polyamide (not 6;6),close relative,gicquel et al. 2024,False,transmission,weak,PA,-1.0
+72f910d80bc4,relative,open specy,polyamide (not 6;6),close relative,gicquel et al. 2024,False,ATR,weak,PA,-1.0
+8eb71b4a03fe,relative,open specy,polyamide (not 6;6),close relative,gicquel et al. 2024,False,as measured,no reliable match,PA,-1.0
+374467421c7a,relative,open specy,polyamide (not 6;6),close relative,gicquel et al. 2024,False,ATR,weak,PE,-1.0
+abb2a867389e,relative,open specy,polyamide (not 6;6),close relative,gicquel et al. 2024,False,ATR,weak,PE,-1.0
+558d57a3f5a7,relative,open specy,polyamide (not 6;6),close relative,gicquel et al. 2024,False,transmission,weak,PA,-1.0
+484c7d99c4d5,relative,open specy,polyamide (not 6;6),close relative,gicquel et al. 2024,False,transmission,weak,PA,-1.0
+2c1a19e1ce19,relative,open specy,polyamide (not 6;6),close relative,gicquel et al. 2024,False,as measured,no reliable match,PA,-1.0
+465e0c4e07cb,relative,open specy,polyamide (not 6;6),close relative,gicquel et al. 2024,False,transmission,weak,PA,-1.0
+ad504beff868,relative,open specy,polyamide (not 6;6),close relative,national renewable energy laboratory,False,transmission,no reliable match,PK,-1.0
+791b8f3293fc,relative,open specy,polyamide (not 6;6),close relative,primpke et al. 2018,False,ATR,weak,PA,-1.0
+c16ae0ccfe83,relative,open specy,polyamide (not 6;6),close relative,primpke et al. 2018,False,ATR,weak,PA,-1.0
+e1d5386fa07b,relative,open specy,polyamide (not 6;6),close relative,primpke et al. 2018,False,ATR,weak,PA,-1.0
+b1cc9d9e2fbc,relative,open specy,polyamide (not 6;6),close relative,primpke et al. 2018,False,ATR,weak,PA,-1.0
+f978469676b7,relative,open specy,polyamide (not 6;6),close relative,primpke et al. 2018,False,ATR,weak,PA,-1.0
+62a797f72175,relative,open specy,polyamide (not 6;6),close relative,primpke et al. 2018,False,ATR,weak,PA,-1.0
+a647f1b93fef,relative,open specy,polyamide (not 6;6),close relative,primpke et al. 2018,False,ATR,weak,PA,-1.0
+f84d108be96e,relative,open specy,polyamide (not 6;6),close relative,hpu polymer kit 1.0,False,transmission,weak,PA,-1.0
+d4b333f8a0f7,relative,open specy,polyamide (not 6;6),close relative,flopp; de frond et al. 2021,False,transmission,no reliable match,PA,-1.0
+a6739ab2c056,relative,open specy,polyamide (not 6;6),close relative,flopp; de frond et al. 2021,False,transmission,weak,PA,-1.0
+e5ccc8e44dfd,relative,open specy,polyamide (not 6;6),close relative,flopp; de frond et al. 2021,False,transmission,weak,PA,-1.0
+5dde4070fbe7,relative,open specy,polyamide (not 6;6),close relative,flopp; de frond et al. 2021,False,transmission,weak,PA,-1.0
+a60aa8beb76d,relative,open specy,polyamide (not 6;6),close relative,flopp; de frond et al. 2021,False,transmission,weak,PA,-1.0
+5222bb2e6c69,relative,open specy,polyamide (not 6;6),close relative,flopp; de frond et al. 2021,False,transmission,weak,PA,-1.0
+eb5181c2bb20,relative,open specy,polyamide (not 6;6),close relative,flopp; de frond et al. 2021,False,transmission,weak,PA,-1.0
+b1487d678211,relative,open specy,polyamide (not 6;6),close relative,flopp; de frond et al. 2021,False,transmission,weak,PA,-1.0
+f74fcd105a82,relative,open specy,polyamide (not 6;6),close relative,flopp; de frond et al. 2021,False,transmission,weak,PA,-1.0
+efffb431e421,relative,open specy,polyamide (not 6;6),close relative,win cowger and sebastian primpke,False,ATR,weak,PA,-1.0
+bcf5f55e8c99,relative,open specy,polyamide (not 6;6),close relative,win cowger and sebastian primpke,False,as measured,no reliable match,PK,-1.0
+fdbae1ef8dc4,relative,open specy,polyamide (not 6;6),close relative,win cowger and sebastian primpke,False,transmission,no reliable match,PLA,-1.0
+4ce9187f9de9,relative,open specy,polyamide (not 6;6),close relative,win cowger and sebastian primpke,False,as measured,no reliable match,PLA,-1.0
+bc3a467660e0,relative,open specy,polyamide (not 6;6),close relative,win cowger and sebastian primpke,False,as measured,no reliable match,PP,-1.0
+ffb0ae195b2b,relative,open specy,polyamide (not 6;6),close relative,win cowger and sebastian primpke,False,transmission,no reliable match,PS,-1.0
+2d88e9917870,relative,open specy,polyamide (not 6;6),close relative,win cowger and sebastian primpke,False,transmission,no reliable match,PU,-1.0
+6a4f7c821e15,relative,open specy,polyamide (not 6;6),close relative,win cowger and sebastian primpke,False,transmission,no reliable match,PU,-1.0
+f4c6c86d8dc6,relative,open specy,polyamide (not 6;6),close relative,win cowger and sebastian primpke,False,as measured,no reliable match,PA,-1.0
+cce3027b06e8,relative,open specy,polyamide (not 6;6),close relative,win cowger and sebastian primpke,False,transmission,no reliable match,PET,-1.0
+ef839adbab02,relative,open specy,polyamide (not 6;6),close relative,win cowger and sebastian primpke,False,transmission,no reliable match,PU,-1.0
+72996b2bfac3,relative,open specy,polyamide (not 6;6),close relative,win cowger and sebastian primpke,False,transmission,no reliable match,PU,-1.0
+4fd502480424,relative,open specy,polyamide (not 6;6),close relative,win cowger and sebastian primpke,False,transmission,no reliable match,PU,-1.0
+e61932122b7e,relative,open specy,polyamide (not 6;6),close relative,win cowger and sebastian primpke,False,as measured,no reliable match,PVC,-1.0
+a3d479fcc8de,relative,open specy,polyamide (not 6;6),close relative,win cowger and sebastian primpke,True,transmission,no reliable match,PK,-1.0
+3ab80fb37233,relative,open specy,polyamide (not 6;6),close relative,win cowger and sebastian primpke,False,as measured,no reliable match,PA,-1.0
+35ffb6bc9a31,relative,open specy,polyamide (not 6;6),close relative,win cowger and sebastian primpke,False,transmission,no reliable match,PMMA,-1.0
+49e3930a05e0,relative,open specy,polyamide (not 6;6),close relative,win cowger and sebastian primpke,False,as measured,no reliable match,PU,-1.0
+9e24ad79cbc7,relative,open specy,polyamide (not 6;6),close relative,win cowger and sebastian primpke,False,transmission,no reliable match,PK,-1.0
+c9e75f844545,relative,open specy,polyamide (not 6;6),close relative,win cowger and sebastian primpke,False,transmission,no reliable match,PA,-1.0
+78a2b78b2eb6,fibre,fibres,cellulose acetate,not in library,FasTEX-KCL,False,ATR,no reliable match,PMMA,-1.0
+f08e490039f8,fibre,fibres,cellulose acetate,not in library,FasTEX-KCL,False,ATR,no reliable match,PLA,-1.0
+ee6ef3b41c01,fibre,fibres,cellulose acetate,not in library,FasTEX-KCL,False,ATR,no reliable match,PC,-1.0
+d1561c4f3620,fibre,fibres,cellulose acetate,not in library,FasTEX-KCL,False,ATR,no reliable match,PC,-1.0
+e29cb58ddbb5,fibre,fibres,acrylic fibre,close relative,FasTEX-KCL,False,ATR,weak,PAN,-1.0
+94d3f650ce71,fibre,fibres,acrylic fibre,close relative,FasTEX-KCL,False,ATR,weak,PAN,-1.0
+9cd687bd5e74,fibre,fibres,acrylic fibre,close relative,FasTEX-KCL,False,ATR,weak,PAN,-1.0
+8fc009012167,fibre,fibres,acrylic fibre,close relative,FasTEX-KCL,False,ATR,weak,PAN,-1.0
+a1200cf7fbee,fibre,fibres,acrylic fibre,close relative,FasTEX-KCL,False,ATR,weak,PAN,-1.0
+7e44c8b399bb,fibre,fibres,acrylic fibre,close relative,FasTEX-KCL,False,ATR,weak,PAN,-1.0
+f5cdab382822,fibre,fibres,acrylic fibre,close relative,FasTEX-KCL,False,ATR,probable,PAN,-1.0
+280ee1f8da32,fibre,fibres,acrylic fibre,close relative,FasTEX-KCL,False,ATR,weak,PAN,-1.0
+d5729c419ec7,fibre,fibres,acrylic fibre,close relative,FasTEX-KCL,False,ATR,weak,PAN,-1.0
+64df39f441e3,fibre,fibres,acrylic fibre,close relative,FasTEX-KCL,False,ATR,weak,PAN,-1.0
+845d2c3c1d0d,fibre,fibres,acrylic fibre,close relative,FasTEX-KCL,False,ATR,weak,PAN,-1.0
+adaff6e04e90,fibre,fibres,acrylic fibre,close relative,FasTEX-KCL,False,ATR,weak,PAN,-1.0
+9bd460fc37a3,fibre,fibres,protein,not in library,FasTEX-KCL,False,ATR,weak,PA,-1.0
+46008fefceb0,fibre,fibres,protein,not in library,FasTEX-KCL,False,ATR,weak,PA,-1.0
+f61cda823369,fibre,fibres,aramid,not in library,FasTEX-KCL,False,ATR,no reliable match,PA,-1.0
+b0f331523b06,fibre,fibres,aramid,not in library,FasTEX-KCL,False,ATR,no reliable match,PA,-1.0
+6f3360850fea,fibre,fibres,aramid,not in library,FasTEX-KCL,False,ATR,no reliable match,PA,-1.0
+a17e95dc3621,fibre,fibres,aramid,not in library,FasTEX-KCL,False,ATR,no reliable match,PA,-1.0
+ad2b4e97e903,fibre,fibres,cellulose,not in library,FasTEX-KCL,False,ATR,no reliable match,PVC,-1.0
+765ced4702fe,fibre,fibres,cellulose,not in library,FasTEX-KCL,False,ATR,no reliable match,PVC,-1.0
+1b578b43d138,fibre,fibres,cellulose,not in library,FasTEX-KCL,False,ATR,weak,PA,-1.0
+30a6211121d5,fibre,fibres,cellulose,not in library,FasTEX-KCL,False,ATR,no reliable match,PVC,-1.0
+bf9382e6f5bc,fibre,fibres,cellulose,not in library,FasTEX-KCL,False,ATR,no reliable match,PVC,-1.0
+b87e9d493f69,fibre,fibres,cellulose,not in library,FasTEX-KCL,False,ATR,no reliable match,PVC,-1.0
+2a2f7b1086d2,fibre,fibres,cellulose,not in library,FasTEX-KCL,False,ATR,no reliable match,PVC,-1.0
+f230399d0ee3,fibre,fibres,cellulose,not in library,FasTEX-KCL,False,ATR,weak,PET,-1.0
+dffe575e02cc,fibre,fibres,cellulose,not in library,FasTEX-KCL,False,ATR,no reliable match,PVC,-1.0
+a1d7a6182bf8,fibre,fibres,cellulose,not in library,FasTEX-KCL,False,ATR,no reliable match,PVC,-1.0
+f7a8b7cc3b29,fibre,fibres,cellulose,not in library,FasTEX-KCL,False,ATR,no reliable match,PU,-1.0
+aa7c60f706cf,fibre,fibres,cellulose,not in library,FasTEX-KCL,False,ATR,no reliable match,PVC,-1.0
+0b916e67463e,fibre,fibres,cellulose,not in library,FasTEX-KCL,False,ATR,no reliable match,PU,-1.0
+31d18d38a732,fibre,fibres,cellulose,not in library,FasTEX-KCL,False,ATR,weak,PE,-1.0
+1c4eef6f2ce7,fibre,fibres,cellulose,not in library,FasTEX-KCL,False,ATR,no reliable match,PVC,-1.0
+f9d5569f17aa,fibre,fibres,cellulose,not in library,FasTEX-KCL,False,ATR,no reliable match,PVC,-1.0
+c6e7a4f688c0,fibre,fibres,cellulose,not in library,FasTEX-KCL,False,ATR,no reliable match,PVC,-1.0
+3f5318321448,fibre,fibres,cellulose,not in library,FasTEX-KCL,False,ATR,no reliable match,PVC,-1.0
+bd03775e6e9b,fibre,fibres,cellulose,not in library,FasTEX-KCL,False,ATR,no reliable match,PVC,-1.0
+098261e0b9ec,fibre,fibres,cellulose,not in library,FasTEX-KCL,False,ATR,no reliable match,PVC,-1.0
+783345a555d5,fibre,fibres,modacrylic fibre,close relative,FasTEX-KCL,False,ATR,weak,PAN,-1.0
+a8bfac440fe8,fibre,fibres,modacrylic fibre,close relative,FasTEX-KCL,False,ATR,no reliable match,PAN,-1.0
+ede2ac330cac,fibre,fibres,modacrylic fibre,close relative,FasTEX-KCL,False,ATR,weak,PAN,-1.0
+d461eb76e6b8,fibre,fibres,modacrylic fibre,close relative,FasTEX-KCL,False,ATR,no reliable match,PAN,-1.0
+98090878a20e,fibre,fibres,modacrylic fibre,close relative,FasTEX-KCL,False,ATR,weak,PAN,-1.0
+01f01e4502e7,fibre,fibres,modacrylic fibre,close relative,FasTEX-KCL,False,ATR,weak,PAN,-1.0
+0ff0d718cb15,fibre,fibres,modacrylic fibre,close relative,FasTEX-KCL,False,ATR,weak,PAN,-1.0
+572e2843eb63,fibre,fibres,modacrylic fibre,close relative,FasTEX-KCL,False,ATR,no reliable match,PAN,-1.0
+6ea678123e0c,fibre,fibres,modacrylic fibre,close relative,FasTEX-KCL,False,ATR,no reliable match,PAN,-1.0
+1a0d8c79be6a,fibre,fibres,modacrylic fibre,close relative,FasTEX-KCL,False,ATR,no reliable match,PAN,-1.0
+0c10f9de7c51,fibre,fibres,modacrylic fibre,close relative,FasTEX-KCL,False,ATR,no reliable match,PAN,-1.0
+62eb411fcdd6,fibre,fibres,modacrylic fibre,close relative,FasTEX-KCL,False,ATR,weak,PVC,-1.0
+d6f340db0ac1,fibre,fibres,modacrylic fibre,close relative,FasTEX-KCL,False,ATR,no reliable match,PA,-1.0
+8a14ab8c726b,fibre,fibres,modacrylic fibre,close relative,FasTEX-KCL,False,ATR,weak,PAN,-1.0
+85c0b1d2c04e,fibre,fibres,modacrylic fibre,close relative,FasTEX-KCL,False,ATR,weak,PAN,-1.0
+7a067068d736,fibre,fibres,cellulose,not in library,FasTEX-KCL,False,ATR,no reliable match,PVC,-1.0
+30862a7e35bc,fibre,fibres,PA,in library,FasTEX-KCL,False,ATR,probable,PA,0.956
+8c068b6b0526,fibre,fibres,polyamide (not 6;6),close relative,FasTEX-KCL,False,ATR,weak,PA,-1.0
+033b7e2064c1,fibre,fibres,polyamide (not 6;6),close relative,FasTEX-KCL,False,ATR,weak,PA,-1.0
+f86207841053,fibre,fibres,PA,in library,FasTEX-KCL,False,ATR,probable,PA,0.955
+3c18040780b5,fibre,fibres,polyamide (not 6;6),close relative,FasTEX-KCL,False,ATR,weak,PA,-1.0
+4c2ece4fbc6a,fibre,fibres,PA,in library,FasTEX-KCL,False,ATR,probable,PA,0.9623
+672fe9832acf,fibre,fibres,PA,in library,FasTEX-KCL,False,ATR,probable,PA,0.9612
+78260fc83e60,fibre,fibres,PA,in library,FasTEX-KCL,False,ATR,probable,PA,0.9722
+408a13fc95e1,fibre,fibres,polyamide (not 6;6),close relative,FasTEX-KCL,False,ATR,weak,PA,-1.0
+1a221c9ad0f0,fibre,fibres,PA,in library,FasTEX-KCL,False,ATR,weak,PA,0.9394
+de1946d2fb94,fibre,fibres,polyamide (not 6;6),close relative,FasTEX-KCL,False,ATR,weak,PA,-1.0
+812a8526f55c,fibre,fibres,polyamide (not 6;6),close relative,FasTEX-KCL,False,ATR,weak,PA,-1.0
+4f5d52043c3d,fibre,fibres,polyamide (not 6;6),close relative,FasTEX-KCL,False,ATR,weak,PA,-1.0
+111f11eb5000,fibre,fibres,polyamide (not 6;6),close relative,FasTEX-KCL,False,ATR,weak,PA,-1.0
+b096836ec62a,fibre,fibres,polyamide (not 6;6),close relative,FasTEX-KCL,False,ATR,weak,PA,-1.0
+e4158cc6ccc1,fibre,fibres,polyamide (not 6;6),close relative,FasTEX-KCL,False,ATR,weak,PA,-1.0
+f00910fcb7d3,fibre,fibres,polyamide (not 6;6),close relative,FasTEX-KCL,False,ATR,weak,PA,-1.0
+b46c583b48f7,fibre,fibres,PP,in library,FasTEX-KCL,False,ATR,probable,PP,0.9752
+0869b01463ef,fibre,fibres,PE,in library,FasTEX-KCL,False,ATR,weak,PE,0.9194
+3a5754b73042,fibre,fibres,PP,in library,FasTEX-KCL,False,ATR,probable,PP,0.9731
+a1c358f73d5b,fibre,fibres,PP,in library,FasTEX-KCL,False,ATR,probable,PP,0.9808
+5116d9e68e25,fibre,fibres,PP,in library,FasTEX-KCL,False,ATR,probable,PP,0.9933
+d8c419486944,fibre,fibres,PP,in library,FasTEX-KCL,False,ATR,probable,PP,0.9929
+c5a1affa9df7,fibre,fibres,PP,in library,FasTEX-KCL,False,ATR,probable,PP,0.9937
+f056ce15a8db,fibre,fibres,PP,in library,FasTEX-KCL,False,ATR,probable,PP,0.9677
+84aedf9d7819,fibre,fibres,PET,in library,FasTEX-KCL,False,ATR,probable,PET,0.9702
+2e43aea5348a,fibre,fibres,PET,in library,FasTEX-KCL,False,ATR,probable,PET,0.973
+5be80bd2a718,fibre,fibres,PET,in library,FasTEX-KCL,False,ATR,weak,PET,0.9642
+95bd8189692c,fibre,fibres,PET,in library,FasTEX-KCL,False,ATR,weak,PET,0.9656
+231aa62bc0e7,fibre,fibres,PET,in library,FasTEX-KCL,False,ATR,weak,PET,0.9517
+b92ba1ad0f31,fibre,fibres,PET,in library,FasTEX-KCL,False,ATR,weak,PET,0.9676
+8c5fa52202ac,fibre,fibres,PET,in library,FasTEX-KCL,False,ATR,probable,PET,0.9655
+39d72a237414,fibre,fibres,PET,in library,FasTEX-KCL,False,ATR,probable,PET,0.9605
+279d87a45cf1,fibre,fibres,PET,in library,FasTEX-KCL,False,ATR,weak,PET,0.9769
+42b1d0977e13,fibre,fibres,PET,in library,FasTEX-KCL,False,ATR,probable,PET,0.9547
+b4df041342e2,fibre,fibres,PET,in library,FasTEX-KCL,False,ATR,weak,PET,0.9695
+5062db6bf493,fibre,fibres,PET,in library,FasTEX-KCL,False,ATR,weak,PBT,0.8756
+b2fcaca548ed,fibre,fibres,PET,in library,FasTEX-KCL,False,ATR,probable,PET,0.9659
+35bab19cab05,fibre,fibres,PET,in library,FasTEX-KCL,False,ATR,weak,PET,0.9583
+b77db48ec764,fibre,fibres,PET,in library,FasTEX-KCL,False,ATR,no reliable match,PET,0.5682
+459ce8c225b5,fibre,fibres,cellulose,not in library,FasTEX-KCL,False,ATR,no reliable match,PVC,-1.0
+603dd998690a,fibre,fibres,cellulose,not in library,FasTEX-KCL,False,ATR,no reliable match,PVC,-1.0
+0c8ede656878,fibre,fibres,cellulose,not in library,FasTEX-KCL,False,ATR,no reliable match,PVC,-1.0
+28fcdf593a70,fibre,fibres,cellulose,not in library,FasTEX-KCL,False,ATR,no reliable match,PU,-1.0
+f2b817a7ec18,fibre,fibres,cellulose,not in library,FasTEX-KCL,False,ATR,no reliable match,PVC,-1.0
+47c8bcb33625,fibre,fibres,cellulose,not in library,FasTEX-KCL,False,ATR,no reliable match,PVC,-1.0
+fff5ae918ee1,fibre,fibres,cellulose,not in library,FasTEX-KCL,False,ATR,no reliable match,PVC,-1.0
+a0b851c1e749,fibre,fibres,cellulose,not in library,FasTEX-KCL,False,ATR,no reliable match,PU,-1.0
+6e6444d9e413,fibre,fibres,cellulose,not in library,FasTEX-KCL,False,ATR,no reliable match,PVC,-1.0
+d48cda01164a,fibre,fibres,cellulose,not in library,FasTEX-KCL,False,ATR,no reliable match,PVC,-1.0
+f3f0faefb47e,fibre,fibres,cellulose,not in library,FasTEX-KCL,False,ATR,no reliable match,PVC,-1.0
+29f2e51d6607,fibre,fibres,cellulose,not in library,FasTEX-KCL,False,ATR,no reliable match,PVC,-1.0
+58fa06616ab5,fibre,fibres,protein,not in library,FasTEX-KCL,False,ATR,weak,PA,-1.0
+d164a52a1d10,fibre,fibres,protein,not in library,FasTEX-KCL,False,ATR,weak,PA,-1.0
+a1484336472b,fibre,fibres,protein,not in library,FasTEX-KCL,False,ATR,weak,PA,-1.0
+c56b0dccf29b,fibre,fibres,protein,not in library,FasTEX-KCL,False,ATR,weak,PA,-1.0
+eb65c0becf50,fibre,fibres,protein,not in library,FasTEX-KCL,False,ATR,weak,PA,-1.0
+2e6d0b097277,fibre,fibres,protein,not in library,FasTEX-KCL,False,ATR,weak,PA,-1.0
+54176c77b4ee,fibre,fibres,protein,not in library,FasTEX-KCL,False,ATR,weak,PA,-1.0
+11a4bc685633,fibre,fibres,cellulose,not in library,FasTEX-KCL,False,ATR,no reliable match,PBT,-1.0
+feff3f1fec92,fibre,fibres,protein,not in library,FasTEX-KCL,False,ATR,weak,PA,-1.0
+ad3d3581ef75,fibre,fibres,protein,not in library,FasTEX-KCL,False,ATR,no reliable match,PA,-1.0
+eb9595fcb467,fibre,fibres,protein,not in library,FasTEX-KCL,False,ATR,no reliable match,PA,-1.0
+f82f5bf2cf67,fibre,fibres,protein,not in library,FasTEX-KCL,False,ATR,no reliable match,PA,-1.0
+4daefbb0065a,fibre,fibres,protein,not in library,FasTEX-KCL,False,ATR,weak,PA,-1.0
+8492aa0b9509,fibre,fibres,protein,not in library,FasTEX-KCL,False,ATR,weak,PA,-1.0
+8acf6f7f4b50,fibre,fibres,protein,not in library,FasTEX-KCL,False,ATR,weak,PA,-1.0
+e14087e11338,fibre,fibres,protein,not in library,FasTEX-KCL,False,ATR,weak,PA,-1.0
+b2258be753b7,fibre,fibres,protein,not in library,FasTEX-KCL,False,ATR,weak,PA,-1.0
+75ed8518dca1,fibre,fibres,protein,not in library,FasTEX-KCL,False,ATR,weak,PA,-1.0
+7e2eabec36d4,fibre,fibres,protein,not in library,FasTEX-KCL,False,ATR,no reliable match,PU,-1.0
+36aaa67a41a7,fibre,fibres,protein,not in library,FasTEX-KCL,False,ATR,no reliable match,PA,-1.0
+a7c17a122a3d,fibre,fibres,protein,not in library,FasTEX-KCL,False,ATR,no reliable match,PA,-1.0
+5a35c8ef1d71,fibre,fibres,protein,not in library,FasTEX-KCL,False,ATR,weak,PA,-1.0
+9c10e52545cd,fibre,fibres,protein,not in library,FasTEX-KCL,False,ATR,weak,PA,-1.0
+34a042418c87,fibre,fibres,protein,not in library,FasTEX-KCL,False,ATR,no reliable match,PU,-1.0
+8feb30d68a9a,fibre,fibres,protein,not in library,FasTEX-KCL,False,ATR,no reliable match,PA,-1.0
+05a63b697b44,fibre,fibres,protein,not in library,FasTEX-KCL,False,ATR,weak,PE,-1.0
+25b1f02739c9,fibre,fibres,protein,not in library,FasTEX-KCL,False,ATR,no reliable match,PA,-1.0

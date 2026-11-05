@@ -123,6 +123,12 @@ def test_the_tool_stops_on_a_changed_data_file(tmp_path):
         confidence.check_data(tmp_path)
 
 
+def test_the_report_rebuilds_from_the_saved_results_alone(tmp_path):
+    from benchmark.confidence_report import build
+    page = build(confidence.RESULTS / "confidence_results.json", tmp_path / "report.html").read_text(encoding="utf-8")
+    assert "The promise held" in page and "Deviations from the protocol" in page
+
+
 def test_only_counts_of_the_true_scores_leave_the_tool():
     picture = confidence.histogram([0.1, 0.9, 0.91])
     assert set(picture) == {"edges", "counts"} and sum(picture["counts"]) == 3
