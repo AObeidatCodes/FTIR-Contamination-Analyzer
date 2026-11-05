@@ -27,7 +27,7 @@ def test_rounding_cannot_move_the_bar_a_place():
         assert bar_of(scores) == sorted(scores, reverse=True)[position - 1]
 
 
-def test_on_exchangeable_data_the_promise_holds():
+def test_on_like_data_the_right_share_clears_the_bar():
     rng = np.random.default_rng(1)
     misses = []
     for _ in range(300):
@@ -74,7 +74,7 @@ def test_coverage_and_list_length_are_counted():
     assert done["per_material"]["PE"] == {"n": 10, "hits": 9, "median_list": 1.0}
 
 
-def test_useful_needs_both_a_kept_promise_and_a_short_list():
+def test_usable_needs_both_enough_right_answers_and_a_short_list():
     long = [{"PE": 0.9, "PP": 0.8, "PS": 0.8, "PET": 0.8}] * 40
     rows = [dict(row("PE", 0.9, cluster=f"c{i}"), scores=s) for i, s in enumerate(long)]
     assert not measure(rows, {"A": {ONE_BAR: 0.5}, "B": {}}, "A", sets.FIBRES)["all"]["useful"]     # valid, but four long
@@ -126,7 +126,8 @@ def test_the_tool_stops_on_a_changed_data_file(tmp_path):
 def test_the_report_rebuilds_from_the_saved_results_alone(tmp_path):
     from benchmark.confidence_report import build
     page = build(confidence.RESULTS / "confidence_results.json", tmp_path / "report.html").read_text(encoding="utf-8")
-    assert "The promise held" in page and "Deviations from the protocol" in page
+    assert "Can the app say how sure it is?" in page and "Deviations from the protocol" in page
+    assert "promise" not in page.lower()
 
 
 def test_only_counts_of_the_true_scores_leave_the_tool():

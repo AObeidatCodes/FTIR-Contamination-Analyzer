@@ -630,21 +630,21 @@ The report alone rebuilds from the saved results at any commit, with no data:
 python -m benchmark --report-only
 ```
 
-### Calibrated confidence
+### Can the app say how sure it is?
 
-The score r is not a probability, so a second step tried to measure one: set a bar on spectra of known material so that
-the right material clears it 90% of the time, then list every material that clears it on a new sample. The rules were
-committed first ([protocol](benchmark/PROTOCOL_CONFIDENCE.md), [report](benchmark/results/confidence_report.html)), using
-the locked Open Specy spectra: 482 set the bar and 539 tested it.
+The score r is not a percentage: 0.93 does not mean 93% sure. A second test asked how many materials the app must name
+for the right one to be among them 9 times out of 10. On 482 locked Open Specy spectra we found the minimum score that
+does this, then tested it on 539 others. The rules were committed first: see the
+[protocol](benchmark/PROTOCOL_CONFIDENCE.md) and the [report](benchmark/results/confidence_report.html).
 
-| | One bar | Compared as ATR |
+| | All spectra | Compared as ATR |
 | --- | --- | --- |
-| Right material on the list | 90.9% (83.4 to 96.0%) | 96.9% (90.9 to 99.4%) |
-| Typical list, of 16 materials | 10 | 4 |
+| Right material named | 90.9% (83.4 to 96.0%) | 96.9% (90.9 to 99.4%) |
+| Typical number named, of 16 | 10 | 4 |
 
-The promise held, but the lists are too long to help: the limit set before the run was 3, and the bar had to drop to
-0.09 (0.43 for ATR). So it is not in the app. The result says more about the data than the method: on other labs'
-spectra the right material often scores low. A lab could repeat this with its own spectra:
+Naming 10 of 16 materials helps nobody, and the limit set before the test was 3, so this is not in the app. On other
+labs' spectra the right material often scores low, so the minimum score has to be very low: 0.09, or 0.43 for ATR. To
+rebuild the report from the saved results:
 
 ```bash
 python -m benchmark.confidence --report-only

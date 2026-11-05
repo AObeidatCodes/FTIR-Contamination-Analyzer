@@ -1,8 +1,8 @@
 """
 FTIR Contamination Analyzer - calibrated confidence (PROTOCOL_CONFIDENCE.md)
 
-Sets a bar on spectra of known material, so that the true material clears it about 90% of the time, then tests that
-promise on spectra that took no part in setting it. On a new sample, every material at or above the bar goes on a list.
+Finds the minimum score (the bar) that lets the right material through about 90% of the time on spectra of known
+material, then tests it on spectra that took no part in setting it. Every material at or above the bar goes on a list.
 
     python -m benchmark.confidence --data benchmark/data     the whole step, then the report
     python -m benchmark.confidence --report-only             only the report, from the saved results
