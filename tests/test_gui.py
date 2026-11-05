@@ -344,6 +344,42 @@ def test_export_report(app, window, tmp_path):
     assert window.audit_log.exists()
 
 
+def test_the_tool_entered_at_export_reaches_the_trends_page(app, window, tmp_path, monkeypatch):
+    monkeypatch.setattr("ftir_analyzer.gui.QDesktopServices", type("Desktop", (), {"openUrl": staticmethod(lambda url: None)}))
+    first = window.audit_log.read_text(encoding="utf-8") if window.audit_log.exists() else ""
+    panel = window.export_report()
+    panel.set_folder(tmp_path)
+    panel.tool.setText("  Etch   3 ")
+    panel._submit("html")
+    assert wait(app, lambda: not window.busy and window.tool_log.exists(), 120)
+    assert window.audit_log.read_text(encoding="utf-8").startswith(first)         # the audit log only grew
+    window.show_page("trends")
+    page = window.trends_page
+    assert page.tool.findText("Etch 3") >= 0
+    samples = len({(s.sha, s.name) for s in page.samples})
+    assert samples == len(page.samples) >= len(window.model.results)              # each sample once
+    panel = window.export_report()                                                # the tool is offered next time
+    assert panel.tool.completer().model().rowCount() == 1
+    window.sheet.close_sheet()
+    window.show_page("analyze")
+
+
+def test_the_trends_page_shows_demo_data_as_made_up(app, window):
+    window.show_page("trends")
+    page = window.trends_page
+    page.demo_button.setChecked(True)
+    assert page.demo_note.isVisible() and page.samples and all(s.sha.startswith("demo") for s in page.samples)
+    assert page.repeat_rows.count() >= 1 and page.material_chart.rows and page.tool_chart.rows
+    page.period.set_value("0")
+    page.show_samples()
+    assert len(page.shown) == len(page.samples)
+    page.tool.setCurrentText("Etch 3")
+    assert {s.tool for s in page.shown} == {"Etch 3"}
+    page.demo_button.setChecked(False)
+    assert not page.demo_note.isVisible()
+    window.show_page("analyze")
+
+
 def test_the_report_message_offers_the_pdf(app, window, tmp_path):
     window.write_report_to(tmp_path, ask_to_open=False)
     assert wait(app, lambda: not window.busy and hasattr(window, "last_report"), 120)

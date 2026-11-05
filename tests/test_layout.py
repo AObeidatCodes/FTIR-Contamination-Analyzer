@@ -141,6 +141,12 @@ def test_pages_fit_the_window(window, size):
     window.show_page("library")
     settle()
     assert problems(window) == [], f"Library page at {size}"
+    window.show_page("trends")
+    window.trends_page.demo_button.setChecked(True)
+    settle()
+    assert problems(window) == [], f"Trends page at {size}"
+    window.trends_page.demo_button.setChecked(False)
+    window.show_page("analyze")
 
 
 @pytest.mark.parametrize("size", SIZES)

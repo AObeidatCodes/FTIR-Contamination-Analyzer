@@ -157,6 +157,7 @@ SETTINGS = {
 | Write the report | **Export report** or `Ctrl+E`: choose the folder, give your name and, if you like, sign it (decision, comment). `report.html` + `report.xlsx` + `report.csv`, a row per spectrum in the audit log, and a row in the signature log when signed |
 | Browse the library | **Library** in the middle of the toolbar, or `Ctrl+2` (`Ctrl+1` back to Analyze). Click a card for details |
 | More references | **Library → Open Specy…**: download or import; then switch **Fab essentials / Extended** |
+| See what keeps coming back | **Trends** (`Ctrl+3`). Enter the tool or area when you export a report |
 | Add a reference | **Add to library…** on a result that is not *probable*, or **Library → Add a reference…** (`Ctrl+N`) |
 | Light / dark | The moon / sun button or `Ctrl+T`. **View → Reduce motion** switches the animations off |
 | The menus | The **☰** button at the left of the top bar: File, View, Library, Records, Help. Every shortcut works without opening it |
@@ -373,6 +374,16 @@ full details are in `records/error_log.txt`.
 
 *The screenshot shows the 5 references kept from the small test file, not the full Open Specy library.*
 
+### Trends
+
+**Trends** (`Ctrl+3`) shows the most common materials and tools, and warns when one material keeps coming back on one
+tool. It counts each exported sample once, however often it was exported, and reads the records without changing them.
+
+The tool or area is entered when you export a report and is kept in `records/tool_log.csv`. A sample without one is
+not checked for repeats. **Demo data** shows made-up samples.
+
+The default repeat of 3 samples in 30 days is a starting value, not a measured one. Change it on the page.
+
 ### The report
 
 One self-contained HTML page that opens in any browser, works offline and prints to PDF. The figures
@@ -458,6 +469,8 @@ Every rule and threshold lives in [`ftir_analyzer/config.py`](ftir_analyzer/conf
 │   ├── families.py      material families, and where two close materials differ
 │   ├── molecule_view.py the 3D view: a model chain that turns, and the bonds of a band that glow
 │   ├── tour.py          the guided tour, in a window of its own that keeps nothing
+│   ├── trends.py        counts samples and finds repeats, from the audit log and the tool log
+│   ├── trends_view.py   the Trends page
 │   ├── compare_view.py  the closest matches, side by side
 │   ├── library_view.py  the Library page: album, details, similarity map, adding a reference
 │   ├── jobs.py          background work (the window never freezes)
@@ -479,7 +492,7 @@ pip install pytest
 python -m pytest
 ```
 
-258 tests. Those for the analysis cover file reading (read-only data, headerless tab-separated files, unit
+279 tests. Those for the analysis cover file reading (read-only data, headerless tab-separated files, unit
 recognition, clear errors), processing, the verdict rule, the impostor test, the known answer for
 every demo spectrum, the second-component, empty-spot and saturation detection, the CO₂ direction,
 the analytical view (each step reproduced, the score recalculated from step 4), the interactive

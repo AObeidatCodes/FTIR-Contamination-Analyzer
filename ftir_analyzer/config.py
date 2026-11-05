@@ -24,6 +24,11 @@ LIBRARY_MODE = "ATR"                                       # every reference is 
 BAND_TABLE_FILE = DATA_DIR / "band_table.csv"             # band ranges and their assignments
 FAB_SOURCES_FILE = DATA_DIR / "fab_sources.csv"           # where a material can come from in a fab
 EXAMPLES_DIR = PROJECT_DIR / "examples"                   # demo spectra
+TRENDS_DEMO_DIR = EXAMPLES_DIR / "trends_demo"            # made-up records for the Trends page
+
+# A repeat: at least this many samples of one material on one tool within this many days. A starting value, not a
+# measured one; each lab sets its own on the Trends page.
+REPEAT_COUNT, REPEAT_DAYS = 3, 30
 
 # Records (sample log and audit log) are kept next to the app when it runs from its own
 # folder, otherwise in the user's home folder. The environment variable FTIR_ANALYZER_RECORDS
@@ -35,6 +40,7 @@ SAMPLE_LOG_FILE = RECORDS_DIR / "sample_log.csv"          # how each raw file wa
 INHOUSE_DIR = RECORDS_DIR / "inhouse_library"             # references the lab adds itself (append-only log)
 AUDIT_LOG_FILE = RECORDS_DIR / "audit_log.csv"            # one row per spectrum per run, append-only
 SIGNATURE_LOG_FILE = RECORDS_DIR / "signatures.csv"       # one row per signed report, append-only
+TOOL_LOG_FILE = RECORDS_DIR / "tool_log.csv"              # which tool or area a sample came from, append-only
 
 # File types the app reads: instrument exports with a wavenumber column and one or more
 # intensity columns (comma, semicolon, tab or space separated, with or without a header).

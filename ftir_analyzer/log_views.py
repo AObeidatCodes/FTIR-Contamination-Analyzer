@@ -71,6 +71,7 @@ COLUMN_HELP = {
     "unexplained": "bands the match cannot explain", "next_step": "what to do next",
     "mix_other": "two-component fit: the second reference (empty: no fit clearly helps)",
     "mix_share_other": "its share of the band height (not of the mass)", "mix_fit_r": "r of the two-component fit",
+    "tool": "the tool or area the sample came from",
 }
 WIDE = {"note", "flags", "fab_sources", "check_next", "confirmation", "notes", "reason", "comment", "next_step",
         "report", "unexplained"}

@@ -5,7 +5,8 @@ Before the report is written, one sheet asks for what the report needs from a pe
 
     1  where        the folder (a new dated sub-folder is made in it)
     2  who          your name, shown as the person who analysed the samples (with your login
-                    name, which is always recorded); remembered for next time
+                    name, which is always recorded); remembered for next time. Also the tool or
+                    area the samples came from (optional), for the Trends page
     3  sign         optional: the review decision (accept / accept with changes / re-measure),
                     a comment, and the statement "I have looked at the raw spectra ...".
                     A signed report shows who signed, when and what they decided, and the
@@ -22,7 +23,7 @@ License: MIT (see LICENSE)
 from pathlib import Path
 
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtWidgets import (QCheckBox, QFileDialog, QFrame, QGridLayout, QHBoxLayout, QLabel, QLineEdit,
+from PySide6.QtWidgets import (QCheckBox, QCompleter, QFileDialog, QFrame, QGridLayout, QHBoxLayout, QLabel, QLineEdit,
                                QPushButton, QVBoxLayout, QWidget)
 
 from .analysis import NO_MATCH, PROBABLE, WEAK
@@ -54,10 +55,11 @@ class ClickLabel(QLabel):
 class ExportPanel(QWidget):
     """The content of the sheet: where the report goes, who made it, and the optional signature."""
 
-    submitted = Signal(dict)          # {"folder": Path, "name": str, "signoff": dict or None, "open": "pdf" or "html"}
+    submitted = Signal(dict)          # {"folder": Path, "name": str, "tool": str, "signoff": dict or None,
+                                      #  "open": "pdf" or "html"}
     cancelled = Signal()
 
-    def __init__(self, results, folder, name=""):
+    def __init__(self, results, folder, name="", tools=()):
         super().__init__()
         t = Theme.t
         self.folder = Path(folder)
@@ -94,10 +96,18 @@ class ExportPanel(QWidget):
         self.name.setPlaceholderText("your full name, e.g. Ali Obeidat")
         form.addWidget(text_label("Your name", "FactLabel"), 0, 0, Qt.AlignVCenter)
         form.addWidget(self.name, 0, 1)
+        self.tool = QLineEdit()
+        self.tool.setPlaceholderText("optional, e.g. Etch 3")
+        self.tool.setCompleter(QCompleter(list(tools), self.tool))
+        self.tool.completer().setCaseSensitivity(Qt.CaseInsensitive)
+        form.addWidget(text_label("Tool or area", "FactLabel"), 1, 0, Qt.AlignVCenter)
+        form.addWidget(self.tool, 1, 1)
+        form.setVerticalSpacing(8)
         form.setColumnStretch(1, 1)
         who_body.addLayout(form)
         who_body.addWidget(text_label(f"Shown as the person who analysed the samples, with your login name "
-                                      f"({current_user()}), which is always recorded.", "SectionHint", wrap=True))
+                                      f"({current_user()}), which is always recorded. The tool or area applies to every "
+                                      "spectrum in this report and is used on the Trends page.", "SectionHint", wrap=True))
         column.addWidget(who_card)
 
         # 3. sign
@@ -196,4 +206,5 @@ class ExportPanel(QWidget):
         name = self.name.text().strip()
         decision = self.decision.value()
         signoff = make_signoff(name, decision, self.comment.text()) if decision else None
-        self.submitted.emit({"folder": self.folder, "name": name, "signoff": signoff, "open": kind})
+        self.submitted.emit({"folder": self.folder, "name": name, "tool": self.tool.text(), "signoff": signoff,
+                             "open": kind})

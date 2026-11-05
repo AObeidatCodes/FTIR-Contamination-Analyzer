@@ -1,7 +1,7 @@
 """
 FTIR Contamination Analyzer - records (data integrity)
 
-Three append-only records, kept as plain CSV files (the Records menu opens them as formatted
+Four append-only records, kept as plain CSV files (the Records menu opens them as formatted
 Excel sheets, see log_views.py):
 
     sample log   how each raw file was measured (ATR or transmission). Each row belongs to
@@ -11,6 +11,8 @@ Excel sheets, see log_views.py):
                  when, who, which program version, which library.
     signatures   one row per signed report: who signed, when, the decision and the comment,
                  and the SHA-256 of the report file they signed.
+    tool log     which tool or area each exported sample came from, as entered at export. It
+                 is a separate file so that the audit log is never rewritten.
 
 Rows are only ever added, never changed or deleted (ALCOA: attributable, legible,
 contemporaneous, original, accurate).
@@ -49,6 +51,11 @@ SIGNATURE_HEADER = (
     "# report file that was signed. Rows are only added.\n"
 )
 SIGNATURE_COLUMNS = ["signed_at", "signed_by", "login", "decision", "comment", "report", "report_sha256", "spectra"]
+TOOL_LOG_HEADER = (
+    "# Tool log: which tool or area each sample came from, entered when the report was exported. Each row\n"
+    "# belongs to one spectrum of one exact file, identified by its SHA-256 checksum. Rows are only added.\n"
+)
+TOOL_LOG_COLUMNS = ["file_sha256", "sample", "file", "tool", "recorded_by", "recorded_at"]
 DECISIONS = {"accept": "Accepted", "accept with changes": "Accepted with changes", "re-measure": "Re-measure"}
 
 
@@ -205,6 +212,28 @@ def append_audit_log(results, info, path=config.AUDIT_LOG_FILE):
         "flags": "; ".join(label for label, _ in r.flags),
     } for r in results])
     rows.to_csv(path, mode="a", index=False, header=not path.exists())        # append; header only for a new log
+    return path
+
+
+def tidy_tool(text):
+    """A tool or area as it is kept: no spare spaces."""
+    return " ".join(str(text).split())
+
+
+def append_tool_log(results, tool, path=config.TOOL_LOG_FILE):
+    """Record which tool or area these spectra came from. Earlier rows are never changed; no tool, no row."""
+    tool = tidy_tool(tool)
+    if not tool:
+        return None
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    rows = pd.DataFrame([{"file_sha256": r.spectrum.sha256, "sample": r.name, "file": r.spectrum.path.name, "tool": tool,
+                          "recorded_by": current_user(), "recorded_at": date.today().isoformat()} for r in results],
+                        columns=TOOL_LOG_COLUMNS)
+    new_file = not path.exists()
+    if new_file:
+        path.write_text(TOOL_LOG_HEADER, encoding="utf-8")
+    rows.to_csv(path, mode="a", index=False, header=new_file)
     return path
 
 

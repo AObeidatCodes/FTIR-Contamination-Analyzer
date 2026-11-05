@@ -78,19 +78,22 @@ from .motion import (MOTION, Card, FadeStack, Motion, Overlay, Sheet, SmoothScro
                      alive, animate, count_up, crossfade, fade_through, make_opaque, rise_in, snapshot, zero_like)
 from .peaks import band_label, band_names
 from .plots import save_figure, setup_fonts
-from .records import SampleLog, readable_time, resolve_modes, run_info
+from .records import SampleLog, append_tool_log, readable_time, resolve_modes, run_info
 from .report import write_report
 from .spectrum_io import SpectrumFileError, find_spectrum_files, read_mode_note, read_spectra
 from .structures import groups_at
 from .theme import FONT_FILES, FONTS, THEMES, VERDICT_LOOK, stylesheet
 from .tour import Tour
+from .trends import known_tools
+from .trends_view import TrendsPage
 from .widgets import (BandButton, ElidedLabel, EmptyState, FlowLayout, ModeDialog, Pill, PlotPanel, ScoreBars, ScoreStrip,
                       SpectrumDelegate, SpectrumListModel, Theme, chip, clear_layout, flag_pill, icon, icon_pixmap,
                       logo_pixmap, verdict_pill)
 
 FILE_FILTER = ("Spectrum files (" + " ".join([f"*{ext}" for ext in config.SPECTRUM_FILE_TYPES]
                                             + list(config.INSTRUMENT_FILE_PATTERNS)) + ");;All files (*)")
-ANALYZE, LIBRARY = "analyze", "library"
+ANALYZE, LIBRARY, TRENDS = "analyze", "library", "trends"
+PAGES = (ANALYZE, LIBRARY, TRENDS)
 
 HOW_IT_WORKS = f"""
 <h2>How the analyzer works</h2>
@@ -134,6 +137,9 @@ which is only ever appended to.</p>
 materials a fab is likely to see are kept, and every one that could be confused with a different material is
 left out, so the extended library still passes the impostor test. Switch between <b>Fab essentials</b> and
 <b>Extended</b> on the Library page.</p>
+<p><b>Trends</b>: counts each exported sample once, and shows the most common materials and tools and any
+material that keeps coming back on one tool. Enter the tool or area when you export a report: a sample without
+one cannot be checked for repeats.</p>
 <h3>Checking it by eye</h3>
 <p>Switch the figure to <b>Analytical view</b> to see every step on its own panel: the raw data, the
 absorbance, the mode correction, the two fingerprints the score is calculated from, and the checks with
@@ -801,6 +807,7 @@ class MainWindow(QMainWindow):
         self.sample_log = SampleLog(sample_log or config.SAMPLE_LOG_FILE)
         self.audit_log = Path(audit_log or config.AUDIT_LOG_FILE)
         self.signature_log = self.audit_log.parent / "signatures.csv"   # next to the audit log
+        self.tool_log = self.audit_log.parent / "tool_log.csv"
         self.inhouse_dir = Path(inhouse_dir or config.INHOUSE_DIR)
         self.openspecy_dir = Path(openspecy_dir or config.RECORDS_DIR / "openspecy")
         self.extended = self.settings.value("library_mode", "essentials") == EXTENDED and tour_folder is None
@@ -871,6 +878,7 @@ class MainWindow(QMainWindow):
         self.act_filter = make("Filter / search", "Ctrl+F", self._focus_search)
         self.act_analyze = make("Analyze", "Ctrl+1", lambda: self.show_page(ANALYZE))
         self.act_library = make("Library", "Ctrl+2", lambda: self.show_page(LIBRARY))
+        self.act_trends = make("Trends", "Ctrl+3", lambda: self.show_page(TRENDS))
         self.act_add = make("Add a reference…", "Ctrl+N", lambda: self.open_add_reference(),
                             "Add a material the lab identified itself")
         self.act_map = make("Similarity map", "", self.open_similarity)
@@ -887,7 +895,7 @@ class MainWindow(QMainWindow):
                        self.act_remove, self.act_clear, None, self.act_quit):
             file_menu.addSeparator() if action is None else file_menu.addAction(action)
         view_menu = bar.addMenu("&View")
-        for action in (self.act_analyze, self.act_library, None, self.act_theme, self.act_motion, None,
+        for action in (self.act_analyze, self.act_library, self.act_trends, None, self.act_theme, self.act_motion, None,
                        self.act_filter):
             view_menu.addSeparator() if action is None else view_menu.addAction(action)
         library_menu = bar.addMenu("&Library")
@@ -901,6 +909,7 @@ class MainWindow(QMainWindow):
         records.addAction("Sample log (Excel)", lambda: self.open_record(self.sample_log.path, "Sample log"))
         records.addAction("Audit log (Excel)", lambda: self.open_record(self.audit_log, "Audit log"))
         records.addAction("Signatures (Excel)", lambda: self.open_record(self.signature_log, "Signatures"))
+        records.addAction("Tool log (Excel)", lambda: self.open_record(self.tool_log, "Tool log"))
         records.addSeparator()
         records.addAction("Open the records folder", lambda: self.open_record(self.sample_log.path.parent))
         help_menu = bar.addMenu("&Help")
@@ -941,9 +950,10 @@ class MainWindow(QMainWindow):
         left.addLayout(titles)
         left.addStretch()
 
-        # middle: the two pages
-        self.nav = Tabs(ANALYZE, (("Analyze", ANALYZE), ("Library", LIBRARY)))
-        self.nav.setToolTip("Analyze spectra (Ctrl+1) · Browse and extend the reference library (Ctrl+2)")
+        # middle: the pages
+        self.nav = Tabs(ANALYZE, (("Analyze", ANALYZE), ("Library", LIBRARY), ("Trends", TRENDS)))
+        self.nav.setToolTip("Analyze spectra (Ctrl+1) · Browse and extend the reference library (Ctrl+2) · "
+                            "See what keeps coming back (Ctrl+3)")
         self.nav.changed.connect(self.show_page)
 
         # right: the actions, the validation badge, theme and help
@@ -1072,9 +1082,15 @@ class MainWindow(QMainWindow):
         self.library_page.mode_changed.connect(self.set_library_mode)
         self.library_page.openspecy_requested.connect(self.open_openspecy)
 
+        # ---- the Trends page
+        self.trends_page = TrendsPage(self.audit_log, self.tool_log, self.settings.value("repeat_count", config.REPEAT_COUNT, type=int),
+                                      self.settings.value("repeat_days", config.REPEAT_DAYS, type=int))
+        self.trends_page.repeat_rule_changed.connect(self._remember_repeat_rule)
+
         self.pages = FadeStack()
         self.pages.addWidget(self.analyze_page)
         self.pages.addWidget(self.library_page)
+        self.pages.addWidget(self.trends_page)
 
         central = QWidget()
         layout = QVBoxLayout(central)
@@ -1137,6 +1153,7 @@ class MainWindow(QMainWindow):
             f"font-size: 22px; font-weight: 600; border: 2px dashed {t['accent']}; border-radius: 20px;")
         self.empty.retheme()
         self.library_page.retheme()
+        self.trends_page.retheme()
         self.result_view.plot.retheme()
         self.badge.update()
         self.nav.update()
@@ -1161,8 +1178,11 @@ class MainWindow(QMainWindow):
 
     # ------------------------------------------------------------------ pages
     def show_page(self, page):
-        """Show the Analyze page or the Library page (the new page slides in)."""
-        target = self.library_page if page == LIBRARY else self.analyze_page
+        """Show a page (the new page slides in, from the side it sits on in the tabs)."""
+        target = {LIBRARY: self.library_page, TRENDS: self.trends_page}.get(page, self.analyze_page)
+        if page == TRENDS:
+            self.trends_page.refresh()                                 # the records may have grown
+        before = self.nav.value()
         if self.sheet is not None and self.pages.currentWidget() is not target:
             self.sheet.close_sheet()                                   # a sheet belongs to the page it was opened on
         self.nav.set_value(page)
@@ -1171,7 +1191,12 @@ class MainWindow(QMainWindow):
             QTimer.singleShot(Motion.ms("page") if self.pages.currentWidget() is not target else 0, self._start_glow)
         if self.pages.currentWidget() is target:
             return
-        self.pages.slide_to(target, 1 if page == LIBRARY else -1)
+        self.pages.slide_to(target, 1 if PAGES.index(page) > PAGES.index(before) else -1)
+
+    def _remember_repeat_rule(self, count, days):
+        if self.tour_folder is None:
+            self.settings.setValue("repeat_count", count)
+            self.settings.setValue("repeat_days", days)
 
     def _focus_search(self):
         if self.pages.currentWidget() is self.library_page:
@@ -1698,7 +1723,7 @@ class MainWindow(QMainWindow):
         folder = self.settings.value("report_dir", str(self.last_dir))
         if not Path(folder).is_dir():
             folder = str(self.last_dir)
-        content = ExportPanel(self.model.results, folder, self.settings.value("user_name", ""))
+        content = ExportPanel(self.model.results, folder, self.settings.value("user_name", ""), known_tools(self.tool_log))
         sheet = self._open_sheet("Export the report", content, 640, "", content.footer)
         content.cancelled.connect(sheet.close_sheet)
         content.submitted.connect(self._export_chosen)
@@ -1711,7 +1736,7 @@ class MainWindow(QMainWindow):
         if self.sheet is not None:
             self.sheet.close_sheet()
         self.write_report_to(choice["folder"], name=choice["name"], signoff=choice["signoff"],
-                             open_with=choice.get("open"))
+                             open_with=choice.get("open"), tool=choice.get("tool", ""))
 
     def open_last(self, filename):
         """Open a file of the report written last (the PDF or the web page)."""
@@ -1721,7 +1746,7 @@ class MainWindow(QMainWindow):
             return
         QDesktopServices.openUrl(QUrl.fromLocalFile(str(path)))
 
-    def write_report_to(self, folder, ask_to_open=True, name=None, signoff=None, open_with=None):
+    def write_report_to(self, folder, ask_to_open=True, name=None, signoff=None, open_with=None, tool=""):
         """Write the report into a new, dated sub-folder of `folder` (in the background)."""
         out_dir = Path(folder) / f"FTIR_report_{datetime.now():%Y-%m-%d_%H%M%S}"
         name = self.settings.value("user_name", "") if name is None else name
@@ -1731,14 +1756,17 @@ class MainWindow(QMainWindow):
 
         def job(progress):
             progress(0, 1, "Writing the report")
-            return write_report(results, self.library, info, out_dir, audit_log=self.audit_log, signoff=signoff,
+            path = write_report(results, self.library, info, out_dir, audit_log=self.audit_log, signoff=signoff,
                                 signature_log=self.signature_log)
+            append_tool_log(results, tool, self.tool_log)
+            return path
 
         self.set_status("Writing the report…", busy=True)
         self.run_job(Job(job), lambda path: self._report_written(path, ask_to_open, open_with), "The report could not be written")
 
     def _report_written(self, html_path, ask_to_open=True, open_with=None):
         self.last_report = html_path
+        self.trends_page.refresh()
         self.set_status(f"Report written: {html_path}")
         if not ask_to_open:
             return
