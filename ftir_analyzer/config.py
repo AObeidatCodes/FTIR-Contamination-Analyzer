@@ -30,6 +30,10 @@ TRENDS_DEMO_DIR = EXAMPLES_DIR / "trends_demo"            # made-up records for 
 # measured one; each lab sets its own on the Trends page.
 REPEAT_COUNT, REPEAT_DAYS = 3, 30
 
+# Unknown groups: samples with no probable verdict are linked at this r, and a group needs this many samples.
+# Both are fixed in benchmark/PROTOCOL_GROUPS.md, which measures what they do.
+UNKNOWN_LINK_R, UNKNOWN_GROUP_SIZE = 0.95, 3
+
 # Records (sample log and audit log) are kept next to the app when it runs from its own
 # folder, otherwise in the user's home folder. The environment variable FTIR_ANALYZER_RECORDS
 # can point somewhere else (for example a shared lab drive).
@@ -41,6 +45,7 @@ INHOUSE_DIR = RECORDS_DIR / "inhouse_library"             # references the lab a
 AUDIT_LOG_FILE = RECORDS_DIR / "audit_log.csv"            # one row per spectrum per run, append-only
 SIGNATURE_LOG_FILE = RECORDS_DIR / "signatures.csv"       # one row per signed report, append-only
 TOOL_LOG_FILE = RECORDS_DIR / "tool_log.csv"              # which tool or area a sample came from, append-only
+UNKNOWN_LOG_FILE = RECORDS_DIR / "unknown_fingerprints.csv"  # fingerprints of samples with no probable verdict
 
 # File types the app reads: instrument exports with a wavenumber column and one or more
 # intensity columns (comma, semicolon, tab or space separated, with or without a header).
