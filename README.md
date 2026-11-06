@@ -105,6 +105,18 @@ python3 -m pip install -r requirements.txt
 python3 run_analyzer.py
 ```
 
+### Or use the Windows app
+
+The Windows app needs no Python: unzip it and double-click **FTIR Contamination Analyzer.exe**. Records are kept in
+*FTIR Analyzer records* in your home folder. It is not signed, so Windows may show the warning above.
+
+To build it yourself:
+
+```
+python -m pip install -r requirements.txt pyinstaller
+python tools/build_windows.py
+```
+
 ### 3b. Or run it as code
 
 1. Install the packages once: open a terminal in the folder and type
@@ -552,6 +564,7 @@ Every rule and threshold lives in [`ftir_analyzer/config.py`](ftir_analyzer/conf
 │   ├── gui.py           the desktop app (Qt)
 │   ├── data/            reference library (index + spectra), band table, fab sources
 │   └── assets/          logo, fonts (Inter, IBM Plex Mono), icons (Lucide)
+├── tools/               the demo records, the 3D models and the Windows build
 ├── examples/            demo spectra with known answers; library_demo/ for adding a reference;
 │                        CHECK_IT_YOURSELF.md, a walkthrough with the numbers to expect
 ├── records/             sample log, audit log, signatures, in-house library (created when first needed)

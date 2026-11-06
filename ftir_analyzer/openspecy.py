@@ -364,7 +364,7 @@ class ImportSummary:
 
     def text(self):
         lines = [f"Open Specy library imported from {self.source}",
-                 f"{self.kept} reference spectra kept (FTIR, fab-relevant, validated)."]
+                 f"{self.kept} reference spectra kept (FTIR, fab-relevant, checked)."]
         lines += [f"  {category}: {count}" for category, count in sorted(self.by_category.items())]
         if self.modes:
             said = {"ATR": "ATR", "transmission": f"transmission (put into the {config.LIBRARY_MODE} look)",

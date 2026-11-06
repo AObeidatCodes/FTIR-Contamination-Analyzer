@@ -4,6 +4,7 @@
 
 ### Added
 
+- A Windows app that needs no Python.
 - A redesigned desktop app, with light and dark themes, and a guided tour that keeps nothing.
 - A report as a PDF, as an interactive web page and as an Excel table.
 - 3D models of the materials, with the bonds of a band shown on the model.

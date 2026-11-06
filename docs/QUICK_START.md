@@ -2,7 +2,12 @@
 
 ## 1. Start the app
 
-On Windows, double-click `run_analyzer.bat`. The first start installs what the app needs, once.
+**The Windows app:** unzip `FTIR-Contamination-Analyzer-2.0.0-windows.zip`, open the folder and double-click
+**FTIR Contamination Analyzer.exe**. It needs no Python. Keep the files in the folder together.
+
+The app is not signed yet, so Windows may say *Windows protected your PC*. Click **More info → Run anyway**.
+
+**From the source folder:** double-click `run_analyzer.bat`. The first start installs what the app needs, once.
 
 ## 2. Try it with the demo
 

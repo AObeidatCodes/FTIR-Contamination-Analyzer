@@ -301,7 +301,7 @@ class Tour(QObject):
         near, score = impact.nearest
         return ("Add a reference from your lab",
                 f"Your lab has a known Nylon 6 fibre. Its file fills in the form, and the app checks it before anything "
-                f"is saved: the closest reference is {near} at r {score:.2f}, the library stays valid, and "
+                f"is saved: the closest reference is {near} at r {score:.2f}, the library still passs valid, and "
                 f"{len(changes)} of your spectra would change.", self.panel.add_button)
 
     def _add_it(self):

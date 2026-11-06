@@ -60,7 +60,7 @@ def make_report(out_dir, items, mode=None):
     if mode:                                                           # --mode answers for every file without a mode
         ask = lambda missing: {p: mode for p in missing}  # noqa: E731
     else:
-        ask = ask_in_terminal if sys.stdin.isatty() else None          # nobody to ask -> "unknown"
+        ask = ask_in_terminal if sys.stdin and sys.stdin.isatty() else None   # nobody to ask -> "unknown"
     modes = resolve_modes(paths, SampleLog(), ask=ask)
 
     results = []

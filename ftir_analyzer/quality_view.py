@@ -34,6 +34,8 @@ from .review import CHANGED, MISSING, REVIEWED, WAITING, read_reports, reviewer_
 from .widgets import Pill, Theme, clear_layout, font, icon, icon_pixmap
 
 SHOWN = (("Waiting", WAITING), ("All", "all"))
+FILM_FILES = ("Spectrum files (" + " ".join([f"*{ext}" for ext in config.SPECTRUM_FILE_TYPES]
+                                            + list(config.INSTRUMENT_FILE_PATTERNS)) + ");;All files (*)")
 REVIEW_CHOICES = (("Accept", "accept"), ("With changes", "accept with changes"), ("Re-measure", "re-measure"))
 STATEMENT = "I did not make this analysis. I have read the report and looked at the raw spectra."
 DECISION_KINDS = {"accept": "good", "accept with changes": "warn", "re-measure": "bad"}
@@ -280,7 +282,7 @@ class QualityPage(QWidget):
                                         "Body2", wrap=True))
         self.instrument = QComboBox()
         self.instrument.setEditable(True)
-        self.instrument.setMinimumWidth(190)
+        self.instrument.setMinimumWidth(240)
         self.instrument.setAccessibleName("Instrument")
         self.instrument.lineEdit().setPlaceholderText("Instrument, e.g. FTIR 1")
         self.instrument.setEditText(instrument)
@@ -397,7 +399,7 @@ class QualityPage(QWidget):
 
     # ------------------------------------------------------------------
     def choose_film(self):
-        path = QFileDialog.getOpenFileName(self, "Choose the measured polystyrene film")[0]
+        path = QFileDialog.getOpenFileName(self, "Choose the measured polystyrene film", "", FILM_FILES)[0]
         if path:
             self.run_check(path)
 

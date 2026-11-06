@@ -150,10 +150,20 @@ test are, in `benchmark/results/`.
 ## Python packages
 
 The program uses numpy, pandas, scipy and matplotlib (BSD-style licences), plotly (MIT),
-rdata (MIT, to read Open Specy files), jcamp (MIT, Nathan Hagen, to read JCAMP-DX files), brukeropus (MIT, Josh Duran, to read Bruker OPUS files) and PySide6 / Qt (LGPL v3). They are installed separately with `pip` and are not distributed with this
+rdata (MIT, to read Open Specy files), jcamp (MIT, Nathan Hagen, to read JCAMP-DX files), brukeropus (MIT, Josh Duran, to read Bruker OPUS files) and PySide6 / Qt (LGPL v3). From the source code they are installed separately with `pip` and are not distributed with this
 project. A report written by the program embeds plotly.js (MIT License, Copyright Plotly, Inc.), so
 that its interactive figures work offline; the licence notice is kept at the top of the embedded
 script.
+
+## The Windows app
+
+The Windows app is built with PyInstaller (GPL with an exception that allows this use) and contains Python (PSF License) and
+the packages above with the packages they need. Their licence files are in its `licenses` folder.
+
+It uses Qt and PySide6 under the GNU Lesser General Public License, version 3. Copies of the LGPL and the GPL are in the
+`licenses` folder. The Qt and PySide6 libraries are separate files in the `_internal` folder, and you may replace them with
+your own versions. Their source code is at https://code.qt.io. The numpy and scipy libraries include runtime libraries under
+the GPL with the GCC Runtime Library Exception, described in their licence files.
 
 ## 3Dmol.js (BSD-3-Clause)
 
